@@ -29,25 +29,26 @@ def get_excel_url():
 
 def try_direct_url():
     base = "https://www.banrep.gov.co/sites/default/files/paginas/"
-    today = datetime.now()
-    for delta in range(5):
-        d = today - timedelta(days=delta)
+    # Start from yesterday — BanRep publishes after market close
+    start = datetime.now() - timedelta(days=1)
+    for delta in range(7):
+        d = start - timedelta(days=delta)
         if d.weekday() >= 5:
             continue
         date_str = d.strftime('%Y-%m-%d')
         for template in [
             f"{base}sen-{date_str}.xls",
             f"{base}sen-{date_str}.xlsx",
-            f"https://www.banrep.gov.co/sites/default/files/sen-{date_str}.xls",
         ]:
             try:
-                r = requests.head(template, timeout=10, headers={'User-Agent':'Mozilla/5.0'})
-                if r.status_code == 200:
+                r = requests.get(template, timeout=10,
+                                 headers={'User-Agent': 'Mozilla/5.0'})
+                if r.status_code == 200 and len(r.content) > 1000:
                     print(f"✓ URL directa: {template}")
-                    return template
+                    return template, r.content
             except:
                 pass
-    return None
+    return None, None
 
 def parse_xls(content):
     wb = xlrd.open_workbook(file_contents=content)
@@ -92,22 +93,32 @@ def parse_xls(content):
 
 def main():
     excel_url = get_excel_url()
+    content = None
+
     if not excel_url:
         print("No encontrado en página, probando URL directa...")
-        excel_url = try_direct_url()
+        excel_url, content = try_direct_url()
+
     if not excel_url:
         print("No se pudo encontrar el Excel del SEN")
         return
-    print(f"Descargando: {excel_url}")
-    resp = requests.get(excel_url, timeout=60, headers={'User-Agent': 'Mozilla/5.0'})
-    if resp.status_code != 200:
-        print(f"Error HTTP {resp.status_code}")
-        return
-    print(f"Descargado: {len(resp.content)//1024} KB")
-    tes_data = parse_xls(resp.content)
+
+    if not content:
+        print(f"Descargando: {excel_url}")
+        resp = requests.get(excel_url, timeout=60,
+                            headers={'User-Agent': 'Mozilla/5.0'})
+        if resp.status_code != 200:
+            print(f"Error HTTP {resp.status_code}")
+            return
+        content = resp.content
+
+    print(f"Descargado: {len(content)//1024} KB")
+    tes_data = parse_xls(content)
+
     if not tes_data:
         print("No se encontraron datos TES TF")
         return
+
     result = {
         'fecha': datetime.now().strftime('%Y-%m-%d'),
         'fuente': 'BanRep SEN',
@@ -115,6 +126,7 @@ def main():
     }
     with open('datos_curva.json', 'w') as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
+
     print(f"✓ {len(tes_data)} TES guardados")
     for t in tes_data:
         print(f"  {t['name']}: {t['tir']}% ({t['plazo']}a)")
