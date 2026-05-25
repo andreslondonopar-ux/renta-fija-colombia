@@ -224,7 +224,9 @@ const fmt2=(n)=>typeof n==='number'?n.toLocaleString('es-CO',{minimumFractionDig
 function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});}
 setInterval(tick,1000);tick();
 
-// ── DEFAULT COLOMBIA DATA (course reference mar-12-2026) ─────
+// ── COLOMBIA DATA ────────────────────────────────────────────
+// Reads from datos_curva.json (updated daily by GitHub Actions)
+// Falls back to static data if not available
 let COL_DATA = [
   {name:'TES 2026',venc:'26/08/2026',cupon:7.50, tir:12.35,plazo:0.45},
   {name:'TES 2027',venc:'03/11/2027',cupon:5.75, tir:13.74,plazo:1.46},
@@ -578,8 +580,34 @@ function interpolateUSat(years){
 }
 
 // ── INIT ─────────────────────────────────────────────────────
+// Try to load live data from datos_curva.json first
+async function loadColJSON(){
+  try{
+    const resp = await fetch('datos_curva.json?t='+Date.now());
+    if(!resp.ok) throw new Error('not found');
+    const data = await resp.json();
+    if(data.tes && data.tes.length > 3){
+      COL_DATA = data.tes.map(t=>({
+        name: t.name,
+        venc: t.venc || '—',
+        cupon: t.cupon || 0,
+        tir: t.tir,
+        plazo: t.plazo
+      }));
+      const el = document.getElementById('col-status');
+      if(el){ el.textContent = '✓ ' + data.fecha; el.className = 'curve-status status-ok'; }
+      const uz = document.getElementById('upload-zone');
+      if(uz) uz.style.display = 'none';
+      console.log('✓ Curva cargada desde datos_curva.json:', data.fecha);
+    }
+  }catch(e){
+    console.log('datos_curva.json no disponible, usando datos estáticos:', e.message);
+  }
+  renderCol();
+}
+
 buildTicker();
-renderCol();
+loadColJSON();
 loadUSTreasury();
 </script>
 </body>
