@@ -1,72 +1,122 @@
-import json, re
-from datetime import datetime
+import json, re, requests
+from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
-import openpyxl
-from io import BytesIO
-import requests
+import xlrd
 
 URL = "https://www.banrep.gov.co/es/sen-boletines-diarios"
 
-def scrape():
+def get_excel_url():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
         page.goto(URL, timeout=60000)
-        page.wait_for_timeout(4000)
-        links = page.eval_on_selector_all(
-            'a[href*=".xlsx"], a[href*=".xls"]',
-            'els => els.map(e => e.href)'
+        page.wait_for_timeout(6000)
+        all_links = page.eval_on_selector_all(
+            'a[href]', 'els => els.map(e => ({href: e.href, text: e.textContent}))'
         )
         browser.close()
+    sen_links = []
+    for item in all_links:
+        href = item.get('href', '')
+        if re.search(r'sen[-_]\d{4}', href, re.IGNORECASE):
+            sen_links.append(href)
+        elif '.xls' in href.lower() and 'sen' in href.lower():
+            sen_links.append(href)
+    print(f"Links SEN encontrados: {len(sen_links)}")
+    for l in sen_links[:3]:
+        print(f"  {l}")
+    return sen_links[0] if sen_links else None
 
-    if not links:
-        print("No se encontraron links de Excel")
-        return None
+def try_direct_url():
+    base = "https://www.banrep.gov.co/sites/default/files/paginas/"
+    today = datetime.now()
+    for delta in range(5):
+        d = today - timedelta(days=delta)
+        if d.weekday() >= 5:
+            continue
+        date_str = d.strftime('%Y-%m-%d')
+        for template in [
+            f"{base}sen-{date_str}.xls",
+            f"{base}sen-{date_str}.xlsx",
+            f"https://www.banrep.gov.co/sites/default/files/sen-{date_str}.xls",
+        ]:
+            try:
+                r = requests.head(template, timeout=10, headers={'User-Agent':'Mozilla/5.0'})
+                if r.status_code == 200:
+                    print(f"✓ URL directa: {template}")
+                    return template
+            except:
+                pass
+    return None
 
-    url = links[0]
-    print(f"Descargando: {url}")
-    resp = requests.get(url, timeout=30)
-    wb = openpyxl.load_workbook(BytesIO(resp.content), data_only=True)
-
+def parse_xls(content):
+    wb = xlrd.open_workbook(file_contents=content)
     tes_data = []
-    for sheet_name in wb.sheetnames:
-        ws = wb[sheet_name]
-        for row in ws.iter_rows(values_only=True):
-            label = str(row[0] or row[1] or '').strip()
-            if 'TES TF' not in label.upper():
+    for sheet_name in wb.sheet_names():
+        ws = wb.sheet_by_name(sheet_name)
+        print(f"  Hoja: {sheet_name} ({ws.nrows} filas)")
+        for row_idx in range(ws.nrows):
+            row = ws.row_values(row_idx)
+            label = ''
+            for col in range(min(3, len(row))):
+                cell_val = str(row[col]).strip()
+                if 'TES TF' in cell_val.upper():
+                    label = cell_val
+                    break
+            if not label:
                 continue
             tir = None
             for cell in row[1:]:
-                if isinstance(cell, (int, float)) and 5 < cell < 25:
-                    tir = round(float(cell), 4)
-                    break
+                try:
+                    v = float(cell)
+                    if 5 < v < 25:
+                        tir = round(v, 4)
+                        break
+                    elif 0.05 < v < 0.25:
+                        tir = round(v * 100, 4)
+                        break
+                except (TypeError, ValueError):
+                    pass
             if not tir:
                 continue
             year_match = re.search(r'20(\d{2})', label)
             if not year_match:
                 continue
-            plazo = round((int('20' + year_match.group(1)) - datetime.now().year) + 0.5, 2)
+            year = int('20' + year_match.group(1))
+            plazo = round((year - datetime.now().year) + 0.5, 2)
             if plazo <= 0:
                 continue
-            tes_data.append({'name': label.replace('  ', ' '), 'tir': tir, 'plazo': plazo})
-
+            tes_data.append({'name': f"TES TF {year}", 'tir': tir, 'plazo': plazo})
     tes_data.sort(key=lambda x: x['plazo'])
     return tes_data
 
 def main():
-    data = scrape()
-    if not data:
-        print("Sin datos - abortando")
+    excel_url = get_excel_url()
+    if not excel_url:
+        print("No encontrado en página, probando URL directa...")
+        excel_url = try_direct_url()
+    if not excel_url:
+        print("No se pudo encontrar el Excel del SEN")
+        return
+    print(f"Descargando: {excel_url}")
+    resp = requests.get(excel_url, timeout=60, headers={'User-Agent': 'Mozilla/5.0'})
+    if resp.status_code != 200:
+        print(f"Error HTTP {resp.status_code}")
+        return
+    print(f"Descargado: {len(resp.content)//1024} KB")
+    tes_data = parse_xls(resp.content)
+    if not tes_data:
+        print("No se encontraron datos TES TF")
         return
     result = {
         'fecha': datetime.now().strftime('%Y-%m-%d'),
         'fuente': 'BanRep SEN',
-        'tes': data
+        'tes': tes_data
     }
     with open('datos_curva.json', 'w') as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
-    print(f"✓ {len(data)} TES guardados")
-    for t in data:
+    print(f"✓ {len(tes_data)} TES guardados")
+    for t in tes_data:
         print(f"  {t['name']}: {t['tir']}% ({t['plazo']}a)")
 
 if __name__ == '__main__':
