@@ -21,8 +21,8 @@ jobs:
           python-version: '3.11'
 
       - name: Instalar dependencias
-        run: pip install requests beautifulsoup4 openpyxl lxml playwright
-      
+        run: pip install requests xlrd playwright
+
       - name: Instalar browser
         run: python -m playwright install chromium
 
