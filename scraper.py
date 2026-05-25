@@ -28,7 +28,7 @@ def get_excel_url():
     return sen_links[0] if sen_links else None
 
 def try_direct_url():
-    base = "https://www.banrep.gov.co/sites/default/files/paginas/"
+    base = "https://www.banrep.gov.co/sites/default/files/"
     # Start from yesterday — BanRep publishes after market close
     start = datetime.now() - timedelta(days=1)
     for delta in range(7):
