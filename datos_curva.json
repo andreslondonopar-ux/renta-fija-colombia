@@ -1,19 +1,125 @@
 {
-  "fecha": "2026-03-12",
+  "fecha": "2026-05-25",
   "fuente": "BanRep SEN",
   "tes": [
-    {"name": "TES TF 2026", "tir": 12.35, "plazo": 0.45},
-    {"name": "TES TF 2027", "tir": 13.74, "plazo": 1.46},
-    {"name": "TES TF 2028", "tir": 14.03, "plazo": 1.96},
-    {"name": "TES TF 2029", "tir": 13.96, "plazo": 3.29},
-    {"name": "TES TF 2030", "tir": 14.20, "plazo": 4.35},
-    {"name": "TES TF 2031", "tir": 14.23, "plazo": 4.87},
-    {"name": "TES TF 2032", "tir": 13.94, "plazo": 6.31},
-    {"name": "TES TF 2033", "tir": 14.10, "plazo": 6.75},
-    {"name": "TES TF 2034", "tir": 13.40, "plazo": 8.52},
-    {"name": "TES TF 2036", "tir": 13.30, "plazo": 10.16},
-    {"name": "TES TF 2042", "tir": 13.36, "plazo": 15.99},
-    {"name": "TES TF 2046", "tir": 13.62, "plazo": 20.37},
-    {"name": "TES TF 2050", "tir": 13.09, "plazo": 24.54}
+    {
+      "codigo": "TFIT15260826",
+      "name": "TES TF 26/08/2026",
+      "tir": 7.301,
+      "plazo": 0.25,
+      "vencimiento": "2026-08-26"
+    },
+    {
+      "codigo": "TFIT08031127",
+      "name": "TES TF 03/11/2027",
+      "tir": 13.898,
+      "plazo": 1.44,
+      "vencimiento": "2027-11-03"
+    },
+    {
+      "codigo": "TFIT16280428",
+      "name": "TES TF 28/04/2028",
+      "tir": 14.012,
+      "plazo": 1.93,
+      "vencimiento": "2028-04-28"
+    },
+    {
+      "codigo": "TFIT05220829",
+      "name": "TES TF 22/08/2029",
+      "tir": 14.34,
+      "plazo": 3.24,
+      "vencimiento": "2029-08-22"
+    },
+    {
+      "codigo": "TFIT05270230",
+      "name": "TES TF 27/02/2030",
+      "tir": 14.551,
+      "plazo": 3.76,
+      "vencimiento": "2030-02-27"
+    },
+    {
+      "codigo": "TFIT16180930",
+      "name": "TES TF 18/09/2030",
+      "tir": 14.402,
+      "plazo": 4.32,
+      "vencimiento": "2030-09-18"
+    },
+    {
+      "codigo": "TFIT10260331",
+      "name": "TES TF 26/03/2031",
+      "tir": 14.34,
+      "plazo": 4.84,
+      "vencimiento": "2031-03-26"
+    },
+    {
+      "codigo": "TFIT16300632",
+      "name": "TES TF 30/06/2032",
+      "tir": 14.23,
+      "plazo": 6.1,
+      "vencimiento": "2032-06-30"
+    },
+    {
+      "codigo": "TFIT11090233",
+      "name": "TES TF 09/02/2033",
+      "tir": 14.292,
+      "plazo": 6.72,
+      "vencimiento": "2033-02-09"
+    },
+    {
+      "codigo": "TFIT16181034",
+      "name": "TES TF 18/10/2034",
+      "tir": 13.9,
+      "plazo": 8.4,
+      "vencimiento": "2034-10-18"
+    },
+    {
+      "codigo": "TFIT11240135",
+      "name": "TES TF 24/01/2035",
+      "tir": 14.001,
+      "plazo": 8.67,
+      "vencimiento": "2035-01-24"
+    },
+    {
+      "codigo": "TFIT16090736",
+      "name": "TES TF 09/07/2036",
+      "tir": 13.405,
+      "plazo": 10.13,
+      "vencimiento": "2036-07-09"
+    },
+    {
+      "codigo": "TFIT16281140",
+      "name": "TES TF 28/11/2040",
+      "tir": 13.527,
+      "plazo": 14.52,
+      "vencimiento": "2040-11-28"
+    },
+    {
+      "codigo": "TFIT21280542",
+      "name": "TES TF 28/05/2042",
+      "tir": 13.312,
+      "plazo": 16.02,
+      "vencimiento": "2042-05-28"
+    },
+    {
+      "codigo": "TFIT23250746",
+      "name": "TES TF 25/07/2046",
+      "tir": 13.311,
+      "plazo": 20.18,
+      "vencimiento": "2046-07-25"
+    },
+    {
+      "codigo": "TFIT31261050",
+      "name": "TES TF 26/10/2050",
+      "tir": 12.99,
+      "plazo": 24.44,
+      "vencimiento": "2050-10-26"
+    },
+    {
+      "codigo": "TFIT34130358",
+      "name": "TES TF 13/03/2058",
+      "tir": 13.44,
+      "plazo": 31.82,
+      "vencimiento": "2058-03-13"
+    }
   ]
 }
