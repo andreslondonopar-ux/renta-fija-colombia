@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Renta Fija Colombia</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
+:root{
+  --bg:#0a0e1a;--bg2:#0f1629;--bg3:#141d35;--bg4:#1a2540;
+  --txt:#e8eaf0;--txt2:#8892a4;--txt3:#4a5568;
+  --border:#1e2d4a;--border2:#263554;--r:6px;--r2:10px;
+  --amber:#f59e0b;--amber2:#78350f;--amber3:#fcd34d;
+  --blue:#3b82f6;--blue2:#1d4ed8;--blue3:#93c5fd;
+  --green:#10b981;--green2:#064e3b;--green3:#6ee7b7;
+  --red:#ef4444;--red2:#7f1d1d;--red3:#fca5a5;
+  --purple:#7c3aed;--purple2:#4c1d95;--purple3:#a78bfa;
+}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 24px;height:54px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{width:36px;height:36px;background:#1a2540;border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--blue3);flex-shrink:0}
+.brand{font-size:14px;font-weight:700}.brand-sub{font-size:9px;color:var(--txt3)}
+.ml{margin-left:auto}
+.clock{font-size:11px;color:var(--txt3);font-variant-numeric:tabular-nums}
+.badge{padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700}
+/* TICKER */
+.ticker-wrap{background:var(--bg2);border-bottom:1px solid var(--border);overflow:hidden;height:34px;display:flex;align-items:center}
+.ticker-label{padding:0 12px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0}
+.ticker-scroll{flex:1;overflow:hidden}
+.ticker-inner{display:flex;animation:scroll 45s linear infinite;white-space:nowrap}
+.ticker-inner:hover{animation-play-state:paused}
+.ticker-item{display:inline-flex;align-items:center;gap:5px;padding:0 16px;border-right:1px solid var(--border2);font-size:11px;height:34px}
+.tn{color:var(--txt3);font-size:9px;font-weight:700}
+.tv{font-weight:700}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+/* LAYOUT */
+.page{display:flex;gap:0;min-height:calc(100vh - 54px - 34px)}
+.left{width:270px;flex-shrink:0;border-right:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.right{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+/* CALC GRID */
+.sec-title{font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:12px 10px;text-decoration:none;display:flex;align-items:center;gap:8px;transition:all .18s}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.ci{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:1px solid}
+.ct h2{font-size:11px;font-weight:700;margin-bottom:1px}
+.ct p{font-size:9px;color:var(--txt3);line-height:1.3}
+.tf .ci{background:var(--amber2);border-color:var(--amber);color:var(--amber3)}.tf:hover{border-color:var(--amber)}.tf h2{color:var(--amber3)}
+.ipc .ci{background:var(--blue2);border-color:var(--blue);color:var(--blue3)}.ipc:hover{border-color:var(--blue)}.ipc h2{color:var(--blue3)}
+.uvr .ci{background:var(--green2);border-color:var(--green);color:var(--green3)}.uvr:hover{border-color:var(--green)}.uvr h2{color:var(--green3)}
+.ibr .ci{background:var(--red2);border-color:var(--red);color:var(--red3)}.ibr:hover{border-color:var(--red)}.ibr h2{color:var(--red3)}
+.pf{grid-column:1/-1;border-color:var(--purple)}.pf:hover{border-color:var(--purple)}.pf h2{color:var(--purple3)}
+.pf .ci{background:var(--purple2);border-color:var(--purple);color:var(--purple3)}
+/* MACRO */
+.macro-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.mi{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 9px}
+.mi-lbl{font-size:8px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.mi-val{font-size:14px;font-weight:700}
+.mi-sub{font-size:8px;color:var(--txt3);margin-top:1px}
+/* CURVES */
+.curve-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.curve-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.curve-title{font-size:12px;font-weight:700;flex:1}
+.curve-sub{font-size:9px;color:var(--txt3)}
+.curve-status{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700}
+.status-ok{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
+.status-static{background:var(--bg3);color:var(--txt3);border:1px solid var(--border2)}
+.status-loading{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
+/* SVG */
+.svg-wrap{padding:8px 14px 4px;position:relative}
+svg{display:block;width:100%}
+/* TABLE */
+.yt{width:100%;border-collapse:collapse;font-size:11px}
+.yt th{padding:6px 10px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700}
+.yt th:first-child{text-align:left}
+.yt td{padding:6px 10px;border-top:1px solid var(--border);text-align:right}
+.yt td:first-child{text-align:left;color:var(--txt2);font-weight:600}
+.yt tbody tr:hover{background:var(--bg3)}
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);margin:10px 14px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--amber);background:var(--amber2)}
+.upload-zone input{display:none}
+.upload-icon{font-size:22px;margin-bottom:6px}
+.upload-text{font-size:11px;color:var(--txt3)}
+.upload-text strong{color:var(--amber3)}
+.btn-sm{padding:4px 10px;border-radius:var(--r);font-size:10px;font-weight:700;cursor:pointer;border:1px solid;background:var(--bg3);color:var(--txt3);border-color:var(--border2)}
+.btn-amber{background:var(--amber2);color:var(--amber3);border-color:var(--amber)}
+/* SPREAD */
+.spread-row{display:flex;gap:0;border-top:1px solid var(--border)}
+.spread-cell{flex:1;padding:8px 10px;border-right:1px solid var(--border);text-align:center}
+.spread-cell:last-child{border-right:none}
+.spread-cell .lbl{font-size:8px;color:var(--txt3);text-transform:uppercase;margin-bottom:3px}
+.spread-cell .val{font-size:13px;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">RF</div>
+  <div><div class="brand">Renta Fija Colombia</div><div class="brand-sub">Valoración · Riesgo · Portafolio · 2026</div></div>
+  <div class="ml" style="display:flex;align-items:center;gap:14px">
+    <div class="clock" id="clock">--:--:--</div>
+    <span style="font-size:9px;color:var(--txt3)">Bogotá</span>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-label">SEN ·</div>
+  <div class="ticker-scroll">
+    <div class="ticker-inner" id="ticker-inner"></div>
+  </div>
+</div>
+
+<div class="page">
+  <!-- LEFT -->
+  <div class="left">
+    <div>
+      <div class="sec-title">// Calculadoras</div>
+      <div class="calc-grid">
+        <a class="card tf" href="rf_tasa_fija.html"><div class="ci">TF</div><div class="ct"><h2>Tasa Fija</h2><p>TES · Bonos<br>365 · 30/360</p></div></a>
+        <a class="card ipc" href="rf_ipc.html"><div class="ci">IPC</div><div class="ct"><h2>IPC</h2><p>Estimada · Real<br>Hist. 2026</p></div></a>
+        <a class="card uvr" href="rf_uvr.html"><div class="ci">UVR</div><div class="ct"><h2>UVR</h2><p>TES UVR<br>Tabla hist.</p></div></a>
+        <a class="card ibr" href="rf_ibr.html"><div class="ci">IBR</div><div class="ct"><h2>IBR</h2><p>FRA · Real<br>Hist. 2026</p></div></a>
+        <a class="card pf" href="portafolio.html"><div class="ci">📊</div><div class="ct"><h2>Portafolio</h2><p>Multi-bono · DV01 · Largo/Corto</p></div></a>
+      </div>
+    </div>
+    <div>
+      <div class="sec-title">// Macro Colombia</div>
+      <div class="macro-grid">
+        <div class="mi"><div class="mi-lbl">Tasa BanRep</div><div class="mi-val" style="color:var(--amber3)">11.25%</div><div class="mi-sub">abr 2026</div></div>
+        <div class="mi"><div class="mi-lbl">IBR Overnight</div><div class="mi-val" style="color:var(--amber3)">10.912%</div><div class="mi-sub">may 2026</div></div>
+        <div class="mi"><div class="mi-lbl">IPC anual</div><div class="mi-val" style="color:var(--blue3)">5.68%</div><div class="mi-sub">abr 2026</div></div>
+        <div class="mi"><div class="mi-lbl">UVR</div><div class="mi-val">$408.32</div><div class="mi-sub">may 2026</div></div>
+        <div class="mi"><div class="mi-lbl">USD/COP</div><div class="mi-val" style="color:var(--red3)">$4,180</div><div class="mi-sub">ref.</div></div>
+        <div class="mi"><div class="mi-lbl">Fed Funds</div><div class="mi-val" style="color:var(--blue3)">4.25%</div><div class="mi-sub">may 2026</div></div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
+      Herramienta pedagógica · Curso Renta Fija Colombia 2026<br>
+      <span style="color:var(--amber3)">🇨🇴 Colombia:</span> sube el Excel del SEN<br>
+      <span style="color:var(--blue3)">🇺🇸 USA:</span> US Treasury API en tiempo real
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <!-- COLOMBIA CURVE -->
+    <div class="curve-box">
+      <div class="curve-hdr">
+        <div>
+          <div class="curve-title" style="color:var(--amber3)">🇨🇴 Curva TES Tasa Fija — Colombia</div>
+          <div class="curve-sub">Sube el Excel diario del SEN (BanRep) para actualizar</div>
+        </div>
+        <span class="curve-status status-static" id="col-status">📋 Datos estáticos</span>
+        <button class="btn-sm btn-amber" onclick="document.getElementById('col-file').click()">📂 Subir Excel SEN</button>
+        <input type="file" id="col-file" accept=".xlsx,.xls" style="display:none" onchange="loadColExcel(this)">
+      </div>
+      <!-- UPLOAD ZONE (visible until file loaded) -->
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('col-file').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="event.preventDefault();this.classList.remove('drag');loadColExcel({files:event.dataTransfer.files})">
+        <div class="upload-icon">📊</div>
+        <div class="upload-text">Arrastra aquí el Excel del SEN<br>o <strong>haz click para seleccionar</strong></div>
+        <div style="font-size:9px;color:var(--txt3);margin-top:6px">Descárgalo en: banrep.gov.co/es/sen-boletines-diarios</div>
+      </div>
+      <div class="svg-wrap"><svg id="svg-col" viewBox="0 0 700 180" height="160"></svg></div>
+      <div style="overflow-x:auto">
+        <table class="yt">
+          <thead><tr>
+            <th style="text-align:left">Título</th>
+            <th>Vencimiento</th><th>Cupón</th>
+            <th>TIR</th><th>D.Mod ref.</th><th>Plazo (a)</th>
+          </tr></thead>
+          <tbody id="col-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USA CURVE -->
+    <div class="curve-box">
+      <div class="curve-hdr">
+        <div>
+          <div class="curve-title" style="color:var(--blue3)">🇺🇸 Curva US Treasury</div>
+          <div class="curve-sub" id="us-date">Cargando datos de US Treasury...</div>
+        </div>
+        <span class="curve-status status-loading" id="us-status">⏳ Cargando...</span>
+        <button class="btn-sm" onclick="loadUSTreasury()">↻ Actualizar</button>
+      </div>
+      <div class="svg-wrap"><svg id="svg-us" viewBox="0 0 700 180" height="160"></svg></div>
+      <div style="overflow-x:auto">
+        <table class="yt">
+          <thead><tr>
+            <th style="text-align:left">Plazo</th>
+            <th>TIR</th><th>vs ayer</th><th>Spread vs COL</th>
+          </tr></thead>
+          <tbody id="us-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SPREAD -->
+    <div class="curve-box">
+      <div class="curve-hdr">
+        <div>
+          <div class="curve-title" style="color:var(--purple3)">📐 Spread Colombia − USA · Riesgo país implícito</div>
+          <div class="curve-sub">Diferencial de tasas plazo a plazo</div>
+        </div>
+      </div>
+      <div class="svg-wrap"><svg id="svg-spread" viewBox="0 0 700 140" height="130"></svg></div>
+      <div class="spread-row" id="spread-summary"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const fmt2=(n)=>typeof n==='number'?n.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2}):n;
+
+// ── CLOCK ────────────────────────────────────────────────────
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});}
+setInterval(tick,1000);tick();
+
+// ── DEFAULT COLOMBIA DATA (course reference mar-12-2026) ─────
+let COL_DATA = [
+  {name:'TES 2026',venc:'26/08/2026',cupon:7.50, tir:12.35,plazo:0.45},
+  {name:'TES 2027',venc:'03/11/2027',cupon:5.75, tir:13.74,plazo:1.46},
+  {name:'TES 2028',venc:'28/04/2028',cupon:6.00, tir:14.03,plazo:1.96},
+  {name:'TES 2029',venc:'22/08/2029',cupon:11.00,tir:13.96,plazo:3.29},
+  {name:'TES 2030',venc:'18/09/2030',cupon:7.75, tir:14.20,plazo:4.35},
+  {name:'TES 2031',venc:'26/03/2031',cupon:7.00, tir:14.23,plazo:4.87},
+  {name:'TES 2032',venc:'30/06/2032',cupon:7.00, tir:13.94,plazo:6.31},
+  {name:'TES 2033',venc:'09/02/2033',cupon:13.25,tir:14.10,plazo:6.75},
+  {name:'TES 2034',venc:'18/10/2034',cupon:7.25, tir:13.40,plazo:8.52},
+  {name:'TES 2036',venc:'09/07/2036',cupon:6.25, tir:13.30,plazo:10.16},
+  {name:'TES 2042',venc:'28/05/2042',cupon:9.25, tir:13.36,plazo:15.99},
+  {name:'TES 2046',venc:'25/07/2046',cupon:11.50,tir:13.62,plazo:20.37},
+  {name:'TES 2050',venc:'26/10/2050',cupon:7.25, tir:13.09,plazo:24.54},
+];
+
+let US_DATA = [];
+
+// ── TICKER ───────────────────────────────────────────────────
+function buildTicker(){
+  const items = [
+    ...COL_DATA.map(r=>`<div class="ticker-item"><span class="tn">${r.name}</span><span class="tv" style="color:var(--amber3)">${r.tir.toFixed(2)}%</span></div>`),
+    `<div class="ticker-item"><span class="tn">IBR ON</span><span class="tv">10.912%</span></div>`,
+    `<div class="ticker-item"><span class="tn">IPC abr</span><span class="tv" style="color:var(--blue3)">5.68%</span></div>`,
+    `<div class="ticker-item"><span class="tn">BanRep</span><span class="tv" style="color:var(--amber3)">11.25%</span></div>`,
+  ];
+  const inner = document.getElementById('ticker-inner');
+  inner.innerHTML = [...items,...items].join('');
+}
+
+// ── SVG CURVE ────────────────────────────────────────────────
+function drawCurve(svgId, pts, color, H=180, showZero=false){
+  const svg=document.getElementById(svgId); if(!svg||!pts.length)return;
+  const W=700,PAD=42,PB=20;
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs);
+  let minY=Math.min(...ys),maxY=Math.max(...ys);
+  if(showZero){minY=Math.min(minY,0);maxY=Math.max(maxY,0);}
+  const rngY=maxY-minY||1;
+  const px=x=>PAD+(x-minX)/(maxX-minX)*(W-2*PAD);
+  const py=y=>(H-PB)-(y-minY)/rngY*(H-PB-14);
+
+  let grid='';
+  for(let i=0;i<=4;i++){
+    const yv=minY+rngY*i/4;
+    const yp=py(yv);
+    grid+=`<line x1="${PAD}" y1="${yp}" x2="${W-PAD}" y2="${yp}" stroke="#1e2d4a" stroke-width="1"/>`;
+    grid+=`<text x="${PAD-4}" y="${yp+4}" text-anchor="end" font-size="9" fill="#4a5568">${yv.toFixed(1)}%</text>`;
+  }
+  // Zero line for spread
+  if(showZero&&minY<0&&maxY>0){
+    const y0=py(0);
+    grid+=`<line x1="${PAD}" y1="${y0}" x2="${W-PAD}" y2="${y0}" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    grid+=`<text x="${PAD-4}" y="${y0+4}" text-anchor="end" font-size="9" fill="#4a5568">0%</text>`;
+  }
+
+  const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x)},${py(p.y)}`).join(' ');
+  const areaD=`${pathD} L${px(maxX)},${H-PB} L${px(minX)},${H-PB} Z`;
+
+  let dots='',xlbls='';
+  pts.forEach((p,i)=>{
+    const show=i===0||i===pts.length-1||i%Math.max(1,Math.floor(pts.length/6))===0;
+    if(show){
+      dots+=`<circle cx="${px(p.x)}" cy="${py(p.y)}" r="4" fill="${color}" stroke="#0a0e1a" stroke-width="2"/>`;
+      dots+=`<text x="${px(p.x)}" y="${py(p.y)-9}" text-anchor="middle" font-size="9" fill="${color}" font-weight="600">${p.y.toFixed(2)}%</text>`;
+      xlbls+=`<text x="${px(p.x)}" y="${H-5}" text-anchor="middle" font-size="9" fill="#4a5568">${p.label||''}</text>`;
+    }
+  });
+
+  svg.innerHTML=`<defs><linearGradient id="g_${svgId}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
+  </linearGradient></defs>
+  ${grid}
+  <path d="${areaD}" fill="url(#g_${svgId})"/>
+  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+  ${dots}${xlbls}`;
+}
+
+// ── COLOMBIA TABLE ───────────────────────────────────────────
+function renderCol(){
+  const tbody=document.getElementById('col-tbody');
+  tbody.innerHTML=COL_DATA.map(r=>{
+    const dmod=r.plazo/(1+r.tir/100);
+    return `<tr>
+      <td style="text-align:left;font-weight:700;color:var(--txt)">${r.name}</td>
+      <td>${r.venc}</td>
+      <td style="color:var(--txt2)">${r.cupon.toFixed(2)}%</td>
+      <td style="font-weight:700;color:var(--amber3)">${r.tir.toFixed(2)}%</td>
+      <td style="color:var(--txt2)">${dmod.toFixed(4)}</td>
+      <td style="color:var(--txt3)">${r.plazo.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+  const pts=COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.name.replace('TES ','')}));
+  drawCurve('svg-col',pts,'#f59e0b');
+  buildTicker();
+  renderSpread();
+}
+
+// ── LOAD EXCEL SEN ───────────────────────────────────────────
+function loadColExcel(input){
+  const file=input.files[0]; if(!file)return;
+  document.getElementById('col-status').textContent='⏳ Procesando...';
+  document.getElementById('col-status').className='curve-status status-loading';
+
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      // Try to find the right sheet
+      let data=null;
+      for(const sheetName of wb.SheetNames){
+        const ws=wb.Sheets[sheetName];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        // Look for rows with TES data: search for "TES TF" or yield rates
+        const tesRows=rows.filter(r=>
+          String(r[0]||r[1]||'').toUpperCase().includes('TES TF')||
+          String(r[0]||r[1]||'').toUpperCase().includes('TES UVR')
+        );
+        if(tesRows.length>3){data={rows,sheetName};break;}
+        // Also try: look for numeric yields between 5-25%
+        const yieldRows=rows.filter(r=>{
+          const vals=r.filter(v=>typeof v==='number'&&v>5&&v<25);
+          return vals.length>=2;
+        });
+        if(yieldRows.length>5&&!data){data={rows,sheetName};}
+      }
+
+      if(!data){
+        alert('No se encontró la hoja de TES en el Excel. Verifica que es el archivo correcto del SEN.');
+        document.getElementById('col-status').textContent='❌ Error';
+        document.getElementById('col-status').className='curve-status status-static';
+        return;
+      }
+
+      // Parse TES TF rows
+      const parsed=[];
+      const {rows}=data;
+      
+      // Find header row (contains "Título" or "Plazo" or similar)
+      let headerIdx=-1;
+      for(let i=0;i<Math.min(30,rows.length);i++){
+        const row=rows[i];
+        const rowStr=row.join('|').toUpperCase();
+        if(rowStr.includes('PLAZO')||rowStr.includes('TITULO')||rowStr.includes('TASA')||rowStr.includes('TIR')){
+          headerIdx=i; break;
+        }
+      }
+
+      // Find TES TF data rows
+      for(const row of rows){
+        const r0=String(row[0]||'').trim();
+        const r1=String(row[1]||'').trim();
+        const label=r0||r1;
+        
+        // Is this a TES TF row?
+        if(!label.toUpperCase().includes('TES TF')) continue;
+        
+        // Extract yield - look for numeric values between 5-20%
+        let tir=null, venc='', cupon=0, plazo=0;
+        
+        for(let i=1;i<row.length;i++){
+          const v=row[i];
+          if(typeof v==='number'){
+            if(v>5&&v<25&&tir===null) tir=v;  // likely a yield
+            if(v>0&&v<30&&cupon===0&&i>2) cupon=v;
+          }
+          if(typeof v==='string'&&v.match(/\d{1,2}\/\d{4}|\d{4}-\d{2}|\d{2}\/\d{2}\/\d{4}/)){
+            if(!venc) venc=v;
+          }
+        }
+        
+        // Extract year from label for plazo
+        const yearMatch=label.match(/20(\d{2})/);
+        if(yearMatch){
+          const yr=2000+parseInt(yearMatch[1]);
+          plazo=Math.max(0,(yr-2026)+0.5);
+        }
+        
+        if(tir&&tir>0&&label){
+          parsed.push({name:label, venc, cupon:cupon||0, tir, plazo});
+        }
+      }
+
+      if(parsed.length<3){
+        // Fallback: try to extract any numeric row that looks like yield data
+        alert(`Se encontraron ${parsed.length} filas de TES. El formato del Excel puede ser diferente. Se mantienen los datos anteriores.`);
+        document.getElementById('col-status').textContent='⚠ Pocas filas';
+        document.getElementById('col-status').className='curve-status status-static';
+        return;
+      }
+
+      // Sort by plazo
+      parsed.sort((a,b)=>a.plazo-b.plazo);
+      COL_DATA=parsed;
+      
+      const fecha=file.name.replace('.xlsx','').replace('.xls','');
+      document.getElementById('col-status').textContent=`✓ ${fecha}`;
+      document.getElementById('col-status').className='curve-status status-ok';
+      document.getElementById('upload-zone').style.display='none';
+      renderCol();
+
+    }catch(err){
+      alert('Error al leer el Excel: '+err.message);
+      document.getElementById('col-status').textContent='❌ Error';
+      document.getElementById('col-status').className='curve-status status-static';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── US TREASURY ──────────────────────────────────────────────
+const US_SERIES=[
+  {plazo:'1M', years:0.083, field:'BC_1MONTH'},
+  {plazo:'2M', years:0.167, field:'BC_2MONTH'},
+  {plazo:'3M', years:0.25,  field:'BC_3MONTH'},
+  {plazo:'6M', years:0.5,   field:'BC_6MONTH'},
+  {plazo:'1Y', years:1,     field:'BC_1YEAR'},
+  {plazo:'2Y', years:2,     field:'BC_2YEAR'},
+  {plazo:'3Y', years:3,     field:'BC_3YEAR'},
+  {plazo:'5Y', years:5,     field:'BC_5YEAR'},
+  {plazo:'7Y', years:7,     field:'BC_7YEAR'},
+  {plazo:'10Y',years:10,    field:'BC_10YEAR'},
+  {plazo:'20Y',years:20,    field:'BC_20YEAR'},
+  {plazo:'30Y',years:30,    field:'BC_30YEAR'},
+];
+
+async function loadUSTreasury(){
+  document.getElementById('us-status').textContent='⏳ Cargando...';
+  document.getElementById('us-status').className='curve-status status-loading';
+
+  try{
+    // US Treasury publishes daily XML - try current month then prev month
+    const now=new Date();
+    const yyyymm=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}`;
+    const url=`https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${yyyymm}`;
+    
+    const resp=await fetch(url);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text=await resp.text();
+    const parser=new DOMParser();
+    const xml=parser.parseFromString(text,'text/xml');
+    
+    // Get all entries, take the last one (most recent trading day)
+    const entries=[...xml.querySelectorAll('entry')];
+    if(!entries.length) throw new Error('No data in XML');
+    
+    const last=entries[entries.length-1];
+    const dateEl=last.querySelector('NEW_DATE');
+    const dateStr=dateEl?dateEl.textContent.split('T')[0]:'';
+    
+    US_DATA=US_SERIES.map(s=>{
+      const el=last.querySelector(s.field);
+      const tir=el?parseFloat(el.textContent):null;
+      return {...s,tir};
+    }).filter(s=>s.tir!==null&&!isNaN(s.tir));
+
+    if(!US_DATA.length) throw new Error('No yields parsed');
+
+    document.getElementById('us-status').textContent=`✓ ${dateStr}`;
+    document.getElementById('us-status').className='curve-status status-ok';
+    document.getElementById('us-date').textContent=`Datos del ${dateStr} · US Treasury Dept.`;
+    renderUS();
+    renderSpread();
+
+  }catch(err){
+    // Fallback to static data
+    console.warn('US Treasury fetch failed:',err);
+    US_DATA=[
+      {plazo:'1M',years:0.083,tir:4.32},{plazo:'3M',years:0.25,tir:4.28},
+      {plazo:'6M',years:0.5,tir:4.20},{plazo:'1Y',years:1,tir:4.05},
+      {plazo:'2Y',years:2,tir:3.92},{plazo:'3Y',years:3,tir:3.88},
+      {plazo:'5Y',years:5,tir:3.95},{plazo:'7Y',years:7,tir:4.10},
+      {plazo:'10Y',years:10,tir:4.25},{plazo:'20Y',years:20,tir:4.68},
+      {plazo:'30Y',years:30,tir:4.72},
+    ];
+    document.getElementById('us-status').textContent='📋 Datos ref.';
+    document.getElementById('us-status').className='curve-status status-static';
+    document.getElementById('us-date').textContent='Error al cargar US Treasury · Usando datos de referencia · '+err.message;
+    renderUS();
+    renderSpread();
+  }
+}
+
+function renderUS(){
+  const tbody=document.getElementById('us-tbody');
+  tbody.innerHTML=US_DATA.map(r=>{
+    // Interpolate COL rate at this maturity for spread
+    const colRate=interpolateCol(r.years);
+    const spread=colRate?colRate-r.tir:null;
+    return `<tr>
+      <td style="text-align:left;font-weight:700">${r.plazo}</td>
+      <td style="font-weight:700;color:var(--blue3)">${r.tir.toFixed(2)}%</td>
+      <td style="color:var(--txt3)">—</td>
+      <td style="color:${spread>0?'var(--amber3)':'var(--red3)'}">${spread?'+'+spread.toFixed(0)+'bp':'—'}</td>
+    </tr>`;
+  }).join('');
+  const pts=US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo}));
+  drawCurve('svg-us',pts,'#3b82f6');
+}
+
+function interpolateCol(years){
+  if(!COL_DATA.length) return null;
+  const sorted=[...COL_DATA].sort((a,b)=>a.plazo-b.plazo);
+  if(years<=sorted[0].plazo) return sorted[0].tir;
+  if(years>=sorted[sorted.length-1].plazo) return sorted[sorted.length-1].tir;
+  for(let i=0;i<sorted.length-1;i++){
+    if(years>=sorted[i].plazo&&years<=sorted[i+1].plazo){
+      const t=(years-sorted[i].plazo)/(sorted[i+1].plazo-sorted[i].plazo);
+      return sorted[i].tir+t*(sorted[i+1].tir-sorted[i].tir);
+    }
+  }
+  return null;
+}
+
+function renderSpread(){
+  if(!US_DATA.length||!COL_DATA.length) return;
+  // Build spread at COL maturities
+  const pts=COL_DATA.map(r=>{
+    const usRate=interpolateUSat(r.plazo);
+    return usRate?{x:r.plazo,y:r.tir-usRate,label:r.name.replace('TES ','')}:null;
+  }).filter(Boolean);
+  if(!pts.length) return;
+  drawCurve('svg-spread',pts,'#7c3aed',140,true);
+
+  // Summary: 2Y, 5Y, 10Y, 30Y spreads
+  const keyPlazos=[{l:'2 años',y:2},{l:'5 años',y:5},{l:'10 años',y:10},{l:'30 años',y:25}];
+  const summary=document.getElementById('spread-summary');
+  summary.innerHTML=keyPlazos.map(k=>{
+    const colR=interpolateCol(k.y), usR=interpolateUSat(k.y);
+    const sp=colR&&usR?((colR-usR)*100).toFixed(0):null;
+    return `<div class="spread-cell">
+      <div class="lbl">${k.l}</div>
+      <div class="val" style="color:var(--purple3)">${sp?'+'+sp+'bp':'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function interpolateUSat(years){
+  if(!US_DATA.length) return null;
+  const sorted=[...US_DATA].sort((a,b)=>a.years-b.years);
+  if(years<=sorted[0].years) return sorted[0].tir;
+  if(years>=sorted[sorted.length-1].years) return sorted[sorted.length-1].tir;
+  for(let i=0;i<sorted.length-1;i++){
+    if(years>=sorted[i].years&&years<=sorted[i+1].years){
+      const t=(years-sorted[i].years)/(sorted[i+1].years-sorted[i].years);
+      return sorted[i].tir+t*(sorted[i+1].tir-sorted[i].tir);
+    }
+  }
+  return null;
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+buildTicker();
+renderCol();
+loadUSTreasury();
+</script>
+</body>
+</html>

@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RF Colombia · IPC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;--bg2:#0f1629;--bg3:#141d35;--bg4:#1a2540;
+  --txt:#e8eaf0;--txt2:#8892a4;--txt3:#4a5568;
+  --blue:#3b82f6;--blue2:#1d4ed8;--blue3:#93c5fd;
+  --green:#10b981;--green2:#064e3b;--green3:#6ee7b7;
+  --red:#ef4444;--red2:#450a0a;--red3:#fca5a5;
+  --amber:#f59e0b;--amber2:#451a03;--amber3:#fcd34d;
+  --border:#1e2d4a;--border2:#263554;
+  --r:6px;--r2:10px;
+}
+body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg);color:var(--txt);font-size:13px;line-height:1.5;min-height:100vh}
+.ticker-bar{background:#050810;border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;white-space:nowrap;position:relative}
+.ticker-track{display:inline-flex;animation:tickscroll 80s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+.tick-item{display:inline-flex;align-items:center;gap:5px;padding:0 22px;font-size:11px;border-right:1px solid var(--border2)}
+.tick-name{color:var(--txt2);font-weight:700}
+.tick-val{color:var(--txt);font-weight:700}
+.tick-chg.up{color:var(--green3)}.tick-chg.dn{color:var(--red3)}
+.tick-dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
+.tick-dot.up{background:var(--green)}.tick-dot.dn{background:var(--red)}.tick-dot.nt{background:var(--txt3)}
+@keyframes tickscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-status{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--txt3);background:var(--bg);padding:2px 6px;border-radius:3px}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-logo{width:32px;height:32px;background:var(--blue2);border:1px solid var(--blue);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--blue3)}
+.brand-name{font-size:14px;font-weight:700;color:var(--txt)}
+.brand-sub{font-size:10px;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.clock-val{color:var(--green3);font-weight:700;font-size:12px}
+.mod-pill{background:var(--bg4);border:1px solid var(--border2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--blue3);text-transform:uppercase;font-weight:600;letter-spacing:.04em}
+.tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 20px}
+.tab{padding:10px 18px;font-size:12px;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;font-weight:600;letter-spacing:.03em;transition:all .15s}
+.tab:hover{color:var(--txt)}.tab.active{color:var(--blue3);border-bottom-color:var(--blue)}
+.page{display:none}.page.active{display:flex;min-height:calc(100vh - 116px)}
+.sidebar{width:285px;min-width:285px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding-bottom:24px}
+.main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.s-hdr{padding:9px 14px;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;background:var(--bg3);border-bottom:1px solid var(--border)}
+.s-body{padding:12px 14px}
+.field{margin-bottom:9px}
+.field label{display:block;font-size:10px;color:var(--txt2);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select{width:100%;padding:7px 9px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg3);font-family:inherit;transition:border-color .15s}
+.field input[type="date"]{color-scheme:dark}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
+.field input[readonly]{color:var(--blue3);border-color:var(--border);background:var(--bg4);cursor:default}
+.field-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.auto-badge{font-size:9px;color:var(--green3);margin-left:4px;text-transform:none}
+.btn{width:100%;padding:9px;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;font-family:inherit;margin-top:4px;transition:all .15s}
+.btn-blue{background:var(--blue2);color:var(--blue3);border:1px solid var(--blue)}
+.btn-blue:hover{background:var(--blue);color:#fff}
+.btn-green{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
+.btn-green:hover{background:var(--green);color:#fff}
+.btn-amber{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
+.btn-amber:hover{background:var(--amber);color:#000}
+.btn-sm{width:auto;padding:5px 12px;font-size:11px;margin-top:0}
+.hr{height:1px;background:var(--border);margin:12px 0}
+.s-lbl{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 0}
+.toggle-label{font-size:11px;color:var(--txt2);font-weight:600}
+.toggle-switch{width:36px;height:20px;background:var(--bg4);border:1px solid var(--border2);border-radius:10px;position:relative;transition:background .2s}
+.toggle-switch.on{background:var(--blue2);border-color:var(--blue)}
+.toggle-knob{width:14px;height:14px;background:var(--txt3);border-radius:50%;position:absolute;top:2px;left:2px;transition:all .2s}
+.toggle-switch.on .toggle-knob{left:18px;background:var(--blue3)}
+.caja-panel{display:none;margin-top:8px;padding:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r)}
+.caja-panel.open{display:block}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.c-hdr{padding:9px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
+.c-body{padding:14px}
+.mg4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.m{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px}
+.m.blue{border-color:rgba(59,130,246,.4);background:rgba(29,78,216,.12)}
+.m.green{border-color:rgba(16,185,129,.3);background:rgba(6,78,59,.25)}
+.m.amber{border-color:rgba(245,158,11,.3);background:rgba(69,26,3,.3)}
+.m.red{border-color:rgba(239,68,68,.3);background:rgba(69,10,10,.2)}
+.m-lbl{font-size:10px;color:var(--txt2);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.m-val{font-size:18px;font-weight:700;color:var(--txt);line-height:1.2}
+.m.blue .m-val{color:var(--blue3)}.m.green .m-val{color:var(--green3)}.m.amber .m-val{color:var(--amber3)}.m.red .m-val{color:var(--red3)}
+.m-unit{font-size:10px;color:var(--txt3);margin-top:1px}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.rr:last-child{border:none}
+.rr-l{color:var(--txt2)}.rr-v{font-weight:700;color:var(--txt);font-family:monospace}
+.rr-v.blue{color:var(--blue3)}.rr-v.green{color:var(--green3)}.rr-v.red{color:var(--red3)}.rr-v.big{font-size:15px}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.b-green{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
+.b-blue{background:rgba(29,78,216,.3);color:var(--blue3);border:1px solid var(--blue)}
+.b-amber{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
+.tir-box{text-align:center;padding:16px;background:rgba(6,78,59,.3);border:1px solid var(--green);border-radius:var(--r)}
+.tir-big{font-size:28px;font-weight:800;color:var(--green3);font-family:monospace}
+.tir-sub{font-size:10px;color:var(--green);margin-top:3px;text-transform:uppercase;letter-spacing:.08em}
+.info-box{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 11px;font-size:11px;color:var(--txt2);margin-top:10px;line-height:1.9}
+.ft{width:100%;border-collapse:collapse;font-size:11px}
+.ft th{text-align:right;padding:6px 8px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:10px;white-space:nowrap;text-transform:uppercase;background:var(--bg3)}
+.ft th:first-child,.ft th:nth-child(2){text-align:center}
+.ft td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--txt);font-family:monospace}
+.ft td:first-child,.ft td:nth-child(2){text-align:center;color:var(--txt2)}
+.ft tr.total td{border-top:1px solid var(--blue2);border-bottom:none;font-weight:700;color:var(--blue3);background:rgba(29,78,216,.12)}
+.ft tbody tr:hover td{background:var(--bg3)}
+.st{width:100%;border-collapse:collapse;font-size:11px}
+.st th{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:10px;text-transform:uppercase;background:var(--bg3)}
+.st th:first-child{text-align:left}
+.st td{text-align:right;padding:5px 10px;border-bottom:1px solid var(--border);font-family:monospace}
+.st td:first-child{text-align:left;font-weight:700}
+.st tr.cur td{background:rgba(29,78,216,.2);color:var(--blue3);font-weight:700}
+.st tr.dn td:first-child{color:var(--green3)}.st tr.up td:first-child{color:var(--red3)}
+.st tbody tr:hover td{background:var(--bg3)}
+/* PORTFOLIO */
+.pf-full{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.bond-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.bond-card-hdr{padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.bond-num{font-size:11px;font-weight:700;color:var(--blue3)}
+.bond-result{font-size:11px;color:var(--txt2);font-family:monospace}
+.bond-grid{display:grid;grid-template-columns:repeat(4,1fr) 0.8fr 0.8fr 1fr;gap:10px;padding:12px 14px;align-items:end}
+.bond-grid .field{margin-bottom:0}
+.add-bond-btn{background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r2);padding:16px;text-align:center;cursor:pointer;color:var(--txt2);font-size:12px;transition:all .15s}
+.add-bond-btn:hover{border-color:var(--blue);color:var(--blue3)}
+.del-btn{background:var(--red2);border:1px solid var(--red);color:var(--red3);border-radius:var(--r);padding:4px 8px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:700}
+.pf-top{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.pf-metric{background:var(--bg2);padding:16px;text-align:center}
+.pf-metric-lbl{font-size:10px;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.pf-metric-val{font-size:22px;font-weight:800;color:var(--txt);font-family:monospace}
+.pf-metric-val.blue{color:var(--blue3)}.pf-metric-val.green{color:var(--green3)}.pf-metric-val.amber{color:var(--amber3)}
+.pf-metric-unit{font-size:11px;color:var(--txt3);margin-top:3px}
+.pf-scen-input{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border-top:1px solid var(--border)}
+.pf-scen-input input{width:80px;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg2);font-family:monospace;text-align:center}
+.pf-scen-result{font-size:13px;font-weight:700;font-family:monospace}
+.pf-bond-table{width:100%;border-collapse:collapse;font-size:11px}
+.pf-bond-table th{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:10px;text-transform:uppercase;background:var(--bg3)}
+.pf-bond-table th:first-child,.pf-bond-table th:nth-child(2){text-align:left}
+.pf-bond-table td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);font-family:monospace;color:var(--txt)}
+.pf-bond-table td:first-child,.pf-bond-table td:nth-child(2){text-align:left;color:var(--txt2)}
+.pf-bond-table tr.pf-total td{background:rgba(29,78,216,.15);color:var(--blue3);font-weight:700;border-top:1px solid var(--blue2)}
+.weight-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:3px}
+.weight-fill{height:100%;border-radius:3px;background:var(--blue)}
+.chart-wrap{position:relative;height:300px}
+.tscroll{overflow-x:auto;max-height:360px;overflow-y:auto}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg3)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.liq-row td{color:var(--red3);font-style:italic}
+</style>
+<body>
+
+<div class="ticker-bar">
+  <div class="ticker-track" id="tickerTrack">
+    <span class="tick-item"><span class="tick-dot nt"></span><span class="tick-name" style="color:var(--txt3)">Cargando mercado...</span></span>
+  </div>
+  <div class="ticker-status" id="tickerStatus"></div>
+</div>
+
+<div class="topbar">
+  <a href="index.html" style="display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:600;text-decoration:none;margin-right:8px;flex-shrink:0" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'">&#8592; Inicio</a>
+  <div class="brand">
+    <div class="brand-logo">RF</div>
+    <div>
+      <div class="brand-name">Renta Fija Colombia</div>
+      <div class="brand-sub">Valoración · Riesgo · Escenarios · IPC</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span style="font-size:11px;color:var(--txt2)">COL &nbsp;<span class="clock-val" id="clock">--:--:--</span></span>
+    <div class="mod-pill" style="color:var(--blue3);border-color:var(--blue2)">IPC</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('calc')">◈ Calculadora</div>
+  
+</div>
+
+<!-- TAB 1: CALCULADORA -->
+<div class="page active" id="page-calc">
+  <div class="sidebar">
+    <div class="s-hdr">// Parámetros del bono IPC</div>
+    <div class="s-body">
+
+      <div class="field"><label>Modo de valoración</label>
+        <select id="ipc-mode" onchange="onModeChange()">
+          <option value="inicio_est">IPC Inicio · Estimada</option>
+          <option value="final_est">IPC Final · Estimada</option>
+          <option value="inicio_real">IPC Inicio · Real</option>
+          <option value="final_real">IPC Final · Real</option>
+          <option value="inicio_curva">IPC Inicio · Curva inflación</option>
+          <option value="final_curva">IPC Final · Curva inflación</option>
+        </select>
+      </div>
+
+      <div class="field"><label>Periodicidad</label>
+        <select id="freq" onchange="autoCA()">
+          <option value="3">Trimestral</option>
+          <option value="6">Semestral</option>
+          <option value="12">Anual</option>
+          <option value="1">Mensual</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Base <span style="font-size:9px;color:var(--txt3);text-transform:none">— siempre 365/365</span></label>
+        <input readonly value="365/365" style="color:var(--blue3);background:var(--bg4)">
+      </div>
+      <div class="field"><label>Spread cupón EA (%)</label>
+        <input type="number" id="sc" value="3.65" step="0.01" min="0">
+      </div>
+      <div class="field"><label>Spread TIR EA (%)</label>
+        <input type="number" id="st" value="5.50" step="0.01" min="0">
+      </div>
+
+      <div class="hr"></div>
+      <div class="s-lbl">// Fechas</div>
+      <div class="field">
+        <label>Liquidación <span style="font-size:9px;color:var(--txt3);text-transform:none">(negociación)</span></label>
+        <input type="date" id="liq" value="2025-01-30" oninput="autoCA()" onchange="autoCA()">
+      </div>
+      <div class="field"><label>Vencimiento</label>
+        <input type="date" id="venc" value="2029-02-27" onchange="autoCA()">
+      </div>
+      <div class="field">
+        <label>Cupón anterior <span class="auto-badge">// AUTO</span></label>
+        <input id="c_ant_display" readonly placeholder="Auto...">
+        <input type="hidden" id="c_ant_iso">
+      </div>
+
+      <div class="hr"></div>
+      <div class="s-lbl">// Posición</div>
+      <div class="field"><label>Nominal ($)</label>
+        <input type="text" id="nom_display" value="5.000.000.000"
+          oninput="fmtNom(this)" onchange="fmtNom(this)" onpaste="setTimeout(()=>fmtNom(this),10)" inputmode="numeric">
+        <input type="hidden" id="nom_val" value="5000000000">
+      </div>
+
+      <!-- IPC vigente display -->
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
+        <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">IPC vigente · fecha liquidación</div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <span style="font-size:15px;font-weight:700;color:var(--blue3);font-family:monospace" id="ipc-display">5.20%</span>
+          <span style="font-size:10px;color:var(--txt3)" id="ipc-period">Dic 2024</span>
+        </div>
+      </div>
+
+      <!-- Curva inflación (modos curva) -->
+      <div id="ipc-curve-section" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
+        <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Curva de inflación estimada</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 8px;background:rgba(59,130,246,.1);border:1px dashed var(--blue);border-radius:var(--r)">
+          <span style="font-size:11px;color:var(--blue3)">📂 Cargar CSV (fecha;IPC%)</span>
+          <input type="file" id="ipc-curve-file" accept=".csv" style="display:none" onchange="loadIPCCurve(this)">
+        </label>
+        <div style="margin-top:6px;font-size:10px;color:var(--txt3)" id="ipc-curve-status">Sin curva cargada</div>
+        <div style="font-size:9px;color:var(--txt3);margin-top:3px">Formato: DD/MM/AAAA;13,12%</div>
+      </div>
+
+            <div class="hr"></div>
+      <div style="margin-bottom:6px">
+        <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-weight:700">// Dirección posición</div>
+        <div style="display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border2);margin-bottom:4px">
+          <div id="dir-btn-long" style="flex:1;padding:6px 0;font-size:11px;font-weight:700;background:var(--green2);color:var(--green3);cursor:pointer;text-align:center" onclick="setDirection('long')">▲ Largo</div>
+          <div id="dir-btn-short" style="flex:1;padding:6px 0;font-size:11px;font-weight:700;background:var(--bg3);color:var(--txt3);cursor:pointer;text-align:center" onclick="setDirection('short')">▼ Corto</div>
+        </div>
+        <div id="dir-info" style="font-size:9px;color:var(--green3)">▲ Compra al offer · gana si tasas bajan</div>
+      </div>
+      <button class="btn btn-blue" onclick="calcular(false)">▶ Calcular</button>
+
+      <div class="hr" id="tir-real-hr"></div>
+      <div id="tir-real-section">
+        <div class="s-lbl">// Escenario de venta</div>
+        <div class="field"><label>Fecha de venta</label>
+          <input type="date" id="f_venta" value="2026-06-30">
+        </div>
+        <div class="field"><label>Spread TIR venta (%)</label>
+          <input type="number" id="st_venta" value="6.00" step="0.01" min="0">
+        </div>
+        <button class="btn btn-green" onclick="calcular(true)">▶ Calcular TIR real</button>
+      </div>
+
+      <div class="hr"></div>
+      <div class="s-lbl">// Calculadora inversa</div>
+      <div class="field"><label>Objetivo</label>
+        <select id="inv-tipo" onchange="updateInvUI()">
+          <option value="dv01">DV01 objetivo ($)</option>
+          <option value="vgiro">Valor de giro objetivo ($)</option>
+          <option value="ganancia">Ganancia objetivo ($) con Δspread</option>
+          <option value="tasa">Spread para precio objetivo (%)</option>
+        </select>
+      </div>
+      <div class="field" id="inv-field-valor">
+        <label id="inv-lbl-valor">DV01 objetivo ($)</label>
+        <input type="text" id="inv-valor" placeholder="ej: 5.000.000"
+          oninput="fmtInvValor(this)" inputmode="numeric">
+        <input type="hidden" id="inv-valor-v">
+      </div>
+      <div class="field" id="inv-field-bp" style="display:none">
+        <label>Δ Spread (bp)</label>
+        <input type="number" id="inv-bp" value="-50" step="1">
+      </div>
+      <div class="field" id="inv-field-precio" style="display:none">
+        <label>Precio objetivo (%)</label>
+        <input type="number" id="inv-precio" value="100" step="0.001" min="0">
+      </div>
+      <button class="btn" style="background:rgba(139,92,246,.2);border:1px solid #7c3aed;color:#c4b5fd;margin-top:4px"
+        onclick="calcularInverso()">⟳ Calcular inverso</button>
+
+    </div><!-- s-body -->
+  </div><!-- sidebar -->
+
+  <div class="main" id="main">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--txt3)">
+      <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
+      <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
+    </div>
+  </div>
+
+</div><!-- page-calc -->
+
+</body>
+
+<script>
+
+const $=id=>document.getElementById(id);
+const fmt=(n,d=4)=>typeof n==='number'?n.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const fmtP=n=>'$'+Math.round(n).toLocaleString('es-CO');
+const fmtM=n=>{const a=Math.abs(n),s=n<0?'-':'';return a>=1e9?s+'$'+fmt(a/1e9,3)+' Bn':a>=1e6?s+'$'+fmt(a/1e6,2)+' MM':(n<0?'-':'')+fmtP(Math.abs(n));};
+function fmtDate(iso){if(!iso)return '—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
+function isoToDisplay(isoStr){return fmtDate(isoStr);}
+
+function fmtNom(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('nom_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
+function fmtCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
+
+function updateClock(){$('clock').textContent=new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});}
+setInterval(updateClock,1000);updateClock();
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calc','pf'][i]===t));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+t).classList.add('active');
+}
+
+let cajaOpen=false;
+function toggleCaja(){cajaOpen=!cajaOpen;$('cajaToggle').classList.toggle('on',cajaOpen);$('cajaPanel').classList.toggle('open',cajaOpen);}
+
+// TICKER
+const FALLBACK=[
+  {n:'USD/COP',v:'4.218',up:true,c:'+12'},{n:'EUR/USD',v:'1.0832',up:false,c:'-0.2%'},
+  {n:'WTI',v:'67.42',up:false,c:'-0.8%'},{n:'Brent',v:'71.18',up:false,c:'-0.7%'},
+  {n:'Oro',v:'3.285',up:true,c:'+0.3%'},{n:'Plata',v:'32.14',up:true,c:'+0.5%'},
+  {n:'S&P 500',v:'5.631',up:true,c:'+0.2%'},{n:'DOW',v:'41.218',up:true,c:'+0.1%'},
+  {n:'Nasdaq',v:'17.842',up:true,c:'+0.4%'},{n:'VIX',v:'18.4',up:false,c:'-1.1%'},
+  {n:'BTC',v:'96.420',up:true,c:'+1.4%'},{n:'ETH',v:'2.641',up:true,c:'+0.9%'},
+  {n:'DXY',v:'104.2',up:true,c:'+0.1%'},{n:'UST 10Y',v:'4.21%',up:true,c:'+2bp'},
+  {n:'UST 2Y',v:'4.58%',up:true,c:'+3bp'},{n:'Col CDS 5Y',v:'180bp',up:false,c:'-3bp'},
+];
+function buildTicker(items){const h=items.map(i=>`<span class="tick-item"><span class="tick-dot ${i.up?'up':'dn'}"></span><span class="tick-name">${i.n}</span>&nbsp;<span class="tick-val">${i.v}</span>&nbsp;<span class="tick-chg ${i.up?'up':'dn'}">${i.c}</span></span>`).join('');return h+h;}
+$('tickerTrack').innerHTML=buildTicker(FALLBACK);$('tickerStatus').textContent='ref.';
+const YAHOO=[
+  {sym:'USDCOP=X',n:'USD/COP',dec:0},{sym:'EURUSD=X',n:'EUR/USD',dec:4},
+  {sym:'CL=F',n:'WTI',dec:2,suf:' USD'},{sym:'BZ=F',n:'Brent',dec:2,suf:' USD'},
+  {sym:'GC=F',n:'Oro',dec:0,suf:' USD'},{sym:'SI=F',n:'Plata',dec:2,suf:' USD'},
+  {sym:'^GSPC',n:'S&P 500',dec:0},{sym:'^DJI',n:'DOW',dec:0},
+  {sym:'^IXIC',n:'Nasdaq',dec:0},{sym:'^VIX',n:'VIX',dec:2},
+  {sym:'BTC-USD',n:'BTC',dec:0,suf:' USD'},{sym:'ETH-USD',n:'ETH',dec:0,suf:' USD'},
+  {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
+];
+async function fetchOne(sym){
+  // Try multiple endpoints for reliability
+  const urls=[
+    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
+  ];
+  for(const url of urls){
+    try{
+      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        {signal:AbortSignal.timeout(8000)});
+      if(!r.ok) continue;
+      const d=await r.json();
+      const meta=d?.chart?.result?.[0]?.meta;
+      if(!meta||!meta.regularMarketPrice) continue;
+      const price=meta.regularMarketPrice;
+      const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPreviousClose||price;
+      const chg=price-prev, chgPct=prev>0?((price-prev)/prev)*100:0;
+      return{price,chg,chgPct};
+    }catch(e){continue;}
+  }
+  // Fallback: try v7 quote endpoint
+  try{
+    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+    const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      {signal:AbortSignal.timeout(8000)});
+    if(r.ok){
+      const d=await r.json();
+      const q=d?.quoteResponse?.result?.[0];
+      if(q&&q.regularMarketPrice){
+        return{price:q.regularMarketPrice,chg:q.regularMarketChange||0,chgPct:q.regularMarketChangePercent||0};
+      }
+    }
+  }catch(e){}
+  return null;
+}
+async function loadTicker(){
+  const results=await Promise.allSettled(YAHOO.map(s=>fetchOne(s.sym)));
+  const items=[];
+  results.forEach((r,i)=>{
+    const cfg=YAHOO[i];
+    if(r.status==='fulfilled'&&r.value){
+      const{price,chg,chgPct}=r.value;const up=chg>=0;
+      items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
+    }
+  });
+  if(items.length>=5){$('tickerTrack').innerHTML=buildTicker(items);$('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});$('tickerStatus').style.color='var(--green3)';}
+}
+loadTicker();setInterval(loadTicker,60000);
+
+// BOND MATH — verified against Excel including leap year handling
+// Key rules (from reverse-engineering Excel formulas):
+// 1. Coupon period days (F): 30/360 convention if base=360, or real_days-L if base=365
+//    where L=1 if period contains Feb 29 (the extra day is neutralized)
+// 2. Discount days (G): ALWAYS real calendar days - count_feb29(liq, fecha)
+//    For 30/360 bonds: just real calendar days (no Feb29 subtraction)
+// 3. Coupon EA: TRUNC((1+EA)^(F/365)-1, 6)  using adjusted F
+// 4. PV: CF / (1+YTM)^(G/365)  always divides by 365
+// 5. IC: cpFirst * (dias_causados / F_first_period)
+
+function addMonths(iso,m){
+  const[y,mo,d]=(typeof iso==='string'?iso:iso.toISOString().split('T')[0]).split('-').map(Number);
+  let nm=mo-1+m;
+  let ny=y+Math.floor(nm/12);
+  nm=((nm%12)+12)%12;
+  const maxDay=[31,ny%4===0&&(ny%100!==0||ny%400===0)?29:28,31,30,31,30,31,31,30,31,30,31][nm]; // nm is 0-based (0=Jan)
+  return`${ny}-${String(nm+1).padStart(2,'0')}-${String(Math.min(d,maxDay)).padStart(2,'0')}`;
+}
+function daysReal(iso1,iso2){return Math.round((new Date(iso2)-new Date(iso1))/86400000);}
+function days360(iso1,iso2){
+  const d1=new Date(iso1),d2=new Date(iso2);
+  let[y1,m1,dd1]=[d1.getUTCFullYear(),d1.getUTCMonth()+1,d1.getUTCDate()];
+  let[y2,m2,dd2]=[d2.getUTCFullYear(),d2.getUTCMonth()+1,d2.getUTCDate()];
+  if(dd1===31)dd1=30;if(dd2===31)dd2=30;
+  return(y2-y1)*360+(m2-m1)*30+(dd2-dd1);
+}
+function isLeap(y){return y%4===0&&(y%100!==0||y%400===0);}
+// Count Feb 29s strictly between liq and fecha (liq < feb29 <= fecha)
+function countFeb29(liqISO,fechaISO){
+  const liq=new Date(liqISO),fecha=new Date(fechaISO);
+  let n=0;
+  for(let y=2020;y<=2060;y+=4){
+    if(!isLeap(y))continue;
+    const feb29=new Date(`${y}-02-29`);
+    if(feb29>liq&&feb29<=fecha)n++;
+  }
+  return n;
+}
+// 1 if coupon period [prev,nxt] contains a Feb 29
+function periodHasLeap(prevISO,nxtISO){
+  const prev=new Date(prevISO),nxt=new Date(nxtISO);
+  for(let y=prev.getUTCFullYear();y<=nxt.getUTCFullYear();y++){
+    if(!isLeap(y))continue;
+    const feb29=new Date(`${y}-02-29`);
+    if(feb29>prev&&feb29<=nxt)return 1;
+  }
+  return 0;
+}
+function trunc6(x){return Math.floor(x*1e6)/1e6;}
+
+
+// ── IPC DATA ─────────────────────────────────────────────────────────
+const IPC_TABLE=[
+  {y:2020,m:1,v:0.0362},{y:2020,m:2,v:0.0372},{y:2020,m:3,v:0.0386},{y:2020,m:4,v:0.0351},
+  {y:2020,m:5,v:0.0285},{y:2020,m:6,v:0.0219},{y:2020,m:7,v:0.0197},{y:2020,m:8,v:0.0188},
+  {y:2020,m:9,v:0.0197},{y:2020,m:10,v:0.0175},{y:2020,m:11,v:0.0149},{y:2020,m:12,v:0.0161},
+  {y:2021,m:1,v:0.0160},{y:2021,m:2,v:0.0156},{y:2021,m:3,v:0.0151},{y:2021,m:4,v:0.0195},
+  {y:2021,m:5,v:0.0330},{y:2021,m:6,v:0.0363},{y:2021,m:7,v:0.0397},{y:2021,m:8,v:0.0444},
+  {y:2021,m:9,v:0.0451},{y:2021,m:10,v:0.0458},{y:2021,m:11,v:0.0526},{y:2021,m:12,v:0.0562},
+  {y:2022,m:1,v:0.0694},{y:2022,m:2,v:0.0801},{y:2022,m:3,v:0.0853},{y:2022,m:4,v:0.0923},
+  {y:2022,m:5,v:0.0907},{y:2022,m:6,v:0.0967},{y:2022,m:7,v:0.1021},{y:2022,m:8,v:0.1084},
+  {y:2022,m:9,v:0.1144},{y:2022,m:10,v:0.1222},{y:2022,m:11,v:0.1253},{y:2022,m:12,v:0.1312},
+  {y:2023,m:1,v:0.1325},{y:2023,m:2,v:0.1328},{y:2023,m:3,v:0.1334},{y:2023,m:4,v:0.1282},
+  {y:2023,m:5,v:0.1236},{y:2023,m:6,v:0.1213},{y:2023,m:7,v:0.1178},{y:2023,m:8,v:0.1143},
+  {y:2023,m:9,v:0.1099},{y:2023,m:10,v:0.1048},{y:2023,m:11,v:0.1015},{y:2023,m:12,v:0.0928},
+  {y:2024,m:1,v:0.0835},{y:2024,m:2,v:0.0774},{y:2024,m:3,v:0.0736},{y:2024,m:4,v:0.0716},
+  {y:2024,m:5,v:0.0716},{y:2024,m:6,v:0.0718},{y:2024,m:7,v:0.0686},{y:2024,m:8,v:0.0612},
+  {y:2024,m:9,v:0.0581},{y:2024,m:10,v:0.0541},{y:2024,m:11,v:0.0520},{y:2024,m:12,v:0.0520},
+  {y:2025,m:1,v:0.0522},{y:2025,m:2,v:0.0528},{y:2025,m:3,v:0.0509},{y:2025,m:4,v:0.0516},
+  {y:2025,m:5,v:0.0505},{y:2025,m:6,v:0.0482},{y:2025,m:7,v:0.0490},{y:2025,m:8,v:0.0510},
+  {y:2025,m:9,v:0.0518},{y:2025,m:10,v:0.0551},{y:2025,m:11,v:0.0530},{y:2025,m:12,v:0.0510},
+  {y:2026,m:1,v:0.0535},{y:2026,m:2,v:0.0529},{y:2026,m:3,v:0.0556},
+];
+const MES_ES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function ipcVigente(iso){
+  const d=new Date(iso+'T12:00:00');
+  let best=null,bestKey=-Infinity;
+  for(const {y,m,v} of IPC_TABLE){
+    const pm=m===12?1:m+1,py=m===12?y+1:y;
+    const pub=new Date(py,pm-1,8);
+    if(pub<=d){const key=y*12+m;if(key>bestKey){bestKey=key;best={y,m,v};}}
+  }
+  return best;
+}
+function ipcLbl(r){return r?MES_ES[r.m-1]+' '+r.y:'—';}
+
+// ── IPC BOND MATH ─────────────────────────────────────────────────────
+function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
+  const ipcLiq=ipcVigente(liqISO);
+  const flows=[];let cur=antISO,firstPending=true;
+  while(true){
+    const nxt=addMonths(cur,mp);
+    if(nxt<=liqISO){cur=nxt;firstPending=false;continue;}
+    const L=periodHasLeap(cur,nxt);
+    const F=daysReal(cur,nxt)-L;
+    const M=countFeb29(liqISO,nxt);
+    const G=daysReal(liqISO,nxt)-M;
+    const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<3;
+    let ipcRec;
+    let ipcVal;
+    if(mode==='inicio_curva'){
+      // Use IPC from uploaded curve at period start
+      const v = ipcFromCurve(cur);
+      ipcVal = v !== null ? v : (ipcLiq ? ipcLiq.v : 0);
+      ipcRec = null;  // no standard record, raw value used
+    } else if(mode==='final_curva'){
+      // Use IPC from uploaded curve at period end
+      const v = ipcFromCurve(nxt);
+      ipcVal = v !== null ? v : (ipcLiq ? ipcLiq.v : 0);
+      ipcRec = null;
+    } else {
+      if(mode==='inicio_est')       ipcRec=firstPending?ipcVigente(cur):ipcLiq;
+      else if(mode==='final_est')   ipcRec=ipcLiq;
+      else if(mode==='inicio_real') ipcRec=ipcVigente(cur);
+      else                          ipcRec=ipcVigente(nxt);
+      ipcVal=ipcRec?ipcRec.v:(ipcLiq?ipcLiq.v:0);
+    }
+    const cuponIPC=(1+ipcVal)*(1+sc)-1;
+    const cpPer=trunc6((Math.pow(1+cuponIPC,F/365)-1)*100);
+    const tirI=(1+ipcVal)*(1+st)-1;
+    const tY=G/365;
+    const cf=cpPer+(last?100:0);
+    const pv=cf/Math.pow(1+tirI,tY);
+    flows.push({num:flows.length+1,fecha:nxt,dC:F,dD:G,L,M,tY,ipcVal,ipcRec,cpPer,tirI,cf,pv});
+    cur=nxt;firstPending=false;
+    if(last||flows.length>300)break;
+  }
+  return flows;
+}
+
+function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode){
+  const flows=buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode);
+  if(!flows.length)return null;
+
+  // PRICE: individual TIRs per flow — correct economic value
+  const price=flows.reduce((s,f)=>s+f.pv,0);
+
+  // Interés corrido
+  const nxt1=addMonths(antISO,mp);
+  const L_ic=periodHasLeap(antISO,nxt1);
+  const F_ic=daysReal(antISO,nxt1)-L_ic;
+  const M_ic=countFeb29(antISO,liqISO);
+  const dCaus=daysReal(antISO,liqISO)-M_ic;
+  const ic=flows[0].cpPer*(dCaus/F_ic);
+  const pl=price-ic;
+  const priceRnd=Math.floor(price*1000)/1000;
+  const vGiro=(priceRnd/100)*nom;
+
+  // RISK METRICS: differ by mode
+  let dmac,dmod,conv,dv01,tirRef,dmN;
+  if(mode==='inicio_curva'||mode==='final_curva'){
+    // Curve modes: single TIR_ref = (1+IPC_liq)*(1+st)-1
+    // Re-discount ALL flows at TIR_ref for duration/convexity/DV01
+    const ipcLiqCurva=ipcFromCurve(liqISO);
+    const ipcLiqFallback=(()=>{const r=ipcVigente(liqISO);return r?r.v:0;})();
+    const ipcLiq=ipcLiqCurva!==null?ipcLiqCurva:ipcLiqFallback;
+    tirRef=(1+ipcLiq)*(1+st)-1;
+    // Re-discount with single TIR_ref
+    const pvRef=flows.map(f=>f.cf/Math.pow(1+tirRef,f.tY));
+    const priceRef=pvRef.reduce((s,v)=>s+v,0);
+    dmN=flows.reduce((s,f,i)=>s+f.tY*pvRef[i],0);
+    dmac=dmN/priceRef;
+    dmod=dmac/(1+tirRef);
+    const cvN=flows.reduce((s,f,i)=>s+pvRef[i]*f.tY*(f.tY+1)/Math.pow(1+tirRef,2),0);
+    conv=cvN/priceRef;
+    dv01=dmod*(priceRnd/100)*nom/10000;  // DV01 on actual display price
+  } else {
+    // Other modes: weighted average of individual TIRs (existing behavior)
+    tirRef=flows.reduce((s,f)=>s+f.tirI*f.pv,0)/price;
+    dmN=flows.reduce((s,f)=>s+f.tY*f.pv,0);
+    dmac=dmN/price;
+    dmod=dmac/(1+tirRef);
+    const cvN=flows.reduce((s,f)=>s+f.pv*f.tY*(f.tY+1)/Math.pow(1+f.tirI,2),0);
+    conv=cvN/price;
+    dv01=dmod*(priceRnd/100)*nom/10000;
+  }
+
+  return{flows,price,priceRnd,ic,pl,vGiro,dCaus,F_ic,dmac,dmod,conv,dv01,tirAvg:tirRef,nom,dmN};
+}
+
+// ── UI STATE ──────────────────────────────────────────────────────────
+let ch1=null,ch2=null,lastRes=null;
+
+function fmtInvValor(el){
+  const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;
+  $('inv-valor-v').value=n;
+  el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';
+}
+function updateInvUI(){
+  const t=$('inv-tipo').value;
+  const lbls={dv01:'DV01 objetivo ($)',vgiro:'Valor de giro objetivo ($)',ganancia:'Ganancia objetivo ($)'};
+  $('inv-lbl-valor').textContent=lbls[t]||'Valor objetivo';
+  $('inv-field-bp').style.display=t==='ganancia'?'block':'none';
+  $('inv-field-precio').style.display=t==='tasa'?'block':'none';
+  $('inv-field-valor').style.display=t==='tasa'?'none':'block';
+}
+function updateIPCDisplay(liqISO){
+  const rec=ipcVigente(liqISO);
+  const el=$('ipc-display'),pe=$('ipc-period');
+  if(el&&rec){el.textContent=fmt(rec.v*100,2)+'%';if(pe)pe.textContent=ipcLbl(rec);}
+}
+
+  // XIRR: find IRR discounting each cash flow at its exact date
+  function xirr(cashflows, dates, d0){
+    // cashflows[0] = -vGiro (outflow), rest = inflows
+    // dates in ISO string
+    const days=dates.map(d=>daysReal(d0,d));
+    function npv(r){return cashflows.reduce((s,cf,i)=>s+cf/Math.pow(1+r,days[i]/365),0);}
+    let lo=-0.9999,hi=10,mid=0,iter=0;
+    while(iter++<200){mid=(lo+hi)/2;if(npv(mid)>0)lo=mid;else hi=mid;if(Math.abs(npv(mid))<0.01)break;}
+    return mid;
+  }
+
+// ── IPC CURVA ESTIMADA ────────────────────────────────────────────────
+let IPC_CURVE_DATA = {};  // {iso: rate_decimal}
+let ipcCurveLoaded = false;
+
+function loadIPCCurve(input){
+  const file = input.files[0];
+  if(!file) return;
+  const stat = $('ipc-curve-status');
+  stat.textContent = 'Cargando...';
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      IPC_CURVE_DATA = {};
+      const lines = e.target.result.split(/\r?\n/);
+      let count = 0;
+      for(const line of lines){
+        if(!line.trim()) continue;
+        // Format: DD/MM/YYYY;13,12%  or  YYYY-MM-DD;0.1312
+        // Split ONLY on first semicolon or tab — comma is decimal separator
+        const sepIdx = line.trim().search(/[;\t]/);
+        if(sepIdx < 0) continue;
+        let rawDate = line.trim().slice(0, sepIdx).trim().replace(/"/g,'');
+        let rawRate = line.trim().slice(sepIdx+1).trim().replace(/"/g,'').replace('%','').replace(',','.');
+        // Parse date
+        let iso = null;
+        if(/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)){
+          const [d,m,y] = rawDate.split('/');
+          iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        } else if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
+          iso = rawDate;
+        } else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)){
+          const [d,m,y] = rawDate.split('/');
+          iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        }
+        if(!iso) continue;
+        let rate = parseFloat(rawRate);
+        if(isNaN(rate)) continue;
+        if(rate > 1) rate = rate / 100;  // % → decimal
+        IPC_CURVE_DATA[iso] = rate;
+        count++;
+      }
+      ipcCurveLoaded = count > 0;
+      const dates = Object.keys(IPC_CURVE_DATA).sort();
+      stat.textContent = ipcCurveLoaded
+        ? `✓ ${count} registros (${dates[0]} → ${dates[dates.length-1]})`
+        : '✗ No se pudieron leer datos';
+      stat.style.color = ipcCurveLoaded ? 'var(--green3)' : 'var(--red3)';
+    } catch(err){
+      stat.textContent = '✗ Error: ' + err.message;
+      stat.style.color = 'var(--red3)';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function ipcFromCurve(iso){
+  if(IPC_CURVE_DATA[iso] !== undefined) return IPC_CURVE_DATA[iso];
+  // Fallback ±3 days
+  for(let d=1; d<=3; d++){
+    const dt = new Date(iso+'T12:00:00');
+    for(const delta of [-d, d]){
+      const td = new Date(dt); td.setDate(td.getDate()+delta);
+      const tiso = td.toISOString().split('T')[0];
+      if(IPC_CURVE_DATA[tiso] !== undefined) return IPC_CURVE_DATA[tiso];
+    }
+  }
+  return null;
+}
+
+function onModeChange(){
+  const mode = $('ipc-mode').value;
+  // Show/hide curve CSV upload section
+  const curveSection = $('ipc-curve-section');
+  if(curveSection){
+    curveSection.style.display = (mode==='inicio_curva'||mode==='final_curva') ? 'block' : 'none';
+  }
+  // Show TIR real section only for real modes
+  const isReal = mode.includes('real');
+  const tirSection = $('tir-real-section');
+  const tirHr = $('tir-real-hr');
+  if(tirSection){ tirSection.style.display = isReal ? 'block' : 'none'; }
+  if(tirHr){ tirHr.style.display = isReal ? 'block' : 'none'; }
+  autoCA();
+}
+
+function autoCA(){
+  const liq=$('liq').value,venc=$('venc').value;
+  if(!liq||!venc)return;
+  updateIPCDisplay(liq);
+  const mp=parseInt($('freq').value);
+  let cur=venc;
+  for(let i=0;i<600;i++){
+    const prev=addMonths(cur,-mp);
+    if(prev<=liq){$('c_ant_iso').value=prev;$('c_ant_display').value=fmtDate(prev);return;}
+    cur=prev;
+  }
+}
+
+// ── MAIN CALCULATOR ───────────────────────────────────────────────────
+function calcular(showTIR=false){
+  ch1=null;ch2=null;
+  const liq=$('liq').value,venc=$('venc').value;
+  if(!$('c_ant_iso').value)autoCA();
+  const ant=$('c_ant_iso').value;
+  const mp=parseInt($('freq').value);
+  const sc=parseFloat($('sc').value)/100;
+  const st=parseFloat($('st').value)/100;
+  const nom=parseFloat($('nom_val').value)||0;
+  const mode=$('ipc-mode').value;
+  if(!liq||!venc||!ant||isNaN(sc)||isNaN(st)||nom<=0){alert('Complete todos los parámetros');return;}
+  if(mode.includes('curva')&&!ipcCurveLoaded){alert('Cargue la curva de inflación estimada primero');return;}
+  const res=calcBondIPC(ant,liq,venc,mp,sc,st,nom,mode);
+  if(!res||isNaN(res.price)){alert('Error en el cálculo');return;}
+  lastRes=res;
+  const{flows,price,priceRnd,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,tirAvg,dmN}=res;
+  const freq=Math.round(12/mp);
+  const ipcLiqRec=ipcVigente(liq);
+  const ipcLiqVal=ipcLiqRec?ipcLiqRec.v:0;
+  const estado=pl>100.01?'Con prima':pl<99.99?'Al descuento':'A la par';
+  const bCls=estado==='Con prima'?'green':estado==='Al descuento'?'amber':'blue';
+  const mCls=estado==='Con prima'?'green':estado==='Al descuento'?'amber':'blue';
+  const modeNames={'inicio_est':'IPC Inicio · Estimada','final_est':'IPC Final · Estimada',
+                   'inicio_real':'IPC Inicio · Real','final_real':'IPC Final · Real',
+                   'inicio_curva':'IPC Inicio · Curva','final_curva':'IPC Final · Curva'};
+  const isReal=mode.includes('real');
+  const isCurva=mode.includes('curva');
+
+  // ── TIR ESTIMADA (curve modes): XIRR buying at current price, receiving estimated flows ──
+  const tirNegCurva = isCurva ? tirAvg : null;  // tirAvg = (1+IPC_liq)*(1+st)-1 for curve
+  let tirEstimada = null;
+  if(isCurva){
+    // XIRR: buy at PAR (100%) — emission convention — receive estimated curve flows
+    const xCFsEst = [-nom];  // always par=100 for TIR Estimada
+    const xDatesEst = [liq];
+    flows.forEach(f=>{xCFsEst.push(f.cf/100*nom); xDatesEst.push(f.fecha);});
+    tirEstimada = xirr(xCFsEst, xDatesEst, liq)*100;
+  }
+
+  // Scenarios — same structure as tasa fija
+  const scen=[-300,-200,-100,-50,-25,0,25,50,100,200,300].map(bp=>{
+    const stS=st+bp/10000;if(stS<=0)return null;
+    const r=calcBondIPC(ant,liq,venc,mp,sc,stS,nom,mode);if(!r)return null;
+    const prnS=Math.floor(r.price*1000)/1000;
+    const dv01S=r.dmod*(prnS/100)*nom/10000;
+    return{bp,yS:stS,pS:prnS,plS:r.pl,dmS:r.dmod,dv01S,gan:(prnS-priceRnd)/100*nom*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1)};
+  }).filter(Boolean);
+
+  // TIR real
+  let tirHTML='';
+  if(showTIR){
+    const fV=$('f_venta').value;
+    const stV=parseFloat($('st_venta').value)/100;
+    if(fV&&!isNaN(stV)&&fV>liq){
+      const rV=calcBondIPC(ant,fV,venc,mp,sc,stV,nom,mode);
+      if(rV){
+        // cupsRec: only intermediate coupons (no principal), up to but not including venc
+        // cupsRec: all flows received between liq and fV
+        // If fV = vencimiento, last flow includes principal → use f.cf (cupón+principal)
+        // If fV < vencimiento, last flow is just a coupon → add vGiroV (market price) separately
+        const isAtVenc = fV >= venc;
+        const cupsRec = flows.filter(f=>f.fecha>liq&&f.fecha<=fV);
+        const vGiroV = isAtVenc
+          ? 0   // already included in last flow's cf (principal + last coupon)
+          : (rV.priceRnd/100)*nom;
+        // Display value for UI
+        const vGiroVDisplay = isAtVenc
+          ? (cupsRec.length ? cupsRec[cupsRec.length-1].cf/100*nom : nom)
+          : (rV.priceRnd/100)*nom;
+        const diasInv=daysReal(liq,fV);
+            const isShortPos = typeof _posDir!=='undefined' && _posDir==='short';
+    const dirSign = isShortPos ? -1 : 1;
+    const xCFs=[-vGiro];const xDates=[liq];
+        cupsRec.forEach((f,i)=>{
+          const isLast=(i===cupsRec.length-1);
+          // If selling at maturity: last flow = cf (cupón+principal), others = cpPer only
+          // If selling before: all flows = cpPer only, then add vGiroV
+          const amount = (isAtVenc && isLast) ? f.cf/100*nom : f.cpPer/100*nom;
+          xCFs.push(amount); xDates.push(f.fecha);
+        });
+        if(!isAtVenc){ xCFs.push(vGiroV); xDates.push(fV); }
+        const tirReal=(diasInv>0?xirr(xCFs,xDates,liq)*100:0)*(isShortPos?-1:1);
+
+        const totCups=cupsRec.reduce((s,f)=>s+f.cpPer/100*nom,0);
+        const totCupsDisplay = isAtVenc
+          ? cupsRec.slice(0,-1).reduce((s,f)=>s+f.cpPer/100*nom,0)+vGiroVDisplay
+          : totCups+vGiroVDisplay;
+        const ganPrecio=isAtVenc ? 0 : (rV.priceRnd-priceRnd)/100*nom;
+        tirHTML=`<div class="card" style="border-color:var(--green)">
+      <div class="c-hdr" style="border-color:var(--green)">TIR real de la inversión</div>
+      <div class="c-body">
+        <div class="mg4" style="margin-bottom:12px">
+          <div class="m ${tirReal>=0?'green':'red'}">
+            <div class="m-lbl">TIR real EA (XIRR)</div>
+            <div class="m-val ${tirReal>=0?'green':'red'}" style="font-size:20px">${fmt(tirReal,4)}%</div>
+            <div class="m-unit">${diasInv} días de inversión</div>
+          </div>
+          <div class="m">
+            <div class="m-lbl">Valor giro compra</div>
+            <div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div>
+            <div class="m-unit">${fmtP(vGiro)}</div>
+          </div>
+          <div class="m green">
+            <div class="m-lbl">Valor giro venta</div>
+            <div class="m-val green" style="font-size:14px">${fmtM(vGiroVDisplay)}</div>
+            <div class="m-unit">${fmtDate(fV)}${isAtVenc?' · al vencimiento':' · spread '+fmt(stV*100,2)+'%'}</div>
+          </div>
+          <div class="m ${ganPrecio>=0?'green':'red'}">
+            <div class="m-lbl">Ganancia en precio</div>
+            <div class="m-val ${ganPrecio>=0?'green':'red'}" style="font-size:14px">${isAtVenc?'$0':(ganPrecio>=0?'+':'')+fmtM(ganPrecio)}</div>
+            <div class="m-unit">Cupones: ${cupsRec.length} · Total: ${isAtVenc?fmtM(cupsRec.slice(0,-1).reduce((s,f)=>s+f.cpPer/100*nom,0)+vGiroVDisplay):fmtM(totCups+vGiroVDisplay)}</div>
+          </div>
+        </div>
+        <div class="tscroll"><table class="ft">
+          <thead><tr>
+            <th style="text-align:center">#</th>
+            <th style="text-align:left">Concepto</th>
+            <th style="text-align:left">Fecha</th>
+            <th>IPC</th>
+            <th>Flujo neto ($)</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td style="text-align:center">0</td>
+              <td style="text-align:left">Compra</td>
+              <td style="text-align:left">${fmtDate(liq)}</td>
+              <td>—</td>
+              <td style="color:var(--red3)">${fmtP(-vGiro)}</td>
+            </tr>
+            ${cupsRec.map((f,i)=>`<tr>
+              <td style="text-align:center">${i+1}</td>
+              <td style="text-align:left">Cupón ${i+1}</td>
+              <td style="text-align:left">${fmtDate(f.fecha)}</td>
+              <td><span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(59,130,246,.15);color:var(--blue3)">${fmt(f.ipcVal*100,2)}%</span></td>
+              <td style="color:var(--green3)">${fmtP(f.cpPer/100*nom)}</td>
+            </tr>`).join('')}
+            <tr style="font-weight:700;color:var(--amber3)">
+              <td style="text-align:center">${cupsRec.length+1}</td>
+              <td style="text-align:left">Venta</td>
+              <td style="text-align:left">${fmtDate(fV)}</td>
+              <td style="font-size:10px">${isAtVenc?'al vencimiento':'spread '+fmt(stV*100,2)+'%'}</td>
+              <td style="color:var(--green3)">${fmtP(vGiroVDisplay)}</td>
+            </tr>
+          </tbody>
+          <tfoot><tr>
+            <td colspan="4" style="text-align:left;color:var(--txt2)">${isShortPos?'P&G neto':'Total recibido'}</td>
+            <td style="color:var(--green3);font-weight:700">${isAtVenc
+  ? fmtP(cupsRec.slice(0,-1).reduce((s,f)=>s+f.cpPer/100*nom,0)+vGiroVDisplay)
+  : fmtP(totCups+vGiroVDisplay)}</td>
+          </tr></tfoot>
+        </table></div>
+      </div></div>`;
+      }
+    }
+  }
+
+  // Chart: vary st symmetrically around current st, X-axis = TIR implícita promedio de flujos
+  // tirAvg = simple average of all flow TIRs (confirmed by user)
+  const tirSimple=flows.reduce((s,f)=>s+f.tirI,0)/flows.length;
+  const halfRange=Math.min(st*0.6,0.06); // tight symmetric range for visible curvature
+  const stMin=Math.max(0.001,st-halfRange);
+  const stMax=st+halfRange;
+  const stepsL=150,stepsR=150;
+  const yArr=[],pArr=[],lArr=[];
+  // Left side: stMin → st
+  for(let i=0;i<=stepsL;i++){
+    const stI=stMin+(st-stMin)*(i/stepsL);
+    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode);
+    const ps=fs.reduce((s,f)=>s+f.pv,0);
+    // x-label = simple avg TIR of flows at this spread
+    const tirI=fs.reduce((s,f)=>s+f.tirI,0)/fs.length;
+    yArr.push((tirI*100).toFixed(2)+'%');
+    pArr.push(+ps.toFixed(4));
+    lArr.push(+(price-dmod*(stI-st)*price).toFixed(4));
+  }
+  // Right side: st → stMax
+  for(let i=1;i<=stepsR;i++){
+    const stI=st+(stMax-st)*(i/stepsR);
+    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode);
+    const ps=fs.reduce((s,f)=>s+f.pv,0);
+    const tirI=fs.reduce((s,f)=>s+f.tirI,0)/fs.length;
+    yArr.push((tirI*100).toFixed(2)+'%');
+    pArr.push(+ps.toFixed(4));
+    lArr.push(+(price-dmod*(stI-st)*price).toFixed(4));
+  }
+  const crossIdx=stepsL; // midpoint = current st → current price
+  const crossPrice=price;
+
+  // ── RENDER — exact same structure/classes as tasa fija ────────────
+  $('main').innerHTML=`
+  <div class="card">
+    <div class="c-hdr">Resultados principales
+      <span class="badge ${bCls}">${estado}</span>
+      <span class="badge" style="background:rgba(59,130,246,.15);color:var(--blue3);border-color:var(--blue2)">${modeNames[mode]}</span>
+    </div>
+    <div class="c-body">
+      <div class="mg4" style="margin-bottom:10px">
+        <div class="m blue"><div class="m-lbl">Precio sucio</div><div class="m-val">${fmt(priceRnd,4)}%</div><div class="m-unit">% del par</div></div>
+        <div class="m"><div class="m-lbl">Precio limpio</div><div class="m-val ${mCls}">${fmt(pl,4)}%</div><div class="m-unit">% del par</div></div>
+        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus} días causados</div></div>
+        <div class="m ${mCls}"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
+      </div>
+      <div class="mg4">
+        <div class="m blue"><div class="m-lbl">IPC vigente · liq</div><div class="m-val" style="font-size:15px">${fmt(ipcLiqVal*100,2)}%</div><div class="m-unit">${ipcLiqRec?ipcLbl(ipcLiqRec):'—'}</div></div>
+        <div class="m"><div class="m-lbl">Spread cupón</div><div class="m-val" style="font-size:15px">${fmt(sc*100,2)}%</div><div class="m-unit">EA sobre IPC</div></div>
+        <div class="m"><div class="m-lbl">Pagos / año</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} meses</div></div>
+        <div class="m"><div class="m-lbl">Cupones restantes</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">hasta vencimiento</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="c-hdr">Medidas de riesgo</div>
+    <div class="c-body">
+      <div class="mg4">
+        <div class="m blue"><div class="m-lbl">D. Macaulay</div><div class="m-val">${fmt(dmac,4)}</div><div class="m-unit">años</div></div>
+        <div class="m blue"><div class="m-lbl">D. Modificada</div><div class="m-val">${fmt(dmod,4)}</div><div class="m-unit">% / 1% Δspread</div></div>
+        <div class="m blue"><div class="m-lbl">Convexidad</div><div class="m-val">${fmt(conv,4)}</div><div class="m-unit">—</div></div>
+        <div class="m blue"><div class="m-lbl">DV01</div><div class="m-val" style="font-size:14px">${fmtP(dv01)}</div><div class="m-unit">$ por 1bp de Δspread</div></div>
+      </div>
+      <div class="info-box">
+        +50bp → <span style="color:var(--red3)">−${fmtM(dv01*50)}</span> &nbsp;|&nbsp;
+        −50bp → <span style="color:var(--green3)">+${fmtM(dv01*50)}</span> &nbsp;|&nbsp;
+        +100bp → <span style="color:var(--red3)">−${fmtM(dv01*100)}</span> &nbsp;|&nbsp;
+        −100bp → <span style="color:var(--green3)">+${fmtM(dv01*100)}</span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="c-hdr">Curva precio–spread</div>
+    <div class="c-body"><div class="chart-wrap"><canvas id="ch1"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="c-hdr">Análisis de escenarios de spread</div>
+    <div class="c-body">
+      <div class="tscroll"><table class="st"><thead><tr>
+        <th>Escenario</th><th>Spread TIR</th><th>P. sucio</th><th>P. limpio</th><th>D. Mod.</th><th>DV01</th><th>Ganancia / Pérdida</th>
+      </tr></thead><tbody>
+        ${scen.map(s=>{
+          const cls=s.bp===0?'cur':s.bp<0?'dn':'up';
+          const g=(s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan))*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1);
+          const gc=s.bp===0?'':s.gan>=0?'color:var(--green3)':'color:var(--red3)';
+          return`<tr class="${cls}"><td>${s.bp===0?'★ Actual':s.bp>0?'+'+s.bp+'bp':s.bp+'bp'}</td><td>${fmt(s.yS*100,2)}%</td><td>${fmt(s.pS,4)}%</td><td>${fmt(s.plS,4)}%</td><td>${fmt(s.dmS,4)}</td><td>${fmtP(s.dv01S)}</td><td style="${gc}">${g}</td></tr>`;
+        }).join('')}
+      </tbody></table></div>
+    </div>
+  </div>
+  ${tirHTML}
+  <div class="card">
+    <div class="c-hdr">Tabla de flujos descontados</div>
+    <div class="c-body"><div class="tscroll"><table class="ft"><thead><tr>
+      <th>#</th><th>Fecha pago</th><th>Días cupón</th><th>Días desc.</th><th>Bis. Cupón</th><th>Bis. Desc.</th>
+      <th>IPC</th><th>TIR flujo</th><th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $ (sin desc.)</th><th>Flujo $ (descontado)</th><th>t·PV</th><th>% precio</th>
+    </tr></thead><tbody>
+      <tr class="liq-row"><td>0</td><td>${fmtDate(liq)}</td><td colspan="11" style="color:var(--red3);font-style:italic;text-align:left;padding-left:8px">−${fmtP(vGiro)} &nbsp; Liquidación</td></tr>
+      ${flows.map(f=>`<tr>
+        <td>${f.num}</td><td>${fmtDate(f.fecha)}</td><td>${f.dC}</td><td>${f.dD}</td>
+        <td style='text-align:center'>${f.L}</td><td style='text-align:center'>${f.M}</td>
+        <td><span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(59,130,246,.15);color:var(--blue3);white-space:nowrap">${fmt(f.ipcVal*100,2)}%${f.ipcRec?' ('+ipcLbl(f.ipcRec)+')':mode.includes('curva')?' (curva)':''}</span></td>
+        <td>${fmt(f.tirI*100,4)}%</td><td>${fmt(f.cf,4)}</td><td>${fmt(f.pv,4)}</td>
+        <td style="color:var(--amber3);font-weight:600">${fmtP(f.cf/100*nom)}</td>
+        <td>${fmtP(f.pv/100*nom)}</td><td>${fmt(f.tY*f.pv,4)}</td><td>${fmt(f.pv/price*100,2)}%</td>
+      </tr>`).join('')}
+      <tr class="total"><td colspan="8">TOTAL</td><td>${fmt(flows.reduce((s,f)=>s+f.cf,0),4)}</td><td>${fmt(price,4)}</td><td style="color:var(--amber3)">${fmtP(flows.reduce((s,f)=>s+f.cf/100*nom,0))}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,4)}</td><td>100%</td></tr>
+    </tbody></table></div></div>
+  </div>`;
+
+  // ── CHART — exact same as tasa fija ──────────────────────────────
+  setTimeout(()=>{
+    try{if(ch1){ch1.destroy();ch1=null;}}catch(e){ch1=null;}
+    ch1=new Chart($('ch1'),{type:'line',data:{labels:yArr,datasets:[
+      {label:'Precio real',data:pArr,borderColor:'#3b82f6',borderWidth:2,pointRadius:0,tension:.15,fill:false},
+      {label:'Aprox. D* lineal',data:lArr,borderColor:'#ef4444',borderWidth:1.5,pointRadius:0,tension:0,borderDash:[5,4],fill:false},
+      {label:'_cross',data:yArr.map((_,i)=>i===crossIdx?crossPrice:null),type:'scatter',
+       backgroundColor:'#f59e0b',pointRadius:yArr.map((_,i)=>i===crossIdx?8:0),showLine:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},
+      plugins:{legend:{display:true,position:'top',labels:{color:'#8892a4',font:{size:10},boxWidth:16,
+        filter:item=>item.text!=='_cross'}},
+        tooltip:{callbacks:{label:ctx=>{
+          if(ctx.dataset.label==='_cross')return`TIR: ${fmt(tirSimple*100,2)}% · Precio: ${fmt(crossPrice,3)}%`;
+          return ctx.dataset.label+': '+fmt(ctx.parsed.y,4)+'%';
+        }}}},
+      scales:{
+        x:{ticks:{color:'#4a5568',autoSkip:true,maxTicksLimit:10,font:{size:9}},
+           grid:{color:'rgba(255,255,255,.03)'},
+           title:{display:true,text:'TIR implícita (%)',color:'#4a5568',font:{size:10}}},
+        y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(0)+'%'},
+           grid:{color:'rgba(255,255,255,.03)'},
+           title:{display:true,text:'Precio (%)',color:'#4a5568',font:{size:10}}}
+    }},plugins:[{id:'crossLines',afterDraw(chart){
+      if(crossIdx<0||crossPrice===null)return;
+      const ctx2=chart.ctx,meta=chart.getDatasetMeta(2);
+      if(!meta.data[crossIdx])return;
+      const pt=meta.data[crossIdx];
+      const xA=chart.scales.x,yA=chart.scales.y;
+      ctx2.save();
+      ctx2.setLineDash([5,4]);ctx2.strokeStyle='rgba(245,158,11,.6)';ctx2.lineWidth=1.2;
+      ctx2.beginPath();ctx2.moveTo(pt.x,pt.y);ctx2.lineTo(pt.x,yA.bottom);ctx2.stroke();
+      ctx2.beginPath();ctx2.moveTo(xA.left,pt.y);ctx2.lineTo(pt.x,pt.y);ctx2.stroke();
+      ctx2.setLineDash([]);
+      ctx2.fillStyle='#f59e0b';ctx2.beginPath();ctx2.arc(pt.x,pt.y,7,0,Math.PI*2);ctx2.fill();
+      ctx2.strokeStyle='#0a0e1a';ctx2.lineWidth=2;ctx2.stroke();
+      const lbl=`${fmt(tirSimple*100,2)}% TIR · ${fmt(crossPrice,3)}%`;
+      ctx2.font='bold 10px monospace';const tw=ctx2.measureText(lbl).width;
+      let lx=pt.x+12,ly=pt.y-10;
+      if(lx+tw+16>xA.right)lx=pt.x-tw-20;
+      ctx2.fillStyle='rgba(10,14,26,.9)';
+      ctx2.beginPath();ctx2.roundRect(lx-4,ly-13,tw+12,19,4);ctx2.fill();
+      ctx2.fillStyle='#fcd34d';ctx2.textAlign='left';ctx2.fillText(lbl,lx+2,ly);
+      ctx2.restore();
+    }}]});
+  },100);
+
+  mostrarBtnGuardar('IPC','#3b82f6','#1d4ed8','#93c5fd',lastRes||null);
+}
+
+// ── INVERSE ───────────────────────────────────────────────────────────
+function calcularInverso(){
+  const liq=$('liq').value,venc=$('venc').value;
+  if(!$('c_ant_iso').value)autoCA();
+  const ant=$('c_ant_iso').value;
+  const mp=parseInt($('freq').value),sc=parseFloat($('sc').value)/100;
+  const st=parseFloat($('st').value)/100,mode=$('ipc-mode').value;
+  if(!liq||!venc||!ant)return;
+  const res=calcBondIPC(ant,liq,venc,mp,sc,st,1e10,mode);
+  if(!res)return;
+  const{price,priceRnd,dmod,conv,ic,pl}=res;
+  const tipo=$('inv-tipo').value;
+  let items=[];
+  if(tipo==='tasa'){
+    const target=parseFloat($('inv-precio').value);
+    if(isNaN(target)||target<=0){alert('Ingresa precio objetivo');return;}
+    let lo=0.0001,hi=2.0,mid,iter=0;
+    while(iter++<120){mid=(lo+hi)/2;const r=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode);if(!r)break;if(r.price>target)lo=mid;else hi=mid;if(Math.abs(r.price-target)<1e-7)break;}
+    const rC=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode);
+    items=[{l:'Precio objetivo',v:fmt(target,4)+'%'},
+      {l:'Spread TIR',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmt(mid*100,4)}%</span>`},
+      {l:'Precio resultante',v:fmt(rC?.priceRnd||0,4)+'%'},{l:'Precio limpio',v:fmt(rC?.pl||0,4)+'%'}];
+  } else {
+    const valorObj=parseFloat($('inv-valor-v').value)||0;
+    if(valorObj<=0){alert('Ingresa valor objetivo');return;}
+    if(tipo==='dv01'){
+      const nom=valorObj*10000/(dmod*(priceRnd/100));
+      items=[{l:'DV01 objetivo',v:fmtP(valorObj)},
+        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
+        {l:'Nominal exacto',v:fmtP(nom)},{l:'Valor giro',v:fmtM((priceRnd/100)*nom)},
+        {l:'DV01 resultante',v:fmtP(dmod*(priceRnd/100)*nom/10000)},{l:'D. Modificada',v:fmt(dmod,4)}];
+    } else if(tipo==='vgiro'){
+      const nom=valorObj/(priceRnd/100);const dv01r=dmod*(priceRnd/100)*nom/10000;
+      items=[{l:'Caja objetivo',v:fmtM(valorObj)},
+        {l:'Nominal comprable',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
+        {l:'Nominal exacto',v:fmtP(nom)},{l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
+        {l:'Precio limpio',v:fmt(pl,4)+'%'},{l:'DV01',v:fmtP(dv01r)},{l:'IC pagado',v:fmtM(ic/100*nom)}];
+    } else if(tipo==='ganancia'){
+      const bp=parseFloat($('inv-bp').value)||0;
+      const fP=(-dmod*(bp/10000)+0.5*conv*(bp/10000)**2)*(priceRnd/100);
+      if(Math.abs(fP)<1e-10){alert('Ganancia ~cero');return;}
+      const nom=valorObj/fP;const dv01r=dmod*(priceRnd/100)*nom/10000;
+      items=[{l:`Ganancia (${bp>0?'+':''}${bp}bp)`,v:fmtM(valorObj)},
+        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
+        {l:'Nominal exacto',v:fmtP(nom)},{l:'Valor giro',v:fmtM((priceRnd/100)*nom)},
+        {l:'DV01',v:fmtP(dv01r)},{l:'Ganancia D*+Cv',v:fmtM(fP*nom)}];
+    }
+  }
+  const old=$('inv-result-card');if(old)old.remove();
+  const card=document.createElement('div');card.id='inv-result-card';
+  card.style.cssText='margin-top:12px;background:rgba(139,92,246,.1);border:1px solid #7c3aed;border-radius:8px;overflow:hidden';
+  card.innerHTML=`<div style="padding:8px 12px;background:rgba(139,92,246,.2);border-bottom:1px solid #7c3aed;font-size:10px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.08em">⟳ Resultado inverso</div><div style="padding:10px 12px">${items.map(it=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px"><span style="color:var(--txt2)">${it.l}</span><span style="font-weight:700;font-family:monospace">${it.v}</span></div>`).join('')}</div>`;
+  const btn=document.querySelector('[onclick="calcularInverso()"]');
+  if(btn)btn.parentNode.insertBefore(card,btn.nextSibling);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+$('liq').value='2025-01-30';
+$('venc').value='2029-02-27';
+onModeChange();
+loadTicker();
+setInterval(loadTicker, 120000);
+updateClock();
+setInterval(updateClock,1000);
+
+// ── DIRECCIÓN POSICIÓN ────────────────────────────────────────
+let _posDir = 'long';
+function setDirection(dir){
+  _posDir = dir;
+  const isLong = dir==='long';
+  const btnL = document.getElementById('dir-btn-long');
+  const btnS = document.getElementById('dir-btn-short');
+  const info = document.getElementById('dir-info');
+  if(btnL){ btnL.style.background=isLong?'var(--green2)':'var(--bg3)'; btnL.style.color=isLong?'var(--green3)':'var(--txt3)'; }
+  if(btnS){ btnS.style.background=!isLong?'var(--red2)':'var(--bg3)'; btnS.style.color=!isLong?'var(--red3)':'var(--txt3)'; }
+  if(info){ info.style.color=isLong?'var(--green3)':'var(--red3)'; info.textContent=isLong?'▲ Compra al offer · gana si tasas bajan':'▼ Vende al bid · gana si tasas suben'; }
+  // Update save button label if visible
+  const btn=document.getElementById('btn-save-pf');
+  if(btn&&btn.style.display!=='none') btn.textContent=isLong?'📊 Guardar (▲ Largo)':'📊 Guardar (▼ Corto)';
+}
+
+// ── GUARDAR EN PORTAFOLIO ──────────────────────────────────────
+let _bondResult = null;
+let _bondMeta   = {tipo:'RF', ac:'#3b82f6', ac2:'#1d4ed8', ac3:'#93c5fd'};
+
+function guardarEnPortafolio() {
+  const r = _bondResult;
+  if (!r) { alert('Primero calcule un bono'); return; }
+  const venc = document.querySelector('[id="venc"]')?.value || '';
+  const liq  = document.querySelector('[id="liq"]')?.value  || '';
+  const cpPct = parseFloat(document.querySelector('[id="cp"],[id="cp_raw"]')?.value)||0;
+  const dir   = typeof _posDir !== 'undefined' ? _posDir : 'long';
+  const sign  = dir==='long' ? 1 : -1;
+  const flows = r.flows || [];
+  const nxt   = flows.find(f=>f.fecha > liq) || flows[0] || {};
+  const bond = {
+    id: Date.now(), tipo: _bondMeta.tipo,
+    ac: _bondMeta.ac, ac2: _bondMeta.ac2, ac3: _bondMeta.ac3,
+    dir, label: _bondMeta.tipo + ' · ' + venc,
+    liq, venc, cpPct,
+    nom:      r.nom      || 0,
+    priceRnd: r.priceRnd || r.price || 100,
+    pl:       r.pl       || 0,
+    ic:       r.ic       || 0,
+    vGiro:    r.vGiro    || 0,
+    dmac:     r.dmac     || 0,
+    dmod:     r.dmod     || 0,
+    conv:     r.conv     || 0,
+    dv01:     Math.abs(r.dv01||0) * sign,
+    tirAvg:   r.tirAvg   || r.TIR_EA || 0,
+    cupsRem:  flows.length,
+    nextCupon: nxt.fecha || '',
+  };
+  try {
+    const list = JSON.parse(localStorage.getItem('rf_portfolio')||'[]');
+    list.push(bond);
+    localStorage.setItem('rf_portfolio', JSON.stringify(list));
+    const btn = document.getElementById('btn-save-pf');
+    if(btn){
+      btn.textContent = dir==='long'?'✓ Guardado (Largo)!':'✓ Guardado (Corto)!';
+      btn.style.background = dir==='long'?'#064e3b':'#7f1d1d';
+      btn.style.borderColor = dir==='long'?'#10b981':'#ef4444';
+      setTimeout(()=>{ btn.textContent='📊 Guardar en portafolio'; btn.style.background='#4c1d95'; btn.style.borderColor='#7c3aed'; },2500);
+    }
+  } catch(e){ alert('Error: '+e.message); }
+}
+
+function mostrarBtnGuardar(tipo, ac, ac2, ac3, result) {
+  _bondMeta   = {tipo, ac, ac2, ac3};
+  _bondResult = result;
+  let btn = document.getElementById('btn-save-pf');
+  if(!btn){
+    btn = document.createElement('button');
+    btn.id = 'btn-save-pf';
+    btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #7c3aed;background:#4c1d95;color:#ddd6fe;box-shadow:0 4px 20px rgba(124,58,237,.5);transition:all .2s';
+    btn.onclick = guardarEnPortafolio;
+    document.body.appendChild(btn);
+  }
+  const dir = typeof _posDir !== 'undefined' ? _posDir : 'long';
+  btn.textContent = dir==='long'?'📊 Guardar (▲ Largo)':'📊 Guardar (▼ Corto)';
+  btn.style.borderColor = dir==='long'?'#7c3aed':'#ef4444';
+  btn.style.display = 'block';
+}
+</script>
+</html>
