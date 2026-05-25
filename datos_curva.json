@@ -1,0 +1,19 @@
+{
+  "fecha": "2026-03-12",
+  "fuente": "BanRep SEN",
+  "tes": [
+    {"name": "TES TF 2026", "tir": 12.35, "plazo": 0.45},
+    {"name": "TES TF 2027", "tir": 13.74, "plazo": 1.46},
+    {"name": "TES TF 2028", "tir": 14.03, "plazo": 1.96},
+    {"name": "TES TF 2029", "tir": 13.96, "plazo": 3.29},
+    {"name": "TES TF 2030", "tir": 14.20, "plazo": 4.35},
+    {"name": "TES TF 2031", "tir": 14.23, "plazo": 4.87},
+    {"name": "TES TF 2032", "tir": 13.94, "plazo": 6.31},
+    {"name": "TES TF 2033", "tir": 14.10, "plazo": 6.75},
+    {"name": "TES TF 2034", "tir": 13.40, "plazo": 8.52},
+    {"name": "TES TF 2036", "tir": 13.30, "plazo": 10.16},
+    {"name": "TES TF 2042", "tir": 13.36, "plazo": 15.99},
+    {"name": "TES TF 2046", "tir": 13.62, "plazo": 20.37},
+    {"name": "TES TF 2050", "tir": 13.09, "plazo": 24.54}
+  ]
+}
