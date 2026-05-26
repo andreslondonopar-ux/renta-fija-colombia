@@ -309,10 +309,21 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
     </div><!-- s-body -->
   </div><!-- sidebar -->
 
-  <div class="main" id="main">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--txt3)">
-      <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
-      <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div class="main" id="main" style="flex:0 0 auto">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;color:var(--txt3)">
+        <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
+        <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
+      </div>
+    </div>
+    <!-- IPC TABLE: siempre visible -->
+    <div style="flex:1;overflow:hidden;border-top:1px solid var(--border);padding:14px;display:flex;flex-direction:column;min-height:260px">
+      <div style="font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        // IPC Colombia · Variación Anual
+        <span id="ipc-table-badge" style="font-size:9px;padding:2px 8px;border-radius:10px;background:rgba(59,130,246,.1);border:1px solid var(--blue);color:var(--blue3);font-weight:400">Histórico DANE</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--txt3);font-weight:400">Línea ámbar = estimado</span>
+      </div>
+      <div id="ipc-table-main" style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)"></div>
     </div>
   </div>
 
@@ -671,6 +682,7 @@ function loadIPCCurve(input){
         count++;
       }
       ipcCurveLoaded = count > 0;
+      renderIPCTable();
       const dates = Object.keys(IPC_CURVE_DATA).sort();
       stat.textContent = ipcCurveLoaded
         ? `✓ ${count} registros (${dates[0]} → ${dates[dates.length-1]})`
@@ -967,7 +979,7 @@ function calcular(showTIR=false){
       </tr></thead><tbody>
         ${scen.map(s=>{
           const cls=s.bp===0?'cur':s.bp<0?'dn':'up';
-          const sign=typeof _posDir!=='undefined'&&_posDir==='short'?-1:1;const ganS=s.gan*sign;const g=s.bp===0?'—':(ganS>=0?'+':'')+fmtM(ganS);
+          const g=(s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan))*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1);
           const gc=s.bp===0?'':s.gan>=0?'color:var(--green3)':'color:var(--red3)';
           return`<tr class="${cls}"><td>${s.bp===0?'★ Actual':s.bp>0?'+'+s.bp+'bp':s.bp+'bp'}</td><td>${fmt(s.yS*100,2)}%</td><td>${fmt(s.pS,4)}%</td><td>${fmt(s.plS,4)}%</td><td>${fmt(s.dmS,4)}</td><td>${fmtP(s.dv01S)}</td><td style="${gc}">${g}</td></tr>`;
         }).join('')}
@@ -1186,5 +1198,58 @@ function mostrarBtnGuardar(tipo, ac, ac2, ac3, result) {
   btn.style.borderColor = dir==='long'?'#7c3aed':'#ef4444';
   btn.style.display = 'block';
 }
+
+// ── TABLA IPC HISTÓRICA ────────────────────────────────────
+function renderIPCTable(){
+  const el = document.getElementById('ipc-table-main');
+  if(!el) return;
+
+  // Cargar curva IPC estimada si está disponible
+  const estimados = typeof IPC_CURVE !== 'undefined' ? IPC_CURVE : {};
+  const hasEst = Object.keys(estimados).length > 0;
+  const badge = document.getElementById('ipc-table-badge');
+  if(badge) badge.textContent = hasEst ? 'Histórico + Estimado' : 'Histórico DANE';
+
+  // Últimos 36 históricos + estimados
+  const hist = [...IPC_TABLE].slice(-36).reverse();
+  const estRows = hasEst
+    ? Object.entries(estimados)
+        .map(([k,v])=>({y:parseInt(k.split('-')[0]),m:parseInt(k.split('-')[1]),v,est:true}))
+        .sort((a,b)=>b.y!==a.y?b.y-a.y:b.m-a.m)
+    : [];
+
+  const allRows = [...estRows, ...hist];
+  if(!allRows.length){ el.innerHTML='<div style="padding:20px;color:var(--txt3);text-align:center">Sin datos</div>'; return; }
+
+  const firstEstKey = estRows.length ? `${estRows[estRows.length-1].y}-${String(estRows[estRows.length-1].m).padStart(2,'0')}` : null;
+
+  const rows = allRows.map(r=>{
+    const key = `${r.y}-${String(r.m).padStart(2,'0')}`;
+    const isFirst = key === firstEstKey;
+    const sepStyle = isFirst ? 'border-top:2px solid var(--amber);' : '';
+    const badge = r.est
+      ? '<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(245,158,11,.15);color:var(--amber3);border:1px solid var(--amber)">estimado</span>'
+      : '<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(255,255,255,.05);color:var(--txt3)">histórico</span>';
+    const color = r.v > 0.08 ? 'var(--red3)' : r.v > 0.05 ? 'var(--amber3)' : 'var(--green3)';
+    return `<tr style="${sepStyle}">
+      <td style="padding:5px 14px;color:var(--txt2)">${MES_ES[r.m-1]} ${r.y}</td>
+      <td style="padding:5px 14px;text-align:right;font-family:monospace;font-weight:700;color:${color}">${(r.v*100).toFixed(2)}%</td>
+      <td style="padding:5px 14px;text-align:center">${badge}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
+        <th style="padding:8px 14px;text-align:left;font-size:9px;color:var(--txt3);text-transform:uppercase">Período</th>
+        <th style="padding:8px 14px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase">IPC Anual</th>
+        <th style="padding:8px 14px;text-align:center;font-size:9px;color:var(--txt3);text-transform:uppercase">Fuente</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="padding:6px 14px;font-size:9px;color:var(--txt3)">Últimos 36 históricos · DANE · Variación anual</div>`;
+}
+
+renderIPCTable();
 </script>
 </html>
