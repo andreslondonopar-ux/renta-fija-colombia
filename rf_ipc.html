@@ -502,17 +502,41 @@ const IPC_TABLE=[
   {y:2025,m:1,v:0.0522},{y:2025,m:2,v:0.0528},{y:2025,m:3,v:0.0509},{y:2025,m:4,v:0.0516},
   {y:2025,m:5,v:0.0505},{y:2025,m:6,v:0.0482},{y:2025,m:7,v:0.0490},{y:2025,m:8,v:0.0510},
   {y:2025,m:9,v:0.0518},{y:2025,m:10,v:0.0551},{y:2025,m:11,v:0.0530},{y:2025,m:12,v:0.0510},
-  {y:2026,m:1,v:0.0535},{y:2026,m:2,v:0.0529},{y:2026,m:3,v:0.0556},
+  {y:2026,m:1,v:0.0535},{y:2026,m:2,v:0.0529},{y:2026,m:3,v:0.0556},{y:2026,m:4,v:0.0568},
 ];
 const MES_ES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+const IPC_PUB_DATES = {
+  "2020-01":"2020-02-07","2020-02":"2020-03-06","2020-03":"2020-04-07","2020-04":"2020-05-08",
+  "2020-05":"2020-06-05","2020-06":"2020-07-07","2020-07":"2020-08-10","2020-08":"2020-09-07",
+  "2020-09":"2020-10-07","2020-10":"2020-11-09","2020-11":"2020-12-07","2020-12":"2021-01-08",
+  "2021-01":"2021-02-05","2021-02":"2021-03-05","2021-03":"2021-04-09","2021-04":"2021-05-07",
+  "2021-05":"2021-06-08","2021-06":"2021-07-08","2021-07":"2021-08-06","2021-08":"2021-09-07",
+  "2021-09":"2021-10-07","2021-10":"2021-11-08","2021-11":"2021-12-07","2021-12":"2022-01-07",
+  "2022-01":"2022-02-07","2022-02":"2022-03-07","2022-03":"2022-04-07","2022-04":"2022-05-06",
+  "2022-05":"2022-06-07","2022-06":"2022-07-08","2022-07":"2022-08-05","2022-08":"2022-09-07",
+  "2022-09":"2022-10-07","2022-10":"2022-11-08","2022-11":"2022-12-07","2022-12":"2023-01-06",
+  "2023-01":"2023-02-07","2023-02":"2023-03-07","2023-03":"2023-04-11","2023-04":"2023-05-08",
+  "2023-05":"2023-06-07","2023-06":"2023-07-10","2023-07":"2023-08-08","2023-08":"2023-09-07",
+  "2023-09":"2023-10-06","2023-10":"2023-11-08","2023-11":"2023-12-07","2023-12":"2024-01-09",
+  "2024-01":"2024-02-07","2024-02":"2024-03-07","2024-03":"2024-04-05","2024-04":"2024-05-08",
+  "2024-05":"2024-06-11","2024-06":"2024-07-08","2024-07":"2024-08-08","2024-08":"2024-09-06",
+  "2024-09":"2024-10-07","2024-10":"2024-11-08","2024-11":"2024-12-06","2024-12":"2025-01-09",
+  "2025-01":"2025-02-07","2025-02":"2025-03-07","2025-03":"2025-04-07","2025-04":"2025-05-08",
+  "2025-05":"2025-06-09","2025-06":"2025-07-07","2025-07":"2025-08-08","2025-08":"2025-09-05",
+  "2025-09":"2025-10-07","2025-10":"2025-11-10","2025-11":"2025-12-05","2025-12":"2026-01-08",
+  "2026-01":"2026-02-06","2026-02":"2026-03-06","2026-03":"2026-04-09","2026-04":"2026-05-08",
+};
+
 
 function ipcVigente(iso){
   const d=new Date(iso+'T12:00:00');
   let best=null,bestKey=-Infinity;
   for(const {y,m,v} of IPC_TABLE){
-    const pm=m===12?1:m+1,py=m===12?y+1:y;
-    const pub=new Date(py,pm-1,8);
-    if(pub<=d){const key=y*12+m;if(key>bestKey){bestKey=key;best={y,m,v};}}
+    const key_str=`${y}-${String(m).padStart(2,'0')}`;
+    const pubISO=IPC_PUB_DATES[key_str];
+    const pub=pubISO?new Date(pubISO+'T12:00:00'):new Date(m===12?y+1:y,(m===12?0:m),8);
+    if(pub<=d){const key=y*12+m;if(key>bestKey){bestKey=key;best={y,m,v,pub:pubISO||null};}}
   }
   return best;
 }
@@ -1283,11 +1307,13 @@ function renderIPCTable(){
     const sepStyle = isFirst ? 'border-top:2px solid var(--amber);' : '';
     const color = r.v > 0.08 ? 'var(--red3)' : r.v > 0.05 ? 'var(--amber3)' : 'var(--green3)';
     const nameStyle = r.est ? ' style="color:var(--amber3)"' : '';
-    // Publication date: ~5th business day of month following the reference month
-    // Simple approximation: day 9 of month+1 (covers most cases)
-    const pubM = r.m === 12 ? 1 : r.m + 1;
-    const pubY = r.m === 12 ? r.y + 1 : r.y;
-    const pubLabel = r.est ? '~est.' : `${String(9).padStart(2,'0')}/${String(pubM).padStart(2,'0')}/${pubY}`;
+    // Exact publication date from DANE calendar
+    const key_str = `${r.y}-${String(r.m).padStart(2,'0')}`;
+    const exactPub = IPC_PUB_DATES[key_str];
+    let pubLabel;
+    if(r.est){ pubLabel = '~est.'; }
+    else if(exactPub){ const [py,pm,pd]=exactPub.split('-'); pubLabel=`${pd}/${pm}/${py}`; }
+    else { const pubM=r.m===12?1:r.m+1; const pubY=r.m===12?r.y+1:r.y; pubLabel=`~${String(8).padStart(2,'0')}/${String(pubM).padStart(2,'0')}/${pubY}`; }
     return `<tr style="${sepStyle}">
       <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap"${nameStyle}>${MES_ES[r.m-1].slice(0,3)} ${r.y}</td>
       <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:10px">${(r.v*100).toFixed(2)}%</td>
