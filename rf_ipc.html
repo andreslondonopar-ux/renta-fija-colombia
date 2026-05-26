@@ -683,31 +683,55 @@ function loadIPCCurve(input){
     try{
       IPC_CURVE_DATA = {};
       const lines = e.target.result.split(/\r?\n/);
-      let count = 0;
+      // Step 1: collect all raw daily/monthly entries
+      const rawEntries = {};
       for(const line of lines){
         if(!line.trim()) continue;
-        // Format: DD/MM/YYYY;13,12%  or  YYYY-MM-DD;0.1312
-        // Split ONLY on first semicolon or tab — comma is decimal separator
-        const sepIdx = line.trim().search(/[;\t]/);
+        const sepIdx = line.trim().search(/[;\t,]/);
         if(sepIdx < 0) continue;
         let rawDate = line.trim().slice(0, sepIdx).trim().replace(/"/g,'');
         let rawRate = line.trim().slice(sepIdx+1).trim().replace(/"/g,'').replace('%','').replace(',','.');
-        // Parse date
+        // Parse date — daily or monthly
         let iso = null;
         if(/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)){
           const [d,m,y] = rawDate.split('/');
           iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-        } else if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
-          iso = rawDate;
         } else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)){
           const [d,m,y] = rawDate.split('/');
           iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        } else if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
+          iso = rawDate;
+        } else if(/^\d{4}-\d{2}$/.test(rawDate)){
+          iso = rawDate + '-01';
         }
         if(!iso) continue;
         let rate = parseFloat(rawRate);
         if(isNaN(rate)) continue;
-        if(rate > 1) rate = rate / 100;  // % → decimal
-        IPC_CURVE_DATA[iso] = rate;
+        // Fix: values like 6.58 are % already, not decimals
+        // Threshold: if > 0.5 treat as percentage → convert to decimal
+        if(rate > 0.5) rate = rate / 100;
+        rawEntries[iso] = rate;
+      }
+      // Step 2: group by month — take LAST value of each month (most representative)
+      const monthly = {};
+      for(const [iso, rate] of Object.entries(rawEntries)){
+        const monthKey = iso.slice(0,7); // YYYY-MM
+        monthly[monthKey] = rate; // last entry wins (sorted later)
+      }
+      // Step 3: only keep future months (after last historical IPC)
+      const lastHistEntry = IPC_TABLE[IPC_TABLE.length-1];
+      const lastHistISO = lastHistEntry ? `${lastHistEntry.y}-${String(lastHistEntry.m).padStart(2,'0')}` : '2020-01';
+      // Step 4: limit to 18 months ahead max
+      const lastHistDate = new Date(lastHistISO + '-01');
+      const maxDate = new Date(lastHistDate);
+      maxDate.setMonth(maxDate.getMonth() + 18);
+      const maxISO = maxDate.toISOString().slice(0,7);
+      let count = 0;
+      for(const [monthKey, rate] of Object.entries(monthly)){
+        if(monthKey <= lastHistISO) continue;  // skip past
+        if(monthKey > maxISO) continue;         // skip too far future
+        // Store keyed by first day of month
+        IPC_CURVE_DATA[monthKey + '-01'] = rate;
         count++;
       }
       ipcCurveLoaded = count > 0;
@@ -727,15 +751,17 @@ function loadIPCCurve(input){
 }
 
 function ipcFromCurve(iso){
+  // Data stored as YYYY-MM-01 (monthly) — look up by month
+  const monthKey = iso.slice(0,7) + '-01';
+  if(IPC_CURVE_DATA[monthKey] !== undefined) return IPC_CURVE_DATA[monthKey];
+  // Also try exact date (backward compat)
   if(IPC_CURVE_DATA[iso] !== undefined) return IPC_CURVE_DATA[iso];
-  // Fallback ±3 days
-  for(let d=1; d<=3; d++){
-    const dt = new Date(iso+'T12:00:00');
-    for(const delta of [-d, d]){
-      const td = new Date(dt); td.setDate(td.getDate()+delta);
-      const tiso = td.toISOString().split('T')[0];
-      if(IPC_CURVE_DATA[tiso] !== undefined) return IPC_CURVE_DATA[tiso];
-    }
+  // Fallback: adjacent months
+  const dt = new Date(iso+'T12:00:00');
+  for(const delta of [-1, 1]){
+    const td = new Date(dt.getFullYear(), dt.getMonth()+delta, 1);
+    const tiso = td.toISOString().slice(0,7)+'-01';
+    if(IPC_CURVE_DATA[tiso] !== undefined) return IPC_CURVE_DATA[tiso];
   }
   return null;
 }
