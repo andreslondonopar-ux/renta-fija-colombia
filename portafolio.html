@@ -503,11 +503,7 @@ function renderCompare(pf){
       {l:'D. Modificada',v:fmt(b.dmod||0,4),color:i===bestDmod?'var(--amber3)':'var(--txt)'},
       {l:'Convexidad',v:fmt(b.conv||0,4),color:i===bestConv?'var(--green3)':'var(--txt)'},
       {l:'DV01 (±)',v:(sdv01>=0?'+':'')+fmtP(sdv01),color:sdv01>=0?'var(--green3)':'var(--red3)'},
-      {sep:'// Escenarios ±100bp'},
-      {l:'+100bp P&G',v:fmtM(calcPG(b,100)),color:calcPG(b,100)>=0?'var(--green3)':'var(--red3)'},
-      {l:'-100bp P&G',v:fmtM(calcPG(b,-100)),color:calcPG(b,-100)>=0?'var(--green3)':'var(--red3)'},
-      {l:'+200bp P&G',v:fmtM(calcPG(b,200)),color:calcPG(b,200)>=0?'var(--green3)':'var(--red3)'},
-      {l:'-200bp P&G',v:fmtM(calcPG(b,-200)),color:calcPG(b,-200)>=0?'var(--green3)':'var(--red3)'},
+
     ];
 
     const rows=metrics.map(m=>{
