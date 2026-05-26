@@ -321,7 +321,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         <span style="margin-left:auto;font-size:9px;color:var(--txt3);font-weight:400">Línea verde = inicio estimación FRA</span>
       </div>
       <div style="display:flex;gap:10px;flex:1;min-height:0">
-        <div style="flex:0 0 150px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)" id="ibr-table-main">
+        <div style="flex:0 0 150px;overflow-y:auto;overflow-x:hidden;border:1px solid var(--border);border-radius:var(--r)" id="ibr-table-main">
           <div style="padding:20px;color:var(--txt3);text-align:center;opacity:.5;font-size:10px">Cargue FRA para ver estimados</div>
         </div>
         <div style="flex:1;min-width:0;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px">
@@ -1204,7 +1204,11 @@ function renderIBRChart(){
 
   // FRA starts where history ends (avoid overlap)
   const lastHist = histDates[histDates.length-1];
-  const fraFiltered = fraDates.filter(d => d > lastHist);
+  // Limitar FRA a los próximos 90 días para no aplanar la gráfica
+  const cutoff = new Date(lastHist);
+  cutoff.setDate(cutoff.getDate() + 90);
+  const cutoffISO = cutoff.toISOString().split('T')[0];
+  const fraFiltered = fraDates.filter(d => d > lastHist && d <= cutoffISO);
   const fraVals = fraFiltered.map(d => +(FRA_DATA[d]*100).toFixed(4));
 
   const allLabels = [...histLabels, ...fraFiltered];
@@ -1304,18 +1308,16 @@ function renderIBRTable(){
     const [y,m,d] = iso.split('-');
     const color = val > 0.10 ? 'var(--red3)' : val > 0.07 ? 'var(--amber3)' : 'var(--green3)';
     return `<tr style="${sepStyle}">
-      <td style="padding:4px 14px;color:var(--txt2);font-size:11px">${d}/${m}/${y}</td>
-      <td style="padding:4px 14px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:11px">${(val*100).toFixed(4)}%</td>
-      <td style="padding:4px 14px;text-align:center">${badge}</td>
+      <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap">${d}/${m}</td>
+      <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:10px">${(val*100).toFixed(2)}%</td>
     </tr>`;
   }).filter(Boolean).join('');
 
   el.innerHTML = `
     <table style="width:100%;border-collapse:collapse">
       <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
-        <th style="padding:8px 14px;text-align:left;font-size:9px;color:var(--txt3);text-transform:uppercase">Fecha</th>
-        <th style="padding:8px 14px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase">IBR Overnight</th>
-        <th style="padding:8px 14px;text-align:center;font-size:9px;color:var(--txt3);text-transform:uppercase">Fuente</th>
+        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Fecha</th>
+        <th style="padding:4px 6px;text-align:right;font-size:9px;color:var(--txt3)">IBR</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
