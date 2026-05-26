@@ -687,10 +687,22 @@ function loadIPCCurve(input){
       const rawEntries = {};
       for(const line of lines){
         if(!line.trim()) continue;
-        const sepIdx = line.trim().search(/[;\t,]/);
-        if(sepIdx < 0) continue;
-        let rawDate = line.trim().slice(0, sepIdx).trim().replace(/"/g,'');
-        let rawRate = line.trim().slice(sepIdx+1).trim().replace(/"/g,'').replace('%','').replace(',','.');
+        // Try ; or \t first (unambiguous separators)
+        let sepIdx = line.trim().search(/[;\t]/);
+        let rawDate, rawRate;
+        if(sepIdx >= 0){
+          rawDate = line.trim().slice(0, sepIdx).trim().replace(/"/g,'');
+          rawRate = line.trim().slice(sepIdx+1).trim().replace(/"/g,'').replace('%','').replace(',','.');
+        } else {
+          // CSV with comma: date is first field, rate is last field
+          const parts = line.trim().replace(/"/g,'').split(',');
+          if(parts.length < 2) continue;
+          rawDate = parts[0].trim();
+          // Rate is last part — join remaining with dot if split on decimal comma
+          const rateParts = parts.slice(1);
+          rawRate = rateParts.length === 1 ? rateParts[0].replace('%','') :
+                    rateParts[0].replace('%','') + '.' + rateParts[1].replace('%','');
+        }
         // Parse date — daily or monthly
         let iso = null;
         if(/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)){
@@ -707,9 +719,8 @@ function loadIPCCurve(input){
         if(!iso) continue;
         let rate = parseFloat(rawRate);
         if(isNaN(rate)) continue;
-        // Fix: values like 6.58 are % already, not decimals
-        // Threshold: if > 0.5 treat as percentage → convert to decimal
-        if(rate > 0.5) rate = rate / 100;
+        // Values always come as percentage (e.g. 4.30 not 0.043)
+        rate = rate / 100;
         rawEntries[iso] = rate;
       }
       // Step 2: group by month — take LAST value of each month (most representative)
