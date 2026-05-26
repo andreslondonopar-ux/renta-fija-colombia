@@ -967,7 +967,7 @@ function calcular(showTIR=false){
       </tr></thead><tbody>
         ${scen.map(s=>{
           const cls=s.bp===0?'cur':s.bp<0?'dn':'up';
-          const g=(s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan))*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1);
+          const sign=typeof _posDir!=='undefined'&&_posDir==='short'?-1:1;const ganS=s.gan*sign;const g=s.bp===0?'—':(ganS>=0?'+':'')+fmtM(ganS);
           const gc=s.bp===0?'':s.gan>=0?'color:var(--green3)':'color:var(--red3)';
           return`<tr class="${cls}"><td>${s.bp===0?'★ Actual':s.bp>0?'+'+s.bp+'bp':s.bp+'bp'}</td><td>${fmt(s.yS*100,2)}%</td><td>${fmt(s.pS,4)}%</td><td>${fmt(s.plS,4)}%</td><td>${fmt(s.dmS,4)}</td><td>${fmtP(s.dv01S)}</td><td style="${gc}">${g}</td></tr>`;
         }).join('')}
