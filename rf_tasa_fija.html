@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RF Colombia · IPC</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>RF Colombia · Tasa Fija</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -18,6 +18,8 @@
   --r:6px;--r2:10px;
 }
 body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg);color:var(--txt);font-size:13px;line-height:1.5;min-height:100vh}
+
+/* TICKER — robusto */
 .ticker-bar{background:#050810;border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;white-space:nowrap;position:relative}
 .ticker-track{display:inline-flex;animation:tickscroll 80s linear infinite}
 .ticker-track:hover{animation-play-state:paused}
@@ -29,6 +31,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .tick-dot.up{background:var(--green)}.tick-dot.dn{background:var(--red)}.tick-dot.nt{background:var(--txt3)}
 @keyframes tickscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ticker-status{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--txt3);background:var(--bg);padding:2px 6px;border-radius:3px}
+
 .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:10px}
 .brand-logo{width:32px;height:32px;background:var(--blue2);border:1px solid var(--blue);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--blue3)}
@@ -113,7 +116,6 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .st tr.cur td{background:rgba(29,78,216,.2);color:var(--blue3);font-weight:700}
 .st tr.dn td:first-child{color:var(--green3)}.st tr.up td:first-child{color:var(--red3)}
 .st tbody tr:hover td{background:var(--bg3)}
-/* PORTFOLIO */
 .pf-full{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
 .bond-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
 .bond-card-hdr{padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
@@ -146,8 +148,8 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg3)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.liq-row td{color:var(--red3);font-style:italic}
 </style>
+</head>
 <body>
 
 <div class="ticker-bar">
@@ -163,100 +165,69 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
     <div class="brand-logo">RF</div>
     <div>
       <div class="brand-name">Renta Fija Colombia</div>
-      <div class="brand-sub">Valoración · Riesgo · Escenarios · IPC</div>
+      <div class="brand-sub">Valoración · Riesgo · Escenarios · Portafolio</div>
     </div>
   </div>
   <div class="topbar-right">
     <span style="font-size:11px;color:var(--txt2)">COL &nbsp;<span class="clock-val" id="clock">--:--:--</span></span>
-    <div class="mod-pill" style="color:var(--blue3);border-color:var(--blue2)">IPC</div>
+    <div class="mod-pill">Tasa Fija</div>
   </div>
 </div>
 
 <div class="tabs">
   <div class="tab active" onclick="showTab('calc')">◈ Calculadora</div>
-  
+  <div class="tab" onclick="showTab('pf')">◎ Analizador de Portafolio</div>
 </div>
 
 <!-- TAB 1: CALCULADORA -->
 <div class="page active" id="page-calc">
   <div class="sidebar">
-    <div class="s-hdr">// Parámetros del bono IPC</div>
+    <div class="s-hdr">// Parámetros del bono</div>
     <div class="s-body">
-
-      <div class="field"><label>Modo de valoración</label>
-        <select id="ipc-mode" onchange="onModeChange()">
-          <option value="inicio_est">IPC Inicio · Estimada</option>
-          <option value="final_est">IPC Final · Estimada</option>
-          <option value="inicio_real">IPC Inicio · Real</option>
-          <option value="final_real">IPC Final · Real</option>
-          <option value="inicio_curva">IPC Inicio · Curva inflación</option>
-          <option value="final_curva">IPC Final · Curva inflación</option>
+      <div class="field-2">
+        <div class="field"><label>Periodicidad</label>
+          <select id="freq" onchange="autoCA()">
+            <option value="4">Trimestral</option><option value="2">Semestral</option>
+            <option value="1">Anual</option><option value="12">Mensual</option>
+          </select>
+        </div>
+        <div class="field"><label>Base</label>
+          <select id="base"><option value="365">365/365</option><option value="360">30/360</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Tasa cupón (%)</label>
+        <input type="number" id="coupon" value="10.489" step="0.001" min="0">
+      </div>
+      <div class="field"><label>Tipo tasa cupón</label>
+        <select id="tipo">
+          <option value="EA">Efectiva Anual (EA)</option>
+          <option value="NA">Nominal Anual (NA)</option>
         </select>
       </div>
-
-      <div class="field"><label>Periodicidad</label>
-        <select id="freq" onchange="autoCA()">
-          <option value="3">Trimestral</option>
-          <option value="6">Semestral</option>
-          <option value="12">Anual</option>
-          <option value="1">Mensual</option>
-        </select>
+      <div class="field"><label>Tasa negociación / YTM (%)</label>
+        <input type="number" id="ytm" value="14.20" step="0.01" min="0">
       </div>
-      <div class="field">
-        <label>Base <span style="font-size:9px;color:var(--txt3);text-transform:none">— siempre 365/365</span></label>
-        <input readonly value="365/365" style="color:var(--blue3);background:var(--bg4)">
-      </div>
-      <div class="field"><label>Spread cupón EA (%)</label>
-        <input type="number" id="sc" value="3.65" step="0.01" min="0">
-      </div>
-      <div class="field"><label>Spread TIR EA (%)</label>
-        <input type="number" id="st" value="5.50" step="0.01" min="0">
-      </div>
-
       <div class="hr"></div>
       <div class="s-lbl">// Fechas</div>
       <div class="field">
         <label>Liquidación <span style="font-size:9px;color:var(--txt3);text-transform:none">(negociación)</span></label>
-        <input type="date" id="liq" value="2025-01-30" oninput="autoCA()" onchange="autoCA()">
+        <input type="date" id="liq" value="2026-02-24" onchange="autoCA()">
       </div>
       <div class="field"><label>Vencimiento</label>
-        <input type="date" id="venc" value="2029-02-27" onchange="autoCA()">
+        <input type="date" id="venc" value="2028-03-12" onchange="autoCA()">
       </div>
       <div class="field">
         <label>Cupón anterior <span class="auto-badge">// AUTO</span></label>
         <input id="c_ant_display" readonly placeholder="Auto...">
         <input type="hidden" id="c_ant_iso">
       </div>
-
       <div class="hr"></div>
       <div class="s-lbl">// Posición</div>
       <div class="field"><label>Nominal ($)</label>
-        <input type="text" id="nom_display" value="5.000.000.000"
-          oninput="fmtNom(this)" onchange="fmtNom(this)" onpaste="setTimeout(()=>fmtNom(this),10)" inputmode="numeric">
-        <input type="hidden" id="nom_val" value="5000000000">
+        <input type="text" id="nom_display" value="1.000.000.000" oninput="fmtNom(this)" onchange="fmtNom(this)" onpaste="setTimeout(()=>fmtNom(this),10)" inputmode="numeric">
+        <input type="hidden" id="nom_val" value="1000000000">
       </div>
-
-      <!-- IPC vigente display -->
-      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
-        <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">IPC vigente · fecha liquidación</div>
-        <div style="display:flex;align-items:baseline;gap:8px">
-          <span style="font-size:15px;font-weight:700;color:var(--blue3);font-family:monospace" id="ipc-display">5.20%</span>
-          <span style="font-size:10px;color:var(--txt3)" id="ipc-period">Dic 2024</span>
-        </div>
-      </div>
-
-      <!-- Curva inflación (modos curva) -->
-      <div id="ipc-curve-section" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
-        <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Curva de inflación estimada</div>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 8px;background:rgba(59,130,246,.1);border:1px dashed var(--blue);border-radius:var(--r)">
-          <span style="font-size:11px;color:var(--blue3)">📂 Cargar CSV (fecha;IPC%)</span>
-          <input type="file" id="ipc-curve-file" accept=".csv" style="display:none" onchange="loadIPCCurve(this)">
-        </label>
-        <div style="margin-top:6px;font-size:10px;color:var(--txt3)" id="ipc-curve-status">Sin curva cargada</div>
-        <div style="font-size:9px;color:var(--txt3);margin-top:3px">Formato: DD/MM/AAAA;13,12%</div>
-      </div>
-
-            <div class="hr"></div>
+      <div class="hr"></div>
       <div style="margin-bottom:6px">
         <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-weight:700">// Dirección posición</div>
         <div style="display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border2);margin-bottom:4px">
@@ -266,68 +237,94 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         <div id="dir-info" style="font-size:9px;color:var(--green3)">▲ Compra al offer · gana si tasas bajan</div>
       </div>
       <button class="btn btn-blue" onclick="calcular(false)">▶ Calcular</button>
-
-      <div class="hr" id="tir-real-hr"></div>
-      <div id="tir-real-section">
-        <div class="s-lbl">// Escenario de venta</div>
-        <div class="field"><label>Fecha de venta</label>
-          <input type="date" id="f_venta" value="2026-06-30">
-        </div>
-        <div class="field"><label>Spread TIR venta (%)</label>
-          <input type="number" id="st_venta" value="6.00" step="0.01" min="0">
-        </div>
-        <button class="btn btn-green" onclick="calcular(true)">▶ Calcular TIR real</button>
+      <div class="hr"></div>
+      <div class="toggle-row" onclick="toggleCaja()">
+        <span class="toggle-label">💼 Restricción de caja</span>
+        <div class="toggle-switch" id="cajaToggle"><div class="toggle-knob"></div></div>
       </div>
-
+      <div class="caja-panel" id="cajaPanel">
+        <div class="field"><label>Caja disponible ($)</label>
+          <input type="text" id="caja_display" value="12.000.000.000" oninput="fmtCaja(this)" inputmode="numeric">
+          <input type="hidden" id="caja_val" value="12000000000">
+        </div>
+        <div class="field"><label>Movimiento esperado (bp)</label>
+          <input type="number" id="caja_bp" value="-50" step="1">
+        </div>
+        <button class="btn btn-amber" onclick="calcular(false)">▶ Calcular con caja</button>
+      </div>
+      <div class="hr"></div>
+      <div class="s-lbl">// Escenario de venta</div>
+      <div class="field"><label>Fecha de venta</label>
+        <input type="date" id="f_venta" value="2026-03-24">
+      </div>
+      <div class="field"><label>Tasa de venta (%)</label>
+        <input type="number" id="ytm_venta" value="13.70" step="0.01" min="0">
+      </div>
+      <button class="btn btn-green" onclick="calcular(true)">▶ Calcular TIR real</button>
       <div class="hr"></div>
       <div class="s-lbl">// Calculadora inversa</div>
-      <div class="field"><label>Objetivo</label>
-        <select id="inv-tipo" onchange="updateInvUI()">
+      <div class="field">
+        <label>Objetivo</label>
+        <select id="inv-tipo" onchange="updateInvPlaceholder()">
           <option value="dv01">DV01 objetivo ($)</option>
           <option value="vgiro">Valor de giro objetivo ($)</option>
-          <option value="ganancia">Ganancia objetivo ($) con Δspread</option>
-          <option value="tasa">Spread para precio objetivo (%)</option>
+          <option value="ganancia">Ganancia objetivo ($) con Δtasa</option>
+          <option value="tasa">Tasa para precio objetivo (%)</option>
         </select>
       </div>
       <div class="field" id="inv-field-valor">
         <label id="inv-lbl-valor">DV01 objetivo ($)</label>
-        <input type="text" id="inv-valor" placeholder="ej: 5.000.000"
-          oninput="fmtInvValor(this)" inputmode="numeric">
+        <input type="text" id="inv-valor" placeholder="ej: 5.000.000" oninput="fmtInvValor(this)" inputmode="numeric">
         <input type="hidden" id="inv-valor-v">
       </div>
       <div class="field" id="inv-field-bp" style="display:none">
-        <label>Δ Spread (bp)</label>
+        <label>Movimiento de tasa (bp)</label>
         <input type="number" id="inv-bp" value="-50" step="1">
       </div>
       <div class="field" id="inv-field-precio" style="display:none">
         <label>Precio objetivo (%)</label>
         <input type="number" id="inv-precio" value="100" step="0.001" min="0">
       </div>
-      <button class="btn" style="background:rgba(139,92,246,.2);border:1px solid #7c3aed;color:#c4b5fd;margin-top:4px"
-        onclick="calcularInverso()">⟳ Calcular inverso</button>
-
-    </div><!-- s-body -->
-  </div><!-- sidebar -->
-
-  <div class="main" id="main">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--txt3)">
-      <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
-      <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
+      <button class="btn" style="background:rgba(139,92,246,.2);border:1px solid #7c3aed;color:#c4b5fd;margin-top:4px" onclick="calcularInverso()">⟳ Calcular inverso</button>
     </div>
   </div>
+  <div class="main" id="main">
+    <div style="text-align:center;padding:80px 20px;color:var(--txt3)">
+      <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
+      <div>// ingresa parámetros → calcular</div>
+    </div>
+  </div>
+</div>
 
-</div><!-- page-calc -->
-
-</body>
+<!-- TAB 2: PORTAFOLIO -->
+<div class="page" id="page-pf">
+  <div class="pf-full">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--txt)">Analizador de Portafolio</div>
+        <div style="font-size:11px;color:var(--txt2);margin-top:2px">Añade los bonos. Las métricas son del portafolio agregado.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:10px;color:var(--txt2);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em">Fecha valoración</label>
+          <input type="date" id="pf_fecha" style="padding:6px 8px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);background:var(--bg3);color-scheme:dark">
+        </div>
+        <button class="btn btn-blue btn-sm" onclick="calcPF()">▶ Calcular portafolio</button>
+        <button class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border2);color:var(--txt2)" onclick="addBond()">+ Añadir bono</button>
+      </div>
+    </div>
+    <div id="bondList"></div>
+    <div class="add-bond-btn" onclick="addBond()">+ Añadir otro bono al portafolio</div>
+    <div id="pfResults" style="display:none;flex-direction:column;gap:14px"></div>
+  </div>
+</div>
 
 <script>
-
 const $=id=>document.getElementById(id);
 const fmt=(n,d=4)=>typeof n==='number'?n.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 const fmtP=n=>'$'+Math.round(n).toLocaleString('es-CO');
 const fmtM=n=>{const a=Math.abs(n),s=n<0?'-':'';return a>=1e9?s+'$'+fmt(a/1e9,3)+' Bn':a>=1e6?s+'$'+fmt(a/1e6,2)+' MM':(n<0?'-':'')+fmtP(Math.abs(n));};
-function fmtDate(iso){if(!iso)return '—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
-function isoToDisplay(isoStr){return fmtDate(isoStr);}
+function fmtDate(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
 
 function fmtNom(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('nom_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 function fmtCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
@@ -344,7 +341,7 @@ function showTab(t){
 let cajaOpen=false;
 function toggleCaja(){cajaOpen=!cajaOpen;$('cajaToggle').classList.toggle('on',cajaOpen);$('cajaPanel').classList.toggle('open',cajaOpen);}
 
-// TICKER
+// ── TICKER ROBUSTO ────────────────────────────────────────────
 const FALLBACK=[
   {n:'USD/COP',v:'4.218',up:true,c:'+12'},{n:'EUR/USD',v:'1.0832',up:false,c:'-0.2%'},
   {n:'WTI',v:'67.42',up:false,c:'-0.8%'},{n:'Brent',v:'71.18',up:false,c:'-0.7%'},
@@ -355,8 +352,28 @@ const FALLBACK=[
   {n:'DXY',v:'104.2',up:true,c:'+0.1%'},{n:'UST 10Y',v:'4.21%',up:true,c:'+2bp'},
   {n:'UST 2Y',v:'4.58%',up:true,c:'+3bp'},{n:'Col CDS 5Y',v:'180bp',up:false,c:'-3bp'},
 ];
-function buildTicker(items){const h=items.map(i=>`<span class="tick-item"><span class="tick-dot ${i.up?'up':'dn'}"></span><span class="tick-name">${i.n}</span>&nbsp;<span class="tick-val">${i.v}</span>&nbsp;<span class="tick-chg ${i.up?'up':'dn'}">${i.c}</span></span>`).join('');return h+h;}
-$('tickerTrack').innerHTML=buildTicker(FALLBACK);$('tickerStatus').textContent='ref.';
+
+function buildTickerHTML(items){
+  // Pad para que la animación -50% siempre funcione bien
+  let arr=[...items];
+  while(arr.length<16) arr=[...arr,...items];
+  return arr.map(i=>`<span class="tick-item"><span class="tick-dot ${i.up?'up':'dn'}"></span><span class="tick-name">${i.n}</span>&nbsp;<span class="tick-val">${i.v}</span>&nbsp;<span class="tick-chg ${i.up?'up':'dn'}">${i.c}</span></span>`).join('');
+}
+
+function setTicker(items){
+  const el=$('tickerTrack');
+  if(!el||!items||!items.length) return;
+  const h=buildTickerHTML(items);
+  el.innerHTML=h+h;
+  // Reiniciar animación limpiamente para evitar trabado
+  el.style.animation='none';
+  requestAnimationFrame(()=>{ el.style.animation=''; });
+}
+
+// Inicializar con fallback de inmediato
+setTicker(FALLBACK);
+$('tickerStatus').textContent='ref.';
+
 const YAHOO=[
   {sym:'USDCOP=X',n:'USD/COP',dec:0},{sym:'EURUSD=X',n:'EUR/USD',dec:4},
   {sym:'CL=F',n:'WTI',dec:2,suf:' USD'},{sym:'BZ=F',n:'Brent',dec:2,suf:' USD'},
@@ -366,41 +383,19 @@ const YAHOO=[
   {sym:'BTC-USD',n:'BTC',dec:0,suf:' USD'},{sym:'ETH-USD',n:'ETH',dec:0,suf:' USD'},
   {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
 ];
+
 async function fetchOne(sym){
-  // Try multiple endpoints for reliability
-  const urls=[
-    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
-  ];
-  for(const url of urls){
-    try{
-      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        {signal:AbortSignal.timeout(8000)});
-      if(!r.ok) continue;
-      const d=await r.json();
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(!meta||!meta.regularMarketPrice) continue;
-      const price=meta.regularMarketPrice;
-      const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPreviousClose||price;
-      const chg=price-prev, chgPct=prev>0?((price-prev)/prev)*100:0;
-      return{price,chg,chgPct};
-    }catch(e){continue;}
-  }
-  // Fallback: try v7 quote endpoint
   try{
-    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-    const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-      {signal:AbortSignal.timeout(8000)});
-    if(r.ok){
-      const d=await r.json();
-      const q=d?.quoteResponse?.result?.[0];
-      if(q&&q.regularMarketPrice){
-        return{price:q.regularMarketPrice,chg:q.regularMarketChange||0,chgPct:q.regularMarketChangePercent||0};
-      }
-    }
-  }catch(e){}
-  return null;
+    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
+    const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+    const d=await r.json();
+    const meta=d?.chart?.result?.[0]?.meta;
+    if(!meta) return null;
+    const price=meta.regularMarketPrice,prev=meta.previousClose||price;
+    return{price,chg:price-prev,chgPct:((price-prev)/prev)*100};
+  }catch{return null;}
 }
+
 async function loadTicker(){
   const results=await Promise.allSettled(YAHOO.map(s=>fetchOne(s.sym)));
   const items=[];
@@ -411,26 +406,21 @@ async function loadTicker(){
       items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
     }
   });
-  if(items.length>=5){$('tickerTrack').innerHTML=buildTicker(items);$('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});$('tickerStatus').style.color='var(--green3)';}
+  if(items.length>=5){
+    setTicker(items);
+    $('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
+    $('tickerStatus').style.color='var(--green3)';
+  }
+  // Si falla, el fallback ya está mostrándose — no hacer nada
 }
-loadTicker();setInterval(loadTicker,60000);
+loadTicker();
+setInterval(loadTicker,60000);
 
-// BOND MATH — verified against Excel including leap year handling
-// Key rules (from reverse-engineering Excel formulas):
-// 1. Coupon period days (F): 30/360 convention if base=360, or real_days-L if base=365
-//    where L=1 if period contains Feb 29 (the extra day is neutralized)
-// 2. Discount days (G): ALWAYS real calendar days - count_feb29(liq, fecha)
-//    For 30/360 bonds: just real calendar days (no Feb29 subtraction)
-// 3. Coupon EA: TRUNC((1+EA)^(F/365)-1, 6)  using adjusted F
-// 4. PV: CF / (1+YTM)^(G/365)  always divides by 365
-// 5. IC: cpFirst * (dias_causados / F_first_period)
-
+// ── BOND MATH ─────────────────────────────────────────────────
 function addMonths(iso,m){
   const[y,mo,d]=(typeof iso==='string'?iso:iso.toISOString().split('T')[0]).split('-').map(Number);
-  let nm=mo-1+m;
-  let ny=y+Math.floor(nm/12);
-  nm=((nm%12)+12)%12;
-  const maxDay=[31,ny%4===0&&(ny%100!==0||ny%400===0)?29:28,31,30,31,30,31,31,30,31,30,31][nm]; // nm is 0-based (0=Jan)
+  let nm=mo-1+m;let ny=y+Math.floor(nm/12);nm=((nm%12)+12)%12;
+  const maxDay=[31,ny%4===0&&(ny%100!==0||ny%400===0)?29:28,31,30,31,30,31,31,30,31,30,31][nm];
   return`${ny}-${String(nm+1).padStart(2,'0')}-${String(Math.min(d,maxDay)).padStart(2,'0')}`;
 }
 function daysReal(iso1,iso2){return Math.round((new Date(iso2)-new Date(iso1))/86400000);}
@@ -442,7 +432,6 @@ function days360(iso1,iso2){
   return(y2-y1)*360+(m2-m1)*30+(dd2-dd1);
 }
 function isLeap(y){return y%4===0&&(y%100!==0||y%400===0);}
-// Count Feb 29s strictly between liq and fecha (liq < feb29 <= fecha)
 function countFeb29(liqISO,fechaISO){
   const liq=new Date(liqISO),fecha=new Date(fechaISO);
   let n=0;
@@ -453,7 +442,6 @@ function countFeb29(liqISO,fechaISO){
   }
   return n;
 }
-// 1 if coupon period [prev,nxt] contains a Feb 29
 function periodHasLeap(prevISO,nxtISO){
   const prev=new Date(prevISO),nxt=new Date(nxtISO);
   for(let y=prev.getUTCFullYear();y<=nxt.getUTCFullYear();y++){
@@ -465,359 +453,148 @@ function periodHasLeap(prevISO,nxtISO){
 }
 function trunc6(x){return Math.floor(x*1e6)/1e6;}
 
-
-// ── IPC DATA ─────────────────────────────────────────────────────────
-const IPC_TABLE=[
-  {y:2020,m:1,v:0.0362},{y:2020,m:2,v:0.0372},{y:2020,m:3,v:0.0386},{y:2020,m:4,v:0.0351},
-  {y:2020,m:5,v:0.0285},{y:2020,m:6,v:0.0219},{y:2020,m:7,v:0.0197},{y:2020,m:8,v:0.0188},
-  {y:2020,m:9,v:0.0197},{y:2020,m:10,v:0.0175},{y:2020,m:11,v:0.0149},{y:2020,m:12,v:0.0161},
-  {y:2021,m:1,v:0.0160},{y:2021,m:2,v:0.0156},{y:2021,m:3,v:0.0151},{y:2021,m:4,v:0.0195},
-  {y:2021,m:5,v:0.0330},{y:2021,m:6,v:0.0363},{y:2021,m:7,v:0.0397},{y:2021,m:8,v:0.0444},
-  {y:2021,m:9,v:0.0451},{y:2021,m:10,v:0.0458},{y:2021,m:11,v:0.0526},{y:2021,m:12,v:0.0562},
-  {y:2022,m:1,v:0.0694},{y:2022,m:2,v:0.0801},{y:2022,m:3,v:0.0853},{y:2022,m:4,v:0.0923},
-  {y:2022,m:5,v:0.0907},{y:2022,m:6,v:0.0967},{y:2022,m:7,v:0.1021},{y:2022,m:8,v:0.1084},
-  {y:2022,m:9,v:0.1144},{y:2022,m:10,v:0.1222},{y:2022,m:11,v:0.1253},{y:2022,m:12,v:0.1312},
-  {y:2023,m:1,v:0.1325},{y:2023,m:2,v:0.1328},{y:2023,m:3,v:0.1334},{y:2023,m:4,v:0.1282},
-  {y:2023,m:5,v:0.1236},{y:2023,m:6,v:0.1213},{y:2023,m:7,v:0.1178},{y:2023,m:8,v:0.1143},
-  {y:2023,m:9,v:0.1099},{y:2023,m:10,v:0.1048},{y:2023,m:11,v:0.1015},{y:2023,m:12,v:0.0928},
-  {y:2024,m:1,v:0.0835},{y:2024,m:2,v:0.0774},{y:2024,m:3,v:0.0736},{y:2024,m:4,v:0.0716},
-  {y:2024,m:5,v:0.0716},{y:2024,m:6,v:0.0718},{y:2024,m:7,v:0.0686},{y:2024,m:8,v:0.0612},
-  {y:2024,m:9,v:0.0581},{y:2024,m:10,v:0.0541},{y:2024,m:11,v:0.0520},{y:2024,m:12,v:0.0520},
-  {y:2025,m:1,v:0.0522},{y:2025,m:2,v:0.0528},{y:2025,m:3,v:0.0509},{y:2025,m:4,v:0.0516},
-  {y:2025,m:5,v:0.0505},{y:2025,m:6,v:0.0482},{y:2025,m:7,v:0.0490},{y:2025,m:8,v:0.0510},
-  {y:2025,m:9,v:0.0518},{y:2025,m:10,v:0.0551},{y:2025,m:11,v:0.0530},{y:2025,m:12,v:0.0510},
-  {y:2026,m:1,v:0.0535},{y:2026,m:2,v:0.0529},{y:2026,m:3,v:0.0556},
-];
-const MES_ES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-function ipcVigente(iso){
-  const d=new Date(iso+'T12:00:00');
-  let best=null,bestKey=-Infinity;
-  for(const {y,m,v} of IPC_TABLE){
-    const pm=m===12?1:m+1,py=m===12?y+1:y;
-    const pub=new Date(py,pm-1,8);
-    if(pub<=d){const key=y*12+m;if(key>bestKey){bestKey=key;best={y,m,v};}}
-  }
-  return best;
-}
-function ipcLbl(r){return r?MES_ES[r.m-1]+' '+r.y:'—';}
-
-// ── IPC BOND MATH ─────────────────────────────────────────────────────
-function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
-  const ipcLiq=ipcVigente(liqISO);
-  const flows=[];let cur=antISO,firstPending=true;
+function buildFlows(antISO,liqISO,vencISO,freq,base,tipo,cpRaw,ytm){
+  const mp=12/freq;const flows=[];let cur=antISO;let num=0;
   while(true){
     const nxt=addMonths(cur,mp);
-    if(nxt<=liqISO){cur=nxt;firstPending=false;continue;}
-    const L=periodHasLeap(cur,nxt);
-    const F=daysReal(cur,nxt)-L;
-    const M=countFeb29(liqISO,nxt);
-    const G=daysReal(liqISO,nxt)-M;
-    const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<3;
-    let ipcRec;
-    let ipcVal;
-    if(mode==='inicio_curva'){
-      // Use IPC from uploaded curve at period start
-      const v = ipcFromCurve(cur);
-      ipcVal = v !== null ? v : (ipcLiq ? ipcLiq.v : 0);
-      ipcRec = null;  // no standard record, raw value used
-    } else if(mode==='final_curva'){
-      // Use IPC from uploaded curve at period end
-      const v = ipcFromCurve(nxt);
-      ipcVal = v !== null ? v : (ipcLiq ? ipcLiq.v : 0);
-      ipcRec = null;
-    } else {
-      if(mode==='inicio_est')       ipcRec=firstPending?ipcVigente(cur):ipcLiq;
-      else if(mode==='final_est')   ipcRec=ipcLiq;
-      else if(mode==='inicio_real') ipcRec=ipcVigente(cur);
-      else                          ipcRec=ipcVigente(nxt);
-      ipcVal=ipcRec?ipcRec.v:(ipcLiq?ipcLiq.v:0);
+    if(nxt<=liqISO){cur=nxt;continue;}
+    num++;
+    let F,G,L=0,M=0;
+    M=countFeb29(liqISO,nxt);
+    if(base===360){
+      F=days360(cur,nxt);
+      G=daysReal(liqISO,nxt)-M;
+    }else{
+      L=periodHasLeap(cur,nxt);
+      F=daysReal(cur,nxt)-L;
+      G=daysReal(liqISO,nxt)-M;
     }
-    const cuponIPC=(1+ipcVal)*(1+sc)-1;
-    const cpPer=trunc6((Math.pow(1+cuponIPC,F/365)-1)*100);
-    const tirI=(1+ipcVal)*(1+st)-1;
-    const tY=G/365;
+    const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<5;
+    const baseDivisor=base===360?360:365;
+    const cpPer=tipo==='NA'?trunc6((cpRaw/freq)*100):trunc6((Math.pow(1+cpRaw,F/baseDivisor)-1)*100);
     const cf=cpPer+(last?100:0);
-    const pv=cf/Math.pow(1+tirI,tY);
-    flows.push({num:flows.length+1,fecha:nxt,dC:F,dD:G,L,M,tY,ipcVal,ipcRec,cpPer,tirI,cf,pv});
-    cur=nxt;firstPending=false;
-    if(last||flows.length>300)break;
+    const tY=G/365;
+    const pv=cf/Math.pow(1+ytm,tY);
+    const dC=base===360?days360(cur,nxt):daysReal(cur,nxt)-(periodHasLeap(cur,nxt));
+    flows.push({num,fecha:nxt,dC,F,G,dD:G,L,M,cf,pv,tY,cpPer});
+    cur=nxt;if(last||num>300)break;
   }
   return flows;
 }
 
-function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode){
-  const flows=buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode);
+function calcBond(antISO,liqISO,vencISO,freq,base,tipo,cpRaw,ytm,nom){
+  const flows=buildFlows(antISO,liqISO,vencISO,freq,base,tipo,cpRaw,ytm);
   if(!flows.length)return null;
-
-  // PRICE: individual TIRs per flow — correct economic value
   const price=flows.reduce((s,f)=>s+f.pv,0);
-
-  // Interés corrido
-  const nxt1=addMonths(antISO,mp);
-  const L_ic=periodHasLeap(antISO,nxt1);
-  const F_ic=daysReal(antISO,nxt1)-L_ic;
-  const M_ic=countFeb29(antISO,liqISO);
-  const dCaus=daysReal(antISO,liqISO)-M_ic;
-  const ic=flows[0].cpPer*(dCaus/F_ic);
+  const mp=12/freq;
+  const nxtFirst=addMonths(antISO,mp);
+  let F_ic,dCaus;
+  if(base===360){
+    F_ic=days360(antISO,nxtFirst);
+    dCaus=days360(antISO,liqISO);
+  }else{
+    const L_ic=periodHasLeap(antISO,nxtFirst);
+    F_ic=daysReal(antISO,nxtFirst)-L_ic;
+    const M_ic=countFeb29(antISO,liqISO);
+    dCaus=daysReal(antISO,liqISO)-M_ic;
+  }
+  const cpFirst=flows[0].cpPer;
+  const ic=cpFirst*(dCaus/F_ic);
   const pl=price-ic;
+  let dmN=0,cvN=0;
+  flows.forEach(f=>{dmN+=f.tY*f.pv;cvN+=f.pv*f.tY*(f.tY+1)/Math.pow(1+ytm,2);});
+  const dmac=dmN/price;
+  const dmod=dmac/(1+ytm);
+  const conv=cvN/price;
   const priceRnd=Math.floor(price*1000)/1000;
   const vGiro=(priceRnd/100)*nom;
-
-  // RISK METRICS: differ by mode
-  let dmac,dmod,conv,dv01,tirRef,dmN;
-  if(mode==='inicio_curva'||mode==='final_curva'){
-    // Curve modes: single TIR_ref = (1+IPC_liq)*(1+st)-1
-    // Re-discount ALL flows at TIR_ref for duration/convexity/DV01
-    const ipcLiqCurva=ipcFromCurve(liqISO);
-    const ipcLiqFallback=(()=>{const r=ipcVigente(liqISO);return r?r.v:0;})();
-    const ipcLiq=ipcLiqCurva!==null?ipcLiqCurva:ipcLiqFallback;
-    tirRef=(1+ipcLiq)*(1+st)-1;
-    // Re-discount with single TIR_ref
-    const pvRef=flows.map(f=>f.cf/Math.pow(1+tirRef,f.tY));
-    const priceRef=pvRef.reduce((s,v)=>s+v,0);
-    dmN=flows.reduce((s,f,i)=>s+f.tY*pvRef[i],0);
-    dmac=dmN/priceRef;
-    dmod=dmac/(1+tirRef);
-    const cvN=flows.reduce((s,f,i)=>s+pvRef[i]*f.tY*(f.tY+1)/Math.pow(1+tirRef,2),0);
-    conv=cvN/priceRef;
-    dv01=dmod*(priceRnd/100)*nom/10000;  // DV01 on actual display price
-  } else {
-    // Other modes: weighted average of individual TIRs (existing behavior)
-    tirRef=flows.reduce((s,f)=>s+f.tirI*f.pv,0)/price;
-    dmN=flows.reduce((s,f)=>s+f.tY*f.pv,0);
-    dmac=dmN/price;
-    dmod=dmac/(1+tirRef);
-    const cvN=flows.reduce((s,f)=>s+f.pv*f.tY*(f.tY+1)/Math.pow(1+f.tirI,2),0);
-    conv=cvN/price;
-    dv01=dmod*(priceRnd/100)*nom/10000;
-  }
-
-  return{flows,price,priceRnd,ic,pl,vGiro,dCaus,F_ic,dmac,dmod,conv,dv01,tirAvg:tirRef,nom,dmN};
+  const dv01=dmod*(priceRnd/100)*nom/10000;
+  return{flows,price,ic,pl,dmac,dmod,conv,dv01,vGiro,priceRnd,dmN,cpFirst};
 }
 
-// ── UI STATE ──────────────────────────────────────────────────────────
-let ch1=null,ch2=null,lastRes=null;
-
-function fmtInvValor(el){
-  const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;
-  $('inv-valor-v').value=n;
-  el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';
-}
-function updateInvUI(){
-  const t=$('inv-tipo').value;
-  const lbls={dv01:'DV01 objetivo ($)',vgiro:'Valor de giro objetivo ($)',ganancia:'Ganancia objetivo ($)'};
-  $('inv-lbl-valor').textContent=lbls[t]||'Valor objetivo';
-  $('inv-field-bp').style.display=t==='ganancia'?'block':'none';
-  $('inv-field-precio').style.display=t==='tasa'?'block':'none';
-  $('inv-field-valor').style.display=t==='tasa'?'none':'block';
-}
-function updateIPCDisplay(liqISO){
-  const rec=ipcVigente(liqISO);
-  const el=$('ipc-display'),pe=$('ipc-period');
-  if(el&&rec){el.textContent=fmt(rec.v*100,2)+'%';if(pe)pe.textContent=ipcLbl(rec);}
-}
-
-  // XIRR: find IRR discounting each cash flow at its exact date
-  function xirr(cashflows, dates, d0){
-    // cashflows[0] = -vGiro (outflow), rest = inflows
-    // dates in ISO string
-    const days=dates.map(d=>daysReal(d0,d));
-    function npv(r){return cashflows.reduce((s,cf,i)=>s+cf/Math.pow(1+r,days[i]/365),0);}
-    let lo=-0.9999,hi=10,mid=0,iter=0;
-    while(iter++<200){mid=(lo+hi)/2;if(npv(mid)>0)lo=mid;else hi=mid;if(Math.abs(npv(mid))<0.01)break;}
-    return mid;
-  }
-
-// ── IPC CURVA ESTIMADA ────────────────────────────────────────────────
-let IPC_CURVE_DATA = {};  // {iso: rate_decimal}
-let ipcCurveLoaded = false;
-
-function loadIPCCurve(input){
-  const file = input.files[0];
-  if(!file) return;
-  const stat = $('ipc-curve-status');
-  stat.textContent = 'Cargando...';
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      IPC_CURVE_DATA = {};
-      const lines = e.target.result.split(/\r?\n/);
-      let count = 0;
-      for(const line of lines){
-        if(!line.trim()) continue;
-        // Format: DD/MM/YYYY;13,12%  or  YYYY-MM-DD;0.1312
-        // Split ONLY on first semicolon or tab — comma is decimal separator
-        const sepIdx = line.trim().search(/[;\t]/);
-        if(sepIdx < 0) continue;
-        let rawDate = line.trim().slice(0, sepIdx).trim().replace(/"/g,'');
-        let rawRate = line.trim().slice(sepIdx+1).trim().replace(/"/g,'').replace('%','').replace(',','.');
-        // Parse date
-        let iso = null;
-        if(/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)){
-          const [d,m,y] = rawDate.split('/');
-          iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-        } else if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
-          iso = rawDate;
-        } else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)){
-          const [d,m,y] = rawDate.split('/');
-          iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-        }
-        if(!iso) continue;
-        let rate = parseFloat(rawRate);
-        if(isNaN(rate)) continue;
-        if(rate > 1) rate = rate / 100;  // % → decimal
-        IPC_CURVE_DATA[iso] = rate;
-        count++;
-      }
-      ipcCurveLoaded = count > 0;
-      const dates = Object.keys(IPC_CURVE_DATA).sort();
-      stat.textContent = ipcCurveLoaded
-        ? `✓ ${count} registros (${dates[0]} → ${dates[dates.length-1]})`
-        : '✗ No se pudieron leer datos';
-      stat.style.color = ipcCurveLoaded ? 'var(--green3)' : 'var(--red3)';
-    } catch(err){
-      stat.textContent = '✗ Error: ' + err.message;
-      stat.style.color = 'var(--red3)';
-    }
-  };
-  reader.readAsText(file);
-}
-
-function ipcFromCurve(iso){
-  if(IPC_CURVE_DATA[iso] !== undefined) return IPC_CURVE_DATA[iso];
-  // Fallback ±3 days
-  for(let d=1; d<=3; d++){
-    const dt = new Date(iso+'T12:00:00');
-    for(const delta of [-d, d]){
-      const td = new Date(dt); td.setDate(td.getDate()+delta);
-      const tiso = td.toISOString().split('T')[0];
-      if(IPC_CURVE_DATA[tiso] !== undefined) return IPC_CURVE_DATA[tiso];
-    }
-  }
-  return null;
-}
-
-function onModeChange(){
-  const mode = $('ipc-mode').value;
-  // Show/hide curve CSV upload section
-  const curveSection = $('ipc-curve-section');
-  if(curveSection){
-    curveSection.style.display = (mode==='inicio_curva'||mode==='final_curva') ? 'block' : 'none';
-  }
-  // Show TIR real section only for real modes
-  const isReal = mode.includes('real');
-  const tirSection = $('tir-real-section');
-  const tirHr = $('tir-real-hr');
-  if(tirSection){ tirSection.style.display = isReal ? 'block' : 'none'; }
-  if(tirHr){ tirHr.style.display = isReal ? 'block' : 'none'; }
-  autoCA();
+function xirr(cashflows,dates,d0){
+  const days=dates.map(d=>daysReal(d0,d));
+  function npv(r){return cashflows.reduce((s,cf,i)=>s+cf/Math.pow(1+r,days[i]/365),0);}
+  let lo=-0.9999,hi=10,mid=0,iter=0;
+  while(iter++<200){mid=(lo+hi)/2;if(npv(mid)>0)lo=mid;else hi=mid;if(Math.abs(npv(mid))<0.01)break;}
+  return mid;
 }
 
 function autoCA(){
   const liq=$('liq').value,venc=$('venc').value;
-  if(!liq||!venc)return;
-  updateIPCDisplay(liq);
-  const mp=parseInt($('freq').value);
-  let cur=venc;
-  for(let i=0;i<600;i++){
-    const prev=addMonths(cur,-mp);
-    if(prev<=liq){$('c_ant_iso').value=prev;$('c_ant_display').value=fmtDate(prev);return;}
-    cur=prev;
-  }
+  const freq=parseInt($('freq').value);
+  if(!liq||!venc||isNaN(freq))return;
+  const mp=12/freq;
+  const liqD=new Date(liq),vencD=new Date(venc);
+  const diffM=(vencD.getUTCFullYear()-liqD.getUTCFullYear())*12+(vencD.getUTCMonth()-liqD.getUTCMonth());
+  let n=Math.ceil(diffM/mp);
+  let cand=addMonths(venc,-n*mp);
+  if(cand>liq)cand=addMonths(venc,-(n+1)*mp);
+  $('c_ant_iso').value=cand;
+  $('c_ant_display').value=fmtDate(cand);
 }
+$('liq').value='2026-02-24';$('venc').value='2028-03-12';autoCA();
 
-// ── MAIN CALCULATOR ───────────────────────────────────────────────────
-function calcular(showTIR=false){
+let ch1=null,ch2=null;
+
+function calcular(showTIR){
   ch1=null;ch2=null;
   const liq=$('liq').value,venc=$('venc').value;
   if(!$('c_ant_iso').value)autoCA();
   const ant=$('c_ant_iso').value;
-  const mp=parseInt($('freq').value);
-  const sc=parseFloat($('sc').value)/100;
-  const st=parseFloat($('st').value)/100;
-  const nom=parseFloat($('nom_val').value)||0;
-  const mode=$('ipc-mode').value;
-  if(!liq||!venc||!ant||isNaN(sc)||isNaN(st)||nom<=0){alert('Complete todos los parámetros');return;}
-  if(mode.includes('curva')&&!ipcCurveLoaded){alert('Cargue la curva de inflación estimada primero');return;}
-  const res=calcBondIPC(ant,liq,venc,mp,sc,st,nom,mode);
-  if(!res||isNaN(res.price)){alert('Error en el cálculo');return;}
-  lastRes=res;
-  const{flows,price,priceRnd,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,tirAvg,dmN}=res;
-  const freq=Math.round(12/mp);
-  const ipcLiqRec=ipcVigente(liq);
-  const ipcLiqVal=ipcLiqRec?ipcLiqRec.v:0;
+  const fV=$('f_venta').value;
+  const freq=parseInt($('freq').value),base=parseInt($('base').value);
+  const cpRaw=parseFloat($('coupon').value)/100,tipo=$('tipo').value;
+  const ytm=parseFloat($('ytm').value)/100,nom=parseFloat($('nom_val').value);
+  const ytmV=parseFloat($('ytm_venta').value)/100;
+  if(!liq||!venc||!ant||[freq,base,cpRaw,ytm,nom].some(isNaN))return;
+  const mp=12/freq;
+  const res=calcBond(ant,liq,venc,freq,base,tipo,cpRaw,ytm,nom);
+  if(!res)return;
+  const{flows,price,ic,pl,dmac,dmod,conv,dv01,vGiro,priceRnd,dmN,cpFirst}=res;
   const estado=pl>100.01?'Con prima':pl<99.99?'Al descuento':'A la par';
-  const bCls=estado==='Con prima'?'green':estado==='Al descuento'?'amber':'blue';
+  const bCls=estado==='Con prima'?'b-green':estado==='Al descuento'?'b-amber':'b-blue';
   const mCls=estado==='Con prima'?'green':estado==='Al descuento'?'amber':'blue';
-  const modeNames={'inicio_est':'IPC Inicio · Estimada','final_est':'IPC Final · Estimada',
-                   'inicio_real':'IPC Inicio · Real','final_real':'IPC Final · Real',
-                   'inicio_curva':'IPC Inicio · Curva','final_curva':'IPC Final · Curva'};
-  const isReal=mode.includes('real');
-  const isCurva=mode.includes('curva');
 
-  // ── TIR ESTIMADA (curve modes): XIRR buying at current price, receiving estimated flows ──
-  const tirNegCurva = isCurva ? tirAvg : null;  // tirAvg = (1+IPC_liq)*(1+st)-1 for curve
-  let tirEstimada = null;
-  if(isCurva){
-    // XIRR: buy at PAR (100%) — emission convention — receive estimated curve flows
-    const xCFsEst = [-nom];  // always par=100 for TIR Estimada
-    const xDatesEst = [liq];
-    flows.forEach(f=>{xCFsEst.push(f.cf/100*nom); xDatesEst.push(f.fecha);});
-    tirEstimada = xirr(xCFsEst, xDatesEst, liq)*100;
+  // CAJA
+  let cajaHTML='';
+  if(cajaOpen){
+    const caja=parseFloat($('caja_val').value)||0;
+    const bp=parseFloat($('caja_bp').value)||0;
+    const nomC=caja/(price/100);
+    const dv01C=dmod*(price/100)*nomC/10000;
+    const ganancia=(-dmod*(bp/10000)+0.5*conv*(bp/10000)**2)*price/100*nomC;
+    cajaHTML=`<div class="card" style="border-color:var(--amber)">
+      <div class="c-hdr" style="border-color:var(--amber)">💼 Restricción de caja</div>
+      <div class="c-body">
+        <div class="mg4" style="margin-bottom:10px">
+          <div class="m amber"><div class="m-lbl">Caja disponible</div><div class="m-val" style="font-size:14px">${fmtM(caja)}</div><div class="m-unit">${fmtP(caja)}</div></div>
+          <div class="m"><div class="m-lbl">Nominal comprable</div><div class="m-val" style="font-size:14px">${fmtM(nomC)}</div><div class="m-unit">a precio ${fmt(price,4)}%</div></div>
+          <div class="m blue"><div class="m-lbl">DV01 posición</div><div class="m-val" style="font-size:14px">${fmtP(dv01C)}</div><div class="m-unit">$ por 1bp</div></div>
+          <div class="m ${ganancia>=0?'green':'red'}"><div class="m-lbl">Gan/Pérd (${bp>0?'+':''}${bp}bp)</div><div class="m-val" style="font-size:14px;color:${ganancia>=0?'var(--green3)':'var(--red3)'}">${fmtM(ganancia)}</div><div class="m-unit">incl. convexidad</div></div>
+        </div>
+        <div class="info-box">Caja <strong style="color:var(--amber3)">${fmtM(caja)}</strong> → compra <strong>${fmtM(nomC)}</strong> nominal · DV01 total: <strong style="color:var(--blue3)">${fmtP(dv01C)}</strong> · Ante ${bp>0?'+':''}${bp}bp: <strong style="color:${ganancia>=0?'var(--green3)':'var(--red3)'}">${fmtM(ganancia)}</strong></div>
+      </div>
+    </div>`;
   }
 
-  // Scenarios — same structure as tasa fija
-  const scen=[-300,-200,-100,-50,-25,0,25,50,100,200,300].map(bp=>{
-    const stS=st+bp/10000;if(stS<=0)return null;
-    const r=calcBondIPC(ant,liq,venc,mp,sc,stS,nom,mode);if(!r)return null;
-    const prnS=Math.floor(r.price*1000)/1000;
-    const dv01S=r.dmod*(prnS/100)*nom/10000;
-    return{bp,yS:stS,pS:prnS,plS:r.pl,dmS:r.dmod,dv01S,gan:(prnS-priceRnd)/100*nom*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1)};
-  }).filter(Boolean);
-
-  // TIR real
+  // TIR REAL
   let tirHTML='';
-  if(showTIR){
-    const fV=$('f_venta').value;
-    const stV=parseFloat($('st_venta').value)/100;
-    if(fV&&!isNaN(stV)&&fV>liq){
-      const rV=calcBondIPC(ant,fV,venc,mp,sc,stV,nom,mode);
-      if(rV){
-        // cupsRec: only intermediate coupons (no principal), up to but not including venc
-        // cupsRec: all flows received between liq and fV
-        // If fV = vencimiento, last flow includes principal → use f.cf (cupón+principal)
-        // If fV < vencimiento, last flow is just a coupon → add vGiroV (market price) separately
-        const isAtVenc = fV >= venc;
-        const cupsRec = flows.filter(f=>f.fecha>liq&&f.fecha<=fV);
-        const vGiroV = isAtVenc
-          ? 0   // already included in last flow's cf (principal + last coupon)
-          : (rV.priceRnd/100)*nom;
-        // Display value for UI
-        const vGiroVDisplay = isAtVenc
-          ? (cupsRec.length ? cupsRec[cupsRec.length-1].cf/100*nom : nom)
-          : (rV.priceRnd/100)*nom;
-        const diasInv=daysReal(liq,fV);
-            const isShortPos = typeof _posDir!=='undefined' && _posDir==='short';
-    const dirSign = isShortPos ? -1 : 1;
+  if(showTIR&&fV){
+    const isShortPos=_posDir==='short';
+    const cupsRec=flows.filter(f=>f.fecha>liq&&f.fecha<=fV);
+    const flV=buildFlows(ant,fV,venc,freq,base,tipo,cpRaw,ytmV);
+    const prV=flV.reduce((s,f)=>s+f.pv,0);
+    const vGiroV=(Math.floor(prV*1000)/1000)/100*nom;
+    const diasInv=daysReal(liq,fV);
     const xCFs=[-vGiro];const xDates=[liq];
-        cupsRec.forEach((f,i)=>{
-          const isLast=(i===cupsRec.length-1);
-          // If selling at maturity: last flow = cf (cupón+principal), others = cpPer only
-          // If selling before: all flows = cpPer only, then add vGiroV
-          const amount = (isAtVenc && isLast) ? f.cf/100*nom : f.cpPer/100*nom;
-          xCFs.push(amount); xDates.push(f.fecha);
-        });
-        if(!isAtVenc){ xCFs.push(vGiroV); xDates.push(fV); }
-        const tirReal=(diasInv>0?xirr(xCFs,xDates,liq)*100:0)*(isShortPos?-1:1);
-
-        const totCups=cupsRec.reduce((s,f)=>s+f.cpPer/100*nom,0);
-        const totCupsDisplay = isAtVenc
-          ? cupsRec.slice(0,-1).reduce((s,f)=>s+f.cpPer/100*nom,0)+vGiroVDisplay
-          : totCups+vGiroVDisplay;
-        const ganPrecio=isAtVenc ? 0 : (rV.priceRnd-priceRnd)/100*nom;
-        tirHTML=`<div class="card" style="border-color:var(--green)">
-      <div class="c-hdr" style="border-color:var(--green)">TIR real de la inversión</div>
+    cupsRec.forEach(f=>{xCFs.push(f.cpPer/100*nom);xDates.push(f.fecha);});
+    xCFs.push(vGiroV);xDates.push(fV);
+    const tirReal=(diasInv>0?xirr(xCFs,xDates,liq)*100:0)*(isShortPos?-1:1);
+    const totCups=cupsRec.reduce((s,f)=>s+f.cpPer/100*nom,0);
+    const ganPrecio=(Math.floor(prV*1000)/1000-priceRnd)/100*nom*(isShortPos?-1:1);
+    tirHTML=`<div class="card" style="border-color:${isShortPos?'var(--red)':'var(--green)'}">
+      <div class="c-hdr" style="border-color:${isShortPos?'var(--red)':'var(--green)'}">${isShortPos?'TIR real posición CORTA':'TIR real de la inversión'}</div>
       <div class="c-body">
         <div class="mg4" style="margin-bottom:12px">
           <div class="m ${tirReal>=0?'green':'red'}">
@@ -826,113 +603,55 @@ function calcular(showTIR=false){
             <div class="m-unit">${diasInv} días de inversión</div>
           </div>
           <div class="m">
-            <div class="m-lbl">Valor giro compra</div>
+            <div class="m-lbl">${isShortPos?'Ingreso venta corta':'Valor giro compra'}</div>
             <div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div>
             <div class="m-unit">${fmtP(vGiro)}</div>
           </div>
-          <div class="m green">
-            <div class="m-lbl">Valor giro venta</div>
-            <div class="m-val green" style="font-size:14px">${fmtM(vGiroVDisplay)}</div>
-            <div class="m-unit">${fmtDate(fV)}${isAtVenc?' · al vencimiento':' · spread '+fmt(stV*100,2)+'%'}</div>
+          <div class="m ${isShortPos?'red':'green'}">
+            <div class="m-lbl">${isShortPos?'Costo recompra':'Valor giro venta'}</div>
+            <div class="m-val" style="font-size:14px;color:var(--${isShortPos?'red3':'green3'})">${fmtM(vGiroV)}</div>
+            <div class="m-unit">${fmtDate(fV)} · YTM ${fmt(ytmV*100,2)}%</div>
           </div>
           <div class="m ${ganPrecio>=0?'green':'red'}">
-            <div class="m-lbl">Ganancia en precio</div>
-            <div class="m-val ${ganPrecio>=0?'green':'red'}" style="font-size:14px">${isAtVenc?'$0':(ganPrecio>=0?'+':'')+fmtM(ganPrecio)}</div>
-            <div class="m-unit">Cupones: ${cupsRec.length} · Total: ${isAtVenc?fmtM(cupsRec.slice(0,-1).reduce((s,f)=>s+f.cpPer/100*nom,0)+vGiroVDisplay):fmtM(totCups+vGiroVDisplay)}</div>
+            <div class="m-lbl">${isShortPos?'Ganancia (tasas subieron)':'Ganancia en precio'}</div>
+            <div class="m-val ${ganPrecio>=0?'green':'red'}" style="font-size:14px">${fmtM(ganPrecio)}</div>
+            <div class="m-unit">Cupones: ${cupsRec.length} · Total: ${fmtM(totCups)}</div>
           </div>
         </div>
         <div class="tscroll"><table class="ft">
-          <thead><tr>
-            <th style="text-align:center">#</th>
-            <th style="text-align:left">Concepto</th>
-            <th style="text-align:left">Fecha</th>
-            <th>IPC</th>
-            <th>Flujo neto ($)</th>
-          </tr></thead>
+          <thead><tr><th style="text-align:center">#</th><th style="text-align:left">Concepto</th><th style="text-align:left">Fecha</th><th>Flujo neto ($)</th></tr></thead>
           <tbody>
-            <tr>
-              <td style="text-align:center">0</td>
-              <td style="text-align:left">Compra</td>
-              <td style="text-align:left">${fmtDate(liq)}</td>
-              <td>—</td>
-              <td style="color:var(--red3)">${fmtP(-vGiro)}</td>
-            </tr>
-            ${cupsRec.map((f,i)=>`<tr>
-              <td style="text-align:center">${i+1}</td>
-              <td style="text-align:left">Cupón ${i+1}</td>
-              <td style="text-align:left">${fmtDate(f.fecha)}</td>
-              <td><span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(59,130,246,.15);color:var(--blue3)">${fmt(f.ipcVal*100,2)}%</span></td>
-              <td style="color:var(--green3)">${fmtP(f.cpPer/100*nom)}</td>
-            </tr>`).join('')}
-            <tr style="font-weight:700;color:var(--amber3)">
-              <td style="text-align:center">${cupsRec.length+1}</td>
-              <td style="text-align:left">Venta</td>
-              <td style="text-align:left">${fmtDate(fV)}</td>
-              <td style="font-size:10px">${isAtVenc?'al vencimiento':'spread '+fmt(stV*100,2)+'%'}</td>
-              <td style="color:var(--green3)">${fmtP(vGiroVDisplay)}</td>
-            </tr>
+            <tr><td style="text-align:center">0</td><td style="text-align:left">${isShortPos?'Venta corta (ingreso)':'Compra'}</td><td style="text-align:left">${fmtDate(liq)}</td><td style="color:${isShortPos?'var(--green3)':'var(--red3)'}">${isShortPos?fmtP(vGiro):fmtP(-vGiro)}</td></tr>
+            ${cupsRec.map((f,i)=>`<tr><td style="text-align:center">${i+1}</td><td style="text-align:left">Cupón ${i+1}</td><td style="text-align:left">${fmtDate(f.fecha)}</td><td style="color:${isShortPos?'var(--red3)':'var(--green3)'}">${isShortPos?fmtP(-f.cpPer/100*nom):fmtP(f.cpPer/100*nom)}</td></tr>`).join('')}
+            <tr style="font-weight:700;color:var(--amber3)"><td style="text-align:center">${cupsRec.length+1}</td><td style="text-align:left">${isShortPos?'Recompra (egreso)':'Venta'}</td><td style="text-align:left">${fmtDate(fV)}</td><td style="color:${isShortPos?'var(--red3)':'var(--green3)'}">${isShortPos?fmtP(-vGiroV):fmtP(vGiroV)}</td></tr>
           </tbody>
-          <tfoot><tr>
-            <td colspan="4" style="text-align:left;color:var(--txt2)">${isShortPos?'P&G neto':'Total recibido'}</td>
-            <td style="color:var(--green3);font-weight:700">${isAtVenc
-  ? fmtP(cupsRec.slice(0,-1).reduce((s,f)=>s+f.cpPer/100*nom,0)+vGiroVDisplay)
-  : fmtP(totCups+vGiroVDisplay)}</td>
-          </tr></tfoot>
+          <tfoot><tr><td colspan="3" style="text-align:left;color:var(--txt2)">${isShortPos?'P&G neto posición':'Total recibido'}</td><td style="color:var(--green3);font-weight:700">${isShortPos?fmtP(ganPrecio-totCups):fmtP(totCups+vGiroV)}</td></tr></tfoot>
         </table></div>
       </div></div>`;
-      }
-    }
   }
 
-  // Chart: vary st symmetrically around current st, X-axis = TIR implícita promedio de flujos
-  // tirAvg = simple average of all flow TIRs (confirmed by user)
-  const tirSimple=flows.reduce((s,f)=>s+f.tirI,0)/flows.length;
-  const halfRange=Math.min(st*0.6,0.06); // tight symmetric range for visible curvature
-  const stMin=Math.max(0.001,st-halfRange);
-  const stMax=st+halfRange;
-  const stepsL=150,stepsR=150;
-  const yArr=[],pArr=[],lArr=[];
-  // Left side: stMin → st
-  for(let i=0;i<=stepsL;i++){
-    const stI=stMin+(st-stMin)*(i/stepsL);
-    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode);
-    const ps=fs.reduce((s,f)=>s+f.pv,0);
-    // x-label = simple avg TIR of flows at this spread
-    const tirI=fs.reduce((s,f)=>s+f.tirI,0)/fs.length;
-    yArr.push((tirI*100).toFixed(2)+'%');
-    pArr.push(+ps.toFixed(4));
-    lArr.push(+(price-dmod*(stI-st)*price).toFixed(4));
-  }
-  // Right side: st → stMax
-  for(let i=1;i<=stepsR;i++){
-    const stI=st+(stMax-st)*(i/stepsR);
-    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode);
-    const ps=fs.reduce((s,f)=>s+f.pv,0);
-    const tirI=fs.reduce((s,f)=>s+f.tirI,0)/fs.length;
-    yArr.push((tirI*100).toFixed(2)+'%');
-    pArr.push(+ps.toFixed(4));
-    lArr.push(+(price-dmod*(stI-st)*price).toFixed(4));
-  }
-  const crossIdx=stepsL; // midpoint = current st → current price
-  const crossPrice=price;
+  // SCENARIOS
+  const bps=[-200,-150,-100,-75,-50,-25,0,25,50,75,100,150,200];
+  const scen=bps.map(bp=>{
+    const yS=ytm+bp/10000;if(yS<=0)return null;
+    const fS=buildFlows(ant,liq,venc,freq,base,tipo,cpRaw,yS);
+    const pS=fS.reduce((s,f)=>s+f.pv,0),plS=pS-ic;
+    let dn=0;fS.forEach(f=>dn+=f.tY*f.pv);
+    const dmS=(dn/pS)/(1+yS/freq),dv01S=dmS*(pS/100)*nom/10000;
+    return{bp,yS,pS,plS,dmS,dv01S,gan:(pS-price)/100*nom*(_posDir==='short'?-1:1)};
+  }).filter(Boolean);
 
-  // ── RENDER — exact same structure/classes as tasa fija ────────────
   $('main').innerHTML=`
   <div class="card">
-    <div class="c-hdr">Resultados principales
-      <span class="badge ${bCls}">${estado}</span>
-      <span class="badge" style="background:rgba(59,130,246,.15);color:var(--blue3);border-color:var(--blue2)">${modeNames[mode]}</span>
-    </div>
+    <div class="c-hdr">Resultados principales <span class="badge ${bCls}">${estado}</span></div>
     <div class="c-body">
       <div class="mg4" style="margin-bottom:10px">
-        <div class="m blue"><div class="m-lbl">Precio sucio</div><div class="m-val">${fmt(priceRnd,4)}%</div><div class="m-unit">% del par</div></div>
-        <div class="m"><div class="m-lbl">Precio limpio</div><div class="m-val ${mCls}">${fmt(pl,4)}%</div><div class="m-unit">% del par</div></div>
-        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus} días causados</div></div>
+        <div class="m blue"><div class="m-lbl">Precio sucio</div><div class="m-val">${fmt(price,4)}%</div><div class="m-unit">% del par</div></div>
+        <div class="m"><div class="m-lbl">Precio limpio</div><div class="m-val">${fmt(pl,4)}%</div><div class="m-unit">% del par</div></div>
+        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${base===360?days360(ant,liq):daysReal(ant,liq)} días causados</div></div>
         <div class="m ${mCls}"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
-      <div class="mg4">
-        <div class="m blue"><div class="m-lbl">IPC vigente · liq</div><div class="m-val" style="font-size:15px">${fmt(ipcLiqVal*100,2)}%</div><div class="m-unit">${ipcLiqRec?ipcLbl(ipcLiqRec):'—'}</div></div>
-        <div class="m"><div class="m-lbl">Spread cupón</div><div class="m-val" style="font-size:15px">${fmt(sc*100,2)}%</div><div class="m-unit">EA sobre IPC</div></div>
+      <div class="mg2">
         <div class="m"><div class="m-lbl">Pagos / año</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} meses</div></div>
         <div class="m"><div class="m-lbl">Cupones restantes</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">hasta vencimiento</div></div>
       </div>
@@ -943,9 +662,9 @@ function calcular(showTIR=false){
     <div class="c-body">
       <div class="mg4">
         <div class="m blue"><div class="m-lbl">D. Macaulay</div><div class="m-val">${fmt(dmac,4)}</div><div class="m-unit">años</div></div>
-        <div class="m blue"><div class="m-lbl">D. Modificada</div><div class="m-val">${fmt(dmod,4)}</div><div class="m-unit">% / 1% Δspread</div></div>
+        <div class="m blue"><div class="m-lbl">D. Modificada</div><div class="m-val">${fmt(dmod,4)}</div><div class="m-unit">% / 1% Δtasa</div></div>
         <div class="m blue"><div class="m-lbl">Convexidad</div><div class="m-val">${fmt(conv,4)}</div><div class="m-unit">—</div></div>
-        <div class="m blue"><div class="m-lbl">DV01</div><div class="m-val" style="font-size:14px">${fmtP(dv01)}</div><div class="m-unit">$ por 1bp de Δspread</div></div>
+        <div class="m blue"><div class="m-lbl">DV01</div><div class="m-val" style="font-size:14px">${fmtP(dv01)}</div><div class="m-unit">$ por 1bp de Δtasa</div></div>
       </div>
       <div class="info-box">
         +50bp → <span style="color:var(--red3)">−${fmtM(dv01*50)}</span> &nbsp;|&nbsp;
@@ -955,236 +674,347 @@ function calcular(showTIR=false){
       </div>
     </div>
   </div>
+  ${cajaHTML}${tirHTML}
   <div class="card">
-    <div class="c-hdr">Curva precio–spread</div>
+    <div class="c-hdr">Curva precio–rendimiento</div>
     <div class="c-body"><div class="chart-wrap"><canvas id="ch1"></canvas></div></div>
   </div>
   <div class="card">
-    <div class="c-hdr">Análisis de escenarios de spread</div>
+    <div class="c-hdr">Análisis de escenarios de tasa</div>
     <div class="c-body">
       <div class="tscroll"><table class="st"><thead><tr>
-        <th>Escenario</th><th>Spread TIR</th><th>P. sucio</th><th>P. limpio</th><th>D. Mod.</th><th>DV01</th><th>Ganancia / Pérdida</th>
+        <th>Escenario</th><th>YTM</th><th>P. sucio</th><th>P. limpio</th><th>D. Mod.</th><th>DV01</th><th>Ganancia / Pérdida</th>
       </tr></thead><tbody>
         ${scen.map(s=>{
           const cls=s.bp===0?'cur':s.bp<0?'dn':'up';
-          const sign=typeof _posDir!=='undefined'&&_posDir==='short'?-1:1;const ganS=s.gan*sign;const g=s.bp===0?'—':(ganS>=0?'+':'')+fmtM(ganS);
+          const g=s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan);
           const gc=s.bp===0?'':s.gan>=0?'color:var(--green3)':'color:var(--red3)';
           return`<tr class="${cls}"><td>${s.bp===0?'★ Actual':s.bp>0?'+'+s.bp+'bp':s.bp+'bp'}</td><td>${fmt(s.yS*100,2)}%</td><td>${fmt(s.pS,4)}%</td><td>${fmt(s.plS,4)}%</td><td>${fmt(s.dmS,4)}</td><td>${fmtP(s.dv01S)}</td><td style="${gc}">${g}</td></tr>`;
         }).join('')}
       </tbody></table></div>
+      <div class="chart-wrap" style="margin-top:12px"><canvas id="ch2"></canvas></div>
     </div>
   </div>
-  ${tirHTML}
   <div class="card">
     <div class="c-hdr">Tabla de flujos descontados</div>
     <div class="c-body"><div class="tscroll"><table class="ft"><thead><tr>
       <th>#</th><th>Fecha pago</th><th>Días cupón</th><th>Días desc.</th><th>Bis. Cupón</th><th>Bis. Desc.</th>
-      <th>IPC</th><th>TIR flujo</th><th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $ (sin desc.)</th><th>Flujo $ (descontado)</th><th>t·PV</th><th>% precio</th>
+      <th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $</th><th>t·PV</th><th>% precio</th>
     </tr></thead><tbody>
-      <tr class="liq-row"><td>0</td><td>${fmtDate(liq)}</td><td colspan="11" style="color:var(--red3);font-style:italic;text-align:left;padding-left:8px">−${fmtP(vGiro)} &nbsp; Liquidación</td></tr>
-      ${flows.map(f=>`<tr>
-        <td>${f.num}</td><td>${fmtDate(f.fecha)}</td><td>${f.dC}</td><td>${f.dD}</td>
-        <td style='text-align:center'>${f.L}</td><td style='text-align:center'>${f.M}</td>
-        <td><span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(59,130,246,.15);color:var(--blue3);white-space:nowrap">${fmt(f.ipcVal*100,2)}%${f.ipcRec?' ('+ipcLbl(f.ipcRec)+')':mode.includes('curva')?' (curva)':''}</span></td>
-        <td>${fmt(f.tirI*100,4)}%</td><td>${fmt(f.cf,4)}</td><td>${fmt(f.pv,4)}</td>
-        <td style="color:var(--amber3);font-weight:600">${fmtP(f.cf/100*nom)}</td>
-        <td>${fmtP(f.pv/100*nom)}</td><td>${fmt(f.tY*f.pv,4)}</td><td>${fmt(f.pv/price*100,2)}%</td>
-      </tr>`).join('')}
-      <tr class="total"><td colspan="8">TOTAL</td><td>${fmt(flows.reduce((s,f)=>s+f.cf,0),4)}</td><td>${fmt(price,4)}</td><td style="color:var(--amber3)">${fmtP(flows.reduce((s,f)=>s+f.cf/100*nom,0))}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,4)}</td><td>100%</td></tr>
+      ${flows.map(f=>`<tr><td>${f.num}</td><td>${fmtDate(f.fecha)}</td><td>${f.dC}</td><td>${f.dD}</td><td style='text-align:center'>${f.L}</td><td style='text-align:center'>${f.M}</td><td>${fmt(f.cf,4)}</td><td>${fmt(f.pv,4)}</td><td>${fmtP(f.pv/100*nom)}</td><td>${fmt(f.tY*f.pv,4)}</td><td>${fmt(f.pv/price*100,2)}%</td></tr>`).join('')}
+      <tr class="total"><td colspan="5">TOTAL</td><td></td><td>${fmt(flows.reduce((s,f)=>s+f.cf,0),4)}</td><td>${fmt(price,4)}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,4)}</td><td>100%</td></tr>
     </tbody></table></div></div>
   </div>`;
 
-  // ── CHART — exact same as tasa fija ──────────────────────────────
-  setTimeout(()=>{
-    try{if(ch1){ch1.destroy();ch1=null;}}catch(e){ch1=null;}
-    ch1=new Chart($('ch1'),{type:'line',data:{labels:yArr,datasets:[
-      {label:'Precio real',data:pArr,borderColor:'#3b82f6',borderWidth:2,pointRadius:0,tension:.15,fill:false},
-      {label:'Aprox. D* lineal',data:lArr,borderColor:'#ef4444',borderWidth:1.5,pointRadius:0,tension:0,borderDash:[5,4],fill:false},
-      {label:'_cross',data:yArr.map((_,i)=>i===crossIdx?crossPrice:null),type:'scatter',
-       backgroundColor:'#f59e0b',pointRadius:yArr.map((_,i)=>i===crossIdx?8:0),showLine:false}
-    ]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},
-      plugins:{legend:{display:true,position:'top',labels:{color:'#8892a4',font:{size:10},boxWidth:16,
-        filter:item=>item.text!=='_cross'}},
-        tooltip:{callbacks:{label:ctx=>{
-          if(ctx.dataset.label==='_cross')return`TIR: ${fmt(tirSimple*100,2)}% · Precio: ${fmt(crossPrice,3)}%`;
-          return ctx.dataset.label+': '+fmt(ctx.parsed.y,4)+'%';
-        }}}},
-      scales:{
-        x:{ticks:{color:'#4a5568',autoSkip:true,maxTicksLimit:10,font:{size:9}},
-           grid:{color:'rgba(255,255,255,.03)'},
-           title:{display:true,text:'TIR implícita (%)',color:'#4a5568',font:{size:10}}},
-        y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(0)+'%'},
-           grid:{color:'rgba(255,255,255,.03)'},
-           title:{display:true,text:'Precio (%)',color:'#4a5568',font:{size:10}}}
-    }},plugins:[{id:'crossLines',afterDraw(chart){
+  // Curva precio-rendimiento
+  const yArr=[],pArr=[],lArr=[];
+  const halfRange=Math.max(ytm*1.8,0.08);
+  const rMin=Math.max(0.002,ytm-halfRange),rMax=ytm+halfRange;
+  const steps=300;
+  for(let i=0;i<=steps;i++){
+    const r=rMin+(rMax-rMin)*(i/steps);
+    const fs=buildFlows(ant,liq,venc,freq,base,tipo,cpRaw,r);
+    const ps=fs.reduce((s,f)=>s+f.pv,0);
+    yArr.push((r*100).toFixed(2)+'%');
+    pArr.push(+ps.toFixed(4));
+    lArr.push(+(price-dmod*(r-ytm)*price).toFixed(4));
+  }
+  let crossIdx=0,minDiff=Infinity;
+  const rArr=[];
+  for(let i=0;i<=steps;i++) rArr.push(rMin+(rMax-rMin)*(i/steps));
+  for(let i=0;i<=steps;i++){const d=Math.abs(rArr[i]-ytm);if(d<minDiff){minDiff=d;crossIdx=i;}}
+  const crossPrice=price;
+
+  try{if(ch1){ch1.destroy();ch1=null;}}catch(e){ch1=null;}
+  ch1=new Chart($('ch1'),{
+    type:'line',
+    data:{labels:yArr,datasets:[
+      {label:'_fill_above',data:pArr,borderColor:'transparent',backgroundColor:'rgba(59,130,246,0.08)',fill:'+1',pointRadius:0,tension:.15,order:5},
+      {label:'_fill_below',data:lArr,borderColor:'transparent',backgroundColor:'transparent',fill:false,pointRadius:0,tension:0,order:6},
+      {label:'Precio real',data:pArr,borderColor:'#3b82f6',borderWidth:2.5,pointRadius:0,tension:.15,fill:false,order:2},
+      {label:'Aprox. D* lineal',data:lArr,borderColor:'#ef4444',borderWidth:1.5,pointRadius:0,tension:0,borderDash:[5,4],fill:false,order:3},
+      {label:'_cross',data:yArr.map((_,i)=>i===crossIdx?crossPrice:null),type:'scatter',backgroundColor:'#f59e0b',pointRadius:yArr.map((_,i)=>i===crossIdx?8:0),pointHoverRadius:10,showLine:false,order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},
+      plugins:{legend:{display:true,position:'top',labels:{color:'#8892a4',font:{size:10},boxWidth:16,filter:item=>!item.text.startsWith('_')}},
+        tooltip:{callbacks:{label:ctx=>{if(ctx.dataset.label==='_cross')return`YTM: ${(ytm*100).toFixed(2)}% · Precio: ${fmt(ctx.parsed.y,4)}%`;if(ctx.dataset.label.startsWith('_'))return null;return ctx.dataset.label+': '+fmt(ctx.parsed.y,4)+'%';},filter:item=>!item.dataset.label.startsWith('_')||item.dataset.label==='_cross'}}},
+      scales:{x:{ticks:{color:'#4a5568',autoSkip:true,maxTicksLimit:12,font:{size:9}},grid:{color:'rgba(255,255,255,.03)'},title:{display:true,text:'YTM (%)',color:'#4a5568',font:{size:10}}},
+               y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(0)+'%'},grid:{color:'rgba(255,255,255,.03)'},title:{display:true,text:'Precio (%)',color:'#4a5568',font:{size:10}}}}},
+    plugins:[{id:'crossLines',afterDraw(chart){
       if(crossIdx<0||crossPrice===null)return;
-      const ctx2=chart.ctx,meta=chart.getDatasetMeta(2);
+      const ctx2=chart.ctx,meta=chart.getDatasetMeta(4);
       if(!meta.data[crossIdx])return;
-      const pt=meta.data[crossIdx];
-      const xA=chart.scales.x,yA=chart.scales.y;
-      ctx2.save();
-      ctx2.setLineDash([5,4]);ctx2.strokeStyle='rgba(245,158,11,.6)';ctx2.lineWidth=1.2;
+      const pt=meta.data[crossIdx],xA=chart.scales.x,yA=chart.scales.y;
+      ctx2.save();ctx2.setLineDash([5,4]);ctx2.strokeStyle='rgba(245,158,11,0.6)';ctx2.lineWidth=1.2;
       ctx2.beginPath();ctx2.moveTo(pt.x,pt.y);ctx2.lineTo(pt.x,yA.bottom);ctx2.stroke();
       ctx2.beginPath();ctx2.moveTo(xA.left,pt.y);ctx2.lineTo(pt.x,pt.y);ctx2.stroke();
-      ctx2.setLineDash([]);
-      ctx2.fillStyle='#f59e0b';ctx2.beginPath();ctx2.arc(pt.x,pt.y,7,0,Math.PI*2);ctx2.fill();
+      ctx2.setLineDash([]);ctx2.fillStyle='#f59e0b';ctx2.beginPath();ctx2.arc(pt.x,pt.y,7,0,Math.PI*2);ctx2.fill();
       ctx2.strokeStyle='#0a0e1a';ctx2.lineWidth=2;ctx2.stroke();
-      const lbl=`${fmt(tirSimple*100,2)}% TIR · ${fmt(crossPrice,3)}%`;
+      const lbl=`${(ytm*100).toFixed(2)}% · ${fmt(crossPrice,3)}%`;
       ctx2.font='bold 10px monospace';const tw=ctx2.measureText(lbl).width;
-      let lx=pt.x+12,ly=pt.y-10;
-      if(lx+tw+16>xA.right)lx=pt.x-tw-20;
-      ctx2.fillStyle='rgba(10,14,26,.9)';
-      ctx2.beginPath();ctx2.roundRect(lx-4,ly-13,tw+12,19,4);ctx2.fill();
-      ctx2.fillStyle='#fcd34d';ctx2.textAlign='left';ctx2.fillText(lbl,lx+2,ly);
-      ctx2.restore();
-    }}]});
-  },100);
+      let lx=pt.x+12,ly=pt.y-10;if(lx+tw+16>xA.right)lx=pt.x-tw-20;
+      ctx2.fillStyle='rgba(10,14,26,0.88)';ctx2.beginPath();ctx2.roundRect(lx-4,ly-13,tw+12,19,4);ctx2.fill();
+      ctx2.fillStyle='#fcd34d';ctx2.textAlign='left';ctx2.fillText(lbl,lx+2,ly);ctx2.restore();
+    }}]
+  });
 
-  mostrarBtnGuardar('IPC','#3b82f6','#1d4ed8','#93c5fd',lastRes||null);
+  try{if(ch2){ch2.destroy();ch2=null;}}catch(e){ch2=null;}
+  ch2=new Chart($('ch2'),{type:'bar',data:{
+    labels:scen.map(s=>s.bp===0?'Actual':(s.bp>0?'+':'')+s.bp+'bp'),
+    datasets:[{label:'MM$',data:scen.map(s=>s.bp===0?0:+(s.gan/1e6).toFixed(2)),backgroundColor:scen.map(s=>s.bp===0?'#4a5568':s.gan>=0?'rgba(16,185,129,.75)':'rgba(239,68,68,.75)'),borderRadius:3}]
+  },options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.raw>=0?'+':'')+ctx.raw+' MM$'}}},
+    scales:{x:{ticks:{color:'#4a5568',font:{size:9}},grid:{display:false}},
+             y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>(v>=0?'+':'')+v+'MM'},grid:{color:'rgba(255,255,255,.03)'},title:{display:true,text:'MM$',color:'#4a5568',font:{size:10}}}}}});
+
+  // FIX: pasar res directamente (antes era lastRes que nunca se definía)
+  mostrarBtnGuardar('TF','#f59e0b','#78350f','#fcd34d', res);
 }
 
-// ── INVERSE ───────────────────────────────────────────────────────────
+// ── CALCULADORA INVERSA ────────────────────────────────────────
+function fmtInvValor(el){
+  const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;
+  $('inv-valor-v').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';
+}
+function updateInvPlaceholder(){
+  const tipo=$('inv-tipo').value;
+  const lbls={dv01:'DV01 objetivo ($)',vgiro:'Valor de giro objetivo ($)',ganancia:'Ganancia objetivo ($)',tasa:'Tasa para precio objetivo (%)'};
+  $('inv-lbl-valor').textContent=lbls[tipo]||'Valor objetivo';
+  $('inv-field-bp').style.display=tipo==='ganancia'?'block':'none';
+  $('inv-field-precio').style.display=tipo==='tasa'?'block':'none';
+  $('inv-field-valor').style.display=tipo==='tasa'?'none':'block';
+}
 function calcularInverso(){
   const liq=$('liq').value,venc=$('venc').value;
   if(!$('c_ant_iso').value)autoCA();
   const ant=$('c_ant_iso').value;
-  const mp=parseInt($('freq').value),sc=parseFloat($('sc').value)/100;
-  const st=parseFloat($('st').value)/100,mode=$('ipc-mode').value;
-  if(!liq||!venc||!ant)return;
-  const res=calcBondIPC(ant,liq,venc,mp,sc,st,1e10,mode);
+  const freq=parseInt($('freq').value),base=parseInt($('base').value);
+  const cpRaw=parseFloat($('coupon').value)/100,tipo=$('tipo').value;
+  const ytm=parseFloat($('ytm').value)/100;
+  if(!liq||!venc||!ant||[freq,base,cpRaw,ytm].some(isNaN))return;
+  const tipo_inv=$('inv-tipo').value;
+  const res=calcBond(ant,liq,venc,freq,base,tipo,cpRaw,ytm,1e10);
   if(!res)return;
   const{price,priceRnd,dmod,conv,ic,pl}=res;
-  const tipo=$('inv-tipo').value;
-  let items=[];
-  if(tipo==='tasa'){
-    const target=parseFloat($('inv-precio').value);
-    if(isNaN(target)||target<=0){alert('Ingresa precio objetivo');return;}
-    let lo=0.0001,hi=2.0,mid,iter=0;
-    while(iter++<120){mid=(lo+hi)/2;const r=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode);if(!r)break;if(r.price>target)lo=mid;else hi=mid;if(Math.abs(r.price-target)<1e-7)break;}
-    const rC=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode);
-    items=[{l:'Precio objetivo',v:fmt(target,4)+'%'},
-      {l:'Spread TIR',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmt(mid*100,4)}%</span>`},
-      {l:'Precio resultante',v:fmt(rC?.priceRnd||0,4)+'%'},{l:'Precio limpio',v:fmt(rC?.pl||0,4)+'%'}];
-  } else {
+  let resultado=null;
+  if(tipo_inv==='tasa'){
+    const targetPrice=parseFloat($('inv-precio').value);
+    if(isNaN(targetPrice)||targetPrice<=0){alert('Ingresa un precio objetivo válido');return;}
+    let lo=0.0001,hi=0.9999,mid,iter=0;
+    while(iter++<100){mid=(lo+hi)/2;const r=calcBond(ant,liq,venc,freq,base,tipo,cpRaw,mid,1);if(!r)break;if(r.price>targetPrice)lo=mid;else hi=mid;if(Math.abs(r.price-targetPrice)<0.0000001)break;}
+    const tasaResult=mid*100;const rCheck=calcBond(ant,liq,venc,freq,base,tipo,cpRaw,mid,1);
+    resultado={titulo:'Tasa para precio objetivo',items:[
+      {l:'Precio objetivo',v:fmt(targetPrice,4)+'%'},
+      {l:'Tasa de negociación',v:`<span style="font-size:20px;font-weight:800;color:var(--amber3)">${fmt(tasaResult,4)}%</span>`},
+      {l:'Precio resultante',v:fmt(rCheck?.priceRnd||0,4)+'%'},
+      {l:'Precio limpio resultante',v:fmt((rCheck?.pl||0),4)+'%'},
+    ]};
+  }else{
     const valorObj=parseFloat($('inv-valor-v').value)||0;
-    if(valorObj<=0){alert('Ingresa valor objetivo');return;}
-    if(tipo==='dv01'){
-      const nom=valorObj*10000/(dmod*(priceRnd/100));
-      items=[{l:'DV01 objetivo',v:fmtP(valorObj)},
-        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Nominal exacto',v:fmtP(nom)},{l:'Valor giro',v:fmtM((priceRnd/100)*nom)},
-        {l:'DV01 resultante',v:fmtP(dmod*(priceRnd/100)*nom/10000)},{l:'D. Modificada',v:fmt(dmod,4)}];
-    } else if(tipo==='vgiro'){
-      const nom=valorObj/(priceRnd/100);const dv01r=dmod*(priceRnd/100)*nom/10000;
-      items=[{l:'Caja objetivo',v:fmtM(valorObj)},
-        {l:'Nominal comprable',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Nominal exacto',v:fmtP(nom)},{l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
-        {l:'Precio limpio',v:fmt(pl,4)+'%'},{l:'DV01',v:fmtP(dv01r)},{l:'IC pagado',v:fmtM(ic/100*nom)}];
-    } else if(tipo==='ganancia'){
+    if(valorObj<=0){alert('Ingresa un valor objetivo válido');return;}
+    if(tipo_inv==='dv01'){
+      const nom=valorObj*10000/(dmod*(priceRnd/100));const vg=(priceRnd/100)*nom;
+      resultado={titulo:'Nominal para DV01 objetivo',items:[
+        {l:'DV01 objetivo',v:'$'+Math.round(valorObj).toLocaleString('es-CO')},
+        {l:'Nominal requerido',v:`<span style="font-size:20px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
+        {l:'Valor giro resultante',v:fmtM(vg)},
+        {l:'D. Modificada',v:fmt(dmod,4)},
+      ]};
+    }else if(tipo_inv==='vgiro'){
+      const nom=valorObj/(priceRnd/100);const dv01=dmod*(priceRnd/100)*nom/10000;
+      resultado={titulo:'Nominal para valor de giro objetivo',items:[
+        {l:'Caja / valor de giro objetivo',v:fmtM(valorObj)},
+        {l:'Nominal comprable',v:`<span style="font-size:20px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
+        {l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
+        {l:'DV01 con ese nominal',v:fmtP(dv01)},
+      ]};
+    }else if(tipo_inv==='ganancia'){
       const bp=parseFloat($('inv-bp').value)||0;
-      const fP=(-dmod*(bp/10000)+0.5*conv*(bp/10000)**2)*(priceRnd/100);
-      if(Math.abs(fP)<1e-10){alert('Ganancia ~cero');return;}
-      const nom=valorObj/fP;const dv01r=dmod*(priceRnd/100)*nom/10000;
-      items=[{l:`Ganancia (${bp>0?'+':''}${bp}bp)`,v:fmtM(valorObj)},
-        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Nominal exacto',v:fmtP(nom)},{l:'Valor giro',v:fmtM((priceRnd/100)*nom)},
-        {l:'DV01',v:fmtP(dv01r)},{l:'Ganancia D*+Cv',v:fmtM(fP*nom)}];
+      const factorPct=(-dmod*(bp/10000)+0.5*conv*(bp/10000)**2)*(priceRnd/100);
+      if(Math.abs(factorPct)<1e-10){alert('Con ese movimiento la ganancia es ~cero.');return;}
+      const nom=valorObj/factorPct;const dv01=dmod*(priceRnd/100)*nom/10000;
+      resultado={titulo:`Nominal para ganancia objetivo (${bp>0?'+':''}${bp}bp)`,items:[
+        {l:`Ganancia objetivo`,v:fmtM(valorObj)},
+        {l:'Nominal requerido',v:`<span style="font-size:20px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
+        {l:'Valor de giro',v:fmtM((priceRnd/100)*nom)},
+        {l:'DV01',v:fmtP(dv01)},
+      ]};
     }
   }
-  const old=$('inv-result-card');if(old)old.remove();
+  if(!resultado)return;
+  const existing=$('inv-result-card');if(existing)existing.remove();
   const card=document.createElement('div');card.id='inv-result-card';
   card.style.cssText='margin-top:12px;background:rgba(139,92,246,.1);border:1px solid #7c3aed;border-radius:8px;overflow:hidden';
-  card.innerHTML=`<div style="padding:8px 12px;background:rgba(139,92,246,.2);border-bottom:1px solid #7c3aed;font-size:10px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.08em">⟳ Resultado inverso</div><div style="padding:10px 12px">${items.map(it=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px"><span style="color:var(--txt2)">${it.l}</span><span style="font-weight:700;font-family:monospace">${it.v}</span></div>`).join('')}</div>`;
+  card.innerHTML=`<div style="padding:8px 12px;background:rgba(139,92,246,.2);border-bottom:1px solid #7c3aed;font-size:10px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.08em">⟳ ${resultado.titulo}</div>
+    <div style="padding:10px 12px">${resultado.items.map(item=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px"><span style="color:var(--txt2)">${item.l}</span><span style="font-weight:700;font-family:monospace">${item.v}</span></div>`).join('')}</div>`;
   const btn=document.querySelector('[onclick="calcularInverso()"]');
   if(btn)btn.parentNode.insertBefore(card,btn.nextSibling);
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────
-$('liq').value='2025-01-30';
-$('venc').value='2029-02-27';
-onModeChange();
-loadTicker();
-setInterval(loadTicker, 120000);
-updateClock();
-setInterval(updateClock,1000);
+// ── PORTFOLIO ─────────────────────────────────────────────────
+let bondCount=0;
+function addBond(){
+  bondCount++;const id=bondCount;
+  const div=document.createElement('div');div.id='bond-'+id;div.className='bond-card';
+  div.innerHTML=`<div class="bond-card-hdr">
+    <span class="bond-num">Bono #${id}</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="bond-result" id="br-${id}"></span>
+      <button class="del-btn" onclick="document.getElementById('bond-${id}').remove()">✕</button>
+    </div>
+  </div>
+  <div class="bond-grid">
+    <div class="field"><label>Vencimiento</label><input type="date" id="bv-${id}" style="color-scheme:dark"></div>
+    <div class="field"><label>Tasa facial (%)</label><input type="number" id="bc-${id}" placeholder="7.75" step="0.001" min="0"></div>
+    <div class="field"><label>Tipo</label><select id="bt-${id}"><option value="EA">EA</option><option value="NA">NA</option></select></div>
+    <div class="field"><label>Periodicidad</label><select id="bf-${id}"><option value="1">Anual</option><option value="4">Trimestral</option><option value="2">Semestral</option><option value="12">Mensual</option></select></div>
+    <div class="field"><label>Base</label><select id="bb-${id}"><option value="365">365/365</option><option value="360">30/360</option></select></div>
+    <div class="field"><label>Tasa mercado (%)</label><input type="number" id="by-${id}" placeholder="14.20" step="0.01" min="0"></div>
+    <div class="field"><label>Nominal ($)</label>
+      <input type="text" id="bn-${id}" placeholder="10.000.000.000" oninput="fmtBN(this,${id})" onchange="fmtBN(this,${id})" inputmode="numeric">
+      <input type="hidden" id="bnv-${id}">
+    </div>
+  </div>`;
+  $('bondList').appendChild(div);
+}
+function fmtBN(el,id){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('bnv-'+id).value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 
-// ── DIRECCIÓN POSICIÓN ────────────────────────────────────────
-let _posDir = 'long';
+let pfChart=null;
+function calcPF(){
+  const pfFecha=$('pf_fecha').value;if(!pfFecha){alert('Ingresa la fecha de valoración.');return;}
+  const rows=[];
+  document.querySelectorAll('.bond-card').forEach(card=>{
+    const id=parseInt(card.id.replace('bond-',''));
+    const vencISO=$('bv-'+id).value,cpRaw=parseFloat($('bc-'+id).value)/100;
+    const tipo=$('bt-'+id).value,freq=parseInt($('bf-'+id).value),base=parseInt($('bb-'+id).value);
+    const ytm=parseFloat($('by-'+id).value)/100;
+    let nom=parseFloat($('bnv-'+id).value)||0;
+    if(!nom){const raw=($('bn-'+id).value||'').replace(/\./g,'').replace(/[^0-9]/g,'');nom=parseInt(raw)||0;if(nom)$('bnv-'+id).value=nom;}
+    if(!vencISO||isNaN(cpRaw)||isNaN(ytm)||nom===0){$('br-'+id).textContent='⚠ datos incompletos';$('br-'+id).style.color='var(--amber3)';return;}
+    const mp=12/freq,vD=new Date(vencISO),pD=new Date(pfFecha);
+    const diffM=(vD.getUTCFullYear()-pD.getUTCFullYear())*12+(vD.getUTCMonth()-pD.getUTCMonth());
+    let n=Math.ceil(diffM/mp);let ant=addMonths(vencISO,-n*mp);
+    if(ant>pfFecha)ant=addMonths(vencISO,-(n+1)*mp);
+    const res=calcBond(ant,pfFecha,vencISO,freq,base,tipo,cpRaw,ytm,nom);
+    if(!res){$('br-'+id).textContent='⚠ error';return;}
+    if(isNaN(res.price)||isNaN(res.dmod)||isNaN(res.vGiro)){$('br-'+id).textContent='⚠ error en cálculo';$('br-'+id).style.color='var(--red3)';return;}
+    $('br-'+id).textContent=`VM: ${fmtM(res.vGiro)} | D*: ${fmt(res.dmod,4)} | DV01: ${fmtP(res.dv01)}`;
+    $('br-'+id).style.color='var(--green3)';
+    rows.push({id,vencISO,cpRaw,freq,base,tipo,ytm,nom,res,ant,pfFecha});
+  });
+  if(!rows.length)return;
+  const totalVM=rows.reduce((s,r)=>s+r.res.vGiro,0);
+  const totalNom=rows.reduce((s,r)=>s+r.nom,0);
+  const dmodPF=rows.reduce((s,r)=>s+r.res.dmod*r.res.vGiro,0)/totalVM;
+  const dmacPF=rows.reduce((s,r)=>s+r.res.dmac*r.res.vGiro,0)/totalVM;
+  const convPF=rows.reduce((s,r)=>s+r.res.conv*r.res.vGiro,0)/totalVM;
+  const dv01PF=rows.reduce((s,r)=>s+r.res.dv01,0);
+  const pfDiv=$('pfResults');pfDiv.style.display='flex';
+  pfDiv.innerHTML=`
+  <div class="card">
+    <div class="c-hdr">Métricas agregadas · ${fmtDate(pfFecha)}</div>
+    <div class="pf-top">
+      <div class="pf-metric"><div class="pf-metric-lbl">Valor de mercado total</div><div class="pf-metric-val blue">${fmtM(totalVM)}</div><div class="pf-metric-unit">${fmtP(totalVM)}</div></div>
+      <div class="pf-metric"><div class="pf-metric-lbl">D. Modificada portafolio</div><div class="pf-metric-val amber">${fmt(dmodPF,4)}</div><div class="pf-metric-unit">pond. por valor de mercado</div></div>
+      <div class="pf-metric"><div class="pf-metric-lbl">DV01 total</div><div class="pf-metric-val green">${fmtP(dv01PF)}</div><div class="pf-metric-unit">$ por 1bp en todas las tasas</div></div>
+      <div class="pf-metric"><div class="pf-metric-lbl">Convexidad portafolio</div><div class="pf-metric-val">${fmt(convPF,4)}</div><div class="pf-metric-unit">pond. por valor de mercado</div></div>
+    </div>
+    <div class="pf-scen-input">
+      <span style="font-size:11px;color:var(--txt2)">Simular:</span>
+      <input type="number" id="pf_bp" value="-30" step="1" oninput="updatePFScen()">
+      <span style="font-size:11px;color:var(--txt2)">bp → Gan/Pérd portafolio:</span>
+      <span class="pf-scen-result" id="pf_scen_result"></span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="c-hdr">Composición del portafolio</div>
+    <div class="c-body"><div class="tscroll"><table class="pf-bond-table">
+      <thead><tr><th>Bono</th><th>Vencimiento</th><th>Nominal</th><th>Precio sucio</th><th>Valor mercado</th><th>Peso %</th><th>D. Mod.</th><th>DV01</th><th>Contrib. D*</th></tr></thead>
+      <tbody>
+        ${rows.map(r=>{const w=r.res.vGiro/totalVM*100;return`<tr><td>Bono #${r.id}</td><td>${fmtDate(r.vencISO)}</td><td>${fmtM(r.nom)}</td><td>${fmt(r.res.price,4)}%</td><td>${fmtM(r.res.vGiro)}</td><td>${fmt(w,2)}%<div class="weight-bar"><div class="weight-fill" style="width:${w}%"></div></div></td><td>${fmt(r.res.dmod,4)}</td><td>${fmtP(r.res.dv01)}</td><td>${fmt(r.res.dmod*w/100,4)}</td></tr>`;}).join('')}
+        <tr class="pf-total"><td colspan="2">TOTAL</td><td>${fmtM(totalNom)}</td><td>—</td><td>${fmtM(totalVM)}</td><td>100%</td><td>${fmt(dmodPF,4)}</td><td>${fmtP(dv01PF)}</td><td>${fmt(dmodPF,4)}</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+  <div class="card">
+    <div class="c-hdr">Escenarios del portafolio</div>
+    <div class="c-body"><div class="tscroll"><table class="st"><thead><tr><th>Escenario</th><th>Δ Valor</th><th>Nuevo VM</th><th>Retorno</th></tr></thead><tbody>
+      ${[-200,-150,-100,-75,-50,-25,0,25,50,75,100,150,200].map(bp=>{
+        const gan=rows.reduce((s,r)=>{const pS=r.res.price+(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*r.res.price;return s+(pS-r.res.price)/100*r.nom;},0);
+        const cls=bp===0?'cur':bp<0?'dn':'up';const gc=bp===0?'':gan>=0?'color:var(--green3)':'color:var(--red3)';
+        return`<tr class="${cls}"><td>${bp===0?'★ Actual':bp>0?'+'+bp+'bp':bp+'bp'}</td><td style="${gc}">${bp===0?'—':(gan>=0?'+':'')+fmtM(gan)}</td><td>${fmtM(totalVM+gan)}</td><td style="${gc}">${bp===0?'—':(gan/totalVM*100>=0?'+':'')+fmt(gan/totalVM*100,3)+'%'}</td></tr>`;
+      }).join('')}
+    </tbody></table></div></div>
+  </div>`;
+  window._pfRows=rows;window._pfTotalVM=totalVM;updatePFScen();
+}
+function updatePFScen(){
+  if(!window._pfRows)return;
+  const bp=parseFloat($('pf_bp').value)||0;
+  const gan=window._pfRows.reduce((s,r)=>{const pS=r.res.price+(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*r.res.price;return s+(pS-r.res.price)/100*r.nom;},0);
+  const el=$('pf_scen_result');el.textContent=(gan>=0?'+':'')+fmtM(gan);el.style.color=gan>=0?'var(--green3)':'var(--red3)';
+}
+addBond();addBond();addBond();
+
+// ── DIRECCIÓN ─────────────────────────────────────────────────
+let _posDir='long';
 function setDirection(dir){
-  _posDir = dir;
-  const isLong = dir==='long';
-  const btnL = document.getElementById('dir-btn-long');
-  const btnS = document.getElementById('dir-btn-short');
-  const info = document.getElementById('dir-info');
-  if(btnL){ btnL.style.background=isLong?'var(--green2)':'var(--bg3)'; btnL.style.color=isLong?'var(--green3)':'var(--txt3)'; }
-  if(btnS){ btnS.style.background=!isLong?'var(--red2)':'var(--bg3)'; btnS.style.color=!isLong?'var(--red3)':'var(--txt3)'; }
-  if(info){ info.style.color=isLong?'var(--green3)':'var(--red3)'; info.textContent=isLong?'▲ Compra al offer · gana si tasas bajan':'▼ Vende al bid · gana si tasas suben'; }
-  // Update save button label if visible
-  const btn=document.getElementById('btn-save-pf');
-  if(btn&&btn.style.display!=='none') btn.textContent=isLong?'📊 Guardar (▲ Largo)':'📊 Guardar (▼ Corto)';
+  _posDir=dir;const isLong=dir==='long';
+  const btnL=$('dir-btn-long'),btnS=$('dir-btn-short'),info=$('dir-info');
+  if(btnL){btnL.style.background=isLong?'var(--green2)':'var(--bg3)';btnL.style.color=isLong?'var(--green3)':'var(--txt3)';}
+  if(btnS){btnS.style.background=!isLong?'var(--red2)':'var(--bg3)';btnS.style.color=!isLong?'var(--red3)':'var(--txt3)';}
+  if(info){info.style.color=isLong?'var(--green3)':'var(--red3)';info.textContent=isLong?'▲ Compra al offer · gana si tasas bajan':'▼ Vende al bid · gana si tasas suben';}
+  const btn=$('btn-save-pf');
+  if(btn&&btn.style.display!=='none')btn.textContent=isLong?'📊 Guardar (▲ Largo)':'📊 Guardar (▼ Corto)';
 }
 
-// ── GUARDAR EN PORTAFOLIO ──────────────────────────────────────
-let _bondResult = null;
-let _bondMeta   = {tipo:'RF', ac:'#3b82f6', ac2:'#1d4ed8', ac3:'#93c5fd'};
+// ── GUARDAR EN PORTAFOLIO ─────────────────────────────────────
+let _bondResult=null;
+let _bondMeta={tipo:'RF',ac:'#3b82f6',ac2:'#1d4ed8',ac3:'#93c5fd'};
 
-function guardarEnPortafolio() {
-  const r = _bondResult;
-  if (!r) { alert('Primero calcule un bono'); return; }
-  const venc = document.querySelector('[id="venc"]')?.value || '';
-  const liq  = document.querySelector('[id="liq"]')?.value  || '';
-  const cpPct = parseFloat(document.querySelector('[id="cp"],[id="cp_raw"]')?.value)||0;
-  const dir   = typeof _posDir !== 'undefined' ? _posDir : 'long';
-  const sign  = dir==='long' ? 1 : -1;
-  const flows = r.flows || [];
-  const nxt   = flows.find(f=>f.fecha > liq) || flows[0] || {};
-  const bond = {
-    id: Date.now(), tipo: _bondMeta.tipo,
-    ac: _bondMeta.ac, ac2: _bondMeta.ac2, ac3: _bondMeta.ac3,
-    dir, label: _bondMeta.tipo + ' · ' + venc,
-    liq, venc, cpPct,
-    nom:      r.nom      || 0,
-    priceRnd: r.priceRnd || r.price || 100,
-    pl:       r.pl       || 0,
-    ic:       r.ic       || 0,
-    vGiro:    r.vGiro    || 0,
-    dmac:     r.dmac     || 0,
-    dmod:     r.dmod     || 0,
-    conv:     r.conv     || 0,
-    dv01:     Math.abs(r.dv01||0) * sign,
-    tirAvg:   r.tirAvg   || r.TIR_EA || 0,
-    cupsRem:  flows.length,
-    nextCupon: nxt.fecha || '',
+function guardarEnPortafolio(){
+  const r=_bondResult;if(!r){alert('Primero calcule un bono');return;}
+  const venc=$('venc')?.value||'';
+  const liq=$('liq')?.value||'';
+  const dir=_posDir;const sign=dir==='long'?1:-1;
+  const flows=r.flows||[];const nxt=flows.find(f=>f.fecha>liq)||flows[0]||{};
+  const bond={
+    id:Date.now(),tipo:_bondMeta.tipo,
+    ac:_bondMeta.ac,ac2:_bondMeta.ac2,ac3:_bondMeta.ac3,
+    dir,label:_bondMeta.tipo+' · '+venc,
+    liq,venc,cpPct:parseFloat($('coupon')?.value)||0,
+    nom:r.nom||0,priceRnd:r.priceRnd||r.price||100,
+    pl:r.pl||0,ic:r.ic||0,vGiro:r.vGiro||0,
+    dmac:r.dmac||0,dmod:r.dmod||0,conv:r.conv||0,
+    dv01:Math.abs(r.dv01||0)*sign,
+    tirAvg:0,cupsRem:flows.length,nextCupon:nxt.fecha||'',
   };
-  try {
-    const list = JSON.parse(localStorage.getItem('rf_portfolio')||'[]');
-    list.push(bond);
-    localStorage.setItem('rf_portfolio', JSON.stringify(list));
-    const btn = document.getElementById('btn-save-pf');
+  try{
+    const list=JSON.parse(localStorage.getItem('rf_portfolio')||'[]');
+    list.push(bond);localStorage.setItem('rf_portfolio',JSON.stringify(list));
+    const btn=$('btn-save-pf');
     if(btn){
-      btn.textContent = dir==='long'?'✓ Guardado (Largo)!':'✓ Guardado (Corto)!';
-      btn.style.background = dir==='long'?'#064e3b':'#7f1d1d';
-      btn.style.borderColor = dir==='long'?'#10b981':'#ef4444';
-      setTimeout(()=>{ btn.textContent='📊 Guardar en portafolio'; btn.style.background='#4c1d95'; btn.style.borderColor='#7c3aed'; },2500);
+      btn.textContent=dir==='long'?'✓ Guardado (Largo)!':'✓ Guardado (Corto)!';
+      btn.style.background=dir==='long'?'#064e3b':'#7f1d1d';
+      btn.style.borderColor=dir==='long'?'#10b981':'#ef4444';
+      setTimeout(()=>{btn.textContent='📊 Guardar en portafolio';btn.style.background='#4c1d95';btn.style.borderColor='#7c3aed';},2500);
     }
-  } catch(e){ alert('Error: '+e.message); }
+  }catch(e){alert('Error: '+e.message);}
 }
 
-function mostrarBtnGuardar(tipo, ac, ac2, ac3, result) {
-  _bondMeta   = {tipo, ac, ac2, ac3};
-  _bondResult = result;
-  let btn = document.getElementById('btn-save-pf');
+function mostrarBtnGuardar(tipo,ac,ac2,ac3,result){
+  _bondMeta={tipo,ac,ac2,ac3};
+  _bondResult=result; // FIX: siempre se asigna el resultado actual
+  let btn=$('btn-save-pf');
   if(!btn){
-    btn = document.createElement('button');
-    btn.id = 'btn-save-pf';
-    btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #7c3aed;background:#4c1d95;color:#ddd6fe;box-shadow:0 4px 20px rgba(124,58,237,.5);transition:all .2s';
-    btn.onclick = guardarEnPortafolio;
-    document.body.appendChild(btn);
+    btn=document.createElement('button');btn.id='btn-save-pf';
+    btn.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #7c3aed;background:#4c1d95;color:#ddd6fe;box-shadow:0 4px 20px rgba(124,58,237,.5);transition:all .2s';
+    btn.onclick=guardarEnPortafolio;document.body.appendChild(btn);
   }
-  const dir = typeof _posDir !== 'undefined' ? _posDir : 'long';
-  btn.textContent = dir==='long'?'📊 Guardar (▲ Largo)':'📊 Guardar (▼ Corto)';
-  btn.style.borderColor = dir==='long'?'#7c3aed':'#ef4444';
-  btn.style.display = 'block';
+  btn.textContent=_posDir==='long'?'📊 Guardar (▲ Largo)':'📊 Guardar (▼ Corto)';
+  btn.style.borderColor=_posDir==='long'?'#7c3aed':'#ef4444';
+  btn.style.display='block';
 }
 </script>
+</body>
 </html>
