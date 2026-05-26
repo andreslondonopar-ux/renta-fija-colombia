@@ -1290,9 +1290,13 @@ function renderIPCTable(){
 
   // Últimos 36 históricos + estimados
   const hist = [...IPC_TABLE].slice(-36).reverse();
+  // Solo estimados posteriores al último histórico real
+  const lastHistEntry = IPC_TABLE[IPC_TABLE.length-1];
+  const lastHistSortT = lastHistEntry ? lastHistEntry.y*100+lastHistEntry.m : 0;
   const estRows = hasEst
     ? Object.entries(estimados)
         .map(([k,v])=>({y:parseInt(k.split('-')[0]),m:parseInt(k.split('-')[1]),v,est:true}))
+        .filter(r => r.y*100+r.m > lastHistSortT)
         .sort((a,b)=>b.y!==a.y?b.y-a.y:b.m-a.m)
     : [];
 
@@ -1332,45 +1336,6 @@ function renderIPCTable(){
     </table>
     <div style="padding:4px 6px;font-size:9px;color:var(--txt3)">DANE · ámbar=est.</div>`;
 
-  // ── GRÁFICA ──
-  const canvas = document.getElementById('ipc-chart-canvas');
-  if(!canvas) return;
-  const allForChart = [...IPC_TABLE].slice(-36);
-  if(hasEst){
-    Object.entries(estimados)
-      .sort((a,b)=>a[0]<b[0]?-1:1)
-      .forEach(([k,v])=>allForChart.push({y:parseInt(k.split('-')[0]),m:parseInt(k.split('-')[1]),v,est:true}));
-  }
-  const labels = allForChart.map(r=>MES_ES[r.m-1]+' '+String(r.y).slice(2));
-  const histData = allForChart.map(r=>r.est?null:(r.v*100).toFixed(2));
-  const estData  = allForChart.map(r=>r.est?(r.v*100).toFixed(2):null);
-  // Último histórico conecta con primer estimado
-  const lastHistIdx = allForChart.map(r=>!r.est).lastIndexOf(true);
-  const bridgeData = allForChart.map((r,i)=>i===lastHistIdx||(r.est&&i===lastHistIdx+1)?( r.v*100).toFixed(2):null);
-
-  if(_ipcChart){ try{_ipcChart.destroy();}catch(e){} _ipcChart=null; }
-  _ipcChart = new Chart(canvas, {
-    type:'line',
-    data:{labels, datasets:[
-      {label:'IPC Histórico',data:histData,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',
-       borderWidth:2,pointRadius:2,tension:.3,fill:true,spanGaps:false},
-      {label:'IPC Estimado',data:estData,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',
-       borderWidth:2,pointRadius:2,tension:.3,fill:true,borderDash:[5,3],spanGaps:false},
-      {label:'_bridge',data:bridgeData,borderColor:'#f59e0b',borderWidth:1.5,
-       pointRadius:0,tension:.3,fill:false,borderDash:[3,2],spanGaps:true},
-    ]},
-    options:{
-      responsive:true,maintainAspectRatio:false,animation:{duration:300},
-      plugins:{legend:{display:true,position:'top',labels:{color:'#8892a4',font:{size:9},boxWidth:12,
-        filter:i=>!i.text.startsWith('_')}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label.startsWith('_')?null:ctx.dataset.label+': '+ctx.raw+'%'}}},
-      scales:{
-        x:{ticks:{color:'#4a5568',font:{size:8},maxTicksLimit:10,autoSkip:true},grid:{color:'rgba(255,255,255,.03)'}},
-        y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.03)'},
-           title:{display:true,text:'IPC Anual (%)',color:'#4a5568',font:{size:9}}}
-      }
-    }
-  });
 }
 
 renderIPCTable();
