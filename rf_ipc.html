@@ -1211,7 +1211,7 @@ let _ipcChart = null;
 function renderIPCChart(){
   const canvas = document.getElementById('ipc-chart-canvas');
   if(!canvas) return;
-  const hasEst = typeof IPC_CURVE !== 'undefined' && Object.keys(IPC_CURVE).length > 0;
+  const hasEst = typeof IPC_CURVE_DATA !== 'undefined' && Object.keys(IPC_CURVE_DATA).length > 0;
   const histData = IPC_TABLE.map(r => ({
     label: String(r.m).padStart(2,'0')+'/'+String(r.y).slice(2),
     val: +(r.v*100).toFixed(2), sort: r.y*100+r.m
@@ -1219,7 +1219,7 @@ function renderIPCChart(){
   // Solo proyectar fechas posteriores al último dato histórico disponible
   const lastHistSort = histData.length ? histData[histData.length-1].sort : 0;
   const estData = hasEst
-    ? Object.entries(IPC_CURVE)
+    ? Object.entries(IPC_CURVE_DATA)
         .map(([k,v]) => { const [y,m]=k.split('-'); return {label:m+'/'+y.slice(2),val:+(v*100).toFixed(2),sort:parseInt(y)*100+parseInt(m),key:k}; })
         .filter(r => r.sort > lastHistSort)
         .sort((a,b)=>a.sort-b.sort)
@@ -1259,7 +1259,7 @@ function renderIPCTable(){
   if(!el) return;
 
   // Cargar curva IPC estimada si está disponible
-  const estimados = typeof IPC_CURVE !== 'undefined' ? IPC_CURVE : {};
+  const estimados = typeof IPC_CURVE_DATA !== 'undefined' ? IPC_CURVE_DATA : {};
   const hasEst = Object.keys(estimados).length > 0;
   const badge = document.getElementById('ipc-table-badge');
   if(badge) badge.textContent = hasEst ? 'Histórico + Estimado' : 'Histórico DANE';
@@ -1283,17 +1283,24 @@ function renderIPCTable(){
     const sepStyle = isFirst ? 'border-top:2px solid var(--amber);' : '';
     const color = r.v > 0.08 ? 'var(--red3)' : r.v > 0.05 ? 'var(--amber3)' : 'var(--green3)';
     const nameStyle = r.est ? ' style="color:var(--amber3)"' : '';
+    // Publication date: ~5th business day of month following the reference month
+    // Simple approximation: day 9 of month+1 (covers most cases)
+    const pubM = r.m === 12 ? 1 : r.m + 1;
+    const pubY = r.m === 12 ? r.y + 1 : r.y;
+    const pubLabel = r.est ? '~est.' : `${String(9).padStart(2,'0')}/${String(pubM).padStart(2,'0')}/${pubY}`;
     return `<tr style="${sepStyle}">
-      <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap"${nameStyle}>${MES_ES[r.m-1].slice(0,3)} ${String(r.y).slice(2)}</td>
+      <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap"${nameStyle}>${MES_ES[r.m-1].slice(0,3)} ${r.y}</td>
       <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:10px">${(r.v*100).toFixed(2)}%</td>
+      <td style="padding:3px 6px;font-size:9px;color:var(--txt3);white-space:nowrap">${pubLabel}</td>
     </tr>`;
   }).join('');
 
   el.innerHTML = `
     <table style="width:100%;border-collapse:collapse;font-size:10px">
       <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
-        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Mes</th>
+        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Mes ref.</th>
         <th style="padding:4px 6px;text-align:right;font-size:9px;color:var(--txt3)">IPC</th>
+        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Pub.</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
