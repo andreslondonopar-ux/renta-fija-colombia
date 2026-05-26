@@ -397,7 +397,7 @@ function renderAggregate(pf){
           <div class="m"><div class="m-lbl">Convexidad pond.</div><div class="m-val">${fmt(wConv,4)}</div><div class="m-unit">—</div></div>
           <div class="m"><div class="m-lbl">Cupón pond.</div><div class="m-val">${pct(wCpPct,2)}</div><div class="m-unit">tasa facial pond.</div></div>
           <div class="m"><div class="m-lbl">Precio sucio pond.</div><div class="m-val">${pct(wPrice,4)}</div><div class="m-unit">% del par</div></div>
-          <div class="m"><div class="m-lbl">Break-even diario</div><div class="m-val">${fmt(breakEven1d,4)}</div><div class="m-unit">bp/día (carry vs DV01)</div></div>
+          <div class="m"><div class="m-lbl">Carry diario</div><div class="m-val" style="color:${carryAnual>=0?'var(--green3)':'var(--red3)'}">${fmtM(carryAnual/365)}</div><div class="m-unit">$/día (cupones netos)</div></div>
         </div>
       </div>
     </div>
