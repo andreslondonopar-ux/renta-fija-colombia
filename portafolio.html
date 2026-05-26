@@ -257,10 +257,15 @@ function analyze(pfId){
 // FIX: price ya viene como % (ej 96.05), NO dividir por 100 de nuevo
 // P&G = (-dmod*(bp/10000) + 0.5*conv*(bp/10000)^2) * (price/100) * nom
 function calcPG(b, bp){
-  const sign=b.dir==='short'?-1:1;
-  const price=b.priceRnd||b.price||100; // ya en %
-  const pg=(-b.dmod*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*(price/100)*b.nom;
-  return pg*sign;
+  const sign = b.dir==='short' ? -1 : 1;
+  const dmod = parseFloat(b.dmod) || 0;
+  const conv = parseFloat(b.conv) || 0;
+  const nom  = parseFloat(b.nom)  || 0;
+  let price = parseFloat(b.priceRnd || b.price || 100);
+  if(price < 2) price = price * 100;
+  if(nom === 0 || dmod === 0) return 0;
+  const pg = (-dmod*(bp/10000) + 0.5*conv*(bp/10000)**2) * (price/100) * nom;
+  return pg * sign;
 }
 function signedDV01(b){return(b.dir==='short'?-1:1)*Math.abs(b.dv01||0);}
 function isShortBond(b){
@@ -271,34 +276,47 @@ function isShortBond(b){
 
 // ── AGGREGATE VIEW ────────────────────────────────────────────
 function renderAggregate(pf){
-  const bonds=pf.bonds;
-  const tot=bonds.reduce((s,b)=>s+Math.abs(b.vGiro||0),0)||1;
-  const totVGiro=bonds.reduce((s,b)=>s+(b.dir==='short'?-1:1)*(b.vGiro||0),0);
+  // Normalizar todos los campos numéricos defensivamente
+  const bonds=pf.bonds.map(b=>({
+    ...b,
+    nom:      parseFloat(b.nom)      || 0,
+    vGiro:    parseFloat(b.vGiro)    || 0,
+    dmod:     parseFloat(b.dmod)     || 0,
+    dmac:     parseFloat(b.dmac)     || 0,
+    conv:     parseFloat(b.conv)     || 0,
+    dv01:     parseFloat(b.dv01)     || 0,
+    priceRnd: parseFloat(b.priceRnd) || 100,
+    ic:       parseFloat(b.ic)       || 0,
+    pl:       parseFloat(b.pl)       || 0,
+    cpPct:    parseFloat(b.cpPct)    || 0,
+    cupsRem:  parseFloat(b.cupsRem)  || 0,
+  }));
+  const tot=bonds.reduce((s,b)=>s+Math.abs(b.vGiro),0)||1;
+  const totVGiro=bonds.reduce((s,b)=>s+(b.dir==='short'?-1:1)*b.vGiro,0);
   const totDV01net=bonds.reduce((s,b)=>s+signedDV01(b),0);
-  const totDV01gross=bonds.reduce((s,b)=>s+Math.abs(b.dv01||0),0);
-  const totNom=bonds.reduce((s,b)=>s+(b.nom||0),0);
+  const totDV01gross=bonds.reduce((s,b)=>s+Math.abs(b.dv01),0);
+  const totNom=bonds.reduce((s,b)=>s+b.nom,0);
   const nLong=bonds.filter(b=>b.dir!=='short').length;
   const nShort=bonds.filter(b=>b.dir==='short').length;
 
   // Weighted averages by abs vGiro
-  const wAvg=fn=>bonds.reduce((s,b)=>s+fn(b)*(Math.abs(b.vGiro||0)/tot),0);
-  const wDmod=wAvg(b=>b.dmod||0);
-  const wDmac=wAvg(b=>b.dmac||0);
-  const wConv=wAvg(b=>b.conv||0);
-  const wPrice=wAvg(b=>b.priceRnd||100);
-  const wIC=wAvg(b=>b.ic||0);
-  const wPL=wAvg(b=>b.pl||0);
-  const wCpPct=wAvg(b=>b.cpPct||0);
+  const wAvg=fn=>bonds.reduce((s,b)=>s+fn(b)*(Math.abs(b.vGiro)/tot),0);
+  const wDmod=wAvg(b=>b.dmod);
+  const wDmac=wAvg(b=>b.dmac);
+  const wConv=wAvg(b=>b.conv);
+  const wPrice=wAvg(b=>b.priceRnd);
+  const wIC=wAvg(b=>b.ic);
+  const wPL=wAvg(b=>b.pl);
+  const wCpPct=wAvg(b=>b.cpPct);
 
-  // Carry anual — cupón en % * nominal
+  // Carry anual
   const carryAnual=bonds.reduce((s,b)=>{
     const sign=b.dir==='short'?-1:1;
-    return s+sign*(b.cpPct||0)/100*(b.nom||0);
+    return s+sign*b.cpPct/100*b.nom;
   },0);
   const carryDiario=carryAnual/365;
   const breakEven1d=Math.abs(totDV01net)>0?Math.abs(carryDiario/totDV01net)*100:0;
-
-  // Parallel scenarios — usa calcPG que ya tiene el fix
+  // Parallel scenarios
   const scens=[-300,-200,-100,-50,-25,0,25,50,100,200,300];
   const scenRows=scens.map(bp=>{
     const pgTotal=bonds.reduce((s,b)=>s+calcPG(b,bp),0);
@@ -452,8 +470,21 @@ function renderAggregate(pf){
 
 // ── COMPARE VIEW — fichas verticales lado a lado ───────────────
 function renderCompare(pf){
-  const bonds=pf.bonds;
-  if(!bonds.length)return;
+  if(!pf.bonds.length)return;
+  const bonds=pf.bonds.map(b=>({
+    ...b,
+    nom:      parseFloat(b.nom)      || 0,
+    vGiro:    parseFloat(b.vGiro)    || 0,
+    dmod:     parseFloat(b.dmod)     || 0,
+    dmac:     parseFloat(b.dmac)     || 0,
+    conv:     parseFloat(b.conv)     || 0,
+    dv01:     parseFloat(b.dv01)     || 0,
+    priceRnd: parseFloat(b.priceRnd) || 100,
+    ic:       parseFloat(b.ic)       || 0,
+    pl:       parseFloat(b.pl)       || 0,
+    cpPct:    parseFloat(b.cpPct)    || 0,
+    cupsRem:  parseFloat(b.cupsRem)  || 0,
+  }));
 
   // Para cada métrica, encontrar el mejor y peor entre los bonos
   function bestIdx(fn,higher=true){
