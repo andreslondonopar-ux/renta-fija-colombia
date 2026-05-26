@@ -46,10 +46,9 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .btn-ghost{background:var(--bg3);color:var(--txt3);border-color:var(--border2)}
 .btn-ghost:hover{color:var(--txt)}
 .btn-red{background:var(--red2);color:var(--red3);border-color:var(--red);padding:2px 6px;font-size:9px}
-.btn-green{background:var(--green2);color:var(--green3);border-color:var(--green)}
 .new-pf{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--border)}
 .new-pf input{flex:1;padding:5px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);font-size:11px}
-.card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:var(--r2);overflow:hidden;margin-bottom:12px}
+.card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:var(--r2);overflow:hidden;margin-bottom:2px}
 .c-hdr{padding:8px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--purple3);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:8px}
 .c-body{padding:12px}
 .mg{display:grid;gap:8px}
@@ -63,12 +62,12 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .m-val{font-size:16px;font-weight:700;line-height:1.1}
 .m-unit{font-size:9px;color:var(--txt3);margin-top:2px}
 .ft{width:100%;border-collapse:collapse;font-size:11px}
-.ft th{padding:7px 10px;text-align:right;color:var(--txt3);font-size:9px;text-transform:uppercase;white-space:nowrap;background:var(--bg3);position:sticky;top:0}
+.ft th{padding:7px 10px;text-align:right;color:var(--txt3);font-size:9px;text-transform:uppercase;white-space:nowrap;background:var(--bg3);position:sticky;top:0;z-index:1}
 .ft th:first-child,.ft th:nth-child(2){text-align:left}
 .ft td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;white-space:nowrap}
 .ft td:first-child,.ft td:nth-child(2){text-align:left}
 .ft tbody tr:hover{background:var(--bg3)}
-.ft tfoot td{background:var(--bg3);font-weight:700}
+.ft tfoot td{background:var(--bg3);font-weight:700;border-top:2px solid var(--border2)}
 .ft .row-zero{background:var(--bg4);font-weight:700}
 .tscroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r)}
 .empty{padding:40px;text-align:center;color:var(--txt3);border:1px dashed var(--border2);border-radius:var(--r2)}
@@ -76,7 +75,19 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .bar-wrap{display:flex;align-items:center;gap:6px}
 .bar-bg{flex:1;height:6px;background:var(--bg4);border-radius:3px;min-width:40px}
 .bar-fill{height:100%;border-radius:3px}
-.dir-long{color:var(--green3)}.dir-short{color:var(--red3)}
+
+/* COMPARE CARDS — layout vertical lado a lado */
+.compare-grid{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}
+.compare-card{min-width:220px;flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;display:flex;flex-direction:column}
+.compare-card-hdr{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.compare-card-body{flex:1;padding:0}
+.compare-row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid var(--border);font-size:11px}
+.compare-row:last-child{border-bottom:none}
+.compare-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;flex:1}
+.compare-val{font-weight:700;font-family:monospace;text-align:right}
+.compare-sep{padding:4px 12px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;background:var(--bg4);border-bottom:1px solid var(--border)}
+/* Highlight best/worst in compare */
+.best{color:var(--green3)}.worst{color:var(--red3)}.neutral{color:var(--txt)}
 </style>
 </head>
 <body>
@@ -108,7 +119,7 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
       <button class="btn btn-ghost" onclick="renderSidebar()" style="padding:2px 7px;font-size:9px">↻</button>
     </div>
     <div class="new-pf">
-      <input type="text" id="new-pf-name" placeholder="Nombre del portafolio..." maxlength="30">
+      <input type="text" id="new-pf-name" placeholder="Nombre del portafolio..." maxlength="30" onkeydown="if(event.key==='Enter')createPF()">
       <button class="btn btn-purple" onclick="createPF()" style="padding:5px 10px;flex-shrink:0">+</button>
     </div>
     <div class="sidebar-body" id="sidebar-body">
@@ -119,11 +130,11 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
   <div class="content" id="main-content">
     <div class="empty" style="margin:auto;max-width:400px">
       <div style="font-size:32px;margin-bottom:10px">📈</div>
-      <div style="font-size:11px;line-height:1.7">
+      <div style="font-size:11px;line-height:1.9">
         1. Crea un portafolio con el botón <strong style="color:var(--purple3)">+</strong><br>
         2. Calcula un bono en cualquier calculadora<br>
         3. Presiona <strong style="color:var(--purple3)">📊 Guardar en portafolio</strong><br>
-        4. Selecciona el portafolio aquí y presiona <strong style="color:var(--purple3)">▶ Analizar</strong>
+        4. Selecciona el portafolio aquí → <strong style="color:var(--purple3)">▶ Analizar</strong>
       </div>
     </div>
   </div>
@@ -134,55 +145,55 @@ const $=id=>document.getElementById(id);
 const fmt=(n,d=4)=>typeof n==='number'?n.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 const fmtP=n=>'$'+Math.round(n).toLocaleString('es-CO');
 const fmtM=n=>{const a=Math.abs(n),s=n<0?'-':'';return a>=1e9?s+'$'+fmt(a/1e9,3)+' Bn':a>=1e6?s+'$'+fmt(a/1e6,2)+' MM':(n<0?'-':'')+fmtP(Math.abs(n));};
-function fmtDate(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
+function fmtDate(iso){if(!iso)return'—';const p=iso.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:iso;}
 function pct(n,d=2){return fmt(n,d)+'%';}
 
 let MODE='aggregate', SELECTED_PF=null;
 
 // ── STORAGE ───────────────────────────────────────────────────
-function getStore(){try{return JSON.parse(localStorage.getItem('rf_pf_store')||'{"portfolios":[]}');}catch(e){return{portfolios:[]};}}
+function getStore(){try{return JSON.parse(localStorage.getItem('rf_pf_store')||'{"portfolios":[]}');}catch{return{portfolios:[]};}}
 function setStore(s){localStorage.setItem('rf_pf_store',JSON.stringify(s));}
-function getPending(){try{return JSON.parse(localStorage.getItem('rf_portfolio')||'[]');}catch(e){return[];}}
+function getPending(){try{return JSON.parse(localStorage.getItem('rf_portfolio')||'[]');}catch{return[];}}
 
-// ── PORTFOLIO MANAGEMENT ───────────────────────────────────────
+// ── PORTFOLIO MANAGEMENT ──────────────────────────────────────
 function createPF(){
-  const inp=$('new-pf-name'), name=inp.value.trim();
+  const inp=$('new-pf-name'),name=inp.value.trim();
   if(!name){inp.focus();return;}
   const store=getStore();
   store.portfolios.push({id:Date.now(),name,bonds:[]});
-  setStore(store); inp.value=''; renderSidebar();
+  setStore(store);inp.value='';renderSidebar();
 }
 function deletePF(id){
   if(!confirm('¿Eliminar este portafolio?'))return;
   const store=getStore();
   store.portfolios=store.portfolios.filter(p=>p.id!==id);
-  setStore(store); if(SELECTED_PF===id)SELECTED_PF=null;
-  renderSidebar(); $('main-content').innerHTML='<div class="empty" style="margin:auto;max-width:400px">Portafolio eliminado</div>';
+  setStore(store);if(SELECTED_PF===id)SELECTED_PF=null;
+  renderSidebar();$('main-content').innerHTML='<div class="empty" style="margin:auto;max-width:400px">Portafolio eliminado</div>';
 }
 function addToPF(pfId,bondId){
-  const pending=getPending(), bond=pending.find(b=>b.id===bondId); if(!bond)return;
-  const store=getStore(), pf=store.portfolios.find(p=>p.id===pfId); if(!pf)return;
+  const pending=getPending(),bond=pending.find(b=>b.id===bondId);if(!bond)return;
+  const store=getStore(),pf=store.portfolios.find(p=>p.id===pfId);if(!pf)return;
   pf.bonds.push(bond);
   localStorage.setItem('rf_portfolio',JSON.stringify(pending.filter(b=>b.id!==bondId)));
-  setStore(store); renderSidebar();
+  setStore(store);renderSidebar();
 }
 function removeBond(pfId,bondId){
-  const store=getStore(), pf=store.portfolios.find(p=>p.id===pfId);
+  const store=getStore(),pf=store.portfolios.find(p=>p.id===pfId);
   if(pf)pf.bonds=pf.bonds.filter(b=>b.id!==bondId);
-  setStore(store); renderSidebar();
+  setStore(store);renderSidebar();if(SELECTED_PF===pfId)analyze(pfId);
 }
 function clearAll(){
   if(!confirm('¿Limpiar todo?'))return;
-  localStorage.removeItem('rf_pf_store'); localStorage.removeItem('rf_portfolio');
-  SELECTED_PF=null; renderSidebar();
+  localStorage.removeItem('rf_pf_store');localStorage.removeItem('rf_portfolio');
+  SELECTED_PF=null;renderSidebar();
   $('main-content').innerHTML='<div class="empty" style="margin:auto">Todo limpiado</div>';
 }
 
-// ── RENDER SIDEBAR ─────────────────────────────────────────────
+// ── SIDEBAR ───────────────────────────────────────────────────
 function renderSidebar(){
-  const store=getStore(), pending=getPending();
+  const store=getStore(),pending=getPending();
   const total=store.portfolios.reduce((s,p)=>s+p.bonds.length,0)+pending.length;
-  const cnt=$('total-count'); if(cnt)cnt.textContent=total+' bono'+(total!==1?'s':'');
+  const cnt=$('total-count');if(cnt)cnt.textContent=total+' bono'+(total!==1?'s':'');
   let html='';
 
   if(pending.length){
@@ -191,11 +202,13 @@ function renderSidebar(){
       <div class="pf-group-body">
         ${pending.map(b=>`<div class="bond-card">
           <div class="bond-type" style="background:${b.ac2||'#1a2540'};border-color:${b.ac||'#1e2d4a'};color:${b.ac3||'#e8eaf0'}">${b.tipo||'RF'}</div>
-          <div class="bond-info"><div class="bond-label">${b.label||'Bono'}</div>
-          <div class="bond-meta">${fmtDate(b.liq)} → ${fmtDate(b.venc)}</div>
-          <div style="margin-top:4px;display:flex;gap:3px;flex-wrap:wrap">
-            ${store.portfolios.map(pf=>`<button class="btn btn-ghost" style="padding:2px 6px;font-size:9px" onclick="addToPF(${pf.id},${b.id})">→ ${pf.name.slice(0,12)}</button>`).join('')}
-          </div></div>
+          <div class="bond-info">
+            <div class="bond-label">${b.label||'Bono'}</div>
+            <div class="bond-meta">${fmtDate(b.liq)} → ${fmtDate(b.venc)}</div>
+            <div style="margin-top:4px;display:flex;gap:3px;flex-wrap:wrap">
+              ${store.portfolios.map(pf=>`<button class="btn btn-ghost" style="padding:2px 6px;font-size:9px" onclick="addToPF(${pf.id},${b.id})">→ ${pf.name.slice(0,12)}</button>`).join('')}
+            </div>
+          </div>
         </div>`).join('')}
       </div></div>`;
   }
@@ -211,8 +224,9 @@ function renderSidebar(){
       <div class="pf-group-body">
         ${pf.bonds.map(b=>`<div class="bond-card">
           <div class="bond-type" style="background:${b.ac2||'#1a2540'};border-color:${b.ac||'#1e2d4a'};color:${b.ac3||'#e8eaf0'};width:28px;height:28px;font-size:8px">${b.tipo||'RF'}</div>
-          <div class="bond-info"><div class="bond-label" style="font-size:10px">${b.label||'Bono'}</div>
-          <div class="bond-meta">${b.dir==='short'?'<span style="color:var(--red3)">▼ CORTO</span>':'<span style="color:var(--green3)">▲ LARGO</span>'} · ${fmtM(b.nom)}</div>
+          <div class="bond-info">
+            <div class="bond-label" style="font-size:10px">${b.label||'Bono'}</div>
+            <div class="bond-meta">${b.dir==='short'?'<span style="color:var(--red3)">▼ CORTO</span>':'<span style="color:var(--green3)">▲ LARGO</span>'} · ${fmtM(b.nom||0)}</div>
           </div>
           <button class="btn btn-red" onclick="removeBond(${pf.id},${b.id})">✕</button>
         </div>`).join('')}
@@ -227,129 +241,127 @@ function renderSidebar(){
   $('sidebar-body').innerHTML=html;
 }
 
-function selectPF(id){SELECTED_PF=SELECTED_PF===id?null:id; renderSidebar(); if(SELECTED_PF)analyze(SELECTED_PF);}
+function selectPF(id){SELECTED_PF=SELECTED_PF===id?null:id;renderSidebar();if(SELECTED_PF)analyze(SELECTED_PF);}
 function setMode(m){MODE=m;document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));$('tab-'+m).classList.add('active');if(SELECTED_PF)analyze(SELECTED_PF);}
-
-// ── FULL ANALYSIS ──────────────────────────────────────────────
 function analyze(pfId){
-  const store=getStore(), pf=store.portfolios.find(p=>p.id===pfId);
+  const store=getStore(),pf=store.portfolios.find(p=>p.id===pfId);
   if(!pf||!pf.bonds.length){
     $('main-content').innerHTML='<div class="empty" style="margin:auto;max-width:400px"><div style="font-size:28px;margin-bottom:8px">📭</div><div style="font-size:11px">Sin bonos en este portafolio</div></div>';
     return;
   }
-  if(MODE==='aggregate') renderAggregate(pf);
+  if(MODE==='aggregate')renderAggregate(pf);
   else renderCompare(pf);
 }
 
+// ── HELPERS ───────────────────────────────────────────────────
+// FIX: price ya viene como % (ej 96.05), NO dividir por 100 de nuevo
+// P&G = (-dmod*(bp/10000) + 0.5*conv*(bp/10000)^2) * (price/100) * nom
+function calcPG(b, bp){
+  const sign=b.dir==='short'?-1:1;
+  const price=b.priceRnd||b.price||100; // ya en %
+  const pg=(-b.dmod*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*(price/100)*b.nom;
+  return pg*sign;
+}
+function signedDV01(b){return(b.dir==='short'?-1:1)*Math.abs(b.dv01||0);}
+function isShortBond(b){
+  if(!b.venc||!b.liq)return false;
+  const days=(new Date(b.venc+'T12:00:00')-new Date(b.liq+'T12:00:00'))/86400000;
+  return days<=3*365;
+}
+
+// ── AGGREGATE VIEW ────────────────────────────────────────────
 function renderAggregate(pf){
   const bonds=pf.bonds;
-  // Signed DV01: long=positive, short=negative
-  const signedDV01=b=>(b.dir==='short'?-1:1)*Math.abs(b.dv01);
-  const tot=bonds.reduce((s,b)=>s+Math.abs(b.vGiro),0);
-  const totLong=bonds.filter(b=>b.dir!=='short').reduce((s,b)=>s+b.vGiro,0);
-  const totShort=bonds.filter(b=>b.dir==='short').reduce((s,b)=>s+b.vGiro,0);
-  const totN=bonds.reduce((s,b)=>s+b.nom,0);
+  const tot=bonds.reduce((s,b)=>s+Math.abs(b.vGiro||0),0)||1;
+  const totVGiro=bonds.reduce((s,b)=>s+(b.dir==='short'?-1:1)*(b.vGiro||0),0);
   const totDV01net=bonds.reduce((s,b)=>s+signedDV01(b),0);
-  const totDV01gross=bonds.reduce((s,b)=>s+Math.abs(b.dv01),0);
-  const totVGiro=bonds.reduce((s,b)=>s+(b.dir==='short'?-1:1)*b.vGiro,0);
-  const wBase=Math.abs(totVGiro)||1;
-  const wDmod=bonds.reduce((s,b)=>s+b.dmod*(Math.abs(b.vGiro)/tot),0);
-  const wDmac=bonds.reduce((s,b)=>s+b.dmac*(Math.abs(b.vGiro)/tot),0);
-  const wConv=bonds.reduce((s,b)=>s+b.conv*(Math.abs(b.vGiro)/tot),0);
-  const wTIR=bonds.reduce((s,b)=>s+(b.tirAvg||0)*(Math.abs(b.vGiro)/tot),0);
-  const wPrice=bonds.reduce((s,b)=>s+b.priceRnd*(Math.abs(b.vGiro)/tot),0);
-  const wIC=bonds.reduce((s,b)=>s+(b.ic||0)*(Math.abs(b.vGiro)/tot),0);
-  const wPL=bonds.reduce((s,b)=>s+(b.pl||0)*(Math.abs(b.vGiro)/tot),0);
+  const totDV01gross=bonds.reduce((s,b)=>s+Math.abs(b.dv01||0),0);
+  const totNom=bonds.reduce((s,b)=>s+(b.nom||0),0);
   const nLong=bonds.filter(b=>b.dir!=='short').length;
   const nShort=bonds.filter(b=>b.dir==='short').length;
-  
-  // Carry: annual coupon income (long positions receive, short pay)
+
+  // Weighted averages by abs vGiro
+  const wAvg=fn=>bonds.reduce((s,b)=>s+fn(b)*(Math.abs(b.vGiro||0)/tot),0);
+  const wDmod=wAvg(b=>b.dmod||0);
+  const wDmac=wAvg(b=>b.dmac||0);
+  const wConv=wAvg(b=>b.conv||0);
+  const wPrice=wAvg(b=>b.priceRnd||100);
+  const wIC=wAvg(b=>b.ic||0);
+  const wPL=wAvg(b=>b.pl||0);
+  const wCpPct=wAvg(b=>b.cpPct||0);
+
+  // Carry anual — cupón en % * nominal
   const carryAnual=bonds.reduce((s,b)=>{
     const sign=b.dir==='short'?-1:1;
-    return s+sign*(b.cpPct||0)/100*b.nom;
+    return s+sign*(b.cpPct||0)/100*(b.nom||0);
   },0);
-  
-  // Break-even: bp needed for DV01 loss to offset 1 day of carry
   const carryDiario=carryAnual/365;
   const breakEven1d=Math.abs(totDV01net)>0?Math.abs(carryDiario/totDV01net)*100:0;
 
-  // Scenarios — parallel shift
+  // Parallel scenarios — usa calcPG que ya tiene el fix
   const scens=[-300,-200,-100,-50,-25,0,25,50,100,200,300];
   const scenRows=scens.map(bp=>{
-    const pgTotal=bonds.reduce((s,b)=>{
-      const sign=b.dir==='short'?-1:1;
-      const pg=(-b.dmod*(bp/10000)+0.5*b.conv*(bp/10000)**2)*(b.priceRnd/100)*b.nom;
-      return s+pg*sign;
-    },0);
+    const pgTotal=bonds.reduce((s,b)=>s+calcPG(b,bp),0);
     const z=bp===0;
     const col=pgTotal>0?'var(--green3)':pgTotal<0?'var(--red3)':'var(--txt)';
-    return `<tr class="${z?'row-zero':''}">
+    const retorno=Math.abs(totVGiro)>0?pgTotal/Math.abs(totVGiro)*100:0;
+    return`<tr class="${z?'row-zero':''}">
       <td style="color:${bp<0?'var(--green3)':bp>0?'var(--red3)':'var(--txt)'};text-align:left">${bp>0?'+':''}${bp}bp</td>
       <td style="color:${col}">${z?'★ Actual':fmtM(pgTotal)}</td>
-      <td style="color:${col}">${z?'—':(pgTotal>=0?'+':'')+fmt(pgTotal/Math.abs(totVGiro)*100,3)+'%'}</td>
-      <td style="color:var(--txt3)">${z?'—':fmtP(Math.abs(pgTotal)/bonds.length)}</td>
+      <td style="color:${col}">${z?'—':(retorno>=0?'+':'')+fmt(retorno,3)+'%'}</td>
+      <td style="color:var(--txt3)">${z?'—':fmtM(Math.abs(pgTotal)/bonds.length)}</td>
     </tr>`;
   }).join('');
 
-  // Curve scenarios: steepening/flattening
-  // Steepening: short end +bp, long end flat (short positions gain if short rate rises)
-  // Flattening: long end -bp, short end flat
+  // Curve scenarios
   const curveScens=[
-    {label:'+100bp corto / flat largo', dA_fn:(b)=>isShortBond(b)?100:0},
-    {label:'+50bp corto / flat largo',  dA_fn:(b)=>isShortBond(b)?50:0},
-    {label:'+25bp corto / flat largo',  dA_fn:(b)=>isShortBond(b)?25:0},
-    {label:'flat',                       dA_fn:(b)=>0},
-    {label:'-25bp largo / flat corto',  dA_fn:(b)=>isLongBond(b)?-25:0},
-    {label:'-50bp largo / flat corto',  dA_fn:(b)=>isLongBond(b)?-50:0},
-    {label:'-100bp largo / flat corto', dA_fn:(b)=>isLongBond(b)?-100:0},
+    {label:'+100bp corto / flat largo', fn:b=>isShortBond(b)?100:0},
+    {label:'+50bp corto / flat largo',  fn:b=>isShortBond(b)?50:0},
+    {label:'+25bp corto / flat largo',  fn:b=>isShortBond(b)?25:0},
+    {label:'flat',                       fn:b=>0},
+    {label:'-25bp largo / flat corto',  fn:b=>!isShortBond(b)?-25:0},
+    {label:'-50bp largo / flat corto',  fn:b=>!isShortBond(b)?-50:0},
+    {label:'-100bp largo / flat corto', fn:b=>!isShortBond(b)?-100:0},
   ];
   const curveRows=curveScens.map(sc=>{
-    const pgTotal=bonds.reduce((s,b)=>{
-      const sign=b.dir==='short'?-1:1;
-      const bp=sc.dA_fn(b);
-      const pg=(-b.dmod*(bp/10000)+0.5*b.conv*(bp/10000)**2)*(b.priceRnd/100)*b.nom;
-      return s+pg*sign;
-    },0);
+    const pgTotal=bonds.reduce((s,b)=>s+calcPG(b,sc.fn(b)),0);
     const z=sc.label==='flat';
     const col=pgTotal>0?'var(--green3)':pgTotal<0?'var(--red3)':'var(--txt)';
-    return `<tr class="${z?'row-zero':''}">
+    const retorno=Math.abs(totVGiro)>0?pgTotal/Math.abs(totVGiro)*100:0;
+    return`<tr class="${z?'row-zero':''}">
       <td style="text-align:left">${sc.label}</td>
       <td style="color:${col}">${z?'★ Neutro':fmtM(pgTotal)}</td>
-      <td style="color:${col}">${z?'—':(pgTotal>=0?'+':'')+fmt(pgTotal/Math.abs(totVGiro)*100,3)+'%'}</td>
+      <td style="color:${col}">${z?'—':(retorno>=0?'+':'')+fmt(retorno,3)+'%'}</td>
     </tr>`;
   }).join('');
 
-  // Per-bond contribution table
+  // Per-bond table
   const bondRows=bonds.map(b=>{
-    const sign=b.dir==='short'?-1:1;
     const sdv01=signedDV01(b);
-    const dv01pct=totDV01gross>0?Math.abs(b.dv01)/totDV01gross*100:0;
-    const vgiroPct=tot>0?Math.abs(b.vGiro)/tot*100:0;
+    const dv01pct=totDV01gross>0?Math.abs(b.dv01||0)/totDV01gross*100:0;
+    const vgiroPct=tot>0?Math.abs(b.vGiro||0)/tot*100:0;
     const isShort=b.dir==='short';
-    return `<tr>
-      <td><span class="tag" style="background:${b.ac2};color:${b.ac3};border-color:${b.ac}">${b.tipo}</span></td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.label}</td>
+    return`<tr>
+      <td><span class="tag" style="background:${b.ac2||'#1a2540'};color:${b.ac3||'#e8eaf0'};border-color:${b.ac||'#1e2d4a'}">${b.tipo||'RF'}</span></td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.label||'—'}</td>
       <td style="color:${isShort?'var(--red3)':'var(--green3)'}">${isShort?'▼ Corto':'▲ Largo'}</td>
       <td>${fmtDate(b.venc)}</td>
       <td>${b.cupsRem||'—'}</td>
-      <td>${fmtDate(b.nextCupon)}</td>
       <td>${pct(b.cpPct||0,2)}</td>
-      <td>${pct(b.priceRnd,4)}</td>
+      <td>${pct(b.priceRnd||0,4)}</td>
       <td>${pct(b.pl||0,4)}</td>
       <td>${pct(b.ic||0,4)}</td>
-      <td>${fmtM(b.vGiro)}</td>
-      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${vgiroPct.toFixed(1)}%;background:var(--purple)"></div></div><span style="font-size:9px;min-width:32px">${vgiroPct.toFixed(1)}%</span></div></td>
-      <td>${fmt(b.dmac,4)}</td>
-      <td>${fmt(b.dmod,4)}</td>
-      <td>${fmt(b.conv,4)}</td>
+      <td>${fmtM(b.vGiro||0)}</td>
+      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(vgiroPct,100).toFixed(1)}%;background:var(--purple)"></div></div><span style="font-size:9px;min-width:32px">${vgiroPct.toFixed(1)}%</span></div></td>
+      <td>${fmt(b.dmac||0,4)}</td>
+      <td>${fmt(b.dmod||0,4)}</td>
+      <td>${fmt(b.conv||0,4)}</td>
       <td style="color:${sdv01>=0?'var(--green3)':'var(--red3)'}">${(sdv01>=0?'+':'')+fmtP(sdv01)}</td>
-      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${dv01pct.toFixed(1)}%;background:var(--amber)"></div></div><span style="font-size:9px;min-width:32px">${dv01pct.toFixed(1)}%</span></div></td>
-      <td>${pct((b.tirAvg||0)*100,4)}</td>
+      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(dv01pct,100).toFixed(1)}%;background:var(--amber)"></div></div><span style="font-size:9px;min-width:32px">${dv01pct.toFixed(1)}%</span></div></td>
     </tr>`;
   }).join('');
 
   $('main-content').innerHTML=`
-    <!-- SUMMARY METRICS -->
     <div class="card">
       <div class="c-hdr">📊 ${pf.name} · Resumen del portafolio</div>
       <div class="c-body">
@@ -365,61 +377,42 @@ function renderAggregate(pf){
           <div class="m"><div class="m-lbl">D. Macaulay pond.</div><div class="m-val">${fmt(wDmac,4)}</div><div class="m-unit">años</div></div>
           <div class="m"><div class="m-lbl">D. Modificada pond.</div><div class="m-val">${fmt(wDmod,4)}</div><div class="m-unit">pond. por valor</div></div>
           <div class="m"><div class="m-lbl">Convexidad pond.</div><div class="m-val">${fmt(wConv,4)}</div><div class="m-unit">—</div></div>
-          <div class="m"><div class="m-lbl">TIR pond.</div><div class="m-val">${pct(wTIR*100,4)}</div><div class="m-unit">EA pond. por valor</div></div>
+          <div class="m"><div class="m-lbl">Cupón pond.</div><div class="m-val">${pct(wCpPct,2)}</div><div class="m-unit">tasa facial pond.</div></div>
           <div class="m"><div class="m-lbl">Precio sucio pond.</div><div class="m-val">${pct(wPrice,4)}</div><div class="m-unit">% del par</div></div>
           <div class="m"><div class="m-lbl">Break-even diario</div><div class="m-val">${fmt(breakEven1d,4)}</div><div class="m-unit">bp/día (carry vs DV01)</div></div>
         </div>
       </div>
     </div>
 
-    <!-- BOND DETAIL TABLE -->
     <div class="card">
-      <div class="c-hdr">Detalle completo de posiciones</div>
+      <div class="c-hdr">Detalle de posiciones</div>
       <div class="c-body" style="padding:0">
-        <div class="tscroll" style="max-height:340px;overflow-y:auto">
+        <div class="tscroll" style="max-height:300px;overflow-y:auto">
           <table class="ft">
             <thead><tr>
               <th style="text-align:left">Tipo</th>
               <th style="text-align:left">Bono</th>
-              <th>Dir.</th>
-              <th>Vencimiento</th>
-              <th>Cups. rest.</th>
-              <th>Próx. cupón</th>
-              <th>Tasa cupón</th>
-              <th>P. Sucio</th>
-              <th>P. Limpio</th>
-              <th>I. Corrido</th>
-              <th>Valor giro</th>
-              <th style="min-width:120px">% Portafolio</th>
-              <th>D. Mac</th>
-              <th>D. Mod</th>
-              <th>Convex.</th>
-              <th>DV01 (±)</th>
-              <th style="min-width:120px">% DV01 bruto</th>
-              <th>TIR EA</th>
+              <th>Dir.</th><th>Vencimiento</th><th>Cups.</th>
+              <th>T. Cupón</th><th>P. Sucio</th><th>P. Limpio</th><th>I. Corrido</th>
+              <th>Valor giro</th><th style="min-width:110px">% PF</th>
+              <th>D. Mac</th><th>D. Mod</th><th>Convex.</th>
+              <th>DV01 (±)</th><th style="min-width:110px">% DV01</th>
             </tr></thead>
             <tbody>${bondRows}</tbody>
             <tfoot><tr>
-              <td colspan="2" style="text-align:left">TOTAL</td>
-              <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
-              <td>${pct(wPrice,3)}</td>
-              <td>${pct(wPL,3)}</td>
-              <td>${pct(wIC,3)}</td>
-              <td style="color:var(--purple3)">${fmtM(totVGiro)}</td>
-              <td>100%</td>
-              <td>${fmt(wDmac,4)}</td>
-              <td>${fmt(wDmod,4)}</td>
-              <td>${fmt(wConv,4)}</td>
+              <td colspan="2" style="text-align:left">TOTAL PORTAFOLIO</td>
+              <td>—</td><td>—</td><td>—</td><td>${pct(wCpPct,2)}</td>
+              <td>${pct(wPrice,3)}</td><td>${pct(wPL,3)}</td><td>${pct(wIC,3)}</td>
+              <td style="color:var(--purple3)">${fmtM(totVGiro)}</td><td>100%</td>
+              <td>${fmt(wDmac,4)}</td><td>${fmt(wDmod,4)}</td><td>${fmt(wConv,4)}</td>
               <td style="color:${totDV01net>=0?'var(--green3)':'var(--red3)'}">${(totDV01net>=0?'+':'')+fmtP(totDV01net)}</td>
               <td>100%</td>
-              <td>${pct(wTIR*100,4)}</td>
             </tr></tfoot>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- PARALLEL SCENARIOS -->
     <div class="card">
       <div class="c-hdr">Escenarios de movimiento paralelo</div>
       <div class="c-body" style="padding:0">
@@ -437,11 +430,10 @@ function renderAggregate(pf){
       </div>
     </div>
 
-    <!-- CURVE SCENARIOS -->
     <div class="card">
       <div class="c-hdr">Escenarios de forma de curva · Empinamiento / Aplanamiento</div>
       <div class="c-body" style="padding:0">
-        <div style="padding:8px 12px;font-size:9px;color:var(--txt3);border-bottom:1px solid var(--border)">
+        <div style="padding:6px 12px;font-size:9px;color:var(--txt3);border-bottom:1px solid var(--border)">
           Bonos con vencimiento ≤ 3 años = "corto plazo" · Bonos &gt; 3 años = "largo plazo"
         </div>
         <div class="tscroll">
@@ -458,95 +450,124 @@ function renderAggregate(pf){
     </div>`;
 }
 
-// Helper: classify bond as short/long tenor
-function isShortBond(b){
-  if(!b.venc||!b.liq)return false;
-  const days=(new Date(b.venc+'T12:00:00')-new Date(b.liq+'T12:00:00'))/86400000;
-  return days<=3*365;
-}
-function isLongBond(b){return !isShortBond(b);}
-
+// ── COMPARE VIEW — fichas verticales lado a lado ───────────────
 function renderCompare(pf){
   const bonds=pf.bonds;
-  const rows=bonds.map(b=>{
+  if(!bonds.length)return;
+
+  // Para cada métrica, encontrar el mejor y peor entre los bonos
+  function bestIdx(fn,higher=true){
+    let best=0;
+    bonds.forEach((b,i)=>{if(higher?fn(b)>fn(bonds[best]):fn(b)<fn(bonds[best]))best=i;});
+    return best;
+  }
+  const bestDmod=bestIdx(b=>b.dmod||0,true);
+  const bestConv=bestIdx(b=>b.conv||0,true);
+  const bestDV01=bestIdx(b=>Math.abs(b.dv01||0),true);
+  const bestPrice=bestIdx(b=>b.priceRnd||0,true);
+  const worstPrice=bestIdx(b=>b.priceRnd||0,false);
+  const bestCups=bestIdx(b=>b.cupsRem||0,true);
+  const bestIC=bestIdx(b=>b.ic||0,true);
+  const bestCpPct=bestIdx(b=>b.cpPct||0,true);
+
+  function cls(i,bestI,higherIsBetter=true){
+    if(bonds.length<2)return'neutral';
+    if(i===bestI)return higherIsBetter?'best':'worst';
+    const worstI=bestIdx(i=>bonds.indexOf(bonds[i]),!higherIsBetter);
+    return'neutral';
+  }
+  function highlight(i,bestI){return i===bestI?'var(--green3)':'var(--txt2)';}
+  function hlLow(i,worstI){return i===worstI?'var(--amber3)':'var(--txt2)';}
+
+  const cards=bonds.map((b,i)=>{
     const isShort=b.dir==='short';
-    const sdv01=(isShort?-1:1)*Math.abs(b.dv01);
-    return `<tr>
-      <td><span class="tag" style="background:${b.ac2};color:${b.ac3};border-color:${b.ac}">${b.tipo}</span></td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.label}</td>
-      <td style="color:${isShort?'var(--red3)':'var(--green3)'}">${isShort?'▼ Corto':'▲ Largo'}</td>
-      <td>${fmtDate(b.liq)}</td>
-      <td>${fmtDate(b.venc)}</td>
-      <td>${b.cupsRem||'—'}</td>
-      <td>${fmtDate(b.nextCupon)}</td>
-      <td>${pct(b.cpPct||0,2)}</td>
-      <td><strong>${pct(b.priceRnd,4)}</strong></td>
-      <td>${pct(b.pl||0,4)}</td>
-      <td>${pct(b.ic||0,4)}</td>
-      <td>${fmtM(b.nom)}</td>
-      <td>${fmtM(b.vGiro)}</td>
-      <td>${fmt(b.dmac,4)}</td>
-      <td>${fmt(b.dmod,4)}</td>
-      <td>${fmt(b.conv,4)}</td>
-      <td style="color:${sdv01>=0?'var(--green3)':'var(--red3)'}">${(sdv01>=0?'+':'')+fmtP(sdv01)}</td>
-      <td><strong style="color:${(b.tirAvg||0)>0.08?'var(--amber3)':'var(--txt)'}">${pct((b.tirAvg||0)*100,4)}</strong></td>
-    </tr>`;
+    const sdv01=signedDV01(b);
+    const metrics=[
+      {sep:'// Identificación'},
+      {l:'Tipo',v:`<span class="tag" style="background:${b.ac2||'#1a2540'};color:${b.ac3||'#e8eaf0'};border-color:${b.ac||'#1e2d4a'}">${b.tipo||'RF'}</span>`},
+      {l:'Dirección',v:`<span style="color:${isShort?'var(--red3)':'var(--green3)'}">${isShort?'▼ Corto':'▲ Largo'}</span>`},
+      {l:'Liquidación',v:fmtDate(b.liq)},
+      {l:'Vencimiento',v:fmtDate(b.venc)},
+      {l:'Próx. cupón',v:fmtDate(b.nextCupon)},
+      {l:'Cupones rest.',v:b.cupsRem||'—',color:i===bestCups?'var(--green3)':'var(--txt)'},
+      {sep:'// Precio y Cupón'},
+      {l:'Tasa cupón',v:pct(b.cpPct||0,2),color:i===bestCpPct?'var(--amber3)':'var(--txt)'},
+      {l:'Precio sucio',v:pct(b.priceRnd||0,4),color:i===bestPrice?'var(--green3)':i===worstPrice?'var(--amber3)':'var(--txt)'},
+      {l:'Precio limpio',v:pct(b.pl||0,4)},
+      {l:'Interés corrido',v:pct(b.ic||0,4),color:i===bestIC?'var(--amber3)':'var(--txt)'},
+      {sep:'// Tamaño posición'},
+      {l:'Nominal',v:fmtM(b.nom||0)},
+      {l:'Valor giro',v:fmtM(b.vGiro||0),color:'var(--purple3)'},
+      {sep:'// Riesgo'},
+      {l:'D. Macaulay',v:fmt(b.dmac||0,4)},
+      {l:'D. Modificada',v:fmt(b.dmod||0,4),color:i===bestDmod?'var(--amber3)':'var(--txt)'},
+      {l:'Convexidad',v:fmt(b.conv||0,4),color:i===bestConv?'var(--green3)':'var(--txt)'},
+      {l:'DV01 (±)',v:(sdv01>=0?'+':'')+fmtP(sdv01),color:sdv01>=0?'var(--green3)':'var(--red3)'},
+      {sep:'// Escenarios ±100bp'},
+      {l:'+100bp P&G',v:fmtM(calcPG(b,100)),color:calcPG(b,100)>=0?'var(--green3)':'var(--red3)'},
+      {l:'-100bp P&G',v:fmtM(calcPG(b,-100)),color:calcPG(b,-100)>=0?'var(--green3)':'var(--red3)'},
+      {l:'+200bp P&G',v:fmtM(calcPG(b,200)),color:calcPG(b,200)>=0?'var(--green3)':'var(--red3)'},
+      {l:'-200bp P&G',v:fmtM(calcPG(b,-200)),color:calcPG(b,-200)>=0?'var(--green3)':'var(--red3)'},
+    ];
+
+    const rows=metrics.map(m=>{
+      if(m.sep)return`<div class="compare-sep">${m.sep}</div>`;
+      return`<div class="compare-row">
+        <span class="compare-lbl">${m.l}</span>
+        <span class="compare-val" style="color:${m.color||'var(--txt)'}">${m.v}</span>
+      </div>`;
+    }).join('');
+
+    return`<div class="compare-card" style="border-color:${b.ac||'var(--border)'}">
+      <div class="compare-card-hdr" style="background:rgba(0,0,0,.2)">
+        <div class="bond-type" style="background:${b.ac2||'#1a2540'};border-color:${b.ac||'#1e2d4a'};color:${b.ac3||'#e8eaf0'};width:28px;height:28px;font-size:8px;border-radius:4px;border:1px solid;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${b.tipo||'RF'}</div>
+        <div style="min-width:0">
+          <div style="font-size:10px;font-weight:700;color:${b.ac3||'var(--txt)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.label||'Bono'}</div>
+          <div style="font-size:9px;color:var(--txt3)">${isShort?'▼ Corto':'▲ Largo'} · ${fmtM(b.nom||0)}</div>
+        </div>
+      </div>
+      <div class="compare-card-body">${rows}</div>
+    </div>`;
   }).join('');
 
-  // Highlights
-  const withVal=(fn)=>bonds.reduce((best,b)=>fn(b)>fn(best)?b:best,bonds[0]);
-  const withMin=(fn)=>bonds.reduce((best,b)=>fn(b)<fn(best)?b:best,bonds[0]);
-  const highlights=[
-    {lbl:'Mayor TIR EA',     val:withVal(b=>b.tirAvg||0).label,    color:'var(--green3)'},
-    {lbl:'Menor TIR EA',     val:withMin(b=>b.tirAvg||0).label,    color:'var(--red3)'},
-    {lbl:'Mayor D. Mod',     val:withVal(b=>b.dmod).label,          color:'var(--amber3)'},
-    {lbl:'Menor D. Mod',     val:withMin(b=>b.dmod).label,          color:'var(--blue3)'},
-    {lbl:'Mayor DV01 bruto', val:withVal(b=>Math.abs(b.dv01)).label,color:'var(--red3)'},
-    {lbl:'Mayor convexidad', val:withVal(b=>b.conv).label,          color:'var(--purple3)'},
-    {lbl:'Precio más alto',  val:withVal(b=>b.priceRnd).label,      color:'var(--txt)'},
-    {lbl:'Precio más bajo',  val:withMin(b=>b.priceRnd).label,      color:'var(--txt)'},
-    {lbl:'Más cupones rest.',val:withVal(b=>b.cupsRem||0).label,    color:'var(--green3)'},
-    {lbl:'Menos cupones',    val:withMin(b=>b.cupsRem||999).label,  color:'var(--amber3)'},
-    {lbl:'Mayor I. Corrido', val:withVal(b=>b.ic||0).label,         color:'var(--txt)'},
-    {lbl:'Mayor convexidad', val:withVal(b=>b.conv).label,          color:'var(--purple3)'},
-  ];
-
-  const hlRows=highlights.map(h=>`<tr>
-    <td style="color:var(--txt3);text-align:left">${h.lbl}</td>
-    <td style="color:${h.color};font-weight:700">${h.val}</td>
-  </tr>`).join('');
+  // Highlights table compacta
+  function bLabel(i){return bonds[i]?`<span style="color:${bonds[i].ac3||'var(--purple3)'};font-weight:700">${bonds[i].label||'—'}</span>`:'—';}
+  const worstDmod=bestIdx(b=>b.dmod||0,false);
+  const worstConv=bestIdx(b=>b.conv||0,false);
 
   $('main-content').innerHTML=`
     <div class="card">
-      <div class="c-hdr">⚖️ ${pf.name} · Comparativa de bonos</div>
-      <div class="c-body" style="padding:0">
-        <div class="tscroll" style="max-height:400px;overflow-y:auto">
-          <table class="ft">
-            <thead><tr>
-              <th style="text-align:left">Tipo</th>
-              <th style="text-align:left">Bono</th>
-              <th>Dir.</th>
-              <th>Liquidación</th><th>Vencimiento</th>
-              <th>Cups. rest.</th><th>Próx. cupón</th>
-              <th>T. Cupón</th><th>P. Sucio</th>
-              <th>P. Limpio</th><th>I. Corrido</th>
-              <th>Nominal</th><th>Valor giro</th>
-              <th>D. Mac</th><th>D. Mod</th>
-              <th>Convex.</th><th>DV01 (±)</th>
-              <th>TIR EA</th>
-            </tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
+      <div class="c-hdr">⚖️ ${pf.name} · Comparativa de bonos (${bonds.length})</div>
+      <div class="c-body" style="padding:10px">
+        <div class="compare-grid">${cards}</div>
       </div>
     </div>
     <div class="card">
-      <div class="c-hdr">🏆 Destacados</div>
+      <div class="c-hdr">🏆 Destacados por métrica</div>
       <div class="c-body" style="padding:0">
-        <table class="ft" style="max-width:600px">
-          <thead><tr><th style="text-align:left">Métrica</th><th style="text-align:left">Bono destacado</th></tr></thead>
-          <tbody>${hlRows}</tbody>
-        </table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+          <table class="ft" style="border-right:1px solid var(--border)">
+            <thead><tr><th style="text-align:left">Métrica</th><th style="text-align:left">Mayor</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--txt3)">D. Modificada</td><td>${bLabel(bestDmod)}</td></tr>
+              <tr><td style="color:var(--txt3)">Convexidad</td><td>${bLabel(bestConv)}</td></tr>
+              <tr><td style="color:var(--txt3)">DV01 bruto</td><td>${bLabel(bestDV01)}</td></tr>
+              <tr><td style="color:var(--txt3)">Precio sucio</td><td>${bLabel(bestPrice)}</td></tr>
+              <tr><td style="color:var(--txt3)">Tasa cupón</td><td>${bLabel(bestCpPct)}</td></tr>
+              <tr><td style="color:var(--txt3)">Interés corrido</td><td>${bLabel(bestIC)}</td></tr>
+              <tr><td style="color:var(--txt3)">Más cupones rest.</td><td>${bLabel(bestCups)}</td></tr>
+            </tbody>
+          </table>
+          <table class="ft">
+            <thead><tr><th style="text-align:left">Métrica</th><th style="text-align:left">Menor</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--txt3)">D. Modificada</td><td>${bLabel(worstDmod)}</td></tr>
+              <tr><td style="color:var(--txt3)">Convexidad</td><td>${bLabel(worstConv)}</td></tr>
+              <tr><td style="color:var(--txt3)">Precio sucio más bajo</td><td>${bLabel(worstPrice)}</td></tr>
+              <tr><td style="color:var(--txt3)">Menos cupones</td><td>${bLabel(bestIdx(b=>b.cupsRem||999,false))}</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>`;
 }
