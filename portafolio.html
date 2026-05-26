@@ -389,15 +389,12 @@ function renderAggregate(pf){
           <div class="m"><div class="m-lbl">DV01 neto</div><div class="m-val" style="font-size:14px;color:${totDV01net>=0?'var(--green3)':'var(--red3)'}">${(totDV01net>=0?'+':'')+fmtP(totDV01net)}</div><div class="m-unit">${totDV01net>0?'neto largo':totDV01net<0?'neto corto':'neutro'}</div></div>
           <div class="m"><div class="m-lbl">DV01 bruto</div><div class="m-val" style="font-size:14px">${fmtP(totDV01gross)}</div><div class="m-unit">exposición total</div></div>
           <div class="m"><div class="m-lbl">Posiciones</div><div class="m-val" style="font-size:14px"><span style="color:var(--green3)">${nLong}L</span> / <span style="color:var(--red3)">${nShort}C</span></div><div class="m-unit">largo / corto</div></div>
-          <div class="m"><div class="m-lbl">Carry anual</div><div class="m-val" style="font-size:14px;color:${carryAnual>=0?'var(--green3)':'var(--red3)'}">${fmtM(carryAnual)}</div><div class="m-unit">cupones netos/año</div></div>
         </div>
-        <div class="mg mg6">
+        <div class="mg mg4">
           <div class="m"><div class="m-lbl">D. Macaulay pond.</div><div class="m-val">${fmt(wDmac,4)}</div><div class="m-unit">años</div></div>
           <div class="m"><div class="m-lbl">D. Modificada pond.</div><div class="m-val">${fmt(wDmod,4)}</div><div class="m-unit">pond. por valor</div></div>
           <div class="m"><div class="m-lbl">Convexidad pond.</div><div class="m-val">${fmt(wConv,4)}</div><div class="m-unit">—</div></div>
-          <div class="m"><div class="m-lbl">Cupón pond.</div><div class="m-val">${pct(wCpPct,2)}</div><div class="m-unit">tasa facial pond.</div></div>
           <div class="m"><div class="m-lbl">Precio sucio pond.</div><div class="m-val">${pct(wPrice,4)}</div><div class="m-unit">% del par</div></div>
-          <div class="m"><div class="m-lbl">Carry diario</div><div class="m-val" style="color:${carryAnual>=0?'var(--green3)':'var(--red3)'}">${fmtM(carryAnual/365)}</div><div class="m-unit">$/día (cupones netos)</div></div>
         </div>
       </div>
     </div>
@@ -431,41 +428,8 @@ function renderAggregate(pf){
       </div>
     </div>
 
-    <div class="card">
-      <div class="c-hdr">Escenarios de movimiento paralelo</div>
-      <div class="c-body" style="padding:0">
-        <div class="tscroll">
-          <table class="ft">
-            <thead><tr>
-              <th style="text-align:left">Δ Tasa (paralelo)</th>
-              <th>P&amp;G portafolio neto</th>
-              <th>Retorno s/ valor</th>
-              <th>P&amp;G promedio/bono</th>
-            </tr></thead>
-            <tbody>${scenRows}</tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="c-hdr">Escenarios de forma de curva · Empinamiento / Aplanamiento</div>
-      <div class="c-body" style="padding:0">
-        <div style="padding:6px 12px;font-size:9px;color:var(--txt3);border-bottom:1px solid var(--border)">
-          Bonos con vencimiento ≤ 3 años = "corto plazo" · Bonos &gt; 3 años = "largo plazo"
-        </div>
-        <div class="tscroll">
-          <table class="ft">
-            <thead><tr>
-              <th style="text-align:left">Escenario curva</th>
-              <th>P&amp;G portafolio neto</th>
-              <th>Retorno</th>
-            </tr></thead>
-            <tbody>${curveRows}</tbody>
-          </table>
-        </div>
-      </div>
-    </div>`;
+`;
+}
 }
 
 // ── COMPARE VIEW — fichas verticales lado a lado ───────────────
