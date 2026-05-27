@@ -385,25 +385,20 @@ const YAHOO=[
 ];
 
 async function fetchOne(sym){
-  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
-  const url2=`https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
-  const PROXIES=[
-    u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  const bases=[
+    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
   ];
-  for(const baseUrl of [url, url2]){
-    for(const proxy of PROXIES){
-      try{
-        const r=await fetch(proxy(baseUrl),{signal:AbortSignal.timeout(6000)});
-        if(!r.ok) continue;
-        const d=await r.json();
-        const meta=d?.chart?.result?.[0]?.meta;
-        if(!meta?.regularMarketPrice) continue;
-        const price=meta.regularMarketPrice,prev=meta.previousClose||price;
-        return{price,chg:price-prev,chgPct:((price-prev)/prev)*100};
-      }catch{ continue; }
-    }
+  for(const url of bases){
+    try{
+      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+      if(!r.ok) continue;
+      const d=await r.json();
+      const meta=d?.chart?.result?.[0]?.meta;
+      if(!meta?.regularMarketPrice) continue;
+      const price=meta.regularMarketPrice,prev=meta.previousClose||price;
+      return{price,chg:price-prev,chgPct:((price-prev)/prev)*100};
+    }catch{continue;}
   }
   return null;
 }
