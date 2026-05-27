@@ -354,7 +354,6 @@ const FALLBACK=[
 ];
 
 function buildTickerHTML(items){
-  // Pad para que la animación -50% siempre funcione bien
   let arr=[...items];
   while(arr.length<16) arr=[...arr,...items];
   return arr.map(i=>`<span class="tick-item"><span class="tick-dot ${i.up?'up':'dn'}"></span><span class="tick-name">${i.n}</span>&nbsp;<span class="tick-val">${i.v}</span>&nbsp;<span class="tick-chg ${i.up?'up':'dn'}">${i.c}</span></span>`).join('');
@@ -365,12 +364,10 @@ function setTicker(items){
   if(!el||!items||!items.length) return;
   const h=buildTickerHTML(items);
   el.innerHTML=h+h;
-  // Reiniciar animación limpiamente para evitar trabado
   el.style.animation='none';
   requestAnimationFrame(()=>{ el.style.animation=''; });
 }
 
-// Inicializar con fallback de inmediato
 setTicker(FALLBACK);
 $('tickerStatus').textContent='ref.';
 
@@ -385,6 +382,7 @@ const YAHOO=[
 ];
 
 async function fetchOne(sym){
+  // Intentar query1 y query2 de Yahoo, ambas vía allorigins
   const bases=[
     `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
     `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
@@ -396,9 +394,12 @@ async function fetchOne(sym){
       const d=await r.json();
       const meta=d?.chart?.result?.[0]?.meta;
       if(!meta?.regularMarketPrice) continue;
-      const price=meta.regularMarketPrice,prev=meta.previousClose||price;
-      return{price,chg:price-prev,chgPct:((price-prev)/prev)*100};
-    }catch{continue;}
+      const price=meta.regularMarketPrice;
+      // Usar regularMarketPreviousClose si está disponible (más preciso que previousClose)
+      const prev=meta.regularMarketPreviousClose||meta.previousClose||price;
+      const chg=price-prev;
+      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
+    }catch{ continue; }
   }
   return null;
 }
@@ -409,8 +410,11 @@ async function loadTicker(){
   results.forEach((r,i)=>{
     const cfg=YAHOO[i];
     if(r.status==='fulfilled'&&r.value){
-      const{price,chg,chgPct}=r.value;const up=chg>=0;
-      items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
+      const{price,chg,chgPct}=r.value;
+      const up=chg>=0;
+      const vStr=price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||'');
+      const cStr=(up?'+':'')+chgPct.toFixed(2)+'%';
+      items.push({n:cfg.n,v:vStr,up,c:cStr});
     }
   });
   if(items.length>=5){
@@ -418,7 +422,7 @@ async function loadTicker(){
     $('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
     $('tickerStatus').style.color='var(--green3)';
   }
-  // Si falla, el fallback ya está mostrándose — no hacer nada
+  // Si ninguno funciona: fallback ya está mostrándose, no hacer nada
 }
 loadTicker();
 setInterval(loadTicker,60000);
