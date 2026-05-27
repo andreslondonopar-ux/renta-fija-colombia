@@ -60,7 +60,7 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .status-ok{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
 .status-static{background:var(--bg3);color:var(--txt3);border:1px solid var(--border2)}
 .status-loading{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
-.svg-wrap{padding:4px 0 0}
+.svg-wrap{padding:8px 14px 4px}
 svg{display:block;width:100%}
 .yt{width:100%;border-collapse:collapse;font-size:11px}
 .yt th{padding:6px 10px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700}
@@ -107,14 +107,14 @@ svg{display:block;width:100%}
       </div>
     </div>
     <div>
-      <div class="sec-title">// Macro Colombia <span id="macro-status" style="font-size:8px;color:var(--txt3);font-weight:400;text-transform:none"></span></div>
+      <div class="sec-title">// Macro Colombia</div>
       <div class="macro-grid">
-        <div class="mi"><div class="mi-lbl">PIB Anual</div><div class="mi-val" id="mac-gdp" style="color:var(--green3)">—</div><div class="mi-sub" id="mac-gdp-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-unem-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">IPC Anual</div><div class="mi-val" id="mac-ipc" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipc-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">IPC Mensual</div><div class="mi-val" id="mac-ipcm" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipcm-sub">cargando...</div></div>
         <div class="mi"><div class="mi-lbl">Tasa BanRep</div><div class="mi-val" id="mac-banrep" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-banrep-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">IBR Overnight</div><div class="mi-val" id="mac-ibr" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-ibr-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">IPC anual</div><div class="mi-val" id="mac-ipc" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipc-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">UVR</div><div class="mi-val" id="mac-uvr">—</div><div class="mi-sub" id="mac-uvr-sub">cargando...</div></div>
         <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="mac-trade-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">Fed Funds</div><div class="mi-val" id="mac-fed" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-fed-sub">cargando...</div></div>
       </div>
     </div>
     <div style="font-size:9px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
@@ -124,54 +124,58 @@ svg{display:block;width:100%}
     </div>
   </div>
 
-  <div class="right" style="display:flex;flex-direction:column;gap:0;overflow:hidden">
-    <div style="display:flex;flex:1;gap:0;min-height:0;overflow:hidden">
-
-      <!-- COLOMBIA -->
-      <div class="curve-box" style="flex:1;min-width:0;border-right:1px solid var(--border);display:flex;flex-direction:column">
-        <div class="curve-hdr">
-          <div>
-            <div class="curve-title" style="color:var(--amber3)">🇨🇴 Curva TES Tasa Fija — Colombia</div>
-            <div class="curve-sub" id="col-sub">Cargando datos del SEN...</div>
-          </div>
-          <span class="curve-status status-loading" id="col-status">⏳ Cargando...</span>
+  <div class="right">
+    <div class="curve-box">
+      <div class="curve-hdr">
+        <div>
+          <div class="curve-title" style="color:var(--amber3)">🇨🇴 Curva TES Tasa Fija — Colombia</div>
+          <div class="curve-sub" id="col-sub">Cargando datos del SEN...</div>
         </div>
-        <div class="svg-wrap" style="flex-shrink:0"><svg id="svg-col" viewBox="0 0 600 160" style="width:100%;height:150px"></svg></div>
-        <div style="overflow-y:auto;flex:1">
-          <table class="yt">
-            <thead><tr>
-              <th style="text-align:left">Título</th>
-              <th>Vencimiento</th>
-              <th>TIR</th>
-              <th>Plazo (a)</th>
-            </tr></thead>
-            <tbody id="col-tbody"></tbody>
-          </table>
+        <span class="curve-status status-loading" id="col-status">⏳ Cargando...</span>
+      </div>
+      <div class="svg-wrap"><svg id="svg-col" viewBox="0 0 700 180" height="160"></svg></div>
+      <div style="overflow-x:auto">
+        <table class="yt">
+          <thead><tr>
+            <th style="text-align:left">Título</th>
+            <th>Vencimiento</th><th>Cupón</th>
+            <th>TIR</th><th>D.Mod ref.</th><th>Plazo (a)</th>
+          </tr></thead>
+          <tbody id="col-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="curve-box">
+      <div class="curve-hdr">
+        <div>
+          <div class="curve-title" style="color:var(--blue3)">🇺🇸 Curva US Treasury</div>
+          <div class="curve-sub" id="us-date">Cargando datos de US Treasury...</div>
+        </div>
+        <span class="curve-status status-loading" id="us-status">⏳ Cargando...</span>
+        <button class="btn-sm" onclick="loadUSTreasury()">↻ Actualizar</button>
+      </div>
+      <div class="svg-wrap"><svg id="svg-us" viewBox="0 0 700 180" height="160"></svg></div>
+      <div style="overflow-x:auto">
+        <table class="yt">
+          <thead><tr>
+            <th style="text-align:left">Plazo</th>
+            <th>TIR</th><th>vs ayer</th><th>Spread vs COL</th>
+          </tr></thead>
+          <tbody id="us-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="curve-box">
+      <div class="curve-hdr">
+        <div>
+          <div class="curve-title" style="color:var(--purple3)">📐 Spread Colombia − USA · Riesgo país implícito</div>
+          <div class="curve-sub">Diferencial de tasas plazo a plazo</div>
         </div>
       </div>
-
-      <!-- USA -->
-      <div class="curve-box" style="flex:1;min-width:0;display:flex;flex-direction:column">
-        <div class="curve-hdr">
-          <div>
-            <div class="curve-title" style="color:var(--blue3)">🇺🇸 Curva US Treasury</div>
-            <div class="curve-sub" id="us-date">Cargando...</div>
-          </div>
-          <span class="curve-status status-loading" id="us-status">⏳ Cargando...</span>
-          <button class="btn-sm" onclick="loadUSTreasury()">↻</button>
-        </div>
-        <div class="svg-wrap" style="flex-shrink:0"><svg id="svg-us" viewBox="0 0 600 160" style="width:100%;height:150px"></svg></div>
-        <div style="overflow-y:auto;flex:1">
-          <table class="yt">
-            <thead><tr>
-              <th style="text-align:left">Plazo</th>
-              <th>TIR</th>
-            </tr></thead>
-            <tbody id="us-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-
+      <div class="svg-wrap"><svg id="svg-spread" viewBox="0 0 700 140" height="130"></svg></div>
+      <div class="spread-row" id="spread-summary"></div>
     </div>
   </div>
 </div>
@@ -213,141 +217,104 @@ function buildTicker(items){
   requestAnimationFrame(()=>{inner.style.animation='';});
 }
 
-// Ticker items cache — updated by loadMacro
-let _tickerExtra=[
-  {name:'IBR ON',v:'10.912%',color:'var(--txt)'},
-  {name:'IPC abr',v:'5.68%',color:'var(--blue3)'},
-  {name:'BanRep',v:'11.25%',color:'var(--amber3)'},
-  {name:'USD/COP',v:'$4,180',color:'var(--red3)'},
-  {name:'PIB Col',v:'2.2%',color:'var(--green3)'},
-  {name:'Desempleo',v:'8.8%',color:'var(--txt2)'},
-];
-
 function buildTickerFromCOL(){
   const items=[
     ...COL_DATA.map(r=>({name:r.name,tir:r.tir,color:'var(--amber3)'})),
-    ..._tickerExtra,
+    {name:'IBR ON',v:'10.912%',color:'var(--txt)'},
+    {name:'IPC abr',v:'5.68%',color:'var(--blue3)'},
+    {name:'BanRep',v:'11.25%',color:'var(--amber3)'},
   ];
   buildTicker(items);
 }
 
-// ── MACRO — lee macro_data.json (actualizado por GitHub Actions) ──
+// ── MACRO — carga desde FRED (Fed Funds) y fallback estático para Colombia
 async function loadMacro(){
   const set=(id,val,sub)=>{
-    const el=document.getElementById(id);if(el&&val!==null&&val!==undefined)el.textContent=val;
-    const s=document.getElementById(id+'-sub');if(s&&sub)s.textContent=sub;
+    const el=document.getElementById(id);
+    if(el&&val!=null)el.textContent=val;
+    const s=document.getElementById(id+'-sub');
+    if(s&&sub)s.textContent=sub;
   };
   const st=document.getElementById('macro-status');
-  const fmt=v=>v!=null?v.toFixed(2)+'%':'—';
 
-  // Fallback
+  // Fallback hardcodeado
   set('mac-gdp',   '2.20%', 'DANE · T1 2026');
   set('mac-unem',  '8.80%', 'DANE · mar 2026');
   set('mac-ipc',   '5.68%', 'DANE · abr 2026');
   set('mac-ipcm',  '0.78%', 'DANE · abr 2026');
   set('mac-banrep','11.25%','BanRep · abr 2026');
-  set('mac-trade', '—',     'cargando...');
+  set('mac-trade', '—',     'Trading Economics');
 
-  // Leer macro_data.json (generado por GitHub Actions con Trading Economics)
+  // macro_data.json generado por GitHub Actions (Trading Economics via Playwright)
   try{
     const r=await fetch('macro_data.json?_='+Date.now());
     if(r.ok){
       const d=await r.json();
       const col=d.colombia||{};
-      const fmt2=v=>v!=null?parseFloat(v).toFixed(2)+'%':'—';
+      const fmt=v=>v!=null?parseFloat(v).toFixed(2)+'%':'—';
 
-      if(col.gdp_annual?.value!=null)    set('mac-gdp',    fmt2(col.gdp_annual.value),    col.gdp_annual.source||'Trading Economics');
-      if(col.unemployment?.value!=null)  set('mac-unem',   fmt2(col.unemployment.value),  col.unemployment.source||'Trading Economics');
-      if(col.inflation?.value!=null)     set('mac-ipc',    fmt2(col.inflation.value),      col.inflation.source||'Trading Economics');
-      if(col.inflation_mom?.value!=null) set('mac-ipcm',   fmt2(col.inflation_mom.value),  col.inflation_mom.source||'Trading Economics');
-      if(col.interest_rate?.value!=null) set('mac-banrep', fmt2(col.interest_rate.value),  col.interest_rate.source||'Trading Economics');
+      if(col.gdp_annual?.value!=null)    set('mac-gdp',    fmt(col.gdp_annual.value),    col.gdp_annual.source);
+      if(col.unemployment?.value!=null)  set('mac-unem',   fmt(col.unemployment.value),  col.unemployment.source);
+      if(col.inflation?.value!=null)     set('mac-ipc',    fmt(col.inflation.value),      col.inflation.source);
+      if(col.inflation_mom?.value!=null) set('mac-ipcm',   fmt(col.inflation_mom.value),  col.inflation_mom.source);
+      if(col.interest_rate?.value!=null) set('mac-banrep', fmt(col.interest_rate.value),  col.interest_rate.source);
       if(col.trade_balance?.value!=null){
         const tb=col.trade_balance.value;
-        const sign=tb>=0?'+':'';
-        set('mac-trade', sign+parseFloat(tb).toFixed(0)+' M USD', col.trade_balance.source||'Trading Economics');
+        set('mac-trade',(tb>=0?'+':'')+parseFloat(tb).toFixed(2)+' B USD', col.trade_balance.source);
       }
 
+      // UST desde macro_data.json si está disponible
       if(d.ust?.rates?.length>=5){
         US_DATA=d.ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
         document.getElementById('us-status').textContent=`✓ ${d.ust.date}`;
         document.getElementById('us-status').className='curve-status status-ok';
         document.getElementById('us-date').textContent=`US Treasury · ${d.ust.date} · GitHub Actions`;
-        renderUS();renderSpread();
+        renderUS();
       }
-
-      if(st) st.textContent=`↺ ${d.fecha||TODAY} · TE`;
+      if(st) st.textContent=`↺ ${d.fecha||''} · TE`;
     }
-  }catch(e){ console.warn('macro_data.json:', e.message); }
+  }catch(e){console.warn('macro_data.json:',e.message);}
 }
 
 // ── SVG CURVE
-function drawCurve(svgId,pts,color,H=160,showZero=false){
+function drawCurve(svgId,pts,color,H=180,showZero=false){
   const svg=document.getElementById(svgId);if(!svg||!pts.length)return;
-  // Use actual rendered width for responsive sizing
-  const W=svg.clientWidth||svg.parentElement?.clientWidth||700;
-  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
-
-  // Full width — no wasted space on sides
-  const PL=36, PR=8, PT=18, PB=22;
-  const cW=W-PL-PR, cH=H-PT-PB;
-  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
-  const minX=Math.min(...xs), maxX=Math.max(...xs);
-  let minY=Math.min(...ys), maxY=Math.max(...ys);
+  const W=700,PAD=42,PB=20;
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs);
+  let minY=Math.min(...ys),maxY=Math.max(...ys);
   if(showZero){minY=Math.min(minY,0);maxY=Math.max(maxY,0);}
-  // Add 8% padding top/bottom so labels don't clip
-  const rngRaw=maxY-minY||0.5;
-  minY-=rngRaw*0.08; maxY+=rngRaw*0.10;
-  const rngY=maxY-minY;
-  const px=x=>PL+(x-minX)/(maxX-minX||1)*cW;
-  const py=y=>PT+cH-(y-minY)/rngY*cH;
-
-  // Grid lines
+  const rngY=maxY-minY||1;
+  const px=x=>PAD+(x-minX)/(maxX-minX)*(W-2*PAD);
+  const py=y=>(H-PB)-(y-minY)/rngY*(H-PB-14);
   let grid='';
   for(let i=0;i<=4;i++){
-    const yv=minY+rngY*i/4, yp=py(yv);
-    grid+=`<line x1="${PL}" y1="${yp}" x2="${W-PR}" y2="${yp}" stroke="#1e2d4a" stroke-width="1"/>`;
-    grid+=`<text x="${PL-4}" y="${yp+3.5}" text-anchor="end" font-size="8.5" fill="#4a5568">${yv.toFixed(1)}%</text>`;
+    const yv=minY+rngY*i/4,yp=py(yv);
+    grid+=`<line x1="${PAD}" y1="${yp}" x2="${W-PAD}" y2="${yp}" stroke="#1e2d4a" stroke-width="1"/>`;
+    grid+=`<text x="${PAD-4}" y="${yp+4}" text-anchor="end" font-size="9" fill="#4a5568">${yv.toFixed(1)}%</text>`;
   }
   if(showZero&&minY<0&&maxY>0){
     const y0=py(0);
-    grid+=`<line x1="${PL}" y1="${y0}" x2="${W-PR}" y2="${y0}" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    grid+=`<line x1="${PAD}" y1="${y0}" x2="${W-PAD}" y2="${y0}" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,3"/>`;
   }
-
-  const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
-  const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
-
-  // Anti-overlap: track last label x position, skip if too close
-  let dots='', xlbls='', lastLblX=-99, lastDotX=-99;
-  // Always show first and last; for middle ones enforce min gap
-  const minGap=40;
+  const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x)},${py(p.y)}`).join(' ');
+  const areaD=`${pathD} L${px(maxX)},${H-PB} L${px(minX)},${H-PB} Z`;
+  let dots='',xlbls='';
   pts.forEach((p,i)=>{
-    const cx=px(p.x), cy=py(p.y);
-    const isFirst=i===0, isLast=i===pts.length-1;
-    const tooClose=cx-lastDotX<minGap&&!isLast;
-    if(isFirst||isLast||!tooClose){
-      dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
-      // Rate label above dot — alternate above/below to avoid overlap
-      const above=i%2===0;
-      const ty=above?cy-8:cy+17;
-      dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="9" fill="${color}" font-weight="600">${p.y.toFixed(2)}%</text>`;
-      // X label (plazo) — only if enough room from last
-      if(cx-lastLblX>=minGap||isLast){
-        // Clamp to avoid clipping at edges
-        const anchor=cx<PL+25?'start':cx>W-PR-25?'end':'middle';
-        xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${anchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
-        lastLblX=cx;
-      }
-      lastDotX=cx;
+    const show=i===0||i===pts.length-1||i%Math.max(1,Math.floor(pts.length/6))===0;
+    if(show){
+      dots+=`<circle cx="${px(p.x)}" cy="${py(p.y)}" r="4" fill="${color}" stroke="#0a0e1a" stroke-width="2"/>`;
+      dots+=`<text x="${px(p.x)}" y="${py(p.y)-9}" text-anchor="middle" font-size="9" fill="${color}" font-weight="600">${p.y.toFixed(2)}%</text>`;
+      xlbls+=`<text x="${px(p.x)}" y="${H-5}" text-anchor="middle" font-size="9" fill="#4a5568">${p.label||''}</text>`;
     }
   });
-
   svg.innerHTML=`<defs><linearGradient id="g_${svgId}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="${color}" stop-opacity="0.25"/>
+    <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
     <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
   </linearGradient></defs>
   ${grid}
   <path d="${areaD}" fill="url(#g_${svgId})"/>
-  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
   ${dots}${xlbls}`;
 }
 
@@ -355,16 +322,20 @@ function drawCurve(svgId,pts,color,H=160,showZero=false){
 function renderCol(){
   const tbody=document.getElementById('col-tbody');
   tbody.innerHTML=COL_DATA.map(r=>{
+    const dmod=r.plazo/(1+r.tir/100);
     return`<tr>
       <td style="text-align:left;font-weight:700;color:var(--txt)">${r.name}</td>
-      <td style="color:var(--txt2)">${r.venc||'—'}</td>
+      <td>${r.venc||'—'}</td>
+      <td style="color:var(--txt2)">${(r.cupon||0).toFixed(2)}%</td>
       <td style="font-weight:700;color:var(--amber3)">${r.tir.toFixed(2)}%</td>
+      <td style="color:var(--txt2)">${dmod.toFixed(4)}</td>
       <td style="color:var(--txt3)">${r.plazo.toFixed(2)}</td>
     </tr>`;
   }).join('');
-  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.name.replace('TES TF ','').replace('TES ','')})),'#f59e0b',160);
+  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.name.replace('TES TF ','').replace('TES ','')})),'#f59e0b');
   buildTickerFromCOL();
-  }
+  renderSpread();
+}
 
 async function loadColJSON(){
   try{
@@ -391,137 +362,79 @@ async function loadColJSON(){
   renderCol();
 }
 
-// ── US TREASURY — múltiples fuentes con fallback ──────────────
+// ── US TREASURY — FIX CORS con proxy allorigins
 const US_SERIES=[
-  {plazo:'1M',years:0.083,field:'BC_1MONTH',maturity:'1MO'},
-  {plazo:'3M',years:0.25,field:'BC_3MONTH',maturity:'3MO'},
-  {plazo:'6M',years:0.5,field:'BC_6MONTH',maturity:'6MO'},
-  {plazo:'1Y',years:1,field:'BC_1YEAR',maturity:'1YR'},
-  {plazo:'2Y',years:2,field:'BC_2YEAR',maturity:'2YR'},
-  {plazo:'3Y',years:3,field:'BC_3YEAR',maturity:'3YR'},
-  {plazo:'5Y',years:5,field:'BC_5YEAR',maturity:'5YR'},
-  {plazo:'7Y',years:7,field:'BC_7YEAR',maturity:'7YR'},
-  {plazo:'10Y',years:10,field:'BC_10YEAR',maturity:'10YR'},
-  {plazo:'20Y',years:20,field:'BC_20YEAR',maturity:'20YR'},
-  {plazo:'30Y',years:30,field:'BC_30YEAR',maturity:'30YR'},
+  {plazo:'1M',years:0.083,field:'BC_1MONTH'},
+  {plazo:'2M',years:0.167,field:'BC_2MONTH'},
+  {plazo:'3M',years:0.25,field:'BC_3MONTH'},
+  {plazo:'6M',years:0.5,field:'BC_6MONTH'},
+  {plazo:'1Y',years:1,field:'BC_1YEAR'},
+  {plazo:'2Y',years:2,field:'BC_2YEAR'},
+  {plazo:'3Y',years:3,field:'BC_3YEAR'},
+  {plazo:'5Y',years:5,field:'BC_5YEAR'},
+  {plazo:'7Y',years:7,field:'BC_7YEAR'},
+  {plazo:'10Y',years:10,field:'BC_10YEAR'},
+  {plazo:'20Y',years:20,field:'BC_20YEAR'},
+  {plazo:'30Y',years:30,field:'BC_30YEAR'},
 ];
 
 async function loadUSTreasury(){
   document.getElementById('us-status').textContent='⏳ Cargando...';
   document.getElementById('us-status').className='curve-status status-loading';
-
-  // Fuente 0: ust_data.json / macro_data.json — generado por GitHub Actions (más confiable)
-  try{
-    // Intenta ust_data.json primero, luego macro_data.json
-    let ustData = null;
-    for(const fname of ['ust_data.json','macro_data.json']){
-      try{
-        const rj=await fetch(fname+'?_='+Date.now());
-        if(rj.ok){
-          const dj=await rj.json();
-          // ust_data.json tiene {date,rates,source} directo
-          // macro_data.json tiene {ust:{date,rates}}
-          const ust=dj.rates?dj:dj.ust;
-          if(ust?.rates?.length>=5){
-            ustData=ust;
-            break;
-          }
-        }
-      }catch(e2){ /* try next */ }
-    }
-    if(ustData){
-      US_DATA=ustData.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
-      if(US_DATA.length>=5){
-        document.getElementById('us-status').textContent=`✓ ${ustData.date} · GitHub Actions`;
-        document.getElementById('us-status').className='curve-status status-ok';
-        document.getElementById('us-date').textContent=`US Treasury · ${ustData.date} · ${ustData.source||'GitHub Actions'}`;
-        renderUS();        return;
-      }
-    }
-  }catch(e){ console.warn('ust_data.json/macro_data.json:', e.message); }
-
-  // Fuente 1: yieldwatch.io — API gratuita sin key, CORS habilitado
-  try{
-    const r=await fetch('https://yieldwatch.io/api/latest');
-    if(r.ok){
-      const d=await r.json();
-      if(d?.success&&d?.data?.rates){
-        const matMap={'1MO':0.083,'2MO':0.167,'3MO':0.25,'4MO':0.333,'6MO':0.5,
-          '1YR':1,'2YR':2,'3YR':3,'5YR':5,'7YR':7,'10YR':10,'20YR':20,'30YR':30};
-        US_DATA=d.data.rates
-          .filter(r=>matMap[r.maturity]!==undefined)
-          .map(r=>{
-            const s=US_SERIES.find(s=>s.maturity===r.maturity)||{plazo:r.maturity};
-            return{plazo:s.plazo||r.maturity,years:matMap[r.maturity],tir:r.rate};
-          });
-        if(US_DATA.length>=5){
-          document.getElementById('us-status').textContent=`✓ ${d.data.date} · yieldwatch.io`;
-          document.getElementById('us-status').className='curve-status status-ok';
-          document.getElementById('us-date').textContent=`yieldwatch.io · ${d.data.date} · datos del día`;
-          renderUS();          return;
-        }
-      }
-    }
-  }catch(e){ console.warn('yieldwatch.io falló:',e.message); }
-
-  // Fuente 2: US Treasury XML via corsproxy.io
   try{
     const now=new Date();
     const yyyymm=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}`;
     const url=`https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${yyyymm}`;
-    const proxies=[
-      `https://corsproxy.io/?${encodeURIComponent(url)}`,
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    // FIX: usar proxy para evitar CORS
+    const proxied=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    const resp=await fetch(proxied);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text=await resp.text();
+    const xml=new DOMParser().parseFromString(text,'text/xml');
+    const entries=[...xml.querySelectorAll('entry')];
+    if(!entries.length) throw new Error('No data');
+    const last=entries[entries.length-1];
+    const dateStr=(last.querySelector('NEW_DATE')?.textContent||'').split('T')[0];
+    US_DATA=US_SERIES.map(s=>{
+      const el=last.querySelector(s.field);
+      const tir=el?parseFloat(el.textContent):null;
+      return{...s,tir};
+    }).filter(s=>s.tir!==null&&!isNaN(s.tir));
+    if(!US_DATA.length) throw new Error('No yields parsed');
+    document.getElementById('us-status').textContent=`✓ ${dateStr}`;
+    document.getElementById('us-status').className='curve-status status-ok';
+    document.getElementById('us-date').textContent=`US Treasury Dept. · ${dateStr} · 1 día de retraso`;
+    renderUS();renderSpread();
+  }catch(err){
+    console.warn('US Treasury:',err.message);
+    US_DATA=[
+      {plazo:'1M',years:0.083,tir:4.32},{plazo:'3M',years:0.25,tir:4.28},
+      {plazo:'6M',years:0.5,tir:4.20},{plazo:'1Y',years:1,tir:4.05},
+      {plazo:'2Y',years:2,tir:3.92},{plazo:'3Y',years:3,tir:3.88},
+      {plazo:'5Y',years:5,tir:3.95},{plazo:'7Y',years:7,tir:4.10},
+      {plazo:'10Y',years:10,tir:4.25},{plazo:'20Y',years:20,tir:4.68},
+      {plazo:'30Y',years:30,tir:4.72},
     ];
-    for(const proxy of proxies){
-      try{
-        const r=await fetch(proxy);
-        if(!r.ok) continue;
-        const text=await r.text();
-        const xml=new DOMParser().parseFromString(text,'text/xml');
-        const entries=[...xml.querySelectorAll('entry')];
-        if(!entries.length) continue;
-        const last=entries[entries.length-1];
-        const dateStr=(last.querySelector('NEW_DATE')?.textContent||'').split('T')[0];
-        const parsed=US_SERIES.map(s=>{
-          const el=last.querySelector(s.field);
-          const tir=el?parseFloat(el.textContent):null;
-          return{...s,tir};
-        }).filter(s=>s.tir!==null&&!isNaN(s.tir));
-        if(parsed.length>=5){
-          US_DATA=parsed;
-          document.getElementById('us-status').textContent=`✓ ${dateStr}`;
-          document.getElementById('us-status').className='curve-status status-ok';
-          document.getElementById('us-date').textContent=`US Treasury · ${dateStr} · 1 día de retraso`;
-          renderUS();          return;
-        }
-      }catch(e2){ continue; }
-    }
-  }catch(e){ console.warn('Treasury XML falló:',e.message); }
-
-  // Fallback: datos estáticos
-  US_DATA=[
-    {plazo:'1M',years:0.083,tir:4.32},{plazo:'3M',years:0.25,tir:4.28},
-    {plazo:'6M',years:0.5,tir:4.20},{plazo:'1Y',years:1,tir:4.05},
-    {plazo:'2Y',years:2,tir:3.92},{plazo:'3Y',years:3,tir:3.88},
-    {plazo:'5Y',years:5,tir:3.95},{plazo:'7Y',years:7,tir:4.10},
-    {plazo:'10Y',years:10,tir:4.25},{plazo:'20Y',years:20,tir:4.68},
-    {plazo:'30Y',years:30,tir:4.72},
-  ];
-  document.getElementById('us-status').textContent='📋 Datos ref.';
-  document.getElementById('us-status').className='curve-status status-static';
-  document.getElementById('us-date').textContent='No se pudo cargar · Usando datos de referencia';
-  renderUS();}
+    document.getElementById('us-status').textContent='📋 Datos ref.';
+    document.getElementById('us-status').className='curve-status status-static';
+    document.getElementById('us-date').textContent='No se pudo cargar US Treasury · Usando datos de referencia';
+    renderUS();renderSpread();
+  }
+}
 
 function renderUS(){
   const tbody=document.getElementById('us-tbody');
   tbody.innerHTML=US_DATA.map(r=>{
+    const colRate=interpolateCol(r.years);
+    const spread=colRate?((colRate-r.tir)*100).toFixed(0):null;
     return`<tr>
-      <td style="text-align:left;font-weight:700;color:var(--txt2)">${r.plazo}</td>
+      <td style="text-align:left;font-weight:700">${r.plazo}</td>
       <td style="font-weight:700;color:var(--blue3)">${r.tir.toFixed(2)}%</td>
+      <td style="color:var(--txt3)">—</td>
+      <td style="color:${spread>0?'var(--amber3)':'var(--red3)'}">${spread?'+'+spread+'bp':'—'}</td>
     </tr>`;
   }).join('');
-  drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6',160);
+  drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6');
 }
 
 function interpolateCol(years){
@@ -552,15 +465,27 @@ function interpolateUSat(years){
   return null;
 }
 
-
+function renderSpread(){
+  if(!US_DATA.length||!COL_DATA.length) return;
+  const pts=COL_DATA.map(r=>{
+    const usRate=interpolateUSat(r.plazo);
+    return usRate?{x:r.plazo,y:r.tir-usRate,label:r.name.replace('TES TF ','').replace('TES ','')}:null;
+  }).filter(Boolean);
+  if(!pts.length) return;
+  drawCurve('svg-spread',pts,'#7c3aed',140,true);
+  const keyPlazos=[{l:'2 años',y:2},{l:'5 años',y:5},{l:'10 años',y:10},{l:'30 años',y:25}];
+  document.getElementById('spread-summary').innerHTML=keyPlazos.map(k=>{
+    const colR=interpolateCol(k.y),usR=interpolateUSat(k.y);
+    const sp=colR&&usR?((colR-usR)*100).toFixed(0):null;
+    return`<div class="spread-cell"><div class="lbl">${k.l}</div><div class="val" style="color:var(--purple3)">${sp?'+'+sp+'bp':'—'}</div></div>`;
+  }).join('');
+}
 
 // ── INIT
 buildTickerFromCOL();
 loadColJSON();
 loadUSTreasury();
 loadMacro();
-// Redraw on resize for responsive charts
-window.addEventListener('resize', ()=>{ if(COL_DATA.length) renderCol(); if(US_DATA.length) renderUS(); });
 </script>
 </body>
 </html>
