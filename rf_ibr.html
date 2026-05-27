@@ -382,38 +382,23 @@ const YAHOO=[
   {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
 ];
 async function fetchOne(sym){
-  // Try multiple endpoints for reliability
-  const urls=[
-    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
+  const bases=[
+    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
   ];
-  for(const url of urls){
+  for(const url of bases){
     try{
-      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        {signal:AbortSignal.timeout(8000)});
+      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
       if(!r.ok) continue;
       const d=await r.json();
       const meta=d?.chart?.result?.[0]?.meta;
-      if(!meta||!meta.regularMarketPrice) continue;
+      if(!meta?.regularMarketPrice) continue;
       const price=meta.regularMarketPrice;
-      const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPreviousClose||price;
-      const chg=price-prev, chgPct=prev>0?((price-prev)/prev)*100:0;
-      return{price,chg,chgPct};
-    }catch(e){continue;}
+      const prev=meta.regularMarketPreviousClose||meta.chartPreviousClose||meta.previousClose||price;
+      const chg=price-prev;
+      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
+    }catch{continue;}
   }
-  // Fallback: try v7 quote endpoint
-  try{
-    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-    const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-      {signal:AbortSignal.timeout(8000)});
-    if(r.ok){
-      const d=await r.json();
-      const q=d?.quoteResponse?.result?.[0];
-      if(q&&q.regularMarketPrice){
-        return{price:q.regularMarketPrice,chg:q.regularMarketChange||0,chgPct:q.regularMarketChangePercent||0};
-      }
-    }
-  }catch(e){}
   return null;
 }
 async function loadTicker(){
@@ -525,8 +510,6 @@ function loadFRA(input){
         count++;
       }
       fraLoaded = count > 0;
-      renderIBRTable();
-      renderIBRChart();
       stat.textContent = fraLoaded ? `✓ ${count} registros cargados (${Object.keys(FRA_DATA).sort()[0]} → ${Object.keys(FRA_DATA).sort().pop()})` : '✗ No se pudieron leer datos';
       stat.style.color = fraLoaded ? 'var(--green3)' : 'var(--red3)';
     } catch(err){
@@ -643,19 +626,17 @@ function buildFlowsIBR(antISO, liqISO, vencISO, mp, sc, st, mode){
   while(true){
     const nxt=addMonths(cur,mp);
     if(nxt<=liqISO){cur=nxt;firstPending=false;continue;}
-    const F=30; // always 30 (30/360)
-    const M=countFeb29(liqISO,nxt); // Feb29s between liq and nxt
-    const G=daysReal(liqISO,nxt)-M; // real days minus leap days for discount
+    const F=days360(cur,nxt);           // 30/360: 30 mensual, 90 trimestral, etc.
+    const M=countFeb29(liqISO,nxt);    // bisiestos siempre se restan en días descuento
+    const G=daysReal(liqISO,nxt)-M;   // días reales - bisiestos
     const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<3;
 
-    // IBR at START of period (cur)
+    // IBR al INICIO del período (fecha de inicio del cupón)
     const ibr=getIBR(cur,mode);
-    if(ibr===null){
-      // No data — stop
-      break;
-    }
+    if(ibr===null) break;
 
-    const cpPer=(ibr+sc)/12*100; // NA monthly, % of nominal
+    const freqP=Math.round(12/mp); // pagos/año: 12 mensual, 4 trimestral, 2 semestral
+    const cpPer=(ibr+sc)/freqP*100; // NA / freq
     ibrs.push(ibr);
     // cf: coupon only (+ principal if last)
     const cf=cpPer+(last?100:0);
@@ -689,7 +670,8 @@ function calcBondIBR(antISO, liqISO, vencISO, mp, sc, st, nom, mode){
 
   // Interés corrido: days360(ant,liq)/30 * cpPer_first
   const dCaus=days360(antISO,liqISO);
-  const ic=flows[0].cpPer*(dCaus/30);
+  const F_ic=days360(antISO,addMonths(antISO,mp));
+  const ic=flows[0].cpPer*(dCaus/F_ic);
   const pl=price-ic;
   const priceRnd=Math.floor(price*1000)/1000;
   const vGiro=(priceRnd/100)*nom;
@@ -821,7 +803,7 @@ function calcular(showTIR=false){
     </tr></thead><tbody>
       ${scen.map(s=>{
         const cls=s.bp===0?'cur':s.bp<0?'dn':'up';
-        const sign=typeof _posDir!=='undefined'&&_posDir==='short'?-1:1;const ganS=s.gan*sign;const g=s.bp===0?'—':(ganS>=0?'+':'')+fmtM(ganS);
+        const g=(s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan))*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1);
         const gc=s.bp===0?'':s.gan>=0?'color:var(--green3)':'color:var(--red3)';
         return`<tr class="${cls}"><td>${s.bp===0?'★ Actual':s.bp>0?'+'+s.bp+'bp':s.bp+'bp'}</td><td>${fmt(s.stS*100,2)}%</td><td>${fmt(s.TIR*100,4)}%</td><td>${fmt(s.pS,4)}%</td><td>${fmt(s.plS,4)}%</td><td>${fmt(s.dmS,4)}</td><td>${fmtP(s.dv01S)}</td><td style="${gc}">${g}</td></tr>`;
       }).join('')}
@@ -1183,155 +1165,15 @@ function mostrarBtnGuardar(tipo, ac, ac2, ac3, result) {
   btn.style.display = 'block';
 }
 
-
 // ── GRÁFICA IBR HISTÓRICA + FRA ───────────────────────────
 let _ibrChart = null;
 function renderIBRChart(){
   const canvas = document.getElementById('ibr-chart-canvas');
   if(!canvas) return;
-
   const hasFRA = typeof FRA_DATA !== 'undefined' && Object.keys(FRA_DATA).length > 0;
-
-  // Last 120 historical + all FRA
-  const histDates = Object.keys(IBR_REAL_DATA).sort().slice(-120);
-  const fraDates  = hasFRA ? Object.keys(FRA_DATA).sort() : [];
-
-  if(!histDates.length) return;
-
-  // Build datasets
-  const histLabels = histDates;
-  const histVals   = histDates.map(d => +(IBR_REAL_DATA[d]*100).toFixed(4));
-
-  // FRA starts where history ends (avoid overlap)
-  const lastHist = histDates[histDates.length-1];
-  // Limitar FRA a los próximos 90 días para no aplanar la gráfica
-  const cutoff = new Date(lastHist);
-  cutoff.setDate(cutoff.getDate() + 90);
-  const cutoffISO = cutoff.toISOString().split('T')[0];
-  const fraFiltered = fraDates.filter(d => d > lastHist && d <= cutoffISO);
-  const fraVals = fraFiltered.map(d => +(FRA_DATA[d]*100).toFixed(4));
-
-  const allLabels = [...histLabels, ...fraFiltered];
-  // Format labels: only show some to avoid crowding
-  const step = Math.max(1, Math.floor(allLabels.length / 12));
-  const displayLabels = allLabels.map((d,i) => {
-    if(i % step !== 0 && i !== allLabels.length-1) return '';
-    const [y,m] = d.split('-');
-    return m+'/'+y.slice(2);
-  });
-
-  const histData  = [...histVals, ...fraFiltered.map(()=>null)];
-  const fraData   = [...histLabels.map(()=>null), ...fraVals];
-
-  if(_ibrChart){ try{_ibrChart.destroy();}catch(e){} _ibrChart=null; }
-
-  _ibrChart = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: displayLabels,
-      datasets: [
-        {
-          label: 'IBR Real',
-          data: histData,
-          borderColor: '#10b981',
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0.1,
-          fill: false,
-        },
-        {
-          label: 'FRA Estimado',
-          data: fraData,
-          borderColor: '#f59e0b',
-          borderWidth: 1.5,
-          borderDash: [4,3],
-          pointRadius: 0,
-          tension: 0.1,
-          fill: false,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {duration: 200},
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {color:'#8892a4', font:{size:9}, boxWidth:12,
-            filter: item => hasFRA || item.text !== 'FRA Estimado'}
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ctx.dataset.label + ': ' + (ctx.parsed.y||0).toFixed(4) + '%'
-          }
-        }
-      },
-      scales: {
-        x: {ticks:{color:'#4a5568',font:{size:8},maxRotation:0}, grid:{color:'rgba(255,255,255,.03)'}},
-        y: {ticks:{color:'#4a5568',font:{size:8},callback:v=>v.toFixed(1)+'%'}, grid:{color:'rgba(255,255,255,.04)'}}
-      }
-    }
-  });
-}
-
-// ── TABLA IBR HISTÓRICA + FRA ──────────────────────────────
-
-function renderIBRTable(){
-  const el = document.getElementById('ibr-table-main');
-  if(!el) return;
-
-  const hasFRA = typeof FRA_DATA !== 'undefined' && Object.keys(FRA_DATA).length > 0;
-  const badge = document.getElementById('ibr-table-badge');
-
-  // Get last 60 historical dates
-  const histDates = Object.keys(IBR_REAL_DATA).sort().slice(-60);
-  // Get FRA dates sorted
-  const fraDates = hasFRA ? Object.keys(FRA_DATA).sort() : [];
-  const firstFRA = fraDates[0] || null;
-
-  // Combine: hist + FRA, most recent first
-  const allDates = [...new Set([...histDates, ...fraDates])].sort().reverse();
-  if(!allDates.length){ el.innerHTML='<div style="padding:20px;color:var(--txt3);text-align:center">Sin datos</div>'; return; }
-
-  const rows = allDates.map(iso=>{
-    const isHist = IBR_REAL_DATA[iso] !== undefined;
-    const isFRA  = FRA_DATA && FRA_DATA[iso] !== undefined;
-    const val    = isFRA && !isHist ? FRA_DATA[iso] : IBR_REAL_DATA[iso];
-    if(val === undefined) return '';
-    const isFirst = iso === firstFRA;
-    const sepStyle = isFirst ? 'border-top:2px solid var(--green);' : '';
-    const badge = isFRA && !isHist
-      ? '<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(16,185,129,.12);color:var(--green3);border:1px solid var(--green)">FRA est.</span>'
-      : '<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(255,255,255,.05);color:var(--txt3)">histórico</span>';
-    const [y,m,d] = iso.split('-');
-    const color = val > 0.10 ? 'var(--red3)' : val > 0.07 ? 'var(--amber3)' : 'var(--green3)';
-    return `<tr style="${sepStyle}">
-      <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap">${d}/${m}</td>
-      <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:10px">${(val*100).toFixed(2)}%</td>
-    </tr>`;
-  }).filter(Boolean).join('');
-
-  el.innerHTML = `
-    <table style="width:100%;border-collapse:collapse">
-      <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
-        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Fecha</th>
-        <th style="padding:4px 6px;text-align:right;font-size:9px;color:var(--txt3)">IBR</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div style="padding:6px 14px;font-size:9px;color:var(--txt3)">Últimos 60 históricos · BanRep${hasFRA?' + FRA estimado':''}</div>`;
-
-  // ── GRÁFICA IBR ──
-  const canvas = document.getElementById('ibr-chart-canvas');
-  if(!canvas) return;
-
-  // Sample historical: last 60 business days, then FRA
   const histSample = Object.keys(IBR_REAL_DATA).sort().slice(-60);
   const fraSample  = hasFRA ? Object.keys(FRA_DATA).sort() : [];
   const allDatesChart = [...new Set([...histSample,...fraSample])].sort();
-
   const labels    = allDatesChart.map(d=>{ const[y,m,dd]=d.split('-'); return dd+'/'+m+'/'+String(y).slice(2); });
   const histVals  = allDatesChart.map(d=>IBR_REAL_DATA[d]!=null?(IBR_REAL_DATA[d]*100).toFixed(4):null);
   const fraVals   = allDatesChart.map(d=>hasFRA&&FRA_DATA[d]!=null&&IBR_REAL_DATA[d]==null?(FRA_DATA[d]*100).toFixed(4):null);
@@ -1341,7 +1183,6 @@ function renderIBRTable(){
     if(hasFRA&&i===lastHistI+1&&FRA_DATA[d]!=null) return (FRA_DATA[d]*100).toFixed(4);
     return null;
   });
-
   if(_ibrChart){ try{_ibrChart.destroy();}catch(e){} _ibrChart=null; }
   _ibrChart = new Chart(canvas, {
     type:'line',
@@ -1367,7 +1208,44 @@ function renderIBRTable(){
   });
 }
 
+// ── TABLA IBR HISTÓRICA + FRA ──────────────────────────────
+function renderIBRTable(){
+  const el = document.getElementById('ibr-table-main');
+  if(!el) return;
+  const hasFRA = typeof FRA_DATA !== 'undefined' && Object.keys(FRA_DATA).length > 0;
+  const badge = document.getElementById('ibr-table-badge');
+  const histDates = Object.keys(IBR_REAL_DATA).sort().slice(-60);
+  const fraDates = hasFRA ? Object.keys(FRA_DATA).sort() : [];
+  const firstFRA = fraDates[0] || null;
+  const allDates = [...new Set([...histDates, ...fraDates])].sort().reverse();
+  if(!allDates.length){ el.innerHTML='<div style="padding:20px;color:var(--txt3);text-align:center">Sin datos</div>'; return; }
+  const rows = allDates.map(iso=>{
+    const isHist = IBR_REAL_DATA[iso] !== undefined;
+    const isFRA  = FRA_DATA && FRA_DATA[iso] !== undefined;
+    const val    = isFRA && !isHist ? FRA_DATA[iso] : IBR_REAL_DATA[iso];
+    if(val === undefined) return '';
+    const isFirst = iso === firstFRA;
+    const sepStyle = isFirst ? 'border-top:2px solid var(--green);' : '';
+    const [y,m,d] = iso.split('-');
+    const color = val > 0.10 ? 'var(--red3)' : val > 0.07 ? 'var(--amber3)' : 'var(--green3)';
+    return `<tr style="${sepStyle}">
+      <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap">${d}/${m}</td>
+      <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:10px">${(val*100).toFixed(2)}%</td>
+    </tr>`;
+  }).filter(Boolean).join('');
+  el.innerHTML = `
+    <table style="width:100%;border-collapse:collapse">
+      <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
+        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Fecha</th>
+        <th style="padding:4px 6px;text-align:right;font-size:9px;color:var(--txt3)">IBR</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="padding:6px 14px;font-size:9px;color:var(--txt3)">Últimos 60 históricos · BanRep${hasFRA?' + FRA estimado':''}</div>`;
+  renderIBRChart();
+}
+
 renderIBRTable();
-renderIBRChart();
+
 </script>
 </html>
