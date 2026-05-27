@@ -114,7 +114,7 @@ svg{display:block;width:100%}
         <div class="mi"><div class="mi-lbl">IPC Anual</div><div class="mi-val" id="mac-ipc" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipc-sub">cargando...</div></div>
         <div class="mi"><div class="mi-lbl">IPC Mensual</div><div class="mi-val" id="mac-ipcm" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipcm-sub">cargando...</div></div>
         <div class="mi"><div class="mi-lbl">Tasa BanRep</div><div class="mi-val" id="mac-banrep" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-banrep-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">USD/COP</div><div class="mi-val" id="mac-usdcop" style="color:var(--red3)">—</div><div class="mi-sub">Yahoo Finance</div></div>
+        <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="mac-trade-sub">cargando...</div></div>
       </div>
     </div>
     <div style="font-size:9px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
@@ -238,72 +238,46 @@ async function loadMacro(){
     const s=document.getElementById(id+'-sub');if(s&&sub)s.textContent=sub;
   };
   const st=document.getElementById('macro-status');
+  const fmt=v=>v!=null?v.toFixed(2)+'%':'—';
 
-  // Fallback values (actualizados manualmente)
-  const fallback={
-    gdp_annual:    {value:2.2,  sub:'DANE · T1 2026'},
-    unemployment:  {value:8.8,  sub:'DANE · mar 2026'},
-    inflation:     {value:5.68, sub:'DANE · abr 2026'},
-    inflation_mom: {value:0.78, sub:'DANE · abr 2026'},
-    interest_rate: {value:11.25,sub:'BanRep · abr 2026'},
-  };
+  // Fallback
+  set('mac-gdp',   '2.20%', 'DANE · T1 2026');
+  set('mac-unem',  '8.80%', 'DANE · mar 2026');
+  set('mac-ipc',   '5.68%', 'DANE · abr 2026');
+  set('mac-ipcm',  '0.78%', 'DANE · abr 2026');
+  set('mac-banrep','11.25%','BanRep · abr 2026');
+  set('mac-trade', '—',     'cargando...');
 
+  // Leer macro_data.json (generado por GitHub Actions con Trading Economics)
   try{
-    const resp = await fetch('macro_data.json?t='+Date.now());
-    if(resp.ok){
-      const d = await resp.json();
-      const col = d.colombia||{};
-      const fmt = v => v!==null&&v!==undefined ? v.toFixed(2)+'%' : '—';
+    const r=await fetch('macro_data.json?_='+Date.now());
+    if(r.ok){
+      const d=await r.json();
+      const col=d.colombia||{};
+      const fmt2=v=>v!=null?parseFloat(v).toFixed(2)+'%':'—';
 
-      set('mac-gdp',    fmt(col.gdp_annual?.value),    col.gdp_annual?.source||'Trading Economics');
-      set('mac-unem',   fmt(col.unemployment?.value),  col.unemployment?.source||'Trading Economics');
-      set('mac-ipc',    fmt(col.inflation?.value),     col.inflation?.source||'Trading Economics');
-      set('mac-ipcm',   fmt(col.inflation_mom?.value), col.inflation_mom?.source||'Trading Economics');
-      set('mac-banrep', fmt(col.interest_rate?.value), col.interest_rate?.source||'Trading Economics');
+      if(col.gdp_annual?.value!=null)    set('mac-gdp',    fmt2(col.gdp_annual.value),    col.gdp_annual.source||'Trading Economics');
+      if(col.unemployment?.value!=null)  set('mac-unem',   fmt2(col.unemployment.value),  col.unemployment.source||'Trading Economics');
+      if(col.inflation?.value!=null)     set('mac-ipc',    fmt2(col.inflation.value),      col.inflation.source||'Trading Economics');
+      if(col.inflation_mom?.value!=null) set('mac-ipcm',   fmt2(col.inflation_mom.value),  col.inflation_mom.source||'Trading Economics');
+      if(col.interest_rate?.value!=null) set('mac-banrep', fmt2(col.interest_rate.value),  col.interest_rate.source||'Trading Economics');
+      if(col.trade_balance?.value!=null){
+        const tb=col.trade_balance.value;
+        const sign=tb>=0?'+':'';
+        set('mac-trade', sign+parseFloat(tb).toFixed(0)+' M USD', col.trade_balance.source||'Trading Economics');
+      }
 
-      // Update ticker extra
-      if(col.inflation?.value)     _tickerExtra.find(t=>t.name==='IPC abr').v=fmt(col.inflation.value);
-      if(col.interest_rate?.value) _tickerExtra.find(t=>t.name==='BanRep').v=fmt(col.interest_rate.value);
-      if(col.gdp_annual?.value)    _tickerExtra.find(t=>t.name==='PIB Col').v=fmt(col.gdp_annual.value);
-      if(col.unemployment?.value)  _tickerExtra.find(t=>t.name==='Desempleo').v=fmt(col.unemployment.value);
-
-      // If UST data is in macro_data.json, use it for the US curve
       if(d.ust?.rates?.length>=5){
-        const matMap={'1M':0.083,'3M':0.25,'6M':0.5,'1Y':1,'2Y':2,'3Y':3,'5Y':5,'7Y':7,'10Y':10,'20Y':20,'30Y':30};
         US_DATA=d.ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
         document.getElementById('us-status').textContent=`✓ ${d.ust.date}`;
         document.getElementById('us-status').className='curve-status status-ok';
         document.getElementById('us-date').textContent=`US Treasury · ${d.ust.date} · GitHub Actions`;
-        renderUS();      }
+        renderUS();renderSpread();
+      }
 
-      if(st) st.textContent=`↺ ${d.fecha||''}`;
-      console.log('✓ macro_data.json cargado:', d.fecha);
-    } else throw new Error('not found');
-  }catch(e){
-    console.log('macro_data.json no disponible, usando fallback:', e.message);
-    // Use fallback values
-    set('mac-gdp',    fallback.gdp_annual.value.toFixed(2)+'%',    fallback.gdp_annual.sub);
-    set('mac-unem',   fallback.unemployment.value.toFixed(2)+'%',  fallback.unemployment.sub);
-    set('mac-ipc',    fallback.inflation.value.toFixed(2)+'%',     fallback.inflation.sub);
-    set('mac-ipcm',   fallback.inflation_mom.value.toFixed(2)+'%', fallback.inflation_mom.sub);
-    set('mac-banrep', fallback.interest_rate.value.toFixed(2)+'%', fallback.interest_rate.sub);
-    if(st) st.textContent='📋 ref.';
-  }
-
-  // USD/COP siempre desde Yahoo (real time)
-  try{
-    const url='https://query1.finance.yahoo.com/v8/finance/chart/USDCOP=X?interval=1d&range=1d';
-    const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    const r=await fetch(proxy);
-    const d=await r.json();
-    const price=d?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if(price){
-      set('mac-usdcop','$'+Math.round(price).toLocaleString('es-CO'));
-      _tickerExtra.find(t=>t.name==='USD/COP').v='$'+Math.round(price).toLocaleString('es-CO');
-    } else set('mac-usdcop','$4,180');
-  }catch(e){ set('mac-usdcop','$4,180'); }
-
-  buildTickerFromCOL();
+      if(st) st.textContent=`↺ ${d.fecha||TODAY} · TE`;
+    }
+  }catch(e){ console.warn('macro_data.json:', e.message); }
 }
 
 // ── SVG CURVE
