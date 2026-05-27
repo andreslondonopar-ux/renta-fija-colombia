@@ -22,64 +22,41 @@
     }
   },
   "ust": {
-    "date": "2026-05-23",
+    "date": "2026-04-30",
     "rates": [
-      {
-        "plazo": "1M",
-        "years": 0.083,
-        "tir": 4.32
-      },
       {
         "plazo": "3M",
         "years": 0.25,
-        "tir": 4.28
+        "tir": 3.696
       },
       {
         "plazo": "6M",
         "years": 0.5,
-        "tir": 4.2
-      },
-      {
-        "plazo": "1Y",
-        "years": 1,
-        "tir": 4.05
+        "tir": 3.696
       },
       {
         "plazo": "2Y",
         "years": 2,
-        "tir": 3.92
-      },
-      {
-        "plazo": "3Y",
-        "years": 3,
-        "tir": 3.88
+        "tir": 3.23
       },
       {
         "plazo": "5Y",
         "years": 5,
-        "tir": 3.95
-      },
-      {
-        "plazo": "7Y",
-        "years": 7,
-        "tir": 4.1
+        "tir": 3.23
       },
       {
         "plazo": "10Y",
         "years": 10,
-        "tir": 4.25
-      },
-      {
-        "plazo": "20Y",
-        "years": 20,
-        "tir": 4.68
+        "tir": 3.23
       },
       {
         "plazo": "30Y",
         "years": 30,
-        "tir": 4.72
+        "tir": 3.403
       }
-    ]
+    ],
+    "source": "FiscalData API (promedios mensuales)",
+    "updated": "2026-05-27T03:20:27Z"
   },
   "fecha": "2026-05-27",
   "updated": "2026-05-27T03:10:31Z",
