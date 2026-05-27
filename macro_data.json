@@ -1,24 +1,24 @@
 {
   "colombia": {
     "gdp_annual": {
-      "value": 1.6,
-      "source": "WorldBank · 2024"
+      "value": 2.2,
+      "source": "Trading Economics · 2026-05-27"
     },
     "unemployment": {
-      "value": 8.43,
-      "source": "WorldBank · 2025"
+      "value": 8.8,
+      "source": "Trading Economics · 2026-05-27"
     },
     "inflation": {
       "value": 5.68,
-      "source": "DANE · abr 2026"
+      "source": "Trading Economics · 2026-05-27"
     },
     "inflation_mom": {
       "value": 0.78,
-      "source": "DANE · abr 2026"
+      "source": "Trading Economics · 2026-05-27"
     },
     "interest_rate": {
       "value": 11.25,
-      "source": "BanRep · abr 2026"
+      "source": "Trading Economics · 2026-05-27"
     }
   },
   "ust": {
@@ -94,9 +94,8 @@
     "updated": "2026-05-27T03:34:18Z"
   },
   "fecha": "2026-05-27",
-  "updated": "2026-05-27T03:10:31Z",
+  "updated": "2026-05-27T03:54:05Z",
   "sources": [
-    "WorldBank GDP",
-    "WorldBank Unemp"
+    "TradingEconomics (5 indicadores)"
   ]
 }
