@@ -588,8 +588,9 @@ function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode){
   const F_ic=_base===365?daysReal(antISO,nxt1)-L_ic:days360(antISO,nxt1);
   const M_ic=_base===365?countFeb29(antISO,liqISO):0;
   const dCaus=_base===365?daysReal(antISO,liqISO)-M_ic:days360(antISO,liqISO);
-  // cpPer_ic recalculated with correct base divisor
-  const cpPer_ic=trunc6((Math.pow(1+((1+flows[0].ipcVal)*(1+(parseFloat(($('sc')||{value:'0'}).value)||0)/100)-1),F_ic/_base)-1)*100);
+  // IC: recalculate cpPer with correct base (F_ic/base)
+  const cuponIPC_ic=(1+flows[0].ipcVal)*(1+sc)-1;
+  const cpPer_ic=trunc6((Math.pow(1+cuponIPC_ic,F_ic/_base)-1)*100);
   const ic=cpPer_ic*(dCaus/F_ic);
   const pl=price-ic;
   const priceRnd=Math.floor(price*1000)/1000;
