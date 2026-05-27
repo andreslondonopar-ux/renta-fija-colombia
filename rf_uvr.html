@@ -631,38 +631,23 @@ const YAHOO=[
   {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
 ];
 async function fetchOne(sym){
-  // Try multiple endpoints for reliability
-  const urls=[
-    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`,
+  const bases=[
+    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
   ];
-  for(const url of urls){
+  for(const url of bases){
     try{
-      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        {signal:AbortSignal.timeout(8000)});
+      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
       if(!r.ok) continue;
       const d=await r.json();
       const meta=d?.chart?.result?.[0]?.meta;
-      if(!meta||!meta.regularMarketPrice) continue;
+      if(!meta?.regularMarketPrice) continue;
       const price=meta.regularMarketPrice;
-      const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPreviousClose||price;
-      const chg=price-prev, chgPct=prev>0?((price-prev)/prev)*100:0;
-      return{price,chg,chgPct};
-    }catch(e){continue;}
+      const prev=meta.regularMarketPreviousClose||meta.chartPreviousClose||meta.previousClose||price;
+      const chg=price-prev;
+      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
+    }catch{continue;}
   }
-  // Fallback: try v7 quote endpoint
-  try{
-    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-    const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-      {signal:AbortSignal.timeout(8000)});
-    if(r.ok){
-      const d=await r.json();
-      const q=d?.quoteResponse?.result?.[0];
-      if(q&&q.regularMarketPrice){
-        return{price:q.regularMarketPrice,chg:q.regularMarketChange||0,chgPct:q.regularMarketChangePercent||0};
-      }
-    }
-  }catch(e){}
   return null;
 }
 async function loadTicker(){
@@ -1009,7 +994,7 @@ function calcular(showTIR){
     </tr></thead><tbody>
       ${scen.map(s=>{
         const cls=s.bp===0?'cur':s.bp<0?'dn':'up';
-        const sign=typeof _posDir!=='undefined'&&_posDir==='short'?-1:1;const ganS=s.gan*sign;const g=s.bp===0?'—':(ganS>=0?'+':'')+fmtM(ganS);
+        const g=(s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan))*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1);
         const gc=s.bp===0?'':s.gan>=0?'color:var(--green3)':'color:var(--red3)';
         return`<tr class="${cls}"><td>${s.bp===0?'★ Actual':s.bp>0?'+'+s.bp+'bp':s.bp+'bp'}</td><td>${fmt(s.yS*100,2)}%</td><td>${fmt(s.pS,4)}%</td><td>${fmt(s.plS,4)}%</td><td>${fmt(s.dmS,4)}</td><td>${fmtP(s.dv01S)}</td><td style="${gc}">${g}</td></tr>`;
       }).join('')}
