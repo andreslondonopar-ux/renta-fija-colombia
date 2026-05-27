@@ -416,6 +416,37 @@ async function loadUSTreasury(){
   document.getElementById('us-status').textContent='⏳ Cargando...';
   document.getElementById('us-status').className='curve-status status-loading';
 
+  // Fuente 0: ust_data.json / macro_data.json — generado por GitHub Actions (más confiable)
+  try{
+    // Intenta ust_data.json primero, luego macro_data.json
+    let ustData = null;
+    for(const fname of ['ust_data.json','macro_data.json']){
+      try{
+        const rj=await fetch(fname+'?_='+Date.now());
+        if(rj.ok){
+          const dj=await rj.json();
+          // ust_data.json tiene {date,rates,source} directo
+          // macro_data.json tiene {ust:{date,rates}}
+          const ust=dj.rates?dj:dj.ust;
+          if(ust?.rates?.length>=5){
+            ustData=ust;
+            break;
+          }
+        }
+      }catch(e2){ /* try next */ }
+    }
+    if(ustData){
+      US_DATA=ustData.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
+      if(US_DATA.length>=5){
+        document.getElementById('us-status').textContent=`✓ ${ustData.date} · GitHub Actions`;
+        document.getElementById('us-status').className='curve-status status-ok';
+        document.getElementById('us-date').textContent=`US Treasury · ${ustData.date} · ${ustData.source||'GitHub Actions'}`;
+        renderUS();renderSpread();
+        return;
+      }
+    }
+  }catch(e){ console.warn('ust_data.json/macro_data.json:', e.message); }
+
   // Fuente 1: yieldwatch.io — API gratuita sin key, CORS habilitado
   try{
     const r=await fetch('https://yieldwatch.io/api/latest');
