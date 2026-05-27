@@ -1,209 +1,169 @@
 """
-scraper_macro.py — Indicadores macro Colombia + curva UST
-Corre via GitHub Actions → guarda macro_data.json
-
-Formato JSON esperado por index.html:
-{
-  "colombia": {
-    "gdp_annual":    {"value": 2.2,   "source": "WorldBank · 2025"},
-    "unemployment":  {"value": 8.8,   "source": "WorldBank · 2024"},
-    "inflation":     {"value": 5.68,  "source": "DANE · abr 2026"},
-    "inflation_mom": {"value": 0.78,  "source": "DANE · abr 2026"},
-    "interest_rate": {"value": 11.25, "source": "BanRep · abr 2026"},
-  },
-  "ust": {
-    "date": "2026-05-23",
-    "rates": [{"plazo":"1M","years":0.083,"tir":4.32}, ...]
-  },
-  "fecha": "2026-05-26",
-  "updated": "2026-05-26T14:00:00"
-}
+scraper_macro.py — Indicadores macro Colombia
+Usa Playwright para abrir tradingeconomics.com/colombia/indicators
+y leer los valores directamente de la página renderizada.
 """
-import json, requests, re, datetime
+import json, re, datetime
 from pathlib import Path
 
-HDR = {'User-Agent': 'Mozilla/5.0 (compatible; renta-fija-bot/1.0)'}
-NOW = datetime.datetime.utcnow()
-TODAY = NOW.date().isoformat()
+TODAY = datetime.date.today().isoformat()
+NOW   = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-# ── Fallback ─────────────────────────────────────────────────
-FALLBACK_COL = {
+FALLBACK = {
     "gdp_annual":    {"value": 2.2,   "source": "DANE · T1 2026"},
     "unemployment":  {"value": 8.8,   "source": "DANE · mar 2026"},
     "inflation":     {"value": 5.68,  "source": "DANE · abr 2026"},
     "inflation_mom": {"value": 0.78,  "source": "DANE · abr 2026"},
     "interest_rate": {"value": 11.25, "source": "BanRep · abr 2026"},
 }
-FALLBACK_UST = {
-    "date": "2026-05-23",
-    "rates": [
-        {"plazo":"1M","years":0.083,"tir":4.32},
-        {"plazo":"3M","years":0.25, "tir":4.28},
-        {"plazo":"6M","years":0.5,  "tir":4.20},
-        {"plazo":"1Y","years":1,    "tir":4.05},
-        {"plazo":"2Y","years":2,    "tir":3.92},
-        {"plazo":"3Y","years":3,    "tir":3.88},
-        {"plazo":"5Y","years":5,    "tir":3.95},
-        {"plazo":"7Y","years":7,    "tir":4.10},
-        {"plazo":"10Y","years":10,  "tir":4.25},
-        {"plazo":"20Y","years":20,  "tir":4.68},
-        {"plazo":"30Y","years":30,  "tir":4.72},
-    ]
-}
 
-# ── 1. World Bank ─────────────────────────────────────────────
-def wb(code):
-    try:
-        data = requests.get(
-            f"https://api.worldbank.org/v2/country/COL/indicator/{code}?format=json&mrv=3&per_page=3",
-            headers=HDR, timeout=15
-        ).json()
-        for rec in (data[1] if len(data)>1 else []):
-            if rec.get("value") is not None:
-                return round(float(rec["value"]), 2), rec.get("date","")
-    except Exception as e:
-        print(f"WB {code}: {e}")
-    return None
-
-# ── 2. BanRep tasa ────────────────────────────────────────────
-def banrep_tasa():
-    for url in [
-        "https://www.banrep.gov.co/es/estadisticas/tasas-de-interes-y-sector-financiero",
-        "https://www.banrep.gov.co/es/politica-monetaria",
-    ]:
-        try:
-            text = requests.get(url, headers=HDR, timeout=15).text
-            for pat in [
-                r'(\d{1,2}[,.]\d{2})\s*%\s*(?:anual|e\.a\.?)',
-                r'tasa[^<]{0,100}?(\d{1,2}[,.]\d{2})\s*%',
-                r'(\d{1,2}[,.]\d{2})\s*%[^<]{0,50}?(?:política|interés)',
-            ]:
-                m = re.search(pat, text, re.IGNORECASE)
-                if m:
-                    val = float(m.group(1).replace(',','.'))
-                    if 5 < val < 25:  # sanity check
-                        return val
-        except Exception as e:
-            print(f"BanRep {url}: {e}")
-    return None
-
-# ── 3. DANE IPC ───────────────────────────────────────────────
-def dane_ipc():
-    # Socrata datos.gov.co
-    try:
-        rec = requests.get(
-            "https://www.datos.gov.co/resource/cfw5-qfex.json"
-            "?$limit=1&$order=fecha+DESC"
-            "&$select=fecha,valor_variacion_anual,valor_variacion_mensual",
-            headers={**HDR,"Accept":"application/json"}, timeout=12
-        ).json()[0]
-        return (round(float(rec["valor_variacion_anual"]),2),
-                round(float(rec["valor_variacion_mensual"]),2),
-                rec["fecha"][:7])
-    except Exception as e:
-        print(f"DANE Socrata: {e}")
-
-    # DANE web scraping
-    try:
-        text = requests.get(
-            "https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc",
-            headers=HDR, timeout=15
-        ).text
-        ma = re.search(r'anual[^<]{0,80}?(\d+[,.]\d+)\s*%', text, re.IGNORECASE)
-        mm = re.search(r'mensual[^<]{0,80}?(\d+[,.]\d+)\s*%', text, re.IGNORECASE)
-        if ma:
-            return (float(ma.group(1).replace(',','.')),
-                    float(mm.group(1).replace(',','.')) if mm else 0.0,
-                    TODAY)
-    except Exception as e:
-        print(f"DANE scrape: {e}")
-    return None
-
-# ── 4. US Treasury XML ────────────────────────────────────────
-UST_MAP = [
-    ("1M","BC_1MONTH",0.083), ("2M","BC_2MONTH",0.167),
-    ("3M","BC_3MONTH",0.25),  ("6M","BC_6MONTH",0.5),
-    ("1Y","BC_1YEAR",1),      ("2Y","BC_2YEAR",2),
-    ("3Y","BC_3YEAR",3),      ("5Y","BC_5YEAR",5),
-    ("7Y","BC_7YEAR",7),      ("10Y","BC_10YEAR",10),
-    ("20Y","BC_20YEAR",20),   ("30Y","BC_30YEAR",30),
+# Indicadores que buscamos en la página de TE
+# Formato: (key_json, texto_buscar_en_tabla)
+INDICATORS = [
+    ("interest_rate", "Interest Rate"),
+    ("inflation",     "Inflation Rate"),
+    ("inflation_mom", "Inflation Rate Mom"),
+    ("gdp_annual",    "GDP Annual Growth Rate"),
+    ("unemployment",  "Unemployment Rate"),
 ]
 
-def ust():
-    today = datetime.date.today()
-    for delta in [0,-1]:
-        d = today.replace(day=1)
-        if delta: d = (d - datetime.timedelta(days=1)).replace(day=1)
-        url = (f"https://home.treasury.gov/resource-center/data-chart-center/"
-               f"interest-rates/pages/xml?data=daily_treasury_yield_curve"
-               f"&field_tdr_date_value={d.strftime('%Y%m')}")
-        try:
-            text = requests.get(url, headers=HDR, timeout=20).text
-            entries = re.findall(r'<entry>(.*?)</entry>', text, re.DOTALL)
-            if not entries: continue
-            last = entries[-1]
-            dm = re.search(r'<NEW_DATE>(.*?)</NEW_DATE>', last)
-            date_str = dm.group(1)[:10] if dm else today.isoformat()
-            rates = []
-            for plazo, field, years in UST_MAP:
-                m = re.search(rf'<{field}>(.*?)</{field}>', last)
-                if m:
-                    try: rates.append({"plazo":plazo,"years":years,"tir":float(m.group(1))})
-                    except: pass
-            if len(rates) >= 6:
-                print(f"UST: {len(rates)} plazos · {date_str}")
-                return {"date": date_str, "rates": rates}
-        except Exception as e:
-            print(f"UST {d.strftime('%Y%m')}: {e}")
-    return None
+def scrape_te():
+    from playwright.sync_api import sync_playwright
+    import re
 
-# ── MAIN ──────────────────────────────────────────────────────
+    url = "https://tradingeconomics.com/colombia/indicators"
+    result = {}
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True, args=[
+            '--no-sandbox', '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage', '--disable-gpu',
+        ])
+        page = browser.new_page(
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 900},
+        )
+
+        print(f"Abriendo {url}...")
+        page.goto(url, wait_until="networkidle", timeout=45000)
+        page.wait_for_timeout(3000)  # esperar JS
+
+        # Intentar cerrar cualquier popup/cookie
+        for sel in ["button:has-text('Accept')", "button:has-text('Agree')",
+                    "[id*='cookie'] button", "[class*='cookie'] button"]:
+            try:
+                btn = page.locator(sel).first
+                if btn.is_visible(timeout=1000):
+                    btn.click()
+                    page.wait_for_timeout(500)
+            except:
+                pass
+
+        # Leer todo el texto de la tabla de indicadores
+        content = page.content()
+        text = page.inner_text("body")
+
+        print(f"Página cargada: {len(text)} chars")
+
+        # Buscar cada indicador — la página lista: "Indicator Name | Last | Previous | ..."
+        # Patron: nombre seguido de número en las primeras columnas
+        for key, name in INDICATORS:
+            # Buscar en el texto el nombre del indicador y el valor que sigue
+            # TE muestra: "Interest Rate\n11.25\n11.25\n..."
+            patterns = [
+                rf'{re.escape(name)}\s*\n\s*([\d.]+)',
+                rf'{re.escape(name)}[^\n]*\n[^\n]*\n\s*([\d.]+)',
+                rf'{re.escape(name)}.*?([\d]+\.[\d]+)(?:\s|%|$)',
+            ]
+            found = False
+            for pat in patterns:
+                m = re.search(pat, text, re.IGNORECASE | re.MULTILINE)
+                if m:
+                    try:
+                        val = float(m.group(1))
+                        if 0 < val < 200:  # sanity check
+                            result[key] = {"value": val, "source": f"Trading Economics · {TODAY}"}
+                            print(f"  ✓ {name}: {val}")
+                            found = True
+                            break
+                    except:
+                        pass
+            if not found:
+                print(f"  ✗ {name}: no encontrado")
+
+        # Si el texto plano no funcionó, intentar con selectores de tabla
+        if len(result) < 3:
+            print("Intentando con selectores de tabla...")
+            try:
+                rows = page.locator("table tr").all()
+                for row in rows:
+                    row_text = row.inner_text()
+                    for key, name in INDICATORS:
+                        if key not in result and name.lower() in row_text.lower():
+                            # Extraer primer número de la fila
+                            nums = re.findall(r'([\d]+\.[\d]+)', row_text)
+                            if nums:
+                                try:
+                                    val = float(nums[0])
+                                    if 0 < val < 200:
+                                        result[key] = {"value": val, "source": f"Trading Economics · {TODAY}"}
+                                        print(f"  ✓ tabla: {name}: {val}")
+                                except:
+                                    pass
+            except Exception as e:
+                print(f"  Selector tabla: {e}")
+
+        browser.close()
+
+    return result
+
+
 def main():
-    col = dict(FALLBACK_COL)
+    print(f"=== Scraper Macro Colombia · {TODAY} ===\n")
+
+    col = dict(FALLBACK)
     sources = []
 
-    # PIB anual
-    r = wb("NY.GDP.MKTP.KD.ZG")
-    if r:
-        col["gdp_annual"] = {"value": r[0], "source": f"WorldBank · {r[1]}"}
-        sources.append("WorldBank GDP")
-        print(f"PIB: {r[0]}% ({r[1]})")
+    # Intentar Playwright + Trading Economics
+    try:
+        scraped = scrape_te()
+        if len(scraped) >= 2:
+            col.update(scraped)
+            sources.append(f"TradingEconomics ({len(scraped)} indicadores)")
+            print(f"\n✓ TE: {len(scraped)} indicadores obtenidos")
+        else:
+            print(f"\n⚠ TE: solo {len(scraped)} indicadores — usando fallback para el resto")
+            col.update(scraped)
+            if scraped:
+                sources.append(f"TradingEconomics ({len(scraped)} indicadores)")
+    except Exception as e:
+        print(f"\n✗ Playwright falló: {e}")
+        sources.append("fallback")
 
-    # Desempleo
-    r = wb("SL.UEM.TOTL.NE.ZS") or wb("SL.UEM.TOTL.ZS")
-    if r:
-        col["unemployment"] = {"value": r[0], "source": f"WorldBank · {r[1]}"}
-        sources.append("WorldBank Unemp")
-        print(f"Desempleo: {r[0]}% ({r[1]})")
-
-    # IPC DANE
-    r = dane_ipc()
-    if r:
-        col["inflation"]     = {"value": r[0], "source": f"DANE · {r[2]}"}
-        col["inflation_mom"] = {"value": r[1], "source": f"DANE · {r[2]}"}
-        sources.append("DANE IPC")
-        print(f"IPC: {r[0]}% MoM: {r[1]}%")
-
-    # BanRep
-    r = banrep_tasa()
-    if r:
-        col["interest_rate"] = {"value": r, "source": f"BanRep · {TODAY}"}
-        sources.append("BanRep")
-        print(f"BanRep: {r}%")
-
-    # UST
-    ust_data = ust() or FALLBACK_UST
+    # Leer macro_data.json existente para preservar UST
+    macro_path = Path("macro_data.json")
+    existing_ust = None
+    if macro_path.exists():
+        try:
+            existing = json.loads(macro_path.read_text())
+            existing_ust = existing.get("ust")
+        except:
+            pass
 
     result = {
         "colombia": col,
-        "ust":      ust_data,
+        "ust":      existing_ust or {"date": TODAY, "rates": []},
         "fecha":    TODAY,
-        "updated":  NOW.strftime("%Y-%m-%dT%H:%M:%S") + "Z",
+        "updated":  NOW,
         "sources":  sources,
     }
 
-    Path("macro_data.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
-    print(f"\n✓ macro_data.json guardado · fuentes: {sources}")
+    macro_path.write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    print(f"\n✓ macro_data.json guardado")
+    print(f"  Fuentes: {sources}")
+    for k, v in col.items():
+        print(f"  {k}: {v['value']} ({v['source']})")
+
 
 if __name__ == "__main__":
     main()
