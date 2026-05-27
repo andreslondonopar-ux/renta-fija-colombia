@@ -540,7 +540,7 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
     const L=base===365?periodHasLeap(cur,nxt):0;
     const F=base===365?daysReal(cur,nxt)-L:days360(cur,nxt);
     const M=base===365?countFeb29(liqISO,nxt):0;
-    const G=base===365?daysReal(liqISO,nxt)-M:days360(liqISO,nxt);
+    const G=daysReal(liqISO,nxt)-M; // G siempre en días reales
     const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<3;
     let ipcRec;
     let ipcVal;
@@ -562,7 +562,7 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
       ipcVal=ipcRec?ipcRec.v:(ipcLiq?ipcLiq.v:0);
     }
     const cuponIPC=(1+ipcVal)*(1+sc)-1;
-    const cpPer=trunc6((Math.pow(1+cuponIPC,F/365)-1)*100);
+    const cpPer=trunc6((Math.pow(1+cuponIPC,F/base)-1)*100);
     const tirI=(1+ipcVal)*(1+st)-1;
     const tY=G/365;
     const cf=cpPer+(last?100:0);
@@ -588,7 +588,9 @@ function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode){
   const F_ic=_base===365?daysReal(antISO,nxt1)-L_ic:days360(antISO,nxt1);
   const M_ic=_base===365?countFeb29(antISO,liqISO):0;
   const dCaus=_base===365?daysReal(antISO,liqISO)-M_ic:days360(antISO,liqISO);
-  const ic=flows[0].cpPer*(dCaus/F_ic);
+  // cpPer_ic recalculated with correct base divisor
+  const cpPer_ic=trunc6((Math.pow(1+((1+flows[0].ipcVal)*(1+(parseFloat(($('sc')||{value:'0'}).value)||0)/100)-1),F_ic/_base)-1)*100);
+  const ic=cpPer_ic*(dCaus/F_ic);
   const pl=price-ic;
   const priceRnd=Math.floor(price*1000)/1000;
   const vGiro=(priceRnd/100)*nom;
@@ -972,6 +974,9 @@ function calcular(showTIR=false){
   const crossPrice=price;
 
   // ── RENDER — exact same structure/classes as tasa fija ────────────
+  const _baseDisp=parseInt(($('base-int')||{value:'365'}).value||'365');
+  const thDC=document.getElementById('th-dias-cupon');
+  if(thDC) thDC.textContent=_baseDisp===360?'Días cupón (30/360)':'Días cupón (365)';
   $('main').innerHTML=`
   <div class="card">
     <div class="c-hdr">Resultados principales
@@ -1033,7 +1038,7 @@ function calcular(showTIR=false){
   <div class="card">
     <div class="c-hdr">Tabla de flujos descontados</div>
     <div class="c-body"><div class="tscroll"><table class="ft"><thead><tr>
-      <th>#</th><th>Fecha pago</th><th>Días cupón</th><th>Días desc.</th><th>Bis. Cupón</th><th>Bis. Desc.</th>
+      <th>#</th><th>Fecha pago</th><th id="th-dias-cupon">Días cupón</th><th>Días desc.</th><th>Bis. Cupón</th><th>Bis. Desc.</th>
       <th>IPC</th><th>TIR flujo</th><th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $ (sin desc.)</th><th>Flujo $ (descontado)</th><th>t·PV</th><th>% precio</th>
     </tr></thead><tbody>
       <tr class="liq-row"><td>0</td><td>${fmtDate(liq)}</td><td colspan="11" style="color:var(--red3);font-style:italic;text-align:left;padding-left:8px">−${fmtP(vGiro)} &nbsp; Liquidación</td></tr>
