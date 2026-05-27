@@ -1201,7 +1201,7 @@ function renderIBRChart(){
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label.startsWith('_')?null:ctx.dataset.label+': '+ctx.raw+'%'}}},
       scales:{
         x:{ticks:{color:'#4a5568',font:{size:8},maxTicksLimit:12,autoSkip:true},grid:{color:'rgba(255,255,255,.03)'}},
-        y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.03)'},
+        y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>parseFloat(v).toFixed(2)+'%'},grid:{color:'rgba(255,255,255,.03)'},
            title:{display:true,text:'IBR ON (%)',color:'#4a5568',font:{size:9}}}
       }
     }
