@@ -60,7 +60,7 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .status-ok{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
 .status-static{background:var(--bg3);color:var(--txt3);border:1px solid var(--border2)}
 .status-loading{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
-.svg-wrap{padding:8px 14px 4px}
+.svg-wrap{padding:4px 0 0}
 svg{display:block;width:100%}
 .yt{width:100%;border-collapse:collapse;font-size:11px}
 .yt th{padding:6px 10px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700}
@@ -110,11 +110,11 @@ svg{display:block;width:100%}
       <div class="sec-title">// Macro Colombia</div>
       <div class="macro-grid">
         <div class="mi"><div class="mi-lbl">Tasa BanRep</div><div class="mi-val" id="mac-banrep" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-banrep-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">IBR Overnight</div><div class="mi-val" id="mac-ibr" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-ibr-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">IPC anual</div><div class="mi-val" id="mac-ipc" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipc-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">UVR</div><div class="mi-val" id="mac-uvr">—</div><div class="mi-sub" id="mac-uvr-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">IPC Anual</div><div class="mi-val" id="mac-ipc" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipc-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">IPC Mensual</div><div class="mi-val" id="mac-ipcm" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipcm-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">PIB Anual</div><div class="mi-val" id="mac-gdp" style="color:var(--green3)">—</div><div class="mi-sub" id="mac-gdp-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-unem-sub">cargando...</div></div>
         <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="mac-trade-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">Fed Funds</div><div class="mi-val" id="mac-fed" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-fed-sub">cargando...</div></div>
       </div>
     </div>
     <div style="font-size:9px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
@@ -124,58 +124,54 @@ svg{display:block;width:100%}
     </div>
   </div>
 
-  <div class="right">
-    <div class="curve-box">
-      <div class="curve-hdr">
-        <div>
-          <div class="curve-title" style="color:var(--amber3)">🇨🇴 Curva TES Tasa Fija — Colombia</div>
-          <div class="curve-sub" id="col-sub">Cargando datos del SEN...</div>
-        </div>
-        <span class="curve-status status-loading" id="col-status">⏳ Cargando...</span>
-      </div>
-      <div class="svg-wrap"><svg id="svg-col" viewBox="0 0 700 180" height="160"></svg></div>
-      <div style="overflow-x:auto">
-        <table class="yt">
-          <thead><tr>
-            <th style="text-align:left">Título</th>
-            <th>Vencimiento</th><th>Cupón</th>
-            <th>TIR</th><th>D.Mod ref.</th><th>Plazo (a)</th>
-          </tr></thead>
-          <tbody id="col-tbody"></tbody>
-        </table>
-      </div>
-    </div>
+  <div class="right" style="display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;flex:1;min-height:0;overflow:hidden">
 
-    <div class="curve-box">
-      <div class="curve-hdr">
-        <div>
-          <div class="curve-title" style="color:var(--blue3)">🇺🇸 Curva US Treasury</div>
-          <div class="curve-sub" id="us-date">Cargando datos de US Treasury...</div>
+      <!-- COLOMBIA -->
+      <div class="curve-box" style="flex:1;min-width:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+        <div class="curve-hdr">
+          <div>
+            <div class="curve-title" style="color:var(--amber3)">🇨🇴 Curva TES Tasa Fija — Colombia</div>
+            <div class="curve-sub" id="col-sub">Cargando datos del SEN...</div>
+          </div>
+          <span class="curve-status status-loading" id="col-status">⏳ Cargando...</span>
         </div>
-        <span class="curve-status status-loading" id="us-status">⏳ Cargando...</span>
-        <button class="btn-sm" onclick="loadUSTreasury()">↻ Actualizar</button>
+        <svg id="svg-col" viewBox="0 0 700 160" style="width:100%;height:150px;flex-shrink:0"></svg>
+        <div style="overflow-y:auto;flex:1">
+          <table class="yt">
+            <thead><tr>
+              <th style="text-align:left">Título</th>
+              <th>Vencimiento</th>
+              <th>TIR</th>
+              <th>Plazo (a)</th>
+            </tr></thead>
+            <tbody id="col-tbody"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="svg-wrap"><svg id="svg-us" viewBox="0 0 700 180" height="160"></svg></div>
-      <div style="overflow-x:auto">
-        <table class="yt">
-          <thead><tr>
-            <th style="text-align:left">Plazo</th>
-            <th>TIR</th><th>vs ayer</th><th>Spread vs COL</th>
-          </tr></thead>
-          <tbody id="us-tbody"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <div class="curve-box">
-      <div class="curve-hdr">
-        <div>
-          <div class="curve-title" style="color:var(--purple3)">📐 Spread Colombia − USA · Riesgo país implícito</div>
-          <div class="curve-sub">Diferencial de tasas plazo a plazo</div>
+      <!-- USA -->
+      <div class="curve-box" style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden">
+        <div class="curve-hdr">
+          <div>
+            <div class="curve-title" style="color:var(--blue3)">🇺🇸 Curva US Treasury</div>
+            <div class="curve-sub" id="us-date">Cargando...</div>
+          </div>
+          <span class="curve-status status-loading" id="us-status">⏳ Cargando...</span>
+          <button class="btn-sm" onclick="loadUSTreasury()">↻</button>
+        </div>
+        <svg id="svg-us" viewBox="0 0 700 160" style="width:100%;height:150px;flex-shrink:0"></svg>
+        <div style="overflow-y:auto;flex:1">
+          <table class="yt">
+            <thead><tr>
+              <th style="text-align:left">Plazo</th>
+              <th>TIR</th>
+            </tr></thead>
+            <tbody id="us-tbody"></tbody>
+          </table>
         </div>
       </div>
-      <div class="svg-wrap"><svg id="svg-spread" viewBox="0 0 700 140" height="130"></svg></div>
-      <div class="spread-row" id="spread-summary"></div>
+
     </div>
   </div>
 </div>
@@ -230,19 +226,17 @@ function buildTickerFromCOL(){
 // ── MACRO — carga desde FRED (Fed Funds) y fallback estático para Colombia
 async function loadMacro(){
   const set=(id,val,sub)=>{
-    const el=document.getElementById(id);
-    if(el&&val!=null)el.textContent=val;
-    const s=document.getElementById(id+'-sub');
-    if(s&&sub)s.textContent=sub;
+    const el=document.getElementById(id);if(el&&val!=null)el.textContent=val;
+    const s=document.getElementById(id+'-sub');if(s&&sub)s.textContent=sub;
   };
   const st=document.getElementById('macro-status');
 
-  // Fallback hardcodeado
-  set('mac-gdp',   '2.20%', 'DANE · T1 2026');
-  set('mac-unem',  '8.80%', 'DANE · mar 2026');
+  // Fallback
+  set('mac-banrep','11.25%','BanRep · abr 2026');
   set('mac-ipc',   '5.68%', 'DANE · abr 2026');
   set('mac-ipcm',  '0.78%', 'DANE · abr 2026');
-  set('mac-banrep','11.25%','BanRep · abr 2026');
+  set('mac-gdp',   '2.20%', 'DANE · T1 2026');
+  set('mac-unem',  '8.80%', 'DANE · mar 2026');
   set('mac-trade', '—',     'Trading Economics');
 
   // macro_data.json generado por GitHub Actions (Trading Economics via Playwright)
@@ -253,17 +247,17 @@ async function loadMacro(){
       const col=d.colombia||{};
       const fmt=v=>v!=null?parseFloat(v).toFixed(2)+'%':'—';
 
-      if(col.gdp_annual?.value!=null)    set('mac-gdp',    fmt(col.gdp_annual.value),    col.gdp_annual.source);
-      if(col.unemployment?.value!=null)  set('mac-unem',   fmt(col.unemployment.value),  col.unemployment.source);
-      if(col.inflation?.value!=null)     set('mac-ipc',    fmt(col.inflation.value),      col.inflation.source);
-      if(col.inflation_mom?.value!=null) set('mac-ipcm',   fmt(col.inflation_mom.value),  col.inflation_mom.source);
-      if(col.interest_rate?.value!=null) set('mac-banrep', fmt(col.interest_rate.value),  col.interest_rate.source);
+      if(col.interest_rate?.value!=null) set('mac-banrep',fmt(col.interest_rate.value), col.interest_rate.source);
+      if(col.inflation?.value!=null)     set('mac-ipc',   fmt(col.inflation.value),     col.inflation.source);
+      if(col.inflation_mom?.value!=null) set('mac-ipcm',  fmt(col.inflation_mom.value), col.inflation_mom.source);
+      if(col.gdp_annual?.value!=null)    set('mac-gdp',   fmt(col.gdp_annual.value),    col.gdp_annual.source);
+      if(col.unemployment?.value!=null)  set('mac-unem',  fmt(col.unemployment.value),  col.unemployment.source);
       if(col.trade_balance?.value!=null){
         const tb=col.trade_balance.value;
         set('mac-trade',(tb>=0?'+':'')+parseFloat(tb).toFixed(2)+' B USD', col.trade_balance.source);
       }
 
-      // UST desde macro_data.json si está disponible
+      // UST desde macro_data.json
       if(d.ust?.rates?.length>=5){
         US_DATA=d.ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
         document.getElementById('us-status').textContent=`✓ ${d.ust.date}`;
@@ -277,44 +271,52 @@ async function loadMacro(){
 }
 
 // ── SVG CURVE
-function drawCurve(svgId,pts,color,H=180,showZero=false){
+function drawCurve(svgId,pts,color,H=160,showZero=false){
   const svg=document.getElementById(svgId);if(!svg||!pts.length)return;
-  const W=700,PAD=42,PB=20;
+  const W=Math.max(svg.clientWidth||0,svg.parentElement?.clientWidth||0,500);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const PL=36,PR=6,PT=16,PB=22,cW=W-PL-PR,cH=H-PT-PB;
   const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
   const minX=Math.min(...xs),maxX=Math.max(...xs);
   let minY=Math.min(...ys),maxY=Math.max(...ys);
   if(showZero){minY=Math.min(minY,0);maxY=Math.max(maxY,0);}
-  const rngY=maxY-minY||1;
-  const px=x=>PAD+(x-minX)/(maxX-minX)*(W-2*PAD);
-  const py=y=>(H-PB)-(y-minY)/rngY*(H-PB-14);
+  const rng=maxY-minY||0.5;
+  minY-=rng*0.08; maxY+=rng*0.12;
+  const rngY=maxY-minY;
+  const px=x=>PL+(x-minX)/(maxX-minX||1)*cW;
+  const py=y=>PT+cH-(y-minY)/rngY*cH;
   let grid='';
   for(let i=0;i<=4;i++){
     const yv=minY+rngY*i/4,yp=py(yv);
-    grid+=`<line x1="${PAD}" y1="${yp}" x2="${W-PAD}" y2="${yp}" stroke="#1e2d4a" stroke-width="1"/>`;
-    grid+=`<text x="${PAD-4}" y="${yp+4}" text-anchor="end" font-size="9" fill="#4a5568">${yv.toFixed(1)}%</text>`;
+    grid+=`<line x1="${PL}" y1="${yp.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yp.toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
+    grid+=`<text x="${PL-4}" y="${(yp+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#4a5568">${yv.toFixed(1)}%</text>`;
   }
-  if(showZero&&minY<0&&maxY>0){
-    const y0=py(0);
-    grid+=`<line x1="${PAD}" y1="${y0}" x2="${W-PAD}" y2="${y0}" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,3"/>`;
-  }
-  const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x)},${py(p.y)}`).join(' ');
-  const areaD=`${pathD} L${px(maxX)},${H-PB} L${px(minX)},${H-PB} Z`;
-  let dots='',xlbls='';
+  const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
+  const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
+  let dots='',xlbls='',lastX=-99,lastLX=-99;
+  const minGap=36;
   pts.forEach((p,i)=>{
-    const show=i===0||i===pts.length-1||i%Math.max(1,Math.floor(pts.length/6))===0;
-    if(show){
-      dots+=`<circle cx="${px(p.x)}" cy="${py(p.y)}" r="4" fill="${color}" stroke="#0a0e1a" stroke-width="2"/>`;
-      dots+=`<text x="${px(p.x)}" y="${py(p.y)-9}" text-anchor="middle" font-size="9" fill="${color}" font-weight="600">${p.y.toFixed(2)}%</text>`;
-      xlbls+=`<text x="${px(p.x)}" y="${H-5}" text-anchor="middle" font-size="9" fill="#4a5568">${p.label||''}</text>`;
+    const cx=px(p.x),cy=py(p.y);
+    const isFirst=i===0,isLast=i===pts.length-1;
+    if(isFirst||isLast||cx-lastX>=minGap){
+      dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
+      const ty=i%2===0?cy-8:cy+16;
+      dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="9" fill="${color}" font-weight="700">${p.y.toFixed(2)}%</text>`;
+      if(cx-lastLX>=minGap||isLast){
+        const anchor=cx<PL+28?'start':cx>W-PR-28?'end':'middle';
+        xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${anchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
+        lastLX=cx;
+      }
+      lastX=cx;
     }
   });
-  svg.innerHTML=`<defs><linearGradient id="g_${svgId}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+  svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${color}" stop-opacity="0.22"/>
     <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
   </linearGradient></defs>
   ${grid}
-  <path d="${areaD}" fill="url(#g_${svgId})"/>
-  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="${areaD}" fill="url(#g${svgId})"/>
+  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
   ${dots}${xlbls}`;
 }
 
@@ -322,20 +324,16 @@ function drawCurve(svgId,pts,color,H=180,showZero=false){
 function renderCol(){
   const tbody=document.getElementById('col-tbody');
   tbody.innerHTML=COL_DATA.map(r=>{
-    const dmod=r.plazo/(1+r.tir/100);
     return`<tr>
       <td style="text-align:left;font-weight:700;color:var(--txt)">${r.name}</td>
-      <td>${r.venc||'—'}</td>
-      <td style="color:var(--txt2)">${(r.cupon||0).toFixed(2)}%</td>
+      <td style="color:var(--txt2)">${r.venc||'—'}</td>
       <td style="font-weight:700;color:var(--amber3)">${r.tir.toFixed(2)}%</td>
-      <td style="color:var(--txt2)">${dmod.toFixed(4)}</td>
       <td style="color:var(--txt3)">${r.plazo.toFixed(2)}</td>
     </tr>`;
   }).join('');
   drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.name.replace('TES TF ','').replace('TES ','')})),'#f59e0b');
   buildTickerFromCOL();
-  renderSpread();
-}
+  }
 
 async function loadColJSON(){
   try{
@@ -381,6 +379,28 @@ const US_SERIES=[
 async function loadUSTreasury(){
   document.getElementById('us-status').textContent='⏳ Cargando...';
   document.getElementById('us-status').className='curve-status status-loading';
+  // Fuente 0: ust_data.json / macro_data.json (GitHub Actions — más confiable)
+  try{
+    for(const fname of ['ust_data.json','macro_data.json']){
+      try{
+        const rj=await fetch(fname+'?_='+Date.now());
+        if(!rj.ok) continue;
+        const dj=await rj.json();
+        const ust=dj.rates?dj:dj.ust;
+        if(ust?.rates?.length>=5){
+          US_DATA=ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
+          if(US_DATA.length>=5){
+            document.getElementById('us-status').textContent=`✓ ${ust.date} · GitHub Actions`;
+            document.getElementById('us-status').className='curve-status status-ok';
+            document.getElementById('us-date').textContent=`US Treasury · ${ust.date} · ${ust.source||'GitHub Actions'}`;
+            renderUS();
+            return;
+          }
+        }
+      }catch(e2){ continue; }
+    }
+  }catch(e){ console.warn('ust_data.json:',e.message); }
+
   try{
     const now=new Date();
     const yyyymm=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -404,7 +424,7 @@ async function loadUSTreasury(){
     document.getElementById('us-status').textContent=`✓ ${dateStr}`;
     document.getElementById('us-status').className='curve-status status-ok';
     document.getElementById('us-date').textContent=`US Treasury Dept. · ${dateStr} · 1 día de retraso`;
-    renderUS();renderSpread();
+    renderUS();
   }catch(err){
     console.warn('US Treasury:',err.message);
     US_DATA=[
@@ -418,20 +438,16 @@ async function loadUSTreasury(){
     document.getElementById('us-status').textContent='📋 Datos ref.';
     document.getElementById('us-status').className='curve-status status-static';
     document.getElementById('us-date').textContent='No se pudo cargar US Treasury · Usando datos de referencia';
-    renderUS();renderSpread();
+    renderUS();
   }
 }
 
 function renderUS(){
   const tbody=document.getElementById('us-tbody');
   tbody.innerHTML=US_DATA.map(r=>{
-    const colRate=interpolateCol(r.years);
-    const spread=colRate?((colRate-r.tir)*100).toFixed(0):null;
     return`<tr>
-      <td style="text-align:left;font-weight:700">${r.plazo}</td>
+      <td style="text-align:left;font-weight:700;color:var(--txt2)">${r.plazo}</td>
       <td style="font-weight:700;color:var(--blue3)">${r.tir.toFixed(2)}%</td>
-      <td style="color:var(--txt3)">—</td>
-      <td style="color:${spread>0?'var(--amber3)':'var(--red3)'}">${spread?'+'+spread+'bp':'—'}</td>
     </tr>`;
   }).join('');
   drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6');
@@ -465,27 +481,14 @@ function interpolateUSat(years){
   return null;
 }
 
-function renderSpread(){
-  if(!US_DATA.length||!COL_DATA.length) return;
-  const pts=COL_DATA.map(r=>{
-    const usRate=interpolateUSat(r.plazo);
-    return usRate?{x:r.plazo,y:r.tir-usRate,label:r.name.replace('TES TF ','').replace('TES ','')}:null;
-  }).filter(Boolean);
-  if(!pts.length) return;
-  drawCurve('svg-spread',pts,'#7c3aed',140,true);
-  const keyPlazos=[{l:'2 años',y:2},{l:'5 años',y:5},{l:'10 años',y:10},{l:'30 años',y:25}];
-  document.getElementById('spread-summary').innerHTML=keyPlazos.map(k=>{
-    const colR=interpolateCol(k.y),usR=interpolateUSat(k.y);
-    const sp=colR&&usR?((colR-usR)*100).toFixed(0):null;
-    return`<div class="spread-cell"><div class="lbl">${k.l}</div><div class="val" style="color:var(--purple3)">${sp?'+'+sp+'bp':'—'}</div></div>`;
-  }).join('');
-}
+
 
 // ── INIT
 buildTickerFromCOL();
 loadColJSON();
 loadUSTreasury();
 loadMacro();
+window.addEventListener('resize',()=>{if(COL_DATA.length)renderCol();if(US_DATA.length)renderUS();});
 </script>
 </body>
 </html>
