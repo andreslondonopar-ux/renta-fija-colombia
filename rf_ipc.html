@@ -202,9 +202,11 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
           <option value="1">Mensual</option>
         </select>
       </div>
-      <div class="field">
-        <label>Base <span style="font-size:9px;color:var(--txt3);text-transform:none">— siempre 365/365</span></label>
-        <input readonly value="365/365" style="color:var(--blue3);background:var(--bg4)">
+      <div class="field"><label>Base intereses</label>
+        <select id="base-int" onchange="autoCA()">
+          <option value="365">365/365</option>
+          <option value="360">30/360</option>
+        </select>
       </div>
       <div class="field"><label>Spread cupón EA (%)</label>
         <input type="number" id="sc" value="3.65" step="0.01" min="0">
@@ -309,10 +311,26 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
     </div><!-- s-body -->
   </div><!-- sidebar -->
 
-  <div class="main" id="main">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--txt3)">
-      <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
-      <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div class="main" id="main" style="flex:0 0 auto">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;color:var(--txt3)">
+        <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
+        <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
+      </div>
+    </div>
+    <!-- IPC TABLE: siempre visible -->
+    <div style="height:320px;flex-shrink:0;border-top:1px solid var(--border);padding:10px 14px;display:flex;flex-direction:column;">
+      <div style="font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        // IPC Colombia · Variación Anual
+        <span id="ipc-table-badge" style="font-size:9px;padding:2px 8px;border-radius:10px;background:rgba(59,130,246,.1);border:1px solid var(--blue);color:var(--blue3);font-weight:400">Histórico DANE</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--txt3);font-weight:400">Línea ámbar = estimado</span>
+      </div>
+      <div style="display:flex;gap:10px;flex:1;min-height:0">
+        <div style="flex:0 0 200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)" id="ipc-table-main"></div>
+        <div style="flex:1;min-width:0;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px">
+          <canvas id="ipc-chart-canvas"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -475,13 +493,37 @@ const IPC_TABLE=[
 ];
 const MES_ES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
+const IPC_PUB_DATES = {
+  "2020-01":"2020-02-07","2020-02":"2020-03-06","2020-03":"2020-04-07","2020-04":"2020-05-08",
+  "2020-05":"2020-06-05","2020-06":"2020-07-07","2020-07":"2020-08-10","2020-08":"2020-09-07",
+  "2020-09":"2020-10-07","2020-10":"2020-11-09","2020-11":"2020-12-07","2020-12":"2021-01-08",
+  "2021-01":"2021-02-05","2021-02":"2021-03-05","2021-03":"2021-04-09","2021-04":"2021-05-07",
+  "2021-05":"2021-06-08","2021-06":"2021-07-08","2021-07":"2021-08-06","2021-08":"2021-09-07",
+  "2021-09":"2021-10-07","2021-10":"2021-11-08","2021-11":"2021-12-07","2021-12":"2022-01-07",
+  "2022-01":"2022-02-07","2022-02":"2022-03-07","2022-03":"2022-04-07","2022-04":"2022-05-06",
+  "2022-05":"2022-06-07","2022-06":"2022-07-08","2022-07":"2022-08-05","2022-08":"2022-09-07",
+  "2022-09":"2022-10-07","2022-10":"2022-11-08","2022-11":"2022-12-07","2022-12":"2023-01-06",
+  "2023-01":"2023-02-07","2023-02":"2023-03-07","2023-03":"2023-04-11","2023-04":"2023-05-08",
+  "2023-05":"2023-06-07","2023-06":"2023-07-10","2023-07":"2023-08-08","2023-08":"2023-09-07",
+  "2023-09":"2023-10-06","2023-10":"2023-11-08","2023-11":"2023-12-07","2023-12":"2024-01-09",
+  "2024-01":"2024-02-07","2024-02":"2024-03-07","2024-03":"2024-04-05","2024-04":"2024-05-08",
+  "2024-05":"2024-06-11","2024-06":"2024-07-08","2024-07":"2024-08-08","2024-08":"2024-09-06",
+  "2024-09":"2024-10-07","2024-10":"2024-11-08","2024-11":"2024-12-06","2024-12":"2025-01-09",
+  "2025-01":"2025-02-07","2025-02":"2025-03-07","2025-03":"2025-04-07","2025-04":"2025-05-08",
+  "2025-05":"2025-06-09","2025-06":"2025-07-07","2025-07":"2025-08-08","2025-08":"2025-09-05",
+  "2025-09":"2025-10-07","2025-10":"2025-11-10","2025-11":"2025-12-05","2025-12":"2026-01-08",
+  "2026-01":"2026-02-06","2026-02":"2026-03-06","2026-03":"2026-04-09","2026-04":"2026-05-08",
+};
+
+
 function ipcVigente(iso){
   const d=new Date(iso+'T12:00:00');
   let best=null,bestKey=-Infinity;
   for(const {y,m,v} of IPC_TABLE){
-    const pm=m===12?1:m+1,py=m===12?y+1:y;
-    const pub=new Date(py,pm-1,8);
-    if(pub<=d){const key=y*12+m;if(key>bestKey){bestKey=key;best={y,m,v};}}
+    const key_str=`${y}-${String(m).padStart(2,'0')}`;
+    const pubISO=IPC_PUB_DATES[key_str];
+    const pub=pubISO?new Date(pubISO+'T12:00:00'):new Date(m===12?y+1:y,(m===12?0:m),8);
+    if(pub<=d){const key=y*12+m;if(key>bestKey){bestKey=key;best={y,m,v,pub:pubISO||null};}}
   }
   return best;
 }
@@ -494,10 +536,11 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
   while(true){
     const nxt=addMonths(cur,mp);
     if(nxt<=liqISO){cur=nxt;firstPending=false;continue;}
-    const L=periodHasLeap(cur,nxt);
-    const F=daysReal(cur,nxt)-L;
-    const M=countFeb29(liqISO,nxt);
-    const G=daysReal(liqISO,nxt)-M;
+    const base=parseInt(($('base-int')||{value:'365'}).value||'365');
+    const L=base===365?periodHasLeap(cur,nxt):0;
+    const F=base===365?daysReal(cur,nxt)-L:days360(cur,nxt);
+    const M=base===365?countFeb29(liqISO,nxt):0;
+    const G=base===365?daysReal(liqISO,nxt)-M:days360(liqISO,nxt);
     const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<3;
     let ipcRec;
     let ipcVal;
@@ -540,10 +583,11 @@ function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode){
 
   // Interés corrido
   const nxt1=addMonths(antISO,mp);
-  const L_ic=periodHasLeap(antISO,nxt1);
-  const F_ic=daysReal(antISO,nxt1)-L_ic;
-  const M_ic=countFeb29(antISO,liqISO);
-  const dCaus=daysReal(antISO,liqISO)-M_ic;
+  const _base=parseInt(($('base-int')||{value:'365'}).value||'365');
+  const L_ic=_base===365?periodHasLeap(antISO,nxt1):0;
+  const F_ic=_base===365?daysReal(antISO,nxt1)-L_ic:days360(antISO,nxt1);
+  const M_ic=_base===365?countFeb29(antISO,liqISO):0;
+  const dCaus=_base===365?daysReal(antISO,liqISO)-M_ic:days360(antISO,liqISO);
   const ic=flows[0].cpPer*(dCaus/F_ic);
   const pl=price-ic;
   const priceRnd=Math.floor(price*1000)/1000;
@@ -628,34 +672,61 @@ function loadIPCCurve(input){
     try{
       IPC_CURVE_DATA = {};
       const lines = e.target.result.split(/\r?\n/);
-      let count = 0;
+      const rawEntries = {};
       for(const line of lines){
         if(!line.trim()) continue;
-        // Format: DD/MM/YYYY;13,12%  or  YYYY-MM-DD;0.1312
-        // Split ONLY on first semicolon or tab — comma is decimal separator
-        const sepIdx = line.trim().search(/[;\t]/);
-        if(sepIdx < 0) continue;
-        let rawDate = line.trim().slice(0, sepIdx).trim().replace(/"/g,'');
-        let rawRate = line.trim().slice(sepIdx+1).trim().replace(/"/g,'').replace('%','').replace(',','.');
-        // Parse date
+        let sepIdx = line.trim().search(/[;\t]/);
+        let rawDate, rawRate;
+        if(sepIdx >= 0){
+          rawDate = line.trim().slice(0, sepIdx).trim().replace(/"/g,'');
+          rawRate = line.trim().slice(sepIdx+1).trim().replace(/"/g,'').replace('%','').replace(',','.');
+        } else {
+          const parts = line.trim().replace(/"/g,'').split(',');
+          if(parts.length < 2) continue;
+          rawDate = parts[0].trim();
+          const rateParts = parts.slice(1);
+          rawRate = rateParts.length === 1 ? rateParts[0].replace('%','') :
+                    rateParts[0].replace('%','') + '.' + rateParts[1].replace('%','');
+        }
         let iso = null;
         if(/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)){
           const [d,m,y] = rawDate.split('/');
           iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-        } else if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
-          iso = rawDate;
         } else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)){
           const [d,m,y] = rawDate.split('/');
           iso = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        } else if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
+          iso = rawDate;
+        } else if(/^\d{4}-\d{2}$/.test(rawDate)){
+          iso = rawDate + '-01';
         }
         if(!iso) continue;
         let rate = parseFloat(rawRate);
         if(isNaN(rate)) continue;
-        if(rate > 1) rate = rate / 100;  // % → decimal
-        IPC_CURVE_DATA[iso] = rate;
+        rate = rate / 100;
+        rawEntries[iso] = rate;
+      }
+      const monthly = {};
+      for(const [iso, rate] of Object.entries(rawEntries)){
+        const monthKey = iso.slice(0,7);
+        monthly[monthKey] = rate;
+      }
+      const lastHistEntry = IPC_TABLE[IPC_TABLE.length-1];
+      const lastHistISO = lastHistEntry ? `${lastHistEntry.y}-${String(lastHistEntry.m).padStart(2,'0')}` : '2020-01';
+      const lastHistDate = new Date(lastHistISO + '-01');
+      const maxDate = new Date(lastHistDate);
+      maxDate.setMonth(maxDate.getMonth() + 18);
+      const maxISO = maxDate.toISOString().slice(0,7);
+      let count = 0;
+      for(const [monthKey, rate] of Object.entries(monthly)){
+        if(monthKey <= lastHistISO) continue;
+        if(monthKey > maxISO) continue;
+        IPC_CURVE_DATA[monthKey + '-01'] = rate;
         count++;
       }
       ipcCurveLoaded = count > 0;
+      renderIPCTable();
+      renderIPCChart();
       const dates = Object.keys(IPC_CURVE_DATA).sort();
       stat.textContent = ipcCurveLoaded
         ? `✓ ${count} registros (${dates[0]} → ${dates[dates.length-1]})`
@@ -670,15 +741,14 @@ function loadIPCCurve(input){
 }
 
 function ipcFromCurve(iso){
+  const monthKey = iso.slice(0,7) + '-01';
+  if(IPC_CURVE_DATA[monthKey] !== undefined) return IPC_CURVE_DATA[monthKey];
   if(IPC_CURVE_DATA[iso] !== undefined) return IPC_CURVE_DATA[iso];
-  // Fallback ±3 days
-  for(let d=1; d<=3; d++){
-    const dt = new Date(iso+'T12:00:00');
-    for(const delta of [-d, d]){
-      const td = new Date(dt); td.setDate(td.getDate()+delta);
-      const tiso = td.toISOString().split('T')[0];
-      if(IPC_CURVE_DATA[tiso] !== undefined) return IPC_CURVE_DATA[tiso];
-    }
+  const dt = new Date(iso+'T12:00:00');
+  for(const delta of [-1, 1]){
+    const td = new Date(dt.getFullYear(), dt.getMonth()+delta, 1);
+    const tiso = td.toISOString().slice(0,7)+'-01';
+    if(IPC_CURVE_DATA[tiso] !== undefined) return IPC_CURVE_DATA[tiso];
   }
   return null;
 }
@@ -1171,5 +1241,103 @@ function mostrarBtnGuardar(tipo, ac, ac2, ac3, result) {
   btn.style.borderColor = dir==='long'?'#7c3aed':'#ef4444';
   btn.style.display = 'block';
 }
+// ── TABLA IPC HISTÓRICA + ESTIMADA ────────────────────────────────────
+function renderIPCTable(){
+  const el = document.getElementById('ipc-table-main');
+  if(!el) return;
+  const estimados = typeof IPC_CURVE_DATA !== 'undefined' ? IPC_CURVE_DATA : {};
+  const hasEst = Object.keys(estimados).length > 0;
+  const badge = document.getElementById('ipc-table-badge');
+  if(badge) badge.textContent = hasEst ? 'Histórico + Estimado' : 'Histórico DANE';
+  const hist = [...IPC_TABLE].slice(-36).reverse();
+  const lastHistEntry = IPC_TABLE[IPC_TABLE.length-1];
+  const lastHistSortT = lastHistEntry ? lastHistEntry.y*100+lastHistEntry.m : 0;
+  const estRows = hasEst
+    ? Object.entries(estimados)
+        .map(([k,v])=>({y:parseInt(k.split('-')[0]),m:parseInt(k.split('-')[1]),v,est:true}))
+        .filter(r => r.y*100+r.m > lastHistSortT)
+        .sort((a,b)=>b.y!==a.y?b.y-a.y:b.m-a.m)
+    : [];
+  const allRows = [...estRows, ...hist];
+  if(!allRows.length){ el.innerHTML='<div style="padding:20px;color:var(--txt3);text-align:center">Sin datos</div>'; return; }
+  const firstEstKey = estRows.length ? `${estRows[estRows.length-1].y}-${String(estRows[estRows.length-1].m).padStart(2,'0')}` : null;
+  const rows = allRows.map(r=>{
+    const key = `${r.y}-${String(r.m).padStart(2,'0')}`;
+    const isFirst = key === firstEstKey;
+    const sepStyle = isFirst ? 'border-top:2px solid var(--amber);' : '';
+    const color = r.v > 0.08 ? 'var(--red3)' : r.v > 0.05 ? 'var(--amber3)' : 'var(--green3)';
+    const nameStyle = r.est ? ' style="color:var(--amber3)"' : '';
+    const key_str = `${r.y}-${String(r.m).padStart(2,'0')}`;
+    const exactPub = IPC_PUB_DATES[key_str];
+    let pubLabel;
+    if(r.est){ pubLabel = '~est.'; }
+    else if(exactPub){ const [py,pm,pd]=exactPub.split('-'); pubLabel=`${pd}/${pm}/${py}`; }
+    else { const pubM=r.m===12?1:r.m+1; const pubY=r.m===12?r.y+1:r.y; pubLabel=`~${String(8).padStart(2,'0')}/${String(pubM).padStart(2,'0')}/${pubY}`; }
+    return `<tr style="${sepStyle}">
+      <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap"${nameStyle}>${MES_ES[r.m-1].slice(0,3)} ${r.y}</td>
+      <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:10px">${(r.v*100).toFixed(2)}%</td>
+      <td style="padding:3px 6px;font-size:9px;color:var(--txt3);white-space:nowrap">${pubLabel}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:10px">
+      <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
+        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Mes ref.</th>
+        <th style="padding:4px 6px;text-align:right;font-size:9px;color:var(--txt3)">IPC</th>
+        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Pub.</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="padding:4px 6px;font-size:9px;color:var(--txt3)">DANE · ámbar=est.</div>`;
+}
+
+// ── GRÁFICA IPC HISTÓRICA + ESTIMADA ──────────────────────────────────
+let _ipcChart = null;
+function renderIPCChart(){
+  const canvas = document.getElementById('ipc-chart-canvas');
+  if(!canvas) return;
+  const hasEst = typeof IPC_CURVE_DATA !== 'undefined' && Object.keys(IPC_CURVE_DATA).length > 0;
+  const histData = IPC_TABLE.map(r => ({
+    label: String(r.m).padStart(2,'0')+'/'+String(r.y).slice(2),
+    val: +(r.v*100).toFixed(2), sort: r.y*100+r.m
+  }));
+  const lastHistSort = histData.length ? histData[histData.length-1].sort : 0;
+  const estData = hasEst
+    ? Object.entries(IPC_CURVE_DATA)
+        .map(([k,v]) => { const [y,m]=k.split('-'); return {label:m+'/'+y.slice(2),val:+(v*100).toFixed(2),sort:parseInt(y)*100+parseInt(m),key:k}; })
+        .filter(r => r.sort > lastHistSort)
+        .sort((a,b)=>a.sort-b.sort)
+    : [];
+  const allData = [...histData, ...estData];
+  if(!allData.length) return;
+  const step = Math.max(1, Math.floor(allData.length/14));
+  const labels = allData.map((r,i) => (i%step===0||i===allData.length-1)?r.label:'');
+  const fi = histData.length;
+  const histVals = allData.map((r,i) => i < fi ? r.val : null);
+  const estVals  = allData.map((r,i) => i >= fi-1 ? r.val : null);
+  if(_ipcChart){ try{_ipcChart.destroy();}catch(e){} _ipcChart=null; }
+  _ipcChart = new Chart(canvas, {
+    type:'line',
+    data:{labels, datasets:[
+      {label:'IPC Anual (real)',data:histVals,borderColor:'#3b82f6',borderWidth:2,pointRadius:0,tension:.2,fill:{target:'origin',above:'rgba(59,130,246,0.06)'}},
+      {label:'IPC Estimado',data:estVals,borderColor:'#f59e0b',borderWidth:2,borderDash:[5,3],pointRadius:0,tension:.2,fill:false}
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:200},
+      plugins:{
+        legend:{display:true,position:'top',labels:{color:'#8892a4',font:{size:9},boxWidth:12,filter:item=>hasEst||item.text!=='IPC Estimado'}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.parsed.y||0).toFixed(2)+'%'}}
+      },
+      scales:{
+        x:{ticks:{color:'#4a5568',font:{size:8},maxRotation:0},grid:{color:'rgba(255,255,255,.03)'}},
+        y:{ticks:{color:'#4a5568',font:{size:8},callback:v=>v.toFixed(0)+'%'},grid:{color:'rgba(255,255,255,.04)'}}
+      }
+    }
+  });
+}
+
+renderIPCTable();
+renderIPCChart();
+
 </script>
 </html>
