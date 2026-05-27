@@ -2,10 +2,10 @@ name: Actualizar Macro Data
 
 on:
   schedule:
-    # 9am y 4pm Colombia (UTC-5) = 14:00 y 21:00 UTC, lunes a viernes
+    # 9am y 5pm Colombia (UTC-5) = 14:00 y 22:00 UTC, lunes a viernes
     - cron: '0 14 * * 1-5'
-    - cron: '0 21 * * 1-5'
-  workflow_dispatch:  # permite correr manualmente
+    - cron: '0 22 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   update-macro:
@@ -23,17 +23,20 @@ jobs:
           python-version: '3.11'
 
       - name: Instalar dependencias
-        run: pip install requests
+        run: |
+          pip install requests playwright
+          playwright install chromium
+          playwright install-deps chromium
 
-      - name: Correr scraper
+      - name: Correr scraper macro
         run: python scraper_macro.py
 
-      - name: Verificar macro_data.json
+      - name: Mostrar resultado
         run: |
           echo "=== macro_data.json ==="
           cat macro_data.json
 
-      - name: Commit y push si hay cambios
+      - name: Commit y push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
