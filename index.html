@@ -60,7 +60,7 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .status-ok{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
 .status-static{background:var(--bg3);color:var(--txt3);border:1px solid var(--border2)}
 .status-loading{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
-.svg-wrap{padding:8px 14px 4px}
+.svg-wrap{padding:4px 0 0}
 svg{display:block;width:100%}
 .yt{width:100%;border-collapse:collapse;font-size:11px}
 .yt th{padding:6px 10px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700}
@@ -160,7 +160,7 @@ svg{display:block;width:100%}
         <table class="yt">
           <thead><tr>
             <th style="text-align:left">Plazo</th>
-            <th>TIR</th><th>vs ayer</th><th>Spread vs COL</th>
+            <th>TIR</th><th>vs ayer</th>
           </tr></thead>
           <tbody id="us-tbody"></tbody>
         </table>
@@ -174,8 +174,7 @@ svg{display:block;width:100%}
           <div class="curve-sub">Diferencial de tasas plazo a plazo</div>
         </div>
       </div>
-      <div class="svg-wrap"><svg id="svg-spread" viewBox="0 0 700 140" height="130"></svg></div>
-      <div class="spread-row" id="spread-summary"></div>
+
     </div>
   </div>
 </div>
@@ -278,8 +277,7 @@ async function loadMacro(){
         document.getElementById('us-status').textContent=`✓ ${d.ust.date}`;
         document.getElementById('us-status').className='curve-status status-ok';
         document.getElementById('us-date').textContent=`US Treasury · ${d.ust.date} · GitHub Actions`;
-        renderUS();renderSpread();
-      }
+        renderUS();      }
 
       if(st) st.textContent=`↺ ${d.fecha||''}`;
       console.log('✓ macro_data.json cargado:', d.fecha);
@@ -314,42 +312,68 @@ async function loadMacro(){
 // ── SVG CURVE
 function drawCurve(svgId,pts,color,H=180,showZero=false){
   const svg=document.getElementById(svgId);if(!svg||!pts.length)return;
-  const W=700,PAD=42,PB=20;
-  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
-  const minX=Math.min(...xs),maxX=Math.max(...xs);
-  let minY=Math.min(...ys),maxY=Math.max(...ys);
+
+  // Full width — no wasted space on sides
+  const W=700, PL=36, PR=8, PT=18, PB=22;
+  const cW=W-PL-PR, cH=H-PT-PB;
+  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  let minY=Math.min(...ys), maxY=Math.max(...ys);
   if(showZero){minY=Math.min(minY,0);maxY=Math.max(maxY,0);}
-  const rngY=maxY-minY||1;
-  const px=x=>PAD+(x-minX)/(maxX-minX)*(W-2*PAD);
-  const py=y=>(H-PB)-(y-minY)/rngY*(H-PB-14);
+  // Add 8% padding top/bottom so labels don't clip
+  const rngRaw=maxY-minY||0.5;
+  minY-=rngRaw*0.08; maxY+=rngRaw*0.10;
+  const rngY=maxY-minY;
+  const px=x=>PL+(x-minX)/(maxX-minX||1)*cW;
+  const py=y=>PT+cH-(y-minY)/rngY*cH;
+
+  // Grid lines
   let grid='';
   for(let i=0;i<=4;i++){
-    const yv=minY+rngY*i/4,yp=py(yv);
-    grid+=`<line x1="${PAD}" y1="${yp}" x2="${W-PAD}" y2="${yp}" stroke="#1e2d4a" stroke-width="1"/>`;
-    grid+=`<text x="${PAD-4}" y="${yp+4}" text-anchor="end" font-size="9" fill="#4a5568">${yv.toFixed(1)}%</text>`;
+    const yv=minY+rngY*i/4, yp=py(yv);
+    grid+=`<line x1="${PL}" y1="${yp}" x2="${W-PR}" y2="${yp}" stroke="#1e2d4a" stroke-width="1"/>`;
+    grid+=`<text x="${PL-4}" y="${yp+3.5}" text-anchor="end" font-size="8.5" fill="#4a5568">${yv.toFixed(1)}%</text>`;
   }
   if(showZero&&minY<0&&maxY>0){
     const y0=py(0);
-    grid+=`<line x1="${PAD}" y1="${y0}" x2="${W-PAD}" y2="${y0}" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    grid+=`<line x1="${PL}" y1="${y0}" x2="${W-PR}" y2="${y0}" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,3"/>`;
   }
-  const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x)},${py(p.y)}`).join(' ');
-  const areaD=`${pathD} L${px(maxX)},${H-PB} L${px(minX)},${H-PB} Z`;
-  let dots='',xlbls='';
+
+  const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
+  const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
+
+  // Anti-overlap: track last label x position, skip if too close
+  let dots='', xlbls='', lastLblX=-99, lastDotX=-99;
+  // Always show first and last; for middle ones enforce min gap
+  const minGap=40;
   pts.forEach((p,i)=>{
-    const show=i===0||i===pts.length-1||i%Math.max(1,Math.floor(pts.length/6))===0;
-    if(show){
-      dots+=`<circle cx="${px(p.x)}" cy="${py(p.y)}" r="4" fill="${color}" stroke="#0a0e1a" stroke-width="2"/>`;
-      dots+=`<text x="${px(p.x)}" y="${py(p.y)-9}" text-anchor="middle" font-size="9" fill="${color}" font-weight="600">${p.y.toFixed(2)}%</text>`;
-      xlbls+=`<text x="${px(p.x)}" y="${H-5}" text-anchor="middle" font-size="9" fill="#4a5568">${p.label||''}</text>`;
+    const cx=px(p.x), cy=py(p.y);
+    const isFirst=i===0, isLast=i===pts.length-1;
+    const tooClose=cx-lastDotX<minGap&&!isLast;
+    if(isFirst||isLast||!tooClose){
+      dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
+      // Rate label above dot — alternate above/below to avoid overlap
+      const above=i%2===0;
+      const ty=above?cy-8:cy+17;
+      dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="9" fill="${color}" font-weight="600">${p.y.toFixed(2)}%</text>`;
+      // X label (plazo) — only if enough room from last
+      if(cx-lastLblX>=minGap||isLast){
+        // Clamp to avoid clipping at edges
+        const anchor=cx<PL+25?'start':cx>W-PR-25?'end':'middle';
+        xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${anchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
+        lastLblX=cx;
+      }
+      lastDotX=cx;
     }
   });
+
   svg.innerHTML=`<defs><linearGradient id="g_${svgId}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+    <stop offset="0%" stop-color="${color}" stop-opacity="0.25"/>
     <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
   </linearGradient></defs>
   ${grid}
   <path d="${areaD}" fill="url(#g_${svgId})"/>
-  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
   ${dots}${xlbls}`;
 }
 
@@ -369,8 +393,7 @@ function renderCol(){
   }).join('');
   drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.name.replace('TES TF ','').replace('TES ','')})),'#f59e0b');
   buildTickerFromCOL();
-  renderSpread();
-}
+  }
 
 async function loadColJSON(){
   try{
@@ -441,8 +464,7 @@ async function loadUSTreasury(){
         document.getElementById('us-status').textContent=`✓ ${ustData.date} · GitHub Actions`;
         document.getElementById('us-status').className='curve-status status-ok';
         document.getElementById('us-date').textContent=`US Treasury · ${ustData.date} · ${ustData.source||'GitHub Actions'}`;
-        renderUS();renderSpread();
-        return;
+        renderUS();        return;
       }
     }
   }catch(e){ console.warn('ust_data.json/macro_data.json:', e.message); }
@@ -465,8 +487,7 @@ async function loadUSTreasury(){
           document.getElementById('us-status').textContent=`✓ ${d.data.date} · yieldwatch.io`;
           document.getElementById('us-status').className='curve-status status-ok';
           document.getElementById('us-date').textContent=`yieldwatch.io · ${d.data.date} · datos del día`;
-          renderUS();renderSpread();
-          return;
+          renderUS();          return;
         }
       }
     }
@@ -501,8 +522,7 @@ async function loadUSTreasury(){
           document.getElementById('us-status').textContent=`✓ ${dateStr}`;
           document.getElementById('us-status').className='curve-status status-ok';
           document.getElementById('us-date').textContent=`US Treasury · ${dateStr} · 1 día de retraso`;
-          renderUS();renderSpread();
-          return;
+          renderUS();          return;
         }
       }catch(e2){ continue; }
     }
@@ -520,8 +540,7 @@ async function loadUSTreasury(){
   document.getElementById('us-status').textContent='📋 Datos ref.';
   document.getElementById('us-status').className='curve-status status-static';
   document.getElementById('us-date').textContent='No se pudo cargar · Usando datos de referencia';
-  renderUS();renderSpread();
-}
+  renderUS();}
 
 function renderUS(){
   const tbody=document.getElementById('us-tbody');
@@ -566,21 +585,7 @@ function interpolateUSat(years){
   return null;
 }
 
-function renderSpread(){
-  if(!US_DATA.length||!COL_DATA.length) return;
-  const pts=COL_DATA.map(r=>{
-    const usRate=interpolateUSat(r.plazo);
-    return usRate?{x:r.plazo,y:r.tir-usRate,label:r.name.replace('TES TF ','').replace('TES ','')}:null;
-  }).filter(Boolean);
-  if(!pts.length) return;
-  drawCurve('svg-spread',pts,'#7c3aed',140,true);
-  const keyPlazos=[{l:'2 años',y:2},{l:'5 años',y:5},{l:'10 años',y:10},{l:'30 años',y:25}];
-  document.getElementById('spread-summary').innerHTML=keyPlazos.map(k=>{
-    const colR=interpolateCol(k.y),usR=interpolateUSat(k.y);
-    const sp=colR&&usR?((colR-usR)*100).toFixed(0):null;
-    return`<div class="spread-cell"><div class="lbl">${k.l}</div><div class="val" style="color:var(--purple3)">${sp?'+'+sp+'bp':'—'}</div></div>`;
-  }).join('');
-}
+
 
 // ── INIT
 buildTickerFromCOL();
