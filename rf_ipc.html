@@ -539,8 +539,8 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
     const base=parseInt(($('base-int')||{value:'365'}).value||'365');
     const L=base===365?periodHasLeap(cur,nxt):0;
     const F=base===365?daysReal(cur,nxt)-L:days360(cur,nxt);
-    const M=base===365?countFeb29(liqISO,nxt):0;
-    const G=daysReal(liqISO,nxt)-M; // G siempre en días reales
+    const M=countFeb29(liqISO,nxt); // siempre resta bisiestos en G (días reales descontados bisiestos)
+    const G=daysReal(liqISO,nxt)-M;
     const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<3;
     let ipcRec;
     let ipcVal;
