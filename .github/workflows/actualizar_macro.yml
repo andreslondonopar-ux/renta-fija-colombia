@@ -1,0 +1,42 @@
+name: Actualizar Macro Data
+
+on:
+  schedule:
+    # 9am y 4pm Colombia (UTC-5) = 14:00 y 21:00 UTC, lunes a viernes
+    - cron: '0 14 * * 1-5'
+    - cron: '0 21 * * 1-5'
+  workflow_dispatch:  # permite correr manualmente
+
+jobs:
+  update-macro:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install requests
+
+      - name: Correr scraper
+        run: python scraper_macro.py
+
+      - name: Verificar macro_data.json
+        run: |
+          echo "=== macro_data.json ==="
+          cat macro_data.json
+
+      - name: Commit y push si hay cambios
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add macro_data.json
+          git diff --staged --quiet || git commit -m "auto: macro_data $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
