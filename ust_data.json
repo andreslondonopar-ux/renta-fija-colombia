@@ -1,37 +1,72 @@
 {
-  "date": "2026-04-30",
+  "date": "2026-05-26",
   "rates": [
+    {
+      "plazo": "1M",
+      "years": 0.083,
+      "tir": 3.72
+    },
+    {
+      "plazo": "2M",
+      "years": 0.167,
+      "tir": 3.7
+    },
     {
       "plazo": "3M",
       "years": 0.25,
-      "tir": 3.696
+      "tir": 3.68
+    },
+    {
+      "plazo": "4M",
+      "years": 0.333,
+      "tir": 3.78
     },
     {
       "plazo": "6M",
       "years": 0.5,
-      "tir": 3.696
+      "tir": 3.8
+    },
+    {
+      "plazo": "1Y",
+      "years": 1,
+      "tir": 3.82
     },
     {
       "plazo": "2Y",
       "years": 2,
-      "tir": 3.23
+      "tir": 4.01
+    },
+    {
+      "plazo": "3Y",
+      "years": 3,
+      "tir": 4.1
     },
     {
       "plazo": "5Y",
       "years": 5,
-      "tir": 3.23
+      "tir": 4.19
+    },
+    {
+      "plazo": "7Y",
+      "years": 7,
+      "tir": 4.33
     },
     {
       "plazo": "10Y",
       "years": 10,
-      "tir": 3.23
+      "tir": 4.5
+    },
+    {
+      "plazo": "20Y",
+      "years": 20,
+      "tir": 5.03
     },
     {
       "plazo": "30Y",
       "years": 30,
-      "tir": 3.403
+      "tir": 5.03
     }
   ],
-  "source": "FiscalData API (promedios mensuales)",
-  "updated": "2026-05-27T03:20:27Z"
+  "source": "US Treasury XML",
+  "updated": "2026-05-27T03:34:18Z"
 }
