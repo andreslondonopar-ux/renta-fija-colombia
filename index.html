@@ -232,10 +232,11 @@ svg{display:block;width:100%}
             <svg id="svg-ipc-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
           <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;font-size:9px;color:var(--txt3)">
-            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#6ee7b7;vertical-align:middle;margin-right:3px"></span>&lt;3%</span>
-            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#86efac;vertical-align:middle;margin-right:3px"></span>3–6%</span>
-            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#fcd34d;vertical-align:middle;margin-right:3px"></span>6–10%</span>
-            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#fca5a5;vertical-align:middle;margin-right:3px"></span>&gt;10%</span>
+            <span><span style="font-family:monospace;font-weight:800;color:#fca5a5">X.X%</span> anual &nbsp;<span style="font-family:monospace;font-weight:700;color:#fca5a5">+X.XX%</span> mensual</span>
+            <span style="color:#3a4a62">·</span>
+            <span><span style="font-family:monospace;color:#6ee7b7">verde</span> &lt;3% &nbsp;<span style="font-family:monospace;color:#fcd34d">amarillo</span> 3–10% &nbsp;<span style="font-family:monospace;color:#fca5a5">rojo</span> &gt;10%</span>
+            <span style="color:#3a4a62">·</span>
+            <span style="color:#8892a4">fecha = pub. DANE</span>
           </div>
           <div id="ipc-calendar" style="overflow-y:auto">
             <div style="padding:20px;text-align:center;color:var(--txt3);font-size:10px">Cargando...</div>
@@ -674,27 +675,29 @@ const MES_ES_D=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov
 function renderIPCCalendar(data, pubDates){
   const el=document.getElementById('ipc-calendar');
   if(!el||!data.length) return;
-  const clr=v=>v>0.10?'#fca5a5':v>0.06?'#fcd34d':v>0.03?'#86efac':'#6ee7b7';
-  const bg=v=>v>0.10?'rgba(239,68,68,.15)':v>0.06?'rgba(245,158,11,.15)':v>0.03?'rgba(134,239,172,.1)':'rgba(110,231,183,.1)';
-  // Group by year
+  const clrA=v=>v>0.10?'#fca5a5':v>0.06?'#fcd34d':v>0.03?'#86efac':'#6ee7b7';
+  const clrM=v=>v>0.01?'#fca5a5':v>0.004?'#fcd34d':'#6ee7b7';
+  const MPUB=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const byYear={};
   data.forEach(({y,m,v,v_mom})=>{if(!byYear[y])byYear[y]={};byYear[y][m]={v,v_mom,pub:(pubDates[`${y}-${String(m).padStart(2,'0')}`]||'').slice(0,10)};});
   const years=Object.keys(byYear).sort().reverse();
-  const MN=['E','F','M','A','M','J','J','A','S','O','N','D'];
+  const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const hdr=MN.map(n=>`<div style="text-align:center;font-size:9px;font-weight:700;color:#3a4a62;padding:3px 0">${n}</div>`).join('');
   const rows=years.map(y=>{
     const cells=Array.from({length:12},(_,i)=>{
       const e=byYear[y][i+1];
-      if(!e) return '<div style="min-height:44px"></div>';
-      return `<div style="background:${bg(e.v)};border:1px solid rgba(255,255,255,.04);border-radius:3px;padding:4px 2px;min-height:44px;text-align:center">
-        <div style="font-size:9px;font-family:monospace;font-weight:700;color:${clr(e.v)}">${(e.v*100).toFixed(1)}%</div>
-        ${e.v_mom!=null?`<div style="font-size:7px;font-family:monospace;color:#4a5568;margin-top:1px">${e.v_mom>0?'+':''}${(e.v_mom*100).toFixed(2)}%m</div>`:''}
-        ${e.pub?`<div style="font-size:6px;color:#2a3550;margin-top:2px">${e.pub.slice(5)}</div>`:''}
+      if(!e) return '<div style="min-height:58px"></div>';
+      // Date: "7 May" format
+      const pubStr=e.pub?`${parseInt(e.pub.slice(8))} ${MPUB[parseInt(e.pub.slice(5,7))-1]}`:'';
+      return `<div style="background:#141d35;border:1px solid #1a2540;border-radius:3px;padding:5px 2px;min-height:58px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+        <div style="font-size:11px;font-family:monospace;font-weight:800;color:${clrA(e.v)};line-height:1.2">${(e.v*100).toFixed(1)}%</div>
+        ${e.v_mom!=null?`<div style="font-size:9px;font-family:monospace;font-weight:700;color:${clrM(e.v_mom)};line-height:1.2">${e.v_mom>0?'+':''}${(e.v_mom*100).toFixed(2)}%</div>`:'<div style="height:13px"></div>'}
+        ${pubStr?`<div style="font-size:8px;color:#8892a4;line-height:1.2;margin-top:1px">${pubStr}</div>`:''}
       </div>`;
     }).join('');
-    return `<div style="display:contents"><div style="font-size:10px;font-weight:700;color:#4a5568;display:flex;align-items:center;padding-right:4px">${y}</div>${cells}</div>`;
+    return `<div style="display:contents"><div style="font-size:10px;font-weight:700;color:#4a5568;display:flex;align-items:center;justify-content:flex-end;padding-right:5px">${y}</div>${cells}</div>`;
   }).join('');
-  el.innerHTML=`<div style="display:grid;grid-template-columns:36px repeat(12,1fr);gap:2px">${'<div></div>'}${hdr}${rows}</div>`;
+  el.innerHTML=`<div style="display:grid;grid-template-columns:36px repeat(12,1fr);gap:2px"><div></div>${hdr}${rows}</div>`;
 }
 
 function renderUVRCalendar(data){
