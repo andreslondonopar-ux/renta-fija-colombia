@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -44,28 +44,28 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .page{display:none}.page.active{display:flex;min-height:calc(100vh - 116px)}
 .sidebar{width:285px;min-width:285px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding-bottom:24px}
 .main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
-.s-hdr{padding:9px 14px;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;background:var(--bg3);border-bottom:1px solid var(--border)}
+.s-hdr{padding:9px 14px;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;background:var(--bg3);border-bottom:1px solid var(--border)}
 .s-body{padding:12px 14px}
 .field{margin-bottom:9px}
-.field label{display:block;font-size:10px;color:var(--txt2);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.field input,.field select{width:100%;padding:7px 9px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg3);font-family:inherit;transition:border-color .15s}
+.field label{display:block;font-size:11px;color:var(--txt2);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select{width:100%;padding:7px 9px;border:1px solid var(--border2);border-radius:var(--r);font-size:13px;color:var(--txt);background:var(--bg3);font-family:inherit;transition:border-color .15s}
 .field input[type="date"]{color-scheme:dark}
 .field input:focus,.field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
 .field input[readonly]{color:var(--blue3);border-color:var(--border);background:var(--bg4);cursor:default}
 .field-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .auto-badge{font-size:9px;color:var(--green3);margin-left:4px;text-transform:none}
-.btn{width:100%;padding:9px;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;font-family:inherit;margin-top:4px;transition:all .15s}
+.btn{width:100%;padding:9px;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;font-family:inherit;margin-top:4px;transition:all .15s}
 .btn-blue{background:var(--blue2);color:var(--blue3);border:1px solid var(--blue)}
 .btn-blue:hover{background:var(--blue);color:#fff}
 .btn-green{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
 .btn-green:hover{background:var(--green);color:#fff}
 .btn-amber{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
 .btn-amber:hover{background:var(--amber);color:#000}
-.btn-sm{width:auto;padding:5px 12px;font-size:11px;margin-top:0}
+.btn-sm{width:auto;padding:5px 12px;font-size:12px;margin-top:0}
 .hr{height:1px;background:var(--border);margin:12px 0}
-.s-lbl{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.s-lbl{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
 .toggle-row{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 0}
-.toggle-label{font-size:11px;color:var(--txt2);font-weight:600}
+.toggle-label{font-size:12px;color:var(--txt2);font-weight:600}
 .toggle-switch{width:36px;height:20px;background:var(--bg4);border:1px solid var(--border2);border-radius:10px;position:relative;transition:background .2s}
 .toggle-switch.on{background:var(--blue2);border-color:var(--blue)}
 .toggle-knob{width:14px;height:14px;background:var(--txt3);border-radius:50%;position:absolute;top:2px;left:2px;transition:all .2s}
@@ -73,7 +73,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .caja-panel{display:none;margin-top:8px;padding:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r)}
 .caja-panel.open{display:block}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
-.c-hdr{padding:9px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
+.c-hdr{padding:9px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
 .c-body{padding:14px}
 .mg4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .mg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -83,14 +83,14 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .m.green{border-color:rgba(16,185,129,.3);background:rgba(6,78,59,.25)}
 .m.amber{border-color:rgba(245,158,11,.3);background:rgba(69,26,3,.3)}
 .m.red{border-color:rgba(239,68,68,.3);background:rgba(69,10,10,.2)}
-.m-lbl{font-size:10px;color:var(--txt2);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.m-val{font-size:18px;font-weight:700;color:var(--txt);line-height:1.2}
+.m-lbl{font-size:11px;color:var(--txt2);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.m-val{font-size:20px;font-weight:700;color:var(--txt);line-height:1.2}
 .m.blue .m-val{color:var(--blue3)}.m.green .m-val{color:var(--green3)}.m.amber .m-val{color:var(--amber3)}.m.red .m-val{color:var(--red3)}
-.m-unit{font-size:10px;color:var(--txt3);margin-top:1px}
-.rr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.m-unit{font-size:11px;color:var(--txt3);margin-top:1px}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
 .rr:last-child{border:none}
 .rr-l{color:var(--txt2)}.rr-v{font-weight:700;color:var(--txt);font-family:monospace}
-.rr-v.blue{color:var(--blue3)}.rr-v.green{color:var(--green3)}.rr-v.red{color:var(--red3)}.rr-v.big{font-size:15px}
+.rr-v.blue{color:var(--blue3)}.rr-v.green{color:var(--green3)}.rr-v.red{color:var(--red3)}.rr-v.big{font-size:17px}
 .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .b-green{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
 .b-blue{background:rgba(29,78,216,.3);color:var(--blue3);border:1px solid var(--blue)}
@@ -98,16 +98,16 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .tir-box{text-align:center;padding:16px;background:rgba(6,78,59,.3);border:1px solid var(--green);border-radius:var(--r)}
 .tir-big{font-size:28px;font-weight:800;color:var(--green3);font-family:monospace}
 .tir-sub{font-size:10px;color:var(--green);margin-top:3px;text-transform:uppercase;letter-spacing:.08em}
-.info-box{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 11px;font-size:11px;color:var(--txt2);margin-top:10px;line-height:1.9}
-.ft{width:100%;border-collapse:collapse;font-size:11px}
-.ft th{text-align:right;padding:6px 8px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:10px;white-space:nowrap;text-transform:uppercase;background:var(--bg3)}
+.info-box{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 11px;font-size:12px;color:var(--txt2);margin-top:10px;line-height:1.9}
+.ft{width:100%;border-collapse:collapse;font-size:12px}
+.ft th{text-align:right;padding:6px 8px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:11px;white-space:nowrap;text-transform:uppercase;background:var(--bg3)}
 .ft th:first-child,.ft th:nth-child(2){text-align:center}
 .ft td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--txt);font-family:monospace}
 .ft td:first-child,.ft td:nth-child(2){text-align:center;color:var(--txt2)}
 .ft tr.total td{border-top:1px solid var(--blue2);border-bottom:none;font-weight:700;color:var(--blue3);background:rgba(29,78,216,.12)}
 .ft tbody tr:hover td{background:var(--bg3)}
-.st{width:100%;border-collapse:collapse;font-size:11px}
-.st th{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:10px;text-transform:uppercase;background:var(--bg3)}
+.st{width:100%;border-collapse:collapse;font-size:12px}
+.st th{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:11px;text-transform:uppercase;background:var(--bg3)}
 .st th:first-child{text-align:left}
 .st td{text-align:right;padding:5px 10px;border-bottom:1px solid var(--border);font-family:monospace}
 .st td:first-child{text-align:left;font-weight:700}
@@ -118,8 +118,8 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .pf-full{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
 .bond-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
 .bond-card-hdr{padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.bond-num{font-size:11px;font-weight:700;color:var(--blue3)}
-.bond-result{font-size:11px;color:var(--txt2);font-family:monospace}
+.bond-num{font-size:12px;font-weight:700;color:var(--blue3)}
+.bond-result{font-size:12px;color:var(--txt2);font-family:monospace}
 .bond-grid{display:grid;grid-template-columns:repeat(4,1fr) 0.8fr 0.8fr 1fr;gap:10px;padding:12px 14px;align-items:end}
 .bond-grid .field{margin-bottom:0}
 .add-bond-btn{background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r2);padding:16px;text-align:center;cursor:pointer;color:var(--txt2);font-size:12px;transition:all .15s}
@@ -127,15 +127,15 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .del-btn{background:var(--red2);border:1px solid var(--red);color:var(--red3);border-radius:var(--r);padding:4px 8px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:700}
 .pf-top{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
 .pf-metric{background:var(--bg2);padding:16px;text-align:center}
-.pf-metric-lbl{font-size:10px;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.pf-metric-lbl{font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .pf-metric-val{font-size:22px;font-weight:800;color:var(--txt);font-family:monospace}
 .pf-metric-val.blue{color:var(--blue3)}.pf-metric-val.green{color:var(--green3)}.pf-metric-val.amber{color:var(--amber3)}
-.pf-metric-unit{font-size:11px;color:var(--txt3);margin-top:3px}
+.pf-metric-unit{font-size:12px;color:var(--txt3);margin-top:3px}
 .pf-scen-input{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border-top:1px solid var(--border)}
 .pf-scen-input input{width:80px;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg2);font-family:monospace;text-align:center}
 .pf-scen-result{font-size:13px;font-weight:700;font-family:monospace}
-.pf-bond-table{width:100%;border-collapse:collapse;font-size:11px}
-.pf-bond-table th{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:10px;text-transform:uppercase;background:var(--bg3)}
+.pf-bond-table{width:100%;border-collapse:collapse;font-size:12px}
+.pf-bond-table th{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:11px;text-transform:uppercase;background:var(--bg3)}
 .pf-bond-table th:first-child,.pf-bond-table th:nth-child(2){text-align:left}
 .pf-bond-table td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);font-family:monospace;color:var(--txt)}
 .pf-bond-table td:first-child,.pf-bond-table td:nth-child(2){text-align:left;color:var(--txt2)}
