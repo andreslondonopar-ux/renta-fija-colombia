@@ -30,8 +30,8 @@ def last_date_in_data(data_dict):
 def try_suameca_api():
     """
     Descarga IBR overnight via API REST de BanRep SUAMECA.
-    Serie ID=241: 'Indicador Bancario de Referencia (IBR) overnight, nominal'
-    La API devuelve valores en % (ej: 10.529) → almacenar como decimal (0.10529).
+    Serie ID=242: 'Indicador Bancario de Referencia (IBR) a 1 mes, nominal'
+    La API devuelve valores en % (ej: 10.581) → almacenar como decimal (0.10581).
     Retorna dict {iso_date: ibr_decimal} o {} si falla.
     """
     import requests
@@ -40,7 +40,7 @@ def try_suameca_api():
     url = (
         "https://suameca.banrep.gov.co/estadisticas-economicas-back/rest/"
         "estadisticaEconomicaRestService/consultaInformacionSerieXTipoDatoXFechaDesde"
-        "?idSerie=241&tipoDato=1&cantDatos=10&frecuenciaDatos=year"
+        "?idSerie=242&tipoDato=1&cantDatos=10&frecuenciaDatos=year"
     )
     try:
         r = requests.get(url, timeout=60, headers={
