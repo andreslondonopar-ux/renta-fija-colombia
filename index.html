@@ -753,6 +753,16 @@ function prevBDibr(isoDate){
   return d.toISOString().slice(0,10);
 }
 
+function ibrAplicado(iso, data){
+  // Día hábil D: aplicado = publicado en prevBD(D)
+  // Día no hábil D: aplicado = publicado en prevBD(último día hábil ≤ D)
+  // → viernes/sábado/domingo comparten el jueves; lunes usa el viernes
+  const dt=new Date(iso+'T12:00:00');
+  const isNonBD=dt.getDay()===0||dt.getDay()===6||CO_HOL.has(iso);
+  const L=isNonBD?prevBDibr(iso):iso;
+  return data[prevBDibr(L)];
+}
+
 function renderIBRCalendar(data){
   const el=document.getElementById('ibr-calendar');
   if(!el) return;
@@ -779,7 +789,7 @@ function renderIBRCalendar(data){
       const isWE=dow===0||dow===6;
       const isFest=!isWE&&CO_HOL.has(iso);
       const pub=data[iso];
-      const ap=data[prevBDibr(iso)];
+      const ap=ibrAplicado(iso,data);
       const isToday=iso===today;
       if(isWE){
         cells+=`<div style="background:#080c17;border-radius:3px;padding:3px 2px;min-height:50px">
