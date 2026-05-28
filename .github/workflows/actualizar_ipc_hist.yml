@@ -22,10 +22,7 @@ jobs:
           python-version: '3.11'
 
       - name: Instalar dependencias
-        run: pip install requests playwright
-
-      - name: Instalar browser
-        run: python -m playwright install chromium
+        run: pip install requests holidays
 
       - name: Actualizar IPC
         run: python scraper_ipc_hist.py

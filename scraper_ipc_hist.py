@@ -10,6 +10,9 @@ Schedule GitHub Actions: dias 8-12 de cada mes (cuando ya esta publicado).
 import json
 from datetime import date, timedelta
 from pathlib import Path
+import holidays as _holidays
+
+_CO_HOLIDAYS = _holidays.Colombia()
 
 TODAY = date.today().isoformat()
 DATA_FILE = Path("datos_ipc.json")
@@ -28,26 +31,25 @@ def load_existing():
     return {"updated": TODAY, "source": "BanRep SUAMECA", "data": [], "pub_dates": {}}
 
 
-def nth_business_day(year, month, n):
-    """Retorna el n-esimo dia habil del mes (lunes-viernes, sin festivos)."""
+def nth_business_day_co(year, month, n):
+    """n-esimo dia habil del mes segun calendario Colombia (holidays.Colombia)."""
     d = date(year, month, 1)
     count = 0
-    last_valid = d
-    while d.month == month:
-        if d.weekday() < 5:
+    while True:
+        if d.weekday() < 5 and d not in _CO_HOLIDAYS:
             count += 1
-            last_valid = d
             if count == n:
                 return d.isoformat()
-        d = d + timedelta(days=1)
-    return last_valid.isoformat()
+        d += timedelta(days=1)
+        if d.month != month and d.day > 6:
+            break
+    return None
 
 
 def pub_date_for(year, month):
-    """IPC del mes M/Y se publica el 5to dia habil del mes M+1."""
-    if month == 12:
-        return nth_business_day(year + 1, 1, 5)
-    return nth_business_day(year, month + 1, 5)
+    """IPC del mes M/Y se publica el 5to dia habil de M+1 (DANE)."""
+    pub_y, pub_m = (year + 1, 1) if month == 12 else (year, month + 1)
+    return nth_business_day_co(pub_y, pub_m, 5)
 
 
 def fetch_suameca():
