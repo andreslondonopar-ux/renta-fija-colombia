@@ -1261,6 +1261,16 @@ function nextBD(isoDate){
   return d.toISOString().slice(0,10);
 }
 
+function prevBD(isoDate){
+  let d=new Date(isoDate+'T12:00:00');
+  for(let i=0;i<10;i++){
+    d.setDate(d.getDate()-1);
+    const s=d.toISOString().slice(0,10);
+    if(d.getDay()!==0&&d.getDay()!==6&&!CO_HOLIDAYS.has(s)) return s;
+  }
+  return d.toISOString().slice(0,10);
+}
+
 // ── TABLA IBR HISTÓRICA + FRA ──────────────────────────────
 function renderIBRTable(){
   const el = document.getElementById('ibr-table-main');
@@ -1275,20 +1285,22 @@ function renderIBRTable(){
   const rows = allDates.map(iso=>{
     const isHist = IBR_REAL_DATA[iso] !== undefined;
     const isFRA  = FRA_DATA && FRA_DATA[iso] !== undefined;
-    const aplicado = isFRA && !isHist ? FRA_DATA[iso] : IBR_REAL_DATA[iso];
-    if(aplicado === undefined) return '';
-    // IBR publicado hoy = tasa anunciada por BanRep hoy → se aplica el próximo día hábil
-    const pubISO = nextBD(iso);
-    const publicado = isFRA && !isHist ? ibrFRA(pubISO) : ibrReal(pubISO);
+    if(!isHist && !isFRA) return '';
+    // Publicado: lo que BanRep anunció ese día (dato directo)
+    const publicado = isHist ? IBR_REAL_DATA[iso] : FRA_DATA[iso];
+    // Aplicado: lo que rige en la negociación hoy = publicado el día hábil anterior
+    const apISO = prevBD(iso);
+    const aplicado = isHist ? ibrReal(apISO) : ibrFRA(apISO);
+    if(publicado === undefined) return '';
     const isFirst = iso === firstFRA;
     const sepStyle = isFirst ? 'border-top:2px solid var(--green);' : '';
     const [y,m,d] = iso.split('-');
-    const apColor = aplicado > 0.10 ? 'var(--red3)' : aplicado > 0.07 ? 'var(--amber3)' : 'var(--green3)';
-    const pubColor = publicado != null ? (publicado > 0.10 ? 'var(--red3)' : publicado > 0.07 ? 'var(--amber3)' : 'var(--green3)') : 'var(--txt3)';
+    const pubColor = publicado > 0.10 ? 'var(--red3)' : publicado > 0.07 ? 'var(--amber3)' : 'var(--green3)';
+    const apColor  = aplicado != null ? (aplicado > 0.10 ? 'var(--red3)' : aplicado > 0.07 ? 'var(--amber3)' : 'var(--green3)') : 'var(--txt3)';
     return `<tr style="${sepStyle}">
       <td style="padding:3px 5px;color:var(--txt2);font-size:10px;white-space:nowrap">${d}/${m}</td>
-      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-size:10px;color:${pubColor}">${publicado!=null?(publicado*100).toFixed(2)+'%':'—'}</td>
-      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-weight:700;color:${apColor};font-size:10px">${(aplicado*100).toFixed(2)}%</td>
+      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-size:10px;color:${pubColor}">${(publicado*100).toFixed(2)}%</td>
+      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-weight:700;color:${apColor};font-size:10px">${aplicado!=null?(aplicado*100).toFixed(2)+'%':'—'}</td>
     </tr>`;
   }).filter(Boolean).join('');
   el.innerHTML = `
