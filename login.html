@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acceso · Renta Fija Colombia</title>
+<script>
+(function(){
+  var H='9b663157ecdd1ba79b9f71c3d798d409367c1f55647240b30a96e05f49c15f84';
+  if(sessionStorage.getItem('rfauth')===H) location.replace('index.html');
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;--bg2:#0f1629;--bg3:#141d35;
+  --txt:#e8eaf0;--txt2:#8892a4;--txt3:#4a5568;
+  --border:#1e2d4a;--border2:#263554;
+  --blue:#3b82f6;--blue2:#1d4ed8;--blue3:#93c5fd;
+  --red:#ef4444;--red2:#7f1d1d;--red3:#fca5a5;
+  --green:#10b981;--green2:#064e3b;--green3:#6ee7b7;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center}
+.logo{width:44px;height:44px;background:#1a2540;border:2px solid var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:var(--blue3)}
+.brand{text-align:left}
+.brand-name{font-size:15px;font-weight:700;line-height:1.2}
+.brand-sub{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em}
+.title{font-size:13px;font-weight:700;color:var(--txt2);text-align:center;margin-bottom:22px;letter-spacing:.04em;text-transform:uppercase}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.input-wrap{position:relative}
+.field input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:10px 38px 10px 12px;font-size:13px;color:var(--txt);font-family:inherit;outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--blue)}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--txt3);padding:2px;display:flex;align-items:center;transition:color .15s}
+.eye:hover{color:var(--txt2)}
+.btn{width:100%;background:var(--blue2);border:1px solid var(--blue);border-radius:7px;padding:11px;font-size:12px;font-weight:700;color:var(--blue3);cursor:pointer;font-family:inherit;letter-spacing:.06em;text-transform:uppercase;transition:all .15s;margin-top:4px}
+.btn:hover{background:var(--blue);color:#fff}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.error{background:var(--red2);border:1px solid var(--red);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--red3);margin-bottom:14px;display:none}
+.footer{text-align:center;margin-top:20px;font-size:9px;color:var(--txt3)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo-row">
+    <div class="logo">RF</div>
+    <div class="brand">
+      <div class="brand-name">Renta Fija Colombia</div>
+      <div class="brand-sub">Valoración · Riesgo · Portafolio</div>
+    </div>
+  </div>
+  <div class="title">Acceso Privado</div>
+  <div class="error" id="err">Contraseña incorrecta</div>
+  <div class="field">
+    <label for="pwd">Contraseña</label>
+    <div class="input-wrap">
+      <input type="password" id="pwd" autocomplete="current-password" placeholder="••••••••" autofocus>
+      <button class="eye" type="button" id="eye-btn" tabindex="-1" aria-label="Mostrar contraseña">
+        <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <button class="btn" id="login-btn">Entrar</button>
+  <div class="footer">2026 · Uso interno</div>
+</div>
+
+<script>
+var HASH = '9b663157ecdd1ba79b9f71c3d798d409367c1f55647240b30a96e05f49c15f84';
+
+async function sha256(str) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+
+async function doLogin() {
+  var pwd = document.getElementById('pwd').value;
+  var btn = document.getElementById('login-btn');
+  var err = document.getElementById('err');
+  if (!pwd) return;
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+  err.style.display = 'none';
+  var h = await sha256(pwd);
+  if (h === HASH) {
+    sessionStorage.setItem('rfauth', HASH);
+    location.replace('index.html');
+  } else {
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+    document.getElementById('pwd').value = '';
+    document.getElementById('pwd').focus();
+  }
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('pwd').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+document.getElementById('eye-btn').addEventListener('click', function(){
+  var input = document.getElementById('pwd');
+  var icon = document.getElementById('eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+});
+</script>
+</body>
+</html>
