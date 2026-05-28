@@ -270,10 +270,11 @@ svg{display:block;width:100%}
           <div style="height:220px;margin-bottom:10px">
             <svg id="svg-ibr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
-          <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;font-size:9px;color:var(--txt3)">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;font-size:9px;color:var(--txt3)">
             <span><span style="font-family:monospace;color:#93c5fd">X.XX%</span> Publicado</span>
             <span><span style="font-family:monospace;font-weight:800;color:#fca5a5">X.XX%</span> Aplicado</span>
-            <span style="opacity:.35;border:1px solid #1e2d4a;border-radius:3px;padding:1px 6px">fin / fest</span>
+            <span><span style="font-family:monospace;font-weight:800;color:#fca5a5;opacity:.6">X.XX%</span> Festivo (solo aplicado)</span>
+            <span style="opacity:.3;border:1px solid #1e2d4a;border-radius:3px;padding:1px 5px">fin semana</span>
           </div>
           <div id="ibr-calendar" style="overflow-y:auto">
             <div style="padding:20px;text-align:center;color:var(--txt3);font-size:10px">Cargando...</div>
@@ -780,10 +781,16 @@ function renderIBRCalendar(data){
       const pub=data[iso];
       const ap=data[prevBDibr(iso)];
       const isToday=iso===today;
-      if(isWE||isFest){
-        cells+=`<div style="background:${isFest?'#0c1220':'#080c17'};border-radius:3px;padding:3px 2px;min-height:50px">
-          <div style="font-size:8px;color:#252f42;font-weight:700">${day}</div>
-          ${isFest?'<div style="font-size:6px;color:#252f42;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">fest</div>':''}
+      if(isWE){
+        cells+=`<div style="background:#080c17;border-radius:3px;padding:3px 2px;min-height:50px">
+          <div style="font-size:8px;color:#1a2235;font-weight:700">${day}</div>
+        </div>`;
+      } else if(isFest){
+        const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
+        cells+=`<div style="background:#0d1628;border-radius:3px;padding:3px 2px;min-height:50px;${ring}">
+          <div style="font-size:8px;color:#2a3855;font-weight:700;margin-bottom:1px">${day}</div>
+          <div style="font-size:6px;color:#2a3855;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">fest</div>
+          ${ap!=null?`<div style="font-size:8px;font-family:monospace;font-weight:800;color:${AP_C};opacity:.65;line-height:1.35">${(ap*100).toFixed(2)}%</div>`:''}
         </div>`;
       } else {
         const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
