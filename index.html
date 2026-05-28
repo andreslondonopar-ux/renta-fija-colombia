@@ -227,8 +227,8 @@ svg{display:block;width:100%}
             <span class="data-badge" id="ipc-badge">cargando...</span>
             <span style="margin-left:auto;font-size:9px;color:var(--txt3)">Fuente: DANE</span>
           </div>
-          <div style="height:100px;margin-bottom:10px">
-            <svg id="svg-ipc-data" viewBox="0 0 800 100" style="width:100%;height:100%"></svg>
+          <div style="height:220px;margin-bottom:10px">
+            <svg id="svg-ipc-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
           <table class="data-tbl">
             <thead><tr>
@@ -247,8 +247,8 @@ svg{display:block;width:100%}
             <span class="data-badge" id="uvr-badge">cargando...</span>
             <span style="margin-left:auto;font-size:9px;color:var(--txt3)">Fuente: BanRep</span>
           </div>
-          <div style="height:100px;margin-bottom:10px">
-            <svg id="svg-uvr-data" viewBox="0 0 800 100" style="width:100%;height:100%"></svg>
+          <div style="height:220px;margin-bottom:10px">
+            <svg id="svg-uvr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
           <table class="data-tbl">
             <thead><tr>
@@ -262,17 +262,17 @@ svg{display:block;width:100%}
         <!-- IBR -->
         <div class="dpanel" id="dpanel-ibr">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <span style="font-size:12px;font-weight:700;color:var(--red3)">IBR Overnight &mdash; Colombia</span>
+            <span style="font-size:12px;font-weight:700;color:var(--red3)">IBR 1 mes &mdash; Colombia</span>
             <span class="data-badge" id="ibr-badge">cargando...</span>
             <span style="margin-left:auto;font-size:9px;color:var(--txt3)">Fuente: BanRep</span>
           </div>
-          <div style="height:100px;margin-bottom:10px">
-            <svg id="svg-ibr-data" viewBox="0 0 800 100" style="width:100%;height:100%"></svg>
+          <div style="height:220px;margin-bottom:10px">
+            <svg id="svg-ibr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
           <table class="data-tbl">
             <thead><tr>
               <th style="text-align:left">Fecha</th>
-              <th>IBR Overnight</th>
+              <th>IBR 1 mes</th>
             </tr></thead>
             <tbody id="ibr-data-tbody"></tbody>
           </table>
@@ -744,7 +744,7 @@ function drawDataSparkline(svgId, vals, color, suffix){
   const svg=document.getElementById(svgId);
   if(!svg||!vals.length) return;
   const W=svg.parentElement?Math.max(svg.parentElement.clientWidth||0,400):800;
-  const H=100, PL=38, PR=8, PT=10, PB=20;
+  const H=220, PL=38, PR=8, PT=14, PB=24;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const cW=W-PL-PR, cH=H-PT-PB;
   let mn=Math.min(...vals), mx=Math.max(...vals);
