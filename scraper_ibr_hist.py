@@ -2,8 +2,9 @@
 scraper_ibr_hist.py — Actualiza datos_ibr.json con los ultimos valores IBR overnight de BanRep.
 
 Estrategias (en orden):
-  1. URL directa de Excel BanRep (IBR indicadores bancarios)
-  2. Playwright en pagina de indicadores bancarios buscando Excel/CSV
+  1. API REST BanRep SUAMECA (serie ID=241, IBR overnight nominal)
+  2. URL directa de Excel BanRep (IBR indicadores bancarios)
+  3. Playwright en pagina de indicadores bancarios buscando Excel/CSV
 """
 import json, re, io
 from datetime import date, timedelta, datetime
@@ -24,6 +25,61 @@ def last_date_in_data(data_dict):
     if not data_dict:
         return None
     return max(data_dict.keys())
+
+
+def try_suameca_api():
+    """
+    Descarga IBR overnight via API REST de BanRep SUAMECA.
+    Serie ID=241: 'Indicador Bancario de Referencia (IBR) overnight, nominal'
+    La API devuelve valores en % (ej: 10.529) → almacenar como decimal (0.10529).
+    Retorna dict {iso_date: ibr_decimal} o {} si falla.
+    """
+    import requests
+    from datetime import datetime, timezone
+
+    url = (
+        "https://suameca.banrep.gov.co/estadisticas-economicas-back/rest/"
+        "estadisticaEconomicaRestService/consultaInformacionSerieXTipoDatoXFechaDesde"
+        "?idSerie=241&tipoDato=1&cantDatos=10&frecuenciaDatos=year"
+    )
+    try:
+        r = requests.get(url, timeout=60, headers={
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        })
+        if not r.ok:
+            print("[IBR] suameca HTTP %d" % r.status_code)
+            return {}
+        print("[IBR] suameca OK: %d bytes" % len(r.content))
+
+        resp = r.json()
+        if not isinstance(resp, list) or not resp:
+            print("[IBR] suameca: respuesta inesperada")
+            return {}
+
+        raw_data = resp[0].get("data", [])
+        if not raw_data:
+            print("[IBR] suameca: campo 'data' vacio")
+            return {}
+
+        result = {}
+        for entry in raw_data:
+            if not isinstance(entry, (list, tuple)) or len(entry) < 2:
+                continue
+            ts_ms, val_pct = entry[0], entry[1]
+            try:
+                iso = datetime.fromtimestamp(int(ts_ms) / 1000, tz=timezone.utc).strftime("%Y-%m-%d")
+                # La API retorna porcentaje (10.529) -> convertir a decimal (0.10529)
+                result[iso] = round(float(val_pct) / 100, 7)
+            except (ValueError, TypeError, OSError):
+                pass
+
+        print("[IBR] suameca: %d entradas parseadas" % len(result))
+        return result
+
+    except Exception as e:
+        print("[IBR] suameca error: %s" % e)
+        return {}
 
 
 def try_direct_excel():
@@ -234,22 +290,34 @@ def main():
 
     new_entries = {}
 
-    # --- Estrategia 1: Excel directo ---
-    content = None
+    # --- Estrategia 1: API SUAMECA BanRep ---
     try:
-        content = try_direct_excel()
+        api_data = try_suameca_api()
+        for d, v in api_data.items():
+            if last_d is None or d > last_d:
+                new_entries[d] = v
+        if new_entries:
+            print("[IBR] suameca: %d entradas nuevas" % len(new_entries))
     except Exception as e:
-        print("Directo: %s" % e)
+        print("[IBR] suameca excepcion: %s" % e)
 
-    if content:
-        parsed = parse_excel_ibr(content)
-        if parsed:
-            for d, v in parsed.items():
-                if last_d is None or d > last_d:
-                    new_entries[d] = v
-            print("Excel directo: %d entradas nuevas" % len(new_entries))
+    # --- Estrategia 2: Excel directo ---
+    if not new_entries:
+        content = None
+        try:
+            content = try_direct_excel()
+        except Exception as e:
+            print("Directo: %s" % e)
 
-    # --- Estrategia 2: Playwright ---
+        if content:
+            parsed = parse_excel_ibr(content)
+            if parsed:
+                for d, v in parsed.items():
+                    if last_d is None or d > last_d:
+                        new_entries[d] = v
+                print("Excel directo: %d entradas nuevas" % len(new_entries))
+
+    # --- Estrategia 3: Playwright ---
     if not new_entries:
         try:
             pw_data = try_banrep_playwright()

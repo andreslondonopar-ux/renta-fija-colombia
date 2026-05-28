@@ -27,30 +27,60 @@ def last_date_in_data(data_dict):
     return max(data_dict.keys())
 
 
-def try_serankua_api():
+def try_suameca_api():
     """
-    Intenta descargar UVR via API SERANKUA de BanRep.
-    BanRep tiene endpoints para series estadisticas.
+    Descarga UVR via API REST de BanRep SUAMECA.
+    Endpoint: consultaInformacionSerieXTipoDatoXFechaDesde?idSerie=850&tipoDato=0&cantDatos=30&frecuenciaDatos=year
+    Respuesta: [{..., "data": [[timestamp_ms, valor], ...]}]
+    Retorna dict {iso_date: uvr_value} o {} si falla.
     """
     import requests
+    from datetime import datetime, timezone
 
-    endpoints = [
-        # URL directa de serie UVR
-        "https://totoro.banrep.gov.co/analytics/saw.dll?Download&PortalPath=%2Fshared%2FSeries%20Estadisticas%2F_inicio%2FInicio&Action=Navigate&path=%2Fshared%2FSeries%20Estadisticas%2FUvr%2FUvr&Extension=csv&NQUser=publico&NQPassword=publico123&lang=es",
-        # Alternativas
-        "https://www.banrep.gov.co/es/estadisticas/indice-uvr?archivo=csv",
-    ]
+    url = (
+        "https://suameca.banrep.gov.co/estadisticas-economicas-back/rest/"
+        "estadisticaEconomicaRestService/consultaInformacionSerieXTipoDatoXFechaDesde"
+        "?idSerie=850&tipoDato=0&cantDatos=30&frecuenciaDatos=year"
+    )
+    try:
+        r = requests.get(url, timeout=60, headers={
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        })
+        if not r.ok:
+            print("[UVR] suameca HTTP %d" % r.status_code)
+            return {}
+        print("[UVR] suameca OK: %d bytes" % len(r.content))
 
-    for url in endpoints:
-        try:
-            import requests as req
-            r = req.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
-            if r.status_code == 200 and len(r.content) > 500:
-                print("SERANKUA OK: %d bytes" % len(r.content))
-                return r.text
-        except Exception as e:
-            print("SERANKUA error: %s" % e)
-    return None
+        resp = r.json()
+        # La respuesta es una lista; el primer elemento tiene el campo "data"
+        if not isinstance(resp, list) or not resp:
+            print("[UVR] suameca: respuesta inesperada")
+            return {}
+
+        raw_data = resp[0].get("data", [])
+        if not raw_data:
+            print("[UVR] suameca: campo 'data' vacio")
+            return {}
+
+        result = {}
+        for entry in raw_data:
+            # Cada entrada es [timestamp_ms, valor]
+            if not isinstance(entry, (list, tuple)) or len(entry) < 2:
+                continue
+            ts_ms, val = entry[0], entry[1]
+            try:
+                iso = datetime.fromtimestamp(int(ts_ms) / 1000, tz=timezone.utc).strftime("%Y-%m-%d")
+                result[iso] = round(float(val), 4)
+            except (ValueError, TypeError, OSError):
+                pass
+
+        print("[UVR] suameca: %d entradas parseadas" % len(result))
+        return result
+
+    except Exception as e:
+        print("[UVR] suameca error: %s" % e)
+        return {}
 
 
 def parse_csv_uvr(text):
@@ -189,21 +219,16 @@ def main():
 
     new_entries = {}
 
-    # --- Estrategia 1: SERANKUA ---
-    csv_text = None
+    # --- Estrategia 1: API SUAMECA BanRep (JSON) ---
     try:
-        csv_text = try_serankua_api()
+        api_data = try_suameca_api()
+        for d, v in api_data.items():
+            if last_d is None or d > last_d:
+                new_entries[d] = v
+        if new_entries:
+            print("[UVR] suameca: %d entradas nuevas" % len(new_entries))
     except Exception as e:
-        print("SERANKUA: %s" % e)
-
-    if csv_text:
-        parsed = parse_csv_uvr(csv_text)
-        if parsed:
-            # Solo entradas mas recientes
-            for d, v in parsed.items():
-                if last_d is None or d > last_d:
-                    new_entries[d] = v
-            print("SERANKUA: %d entradas nuevas" % len(new_entries))
+        print("[UVR] suameca excepcion: %s" % e)
 
     # --- Estrategia 2: Playwright BanRep ---
     if not new_entries:
