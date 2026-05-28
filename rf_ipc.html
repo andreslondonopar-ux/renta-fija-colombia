@@ -202,9 +202,11 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
           <option value="1">Mensual</option>
         </select>
       </div>
-      <div class="field">
-        <label>Base <span style="font-size:9px;color:var(--txt3);text-transform:none">— siempre 365/365</span></label>
-        <input readonly value="365/365" style="color:var(--blue3);background:var(--bg4)">
+      <div class="field"><label>Base</label>
+        <select id="base">
+          <option value="365">365/365 (Act/Act)</option>
+          <option value="360">360/360 (30/360)</option>
+        </select>
       </div>
       <div class="field"><label>Spread cupón EA (%)</label>
         <input type="number" id="sc" value="3.65" step="0.01" min="0">
@@ -539,14 +541,14 @@ function ipcVigente(iso){
 function ipcLbl(r){return r?MES_ES[r.m-1]+' '+r.y:'—';}
 
 // ── IPC BOND MATH ─────────────────────────────────────────────────────
-function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
+function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode,base=365){
   const ipcLiq=ipcVigente(liqISO);
   const flows=[];let cur=antISO,firstPending=true;
   while(true){
     const nxt=addMonths(cur,mp);
     if(nxt<=liqISO){cur=nxt;firstPending=false;continue;}
-    const L=periodHasLeap(cur,nxt);
-    const F=daysReal(cur,nxt)-L;
+    const L=base===360?0:periodHasLeap(cur,nxt);
+    const F=base===360?days360(cur,nxt):daysReal(cur,nxt)-L;
     const M=countFeb29(liqISO,nxt);
     const G=daysReal(liqISO,nxt)-M;
     const last=nxt>=vencISO||Math.abs(daysReal(nxt,vencISO))<3;
@@ -570,7 +572,7 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
       ipcVal=ipcRec?ipcRec.v:(ipcLiq?ipcLiq.v:0);
     }
     const cuponIPC=(1+ipcVal)*(1+sc)-1;
-    const cpPer=trunc6((Math.pow(1+cuponIPC,F/365)-1)*100);
+    const cpPer=trunc6((Math.pow(1+cuponIPC,F/base)-1)*100);
     const tirI=(1+ipcVal)*(1+st)-1;
     const tY=G/365;
     const cf=cpPer+(last?100:0);
@@ -582,8 +584,8 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode){
   return flows;
 }
 
-function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode){
-  const flows=buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode);
+function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode,base=365){
+  const flows=buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode,base);
   if(!flows.length)return null;
 
   // PRICE: individual TIRs per flow — correct economic value
@@ -591,10 +593,10 @@ function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode){
 
   // Interés corrido
   const nxt1=addMonths(antISO,mp);
-  const L_ic=periodHasLeap(antISO,nxt1);
-  const F_ic=daysReal(antISO,nxt1)-L_ic;
+  const L_ic=base===360?0:periodHasLeap(antISO,nxt1);
+  const F_ic=base===360?days360(antISO,nxt1):daysReal(antISO,nxt1)-L_ic;
   const M_ic=countFeb29(antISO,liqISO);
-  const dCaus=daysReal(antISO,liqISO)-M_ic;
+  const dCaus=base===360?days360(antISO,liqISO):daysReal(antISO,liqISO)-M_ic;
   const ic=flows[0].cpPer*(dCaus/F_ic);
   const pl=price-ic;
   const priceRnd=Math.floor(price*1000)/1000;
@@ -774,9 +776,10 @@ function calcular(showTIR=false){
   const st=parseFloat($('st').value)/100;
   const nom=parseFloat($('nom_val').value)||0;
   const mode=$('ipc-mode').value;
+  const base=parseInt($('base').value)||365;
   if(!liq||!venc||!ant||isNaN(sc)||isNaN(st)||nom<=0){alert('Complete todos los parámetros');return;}
   if(mode.includes('curva')&&!ipcCurveLoaded){alert('Cargue la curva de inflación estimada primero');return;}
-  const res=calcBondIPC(ant,liq,venc,mp,sc,st,nom,mode);
+  const res=calcBondIPC(ant,liq,venc,mp,sc,st,nom,mode,base);
   if(!res||isNaN(res.price)){alert('Error en el cálculo');return;}
   lastRes=res;
   const{flows,price,priceRnd,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,tirAvg,dmN}=res;
@@ -806,7 +809,7 @@ function calcular(showTIR=false){
   // Scenarios — same structure as tasa fija
   const scen=[-300,-200,-100,-50,-25,0,25,50,100,200,300].map(bp=>{
     const stS=st+bp/10000;if(stS<=0)return null;
-    const r=calcBondIPC(ant,liq,venc,mp,sc,stS,nom,mode);if(!r)return null;
+    const r=calcBondIPC(ant,liq,venc,mp,sc,stS,nom,mode,base);if(!r)return null;
     const prnS=Math.floor(r.price*1000)/1000;
     const dv01S=r.dmod*(prnS/100)*nom/10000;
     return{bp,yS:stS,pS:prnS,plS:r.pl,dmS:r.dmod,dv01S,gan:(prnS-priceRnd)/100*nom*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1)};
@@ -818,7 +821,7 @@ function calcular(showTIR=false){
     const fV=$('f_venta').value;
     const stV=parseFloat($('st_venta').value)/100;
     if(fV&&!isNaN(stV)&&fV>liq){
-      const rV=calcBondIPC(ant,fV,venc,mp,sc,stV,nom,mode);
+      const rV=calcBondIPC(ant,fV,venc,mp,sc,stV,nom,mode,base);
       if(rV){
         // cupsRec: only intermediate coupons (no principal), up to but not including venc
         // cupsRec: all flows received between liq and fV
@@ -931,7 +934,7 @@ function calcular(showTIR=false){
   // Left side: stMin → st
   for(let i=0;i<=stepsL;i++){
     const stI=stMin+(st-stMin)*(i/stepsL);
-    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode);
+    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode,base);
     const ps=fs.reduce((s,f)=>s+f.pv,0);
     // x-label = simple avg TIR of flows at this spread
     const tirI=fs.reduce((s,f)=>s+f.tirI,0)/fs.length;
@@ -942,7 +945,7 @@ function calcular(showTIR=false){
   // Right side: st → stMax
   for(let i=1;i<=stepsR;i++){
     const stI=st+(stMax-st)*(i/stepsR);
-    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode);
+    const fs=buildFlowsIPC(ant,liq,venc,mp,sc,stI,mode,base);
     const ps=fs.reduce((s,f)=>s+f.pv,0);
     const tirI=fs.reduce((s,f)=>s+f.tirI,0)/fs.length;
     yArr.push((tirI*100).toFixed(2)+'%');
@@ -958,6 +961,7 @@ function calcular(showTIR=false){
     <div class="c-hdr">Resultados principales
       <span class="badge ${bCls}">${estado}</span>
       <span class="badge" style="background:rgba(59,130,246,.15);color:var(--blue3);border-color:var(--blue2)">${modeNames[mode]}</span>
+      <span class="badge" style="background:rgba(16,185,129,.1);color:var(--green3);border-color:var(--green)">${base}/${base}</span>
     </div>
     <div class="c-body">
       <div class="mg4" style="margin-bottom:10px">
@@ -1088,8 +1092,9 @@ function calcularInverso(){
   const ant=$('c_ant_iso').value;
   const mp=parseInt($('freq').value),sc=parseFloat($('sc').value)/100;
   const st=parseFloat($('st').value)/100,mode=$('ipc-mode').value;
+  const base=parseInt($('base').value)||365;
   if(!liq||!venc||!ant)return;
-  const res=calcBondIPC(ant,liq,venc,mp,sc,st,1e10,mode);
+  const res=calcBondIPC(ant,liq,venc,mp,sc,st,1e10,mode,base);
   if(!res)return;
   const{price,priceRnd,dmod,conv,ic,pl}=res;
   const tipo=$('inv-tipo').value;
@@ -1098,8 +1103,8 @@ function calcularInverso(){
     const target=parseFloat($('inv-precio').value);
     if(isNaN(target)||target<=0){alert('Ingresa precio objetivo');return;}
     let lo=0.0001,hi=2.0,mid,iter=0;
-    while(iter++<120){mid=(lo+hi)/2;const r=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode);if(!r)break;if(r.price>target)lo=mid;else hi=mid;if(Math.abs(r.price-target)<1e-7)break;}
-    const rC=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode);
+    while(iter++<120){mid=(lo+hi)/2;const r=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode,base);if(!r)break;if(r.price>target)lo=mid;else hi=mid;if(Math.abs(r.price-target)<1e-7)break;}
+    const rC=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode,base);
     items=[{l:'Precio objetivo',v:fmt(target,4)+'%'},
       {l:'Spread TIR',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmt(mid*100,4)}%</span>`},
       {l:'Precio resultante',v:fmt(rC?.priceRnd||0,4)+'%'},{l:'Precio limpio',v:fmt(rC?.pl||0,4)+'%'}];
