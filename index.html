@@ -270,14 +270,14 @@ svg{display:block;width:100%}
           <div style="height:220px;margin-bottom:10px">
             <svg id="svg-ibr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
-          <table class="data-tbl">
-            <thead><tr>
-              <th style="text-align:left">Fecha</th>
-              <th>Publicado</th>
-              <th>Aplicado</th>
-            </tr></thead>
-            <tbody id="ibr-data-tbody"></tbody>
-          </table>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;font-size:9px;color:var(--txt3)">
+            <span><span style="font-family:monospace;color:var(--txt2)">X.XX%</span> Publicado</span>
+            <span><span style="font-family:monospace;font-weight:800;color:var(--txt)">X.XX%</span> Aplicado</span>
+            <span style="opacity:.35;border:1px solid #1e2d4a;border-radius:3px;padding:1px 6px">fin / fest</span>
+          </div>
+          <div id="ibr-calendar" style="overflow-y:auto">
+            <div style="padding:20px;text-align:center;color:var(--txt3);font-size:10px">Cargando...</div>
+          </div>
         </div>
 
         <!-- Estimados -->
@@ -752,9 +752,59 @@ function prevBDibr(isoDate){
   return d.toISOString().slice(0,10);
 }
 
+function renderIBRCalendar(data){
+  const el=document.getElementById('ibr-calendar');
+  if(!el) return;
+  const dates=Object.keys(data).sort();
+  if(!dates.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--txt3)">Sin datos</div>';return;}
+  const last=new Date(dates[dates.length-1]+'T12:00:00');
+  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DN=['L','M','X','J','V','S','D'];
+  const today=new Date().toISOString().slice(0,10);
+  const clr=v=>v>0.10?'#fca5a5':v>0.07?'#fcd34d':'#6ee7b7';
+  let html='<div style="display:flex;flex-wrap:wrap;gap:14px">';
+  for(let mi=2;mi>=0;mi--){
+    const ref=new Date(last.getFullYear(),last.getMonth()-mi,1);
+    const y=ref.getFullYear(),m=ref.getMonth();
+    const days=new Date(y,m+1,0).getDate();
+    let sdow=new Date(y,m,1).getDay(); sdow=sdow===0?6:sdow-1;
+    const hdrs=DN.map(d=>`<div style="text-align:center;font-size:8px;font-weight:700;color:#3a4a62;padding:2px 0">${d}</div>`).join('');
+    let cells='';
+    for(let i=0;i<sdow;i++) cells+='<div></div>';
+    for(let day=1;day<=days;day++){
+      const mm=String(m+1).padStart(2,'0'),dd=String(day).padStart(2,'0');
+      const iso=`${y}-${mm}-${dd}`;
+      const dow=new Date(iso+'T12:00:00').getDay();
+      const isWE=dow===0||dow===6;
+      const isFest=!isWE&&CO_HOL.has(iso);
+      const pub=data[iso];
+      const ap=pub!=null?data[prevBDibr(iso)]:undefined;
+      const isToday=iso===today;
+      if(isWE||isFest){
+        cells+=`<div style="background:${isFest?'#0c1220':'#080c17'};border-radius:3px;padding:3px 2px;min-height:50px">
+          <div style="font-size:8px;color:#252f42;font-weight:700">${day}</div>
+          ${isFest?'<div style="font-size:6px;color:#252f42;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">fest</div>':''}
+        </div>`;
+      } else {
+        const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
+        cells+=`<div style="background:#141d35;border-radius:3px;padding:3px 2px;min-height:50px;${ring}">
+          <div style="font-size:8px;color:${isToday?'#93c5fd':'#3a4a62'};font-weight:700;margin-bottom:2px">${day}</div>
+          ${pub!=null?`<div style="font-size:8px;font-family:monospace;color:${clr(pub)};line-height:1.35">${(pub*100).toFixed(2)}%</div>`:''}
+          ${ap!=null?`<div style="font-size:8px;font-family:monospace;font-weight:800;color:${clr(ap)};line-height:1.35">${(ap*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#252f42">—</div>'}
+        </div>`;
+      }
+    }
+    html+=`<div style="min-width:195px;flex:1">
+      <div style="font-size:11px;font-weight:700;color:#4a5568;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #1e2d4a;text-transform:uppercase;letter-spacing:.06em">${MN[m]} ${y}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">${hdrs}${cells}</div>
+    </div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 async function loadDatosIBR(){
   const badge=document.getElementById('ibr-badge');
-  const tbody=document.getElementById('ibr-data-tbody');
   try{
     const r=await fetch('datos_ibr.json?_='+Date.now());
     if(!r.ok) throw new Error('HTTP '+r.status);
@@ -763,18 +813,7 @@ async function loadDatosIBR(){
     const data=d.data||{};
     const dates=Object.keys(data).sort();
     const recent=dates.slice(-60);
-    if(tbody){
-      tbody.innerHTML=[...recent].reverse().map(dt=>{
-        const pub=data[dt];
-        const ap=data[prevBDibr(dt)];
-        const c=v=>v>0.10?'var(--red3)':v>0.07?'var(--amber3)':'var(--green3)';
-        return `<tr>
-          <td>${dt}</td>
-          <td style="color:${c(pub)}">${(pub*100).toFixed(3)}%</td>
-          <td style="color:${c(ap??pub)};font-weight:700">${ap!=null?(ap*100).toFixed(3)+'%':'—'}</td>
-        </tr>`;
-      }).join('');
-    }
+    renderIBRCalendar(data);
     drawDataSparkline('svg-ibr-data', recent.map(dt=>data[dt]*100), '#ef4444', '%');
   }catch(e){
     if(badge){badge.textContent='sin datos';badge.className='data-badge';}
