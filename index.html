@@ -231,14 +231,15 @@ svg{display:block;width:100%}
           <div style="height:220px;margin-bottom:10px">
             <svg id="svg-ipc-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
-          <table class="data-tbl">
-            <thead><tr>
-              <th style="text-align:left">Periodo</th>
-              <th>IPC Anual</th>
-              <th>Publicaci&oacute;n</th>
-            </tr></thead>
-            <tbody id="ipc-data-tbody"></tbody>
-          </table>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;font-size:9px;color:var(--txt3)">
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#6ee7b7;vertical-align:middle;margin-right:3px"></span>&lt;3%</span>
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#86efac;vertical-align:middle;margin-right:3px"></span>3–6%</span>
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#fcd34d;vertical-align:middle;margin-right:3px"></span>6–10%</span>
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#fca5a5;vertical-align:middle;margin-right:3px"></span>&gt;10%</span>
+          </div>
+          <div id="ipc-calendar" style="overflow-y:auto">
+            <div style="padding:20px;text-align:center;color:var(--txt3);font-size:10px">Cargando...</div>
+          </div>
         </div>
 
         <!-- UVR -->
@@ -251,13 +252,9 @@ svg{display:block;width:100%}
           <div style="height:220px;margin-bottom:10px">
             <svg id="svg-uvr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
-          <table class="data-tbl">
-            <thead><tr>
-              <th style="text-align:left">Fecha</th>
-              <th>UVR</th>
-            </tr></thead>
-            <tbody id="uvr-data-tbody"></tbody>
-          </table>
+          <div id="uvr-calendar" style="overflow-y:auto">
+            <div style="padding:20px;text-align:center;color:var(--txt3);font-size:10px">Cargando...</div>
+          </div>
         </div>
 
         <!-- IBR -->
@@ -674,9 +671,78 @@ async function loadDatosSection(){
 
 const MES_ES_D=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
+function renderIPCCalendar(data, pubDates){
+  const el=document.getElementById('ipc-calendar');
+  if(!el||!data.length) return;
+  const clr=v=>v>0.10?'#fca5a5':v>0.06?'#fcd34d':v>0.03?'#86efac':'#6ee7b7';
+  const bg=v=>v>0.10?'rgba(239,68,68,.15)':v>0.06?'rgba(245,158,11,.15)':v>0.03?'rgba(134,239,172,.1)':'rgba(110,231,183,.1)';
+  // Group by year
+  const byYear={};
+  data.forEach(({y,m,v,v_mom})=>{if(!byYear[y])byYear[y]={};byYear[y][m]={v,v_mom,pub:(pubDates[`${y}-${String(m).padStart(2,'0')}`]||'').slice(0,10)};});
+  const years=Object.keys(byYear).sort().reverse();
+  const MN=['E','F','M','A','M','J','J','A','S','O','N','D'];
+  const hdr=MN.map(n=>`<div style="text-align:center;font-size:9px;font-weight:700;color:#3a4a62;padding:3px 0">${n}</div>`).join('');
+  const rows=years.map(y=>{
+    const cells=Array.from({length:12},(_,i)=>{
+      const e=byYear[y][i+1];
+      if(!e) return '<div style="min-height:44px"></div>';
+      return `<div style="background:${bg(e.v)};border:1px solid rgba(255,255,255,.04);border-radius:3px;padding:4px 2px;min-height:44px;text-align:center">
+        <div style="font-size:9px;font-family:monospace;font-weight:700;color:${clr(e.v)}">${(e.v*100).toFixed(1)}%</div>
+        ${e.v_mom!=null?`<div style="font-size:7px;font-family:monospace;color:#4a5568;margin-top:1px">${e.v_mom>0?'+':''}${(e.v_mom*100).toFixed(2)}%m</div>`:''}
+        ${e.pub?`<div style="font-size:6px;color:#2a3550;margin-top:2px">${e.pub.slice(5)}</div>`:''}
+      </div>`;
+    }).join('');
+    return `<div style="display:contents"><div style="font-size:10px;font-weight:700;color:#4a5568;display:flex;align-items:center;padding-right:4px">${y}</div>${cells}</div>`;
+  }).join('');
+  el.innerHTML=`<div style="display:grid;grid-template-columns:36px repeat(12,1fr);gap:2px">${'<div></div>'}${hdr}${rows}</div>`;
+}
+
+function renderUVRCalendar(data){
+  const el=document.getElementById('uvr-calendar');
+  if(!el) return;
+  const dates=Object.keys(data).sort();
+  if(!dates.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--txt3)">Sin datos</div>';return;}
+  const last=new Date(dates[dates.length-1]+'T12:00:00');
+  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DN=['L','M','X','J','V','S','D'];
+  const today=new Date().toISOString().slice(0,10);
+  let html='<div style="display:flex;flex-wrap:wrap;gap:14px">';
+  for(let mi=2;mi>=0;mi--){
+    const ref=new Date(last.getFullYear(),last.getMonth()-mi,1);
+    const y=ref.getFullYear(),m=ref.getMonth();
+    const days=new Date(y,m+1,0).getDate();
+    let sdow=new Date(y,m,1).getDay(); sdow=sdow===0?6:sdow-1;
+    const hdrs=DN.map(d=>`<div style="text-align:center;font-size:8px;font-weight:700;color:#3a4a62;padding:2px 0">${d}</div>`).join('');
+    let cells='';
+    for(let i=0;i<sdow;i++) cells+='<div></div>';
+    for(let day=1;day<=days;day++){
+      const mm=String(m+1).padStart(2,'0'),dd=String(day).padStart(2,'0');
+      const iso=`${y}-${mm}-${dd}`;
+      const val=data[iso];
+      // Daily change: compare with previous calendar day
+      const prev=new Date(iso+'T12:00:00'); prev.setDate(prev.getDate()-1);
+      const prevISO=prev.toISOString().slice(0,10);
+      const prevVal=data[prevISO];
+      const chg=val!=null&&prevVal!=null?((val/prevVal-1)*100):null;
+      const isToday=iso===today;
+      const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
+      cells+=`<div style="background:#141d35;border-radius:3px;padding:3px 2px;min-height:50px;${ring}">
+        <div style="font-size:8px;color:${isToday?'#93c5fd':'#3a4a62'};font-weight:700;margin-bottom:1px">${day}</div>
+        ${val!=null?`<div style="font-size:7.5px;font-family:monospace;color:#6ee7b7;line-height:1.3">${val.toFixed(4)}</div>`:''}
+        ${chg!=null?`<div style="font-size:7px;font-family:monospace;color:#4a5568;line-height:1.3">${chg>0?'+':''}${chg.toFixed(4)}%</div>`:''}
+      </div>`;
+    }
+    html+=`<div style="min-width:195px;flex:1">
+      <div style="font-size:11px;font-weight:700;color:#4a5568;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #1e2d4a;text-transform:uppercase;letter-spacing:.06em">${MN[m]} ${y}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">${hdrs}${cells}</div>
+    </div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 async function loadDatosIPC(){
   const badge=document.getElementById('ipc-badge');
-  const tbody=document.getElementById('ipc-data-tbody');
   try{
     const r=await fetch('datos_ipc.json?_='+Date.now());
     if(!r.ok) throw new Error('HTTP '+r.status);
@@ -684,17 +750,8 @@ async function loadDatosIPC(){
     if(badge){badge.textContent='✓ '+d.updated;badge.className='data-badge ok';}
     const data=d.data||[];
     const pubDates=d.pub_dates||{};
-    const recent=data.slice(-48);
-    if(tbody){
-      tbody.innerHTML=[...recent].reverse().map(row=>{
-        const key=`${row.y}-${String(row.m).padStart(2,'0')}`;
-        const pub=pubDates[key]||'—';
-        const pct=(row.v*100).toFixed(2)+'%';
-        const color=row.v>0.1?'var(--red3)':row.v>0.05?'var(--amber3)':'var(--green3)';
-        return `<tr><td>${MES_ES_D[row.m-1]} ${row.y}</td><td style="color:${color}">${pct}</td><td style="color:var(--txt3)">${pub}</td></tr>`;
-      }).join('');
-    }
-    drawDataSparkline('svg-ipc-data', recent.map(r=>r.v*100), '#3b82f6', '%');
+    renderIPCCalendar(data, pubDates);
+    drawDataSparkline('svg-ipc-data', data.slice(-48).map(r=>r.v*100), '#3b82f6', '%');
   }catch(e){
     if(badge){badge.textContent='sin datos';badge.className='data-badge';}
     console.warn('datos_ipc.json:',e);
@@ -703,7 +760,6 @@ async function loadDatosIPC(){
 
 async function loadDatosUVR(){
   const badge=document.getElementById('uvr-badge');
-  const tbody=document.getElementById('uvr-data-tbody');
   try{
     const r=await fetch('datos_uvr.json?_='+Date.now());
     if(!r.ok) throw new Error('HTTP '+r.status);
@@ -711,14 +767,8 @@ async function loadDatosUVR(){
     if(badge){badge.textContent='✓ '+d.updated;badge.className='data-badge ok';}
     const data=d.data||{};
     const dates=Object.keys(data).sort();
-    const recent=dates.slice(-60);
-    if(tbody){
-      tbody.innerHTML=[...recent].reverse().map(dt=>{
-        const v=data[dt];
-        return `<tr><td>${dt}</td><td style="color:var(--green3)">${v.toFixed(4)}</td></tr>`;
-      }).join('');
-    }
-    drawDataSparkline('svg-uvr-data', recent.map(dt=>data[dt]), '#10b981', '');
+    renderUVRCalendar(data);
+    drawDataSparkline('svg-uvr-data', dates.slice(-60).map(dt=>data[dt]), '#10b981', '');
   }catch(e){
     if(badge){badge.textContent='sin datos';badge.className='data-badge';}
     console.warn('datos_uvr.json:',e);

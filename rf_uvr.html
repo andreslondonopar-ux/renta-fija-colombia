@@ -309,6 +309,17 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
       </div>
     </div>
+    <!-- IPC MENSUAL CONTEXT -->
+    <div style="border-top:1px solid var(--border);padding:10px 16px;background:var(--bg2)">
+      <div style="font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        // IPC mensual → períodos UVR
+        <span style="font-size:9px;font-weight:400;color:var(--txt3)">IPC de mes M publicado el 5° día hábil de M+1 · vigente en UVR desde el 16 de M+1</span>
+      </div>
+      <div id="uvr-ipc-context" style="overflow-x:auto">
+        <div style="font-size:10px;color:var(--txt3);padding:4px 0">Cargando...</div>
+      </div>
+    </div>
+
     <!-- UVR TABLE: always visible below results -->
     <div style="flex:1;overflow:hidden;border-top:1px solid var(--border);padding:16px;display:flex;flex-direction:column;min-height:320px">
       <div style="font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px">
@@ -1234,5 +1245,51 @@ async function loadUVRData(){
   }catch(e){}
 }
 loadUVRData();
+
+// ── IPC MENSUAL CONTEXT ──────────────────────────────────────────────
+async function loadIPCContext(){
+  const el=document.getElementById('uvr-ipc-context');
+  if(!el) return;
+  try{
+    const r=await fetch('datos_ipc.json?_='+Date.now());
+    if(!r.ok) return;
+    const d=await r.json();
+    const data=d.data||[];
+    const pub=d.pub_dates||{};
+    if(!data.length){el.innerHTML='<div style="font-size:10px;color:var(--txt3)">Sin datos</div>';return;}
+    // Last 8 entries (most recent months)
+    const recent=[...data].slice(-8).reverse();
+    const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const rows=recent.map(({y,m,v,v_mom})=>{
+      const ym=`${y}-${String(m).padStart(2,'0')}`;
+      const pubDate=pub[ym]||'';
+      // UVR vigente: desde el 16 del mes M+1 hasta el 15 del mes M+2
+      const nm=m===12?1:m+1, ny=m===12?y+1:y;
+      const nm2=nm===12?1:nm+1, ny2=nm===12?ny+1:ny;
+      const desde=`16/${String(nm).padStart(2,'0')}/${ny}`;
+      const hasta=`15/${String(nm2).padStart(2,'0')}/${ny2}`;
+      const clrA=v>0.10?'#fca5a5':v>0.06?'#fcd34d':v>0.03?'#86efac':'#6ee7b7';
+      const clrM=v_mom!=null?(v_mom>0.01?'#fca5a5':v_mom>0.004?'#fcd34d':'#6ee7b7'):'#4a5568';
+      return `<tr>
+        <td style="padding:4px 8px;white-space:nowrap;color:var(--txt2);font-weight:700">${MN[m-1]} ${y}</td>
+        <td style="padding:4px 8px;white-space:nowrap;color:#4a5568">${pubDate.slice(5)||'—'}</td>
+        <td style="padding:4px 8px;white-space:nowrap;color:${clrM};font-family:monospace;font-weight:700">${v_mom!=null?(v_mom*100).toFixed(3)+'%':'—'}</td>
+        <td style="padding:4px 8px;white-space:nowrap;color:${clrA};font-family:monospace">${(v*100).toFixed(2)}%</td>
+        <td style="padding:4px 8px;white-space:nowrap;color:#4a5568;font-size:10px">${desde} → ${hasta}</td>
+      </tr>`;
+    }).join('');
+    el.innerHTML=`<table style="border-collapse:collapse;font-size:11px;width:100%">
+      <thead><tr style="background:var(--bg3)">
+        <th style="padding:4px 8px;text-align:left;font-size:9px;color:var(--txt3);text-transform:uppercase;white-space:nowrap">IPC mes</th>
+        <th style="padding:4px 8px;text-align:left;font-size:9px;color:var(--txt3);text-transform:uppercase;white-space:nowrap">Pub.</th>
+        <th style="padding:4px 8px;text-align:left;font-size:9px;color:var(--txt3);text-transform:uppercase;white-space:nowrap">IPC mensual</th>
+        <th style="padding:4px 8px;text-align:left;font-size:9px;color:var(--txt3);text-transform:uppercase;white-space:nowrap">IPC anual</th>
+        <th style="padding:4px 8px;text-align:left;font-size:9px;color:var(--txt3);text-transform:uppercase;white-space:nowrap">UVR vigente</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }catch(e){if(el)el.innerHTML='<div style="font-size:10px;color:var(--txt3)">Sin datos</div>';}
+}
+loadIPCContext();
 </script>
 </html>

@@ -22,6 +22,11 @@ SUAMECA_URL = (
     "estadisticaEconomicaRestService/consultaInformacionSerieXTipoDatoXFechaDesde"
     "?idSerie=15000&tipoDato=20&cantDatos=12&frecuenciaDatos=year"
 )
+SUAMECA_URL_MOM = (
+    "https://suameca.banrep.gov.co/estadisticas-economicas-back/rest/"
+    "estadisticaEconomicaRestService/consultaInformacionSerieXTipoDatoXFechaDesde"
+    "?idSerie=15000&tipoDato=1&cantDatos=12&frecuenciaDatos=year"
+)
 
 
 def load_existing():
@@ -95,6 +100,36 @@ def fetch_suameca():
     return result, pub_dates
 
 
+def fetch_suameca_mom():
+    """Descarga variacion mensual IPC (tipoDato=1). Retorna dict {YYYY-MM: v_mom}."""
+    import requests
+    from datetime import datetime, timezone
+    try:
+        r = requests.get(SUAMECA_URL_MOM, timeout=60, headers={
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        })
+        if not r.ok:
+            print("[IPC-MOM] suameca HTTP %d" % r.status_code)
+            return {}
+        resp = r.json()
+        if not isinstance(resp, list) or not resp:
+            return {}
+        raw = resp[0].get("data", [])
+        result = {}
+        for entry in raw:
+            if not isinstance(entry, (list, tuple)) or len(entry) < 2:
+                continue
+            ts_ms, val_pct = entry[0], entry[1]
+            ym = datetime.fromtimestamp(int(ts_ms) / 1000, tz=timezone.utc).strftime("%Y-%m")
+            result[ym] = round(float(val_pct) / 100, 6)
+        print("[IPC-MOM] suameca: %d entradas mensuales" % len(result))
+        return result
+    except Exception as e:
+        print("[IPC-MOM] error: %s" % e)
+        return {}
+
+
 def main():
     print("=== Actualizando datos_ipc.json ===")
     existing = load_existing()
@@ -106,7 +141,18 @@ def main():
     except Exception as e:
         print("[IPC] error: %s" % e)
 
+    # Intentar bajar variacion mensual y agregar v_mom a cada entrada
+    mom_dict = {}
+    try:
+        mom_dict = fetch_suameca_mom()
+    except Exception as e:
+        print("[IPC-MOM] excepcion: %s" % e)
+
     if new_data and len(new_data) >= len(old_data):
+        for entry in new_data:
+            ym = "%d-%02d" % (entry["y"], entry["m"])
+            if ym in mom_dict:
+                entry["v_mom"] = mom_dict[ym]
         existing["data"] = new_data
         existing["pub_dates"] = {**existing.get("pub_dates", {}), **new_pub_dates}
         existing["source"] = "BanRep SUAMECA / DANE (serie 15000, var. anual calculada)"
