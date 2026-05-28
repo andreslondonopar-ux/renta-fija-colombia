@@ -271,8 +271,8 @@ svg{display:block;width:100%}
             <svg id="svg-ibr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
           <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;font-size:9px;color:var(--txt3)">
-            <span><span style="font-family:monospace;color:var(--txt2)">X.XX%</span> Publicado</span>
-            <span><span style="font-family:monospace;font-weight:800;color:var(--txt)">X.XX%</span> Aplicado</span>
+            <span><span style="font-family:monospace;color:#93c5fd">X.XX%</span> Publicado</span>
+            <span><span style="font-family:monospace;font-weight:800;color:#fca5a5">X.XX%</span> Aplicado</span>
             <span style="opacity:.35;border:1px solid #1e2d4a;border-radius:3px;padding:1px 6px">fin / fest</span>
           </div>
           <div id="ibr-calendar" style="overflow-y:auto">
@@ -761,7 +761,7 @@ function renderIBRCalendar(data){
   const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const DN=['L','M','X','J','V','S','D'];
   const today=new Date().toISOString().slice(0,10);
-  const clr=v=>v>0.10?'#fca5a5':v>0.07?'#fcd34d':'#6ee7b7';
+  const PUB_C='#93c5fd', AP_C='#fca5a5';
   let html='<div style="display:flex;flex-wrap:wrap;gap:14px">';
   for(let mi=2;mi>=0;mi--){
     const ref=new Date(last.getFullYear(),last.getMonth()-mi,1);
@@ -778,7 +778,7 @@ function renderIBRCalendar(data){
       const isWE=dow===0||dow===6;
       const isFest=!isWE&&CO_HOL.has(iso);
       const pub=data[iso];
-      const ap=pub!=null?data[prevBDibr(iso)]:undefined;
+      const ap=data[prevBDibr(iso)];
       const isToday=iso===today;
       if(isWE||isFest){
         cells+=`<div style="background:${isFest?'#0c1220':'#080c17'};border-radius:3px;padding:3px 2px;min-height:50px">
@@ -789,8 +789,8 @@ function renderIBRCalendar(data){
         const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
         cells+=`<div style="background:#141d35;border-radius:3px;padding:3px 2px;min-height:50px;${ring}">
           <div style="font-size:8px;color:${isToday?'#93c5fd':'#3a4a62'};font-weight:700;margin-bottom:2px">${day}</div>
-          ${pub!=null?`<div style="font-size:8px;font-family:monospace;color:${clr(pub)};line-height:1.35">${(pub*100).toFixed(2)}%</div>`:''}
-          ${ap!=null?`<div style="font-size:8px;font-family:monospace;font-weight:800;color:${clr(ap)};line-height:1.35">${(ap*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#252f42">—</div>'}
+          ${pub!=null?`<div style="font-size:8px;font-family:monospace;color:${PUB_C};line-height:1.35">${(pub*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#2a3550">—</div>'}
+          ${ap!=null?`<div style="font-size:8px;font-family:monospace;font-weight:800;color:${AP_C};line-height:1.35">${(ap*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#2a3550">—</div>'}
         </div>`;
       }
     }
