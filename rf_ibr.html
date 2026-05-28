@@ -312,20 +312,15 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <div style="font-size:40px;margin-bottom:12px;opacity:.25">◈</div>
       <div>// Configure los parámetros y presione <strong style="color:var(--blue3)">▶ Calcular</strong></div>
     </div>
-    <!-- IBR TABLE: siempre visible -->
+    <!-- IBR CHART: siempre visible -->
     <div style="height:220px;flex-shrink:0;border-top:1px solid var(--border);padding:8px 14px;display:flex;flex-direction:column;">
-      <div style="font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-        // Tabla IBR · Histórico + FRA Estimado
+      <div style="font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        // IBR Histórico + FRA Estimado
         <span id="ibr-table-badge" style="font-size:9px;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green3);font-weight:400">Histórico desde 2020</span>
-        <span style="margin-left:auto;font-size:9px;color:var(--txt3);font-weight:400">Línea verde = inicio estimación FRA</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--txt3);font-weight:400">Línea verde = inicio FRA · tabla completa en Inicio → Datos</span>
       </div>
-      <div style="display:flex;gap:10px;flex:1;min-height:0">
-        <div style="flex:0 0 230px;overflow-y:auto;overflow-x:hidden;border:1px solid var(--border);border-radius:var(--r)" id="ibr-table-main">
-          <div style="padding:20px;color:var(--txt3);text-align:center;opacity:.5;font-size:10px">Cargue FRA para ver estimados</div>
-        </div>
-        <div style="flex:1;min-width:0;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px">
-          <canvas id="ibr-chart-canvas"></canvas>
-        </div>
+      <div style="flex:1;min-height:0;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px">
+        <canvas id="ibr-chart-canvas"></canvas>
       </div>
     </div>
   </div>
@@ -1271,50 +1266,8 @@ function prevBD(isoDate){
   return d.toISOString().slice(0,10);
 }
 
-// ── TABLA IBR HISTÓRICA + FRA ──────────────────────────────
-function renderIBRTable(){
-  const el = document.getElementById('ibr-table-main');
-  if(!el) return;
-  const hasFRA = typeof FRA_DATA !== 'undefined' && Object.keys(FRA_DATA).length > 0;
-  const badge = document.getElementById('ibr-table-badge');
-  const histDates = Object.keys(IBR_REAL_DATA).sort().slice(-60);
-  const fraDates = hasFRA ? Object.keys(FRA_DATA).sort() : [];
-  const firstFRA = fraDates[0] || null;
-  const allDates = [...new Set([...histDates, ...fraDates])].sort().reverse();
-  if(!allDates.length){ el.innerHTML='<div style="padding:20px;color:var(--txt3);text-align:center">Sin datos</div>'; return; }
-  const rows = allDates.map(iso=>{
-    const isHist = IBR_REAL_DATA[iso] !== undefined;
-    const isFRA  = FRA_DATA && FRA_DATA[iso] !== undefined;
-    if(!isHist && !isFRA) return '';
-    // Publicado: lo que BanRep anunció ese día (dato directo)
-    const publicado = isHist ? IBR_REAL_DATA[iso] : FRA_DATA[iso];
-    // Aplicado: lo que rige en la negociación hoy = publicado el día hábil anterior
-    const apISO = prevBD(iso);
-    const aplicado = isHist ? ibrReal(apISO) : ibrFRA(apISO);
-    if(publicado === undefined) return '';
-    const isFirst = iso === firstFRA;
-    const sepStyle = isFirst ? 'border-top:2px solid var(--green);' : '';
-    const [y,m,d] = iso.split('-');
-    const pubColor = publicado > 0.10 ? 'var(--red3)' : publicado > 0.07 ? 'var(--amber3)' : 'var(--green3)';
-    const apColor  = aplicado != null ? (aplicado > 0.10 ? 'var(--red3)' : aplicado > 0.07 ? 'var(--amber3)' : 'var(--green3)') : 'var(--txt3)';
-    return `<tr style="${sepStyle}">
-      <td style="padding:3px 5px;color:var(--txt2);font-size:10px;white-space:nowrap">${d}/${m}</td>
-      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-size:10px;color:${pubColor}">${(publicado*100).toFixed(2)}%</td>
-      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-weight:700;color:${apColor};font-size:10px">${aplicado!=null?(aplicado*100).toFixed(2)+'%':'—'}</td>
-    </tr>`;
-  }).filter(Boolean).join('');
-  el.innerHTML = `
-    <table style="width:100%;border-collapse:collapse">
-      <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
-        <th style="padding:4px 5px;text-align:left;font-size:9px;color:var(--txt3)">Fecha</th>
-        <th style="padding:4px 5px;text-align:right;font-size:9px;color:var(--txt3)">Publicado</th>
-        <th style="padding:4px 5px;text-align:right;font-size:9px;color:var(--txt3);font-weight:900">Aplicado</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div style="padding:6px 10px;font-size:9px;color:var(--txt3)">T+1: publicado hoy → aplicado mañana${hasFRA?' · +FRA estimado':''}</div>`;
-  renderIBRChart();
-}
+// ── RENDER IBR (tabla movida a index.html Datos) ──────────────────────
+function renderIBRTable(){ renderIBRChart(); }
 
 renderIBRTable();
 

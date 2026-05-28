@@ -273,7 +273,8 @@ svg{display:block;width:100%}
           <table class="data-tbl">
             <thead><tr>
               <th style="text-align:left">Fecha</th>
-              <th>IBR 1 mes</th>
+              <th>Publicado</th>
+              <th>Aplicado</th>
             </tr></thead>
             <tbody id="ibr-data-tbody"></tbody>
           </table>
@@ -723,6 +724,34 @@ async function loadDatosUVR(){
   }
 }
 
+// ── COLOMBIA HOLIDAYS + PREV BUSINESS DAY (para IBR aplicado) ──────────
+(function(){
+  const iso = d => d.toISOString().slice(0,10);
+  const addD = (base,n) => { const d=new Date(base); d.setDate(d.getDate()+n); return d; };
+  const nextMon = d => { const dow=d.getDay(); if(dow!==1) d.setDate(d.getDate()+(dow===0?1:8-dow)); return d; };
+  const EASTERS = {'2020':'2020-04-12','2021':'2021-04-04','2022':'2022-04-17','2023':'2023-04-09','2024':'2024-03-31','2025':'2025-04-20','2026':'2026-04-05','2027':'2027-03-28'};
+  window.CO_HOL = new Set();
+  ['01-01','05-01','07-20','08-07','12-08','12-25'].forEach(dm=>{for(let y=2015;y<=2028;y++) CO_HOL.add(`${y}-${dm}`);});
+  ['01-06','03-19','06-29','08-15','10-12','11-01','11-11'].forEach(dm=>{
+    for(let y=2015;y<=2028;y++) CO_HOL.add(iso(nextMon(new Date(`${y}-${dm}T12:00:00`))));
+  });
+  for(let y=2020;y<=2027;y++){
+    const eISO=EASTERS[y]; if(!eISO) continue;
+    const e=new Date(eISO+'T12:00:00');
+    CO_HOL.add(iso(addD(e,-3))); CO_HOL.add(iso(addD(e,-2)));
+    CO_HOL.add(iso(nextMon(addD(e,39)))); CO_HOL.add(iso(nextMon(addD(e,60)))); CO_HOL.add(iso(nextMon(addD(e,68))));
+  }
+})();
+function prevBDibr(isoDate){
+  let d=new Date(isoDate+'T12:00:00');
+  for(let i=0;i<10;i++){
+    d.setDate(d.getDate()-1);
+    const s=d.toISOString().slice(0,10);
+    if(d.getDay()!==0&&d.getDay()!==6&&!CO_HOL.has(s)) return s;
+  }
+  return d.toISOString().slice(0,10);
+}
+
 async function loadDatosIBR(){
   const badge=document.getElementById('ibr-badge');
   const tbody=document.getElementById('ibr-data-tbody');
@@ -736,9 +765,14 @@ async function loadDatosIBR(){
     const recent=dates.slice(-60);
     if(tbody){
       tbody.innerHTML=[...recent].reverse().map(dt=>{
-        const v=data[dt];
-        const pct=(v*100).toFixed(3)+'%';
-        return `<tr><td>${dt}</td><td style="color:var(--red3)">${pct}</td></tr>`;
+        const pub=data[dt];
+        const ap=data[prevBDibr(dt)];
+        const c=v=>v>0.10?'var(--red3)':v>0.07?'var(--amber3)':'var(--green3)';
+        return `<tr>
+          <td>${dt}</td>
+          <td style="color:${c(pub)}">${(pub*100).toFixed(3)}%</td>
+          <td style="color:${c(ap??pub)};font-weight:700">${ap!=null?(ap*100).toFixed(3)+'%':'—'}</td>
+        </tr>`;
       }).join('');
     }
     drawDataSparkline('svg-ibr-data', recent.map(dt=>data[dt]*100), '#ef4444', '%');
