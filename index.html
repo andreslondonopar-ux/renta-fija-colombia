@@ -644,12 +644,19 @@ function switchMainTab(id,el){
 }
 
 // ── DATA SUB-TABS
+const _sparkCache={};
 function switchDataTab(id,el){
   document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   const panel=document.getElementById('dpanel-'+id);
   if(panel) panel.classList.add('active');
+  // Re-draw sparkline now that panel is visible
+  const svgId='svg-'+id+'-data';
+  if(_sparkCache[svgId]){
+    const{vals,color,suffix}=_sparkCache[svgId];
+    requestAnimationFrame(()=>drawDataSparkline(svgId,vals,color,suffix));
+  }
 }
 
 // ── DATOS SECTION LOADER
@@ -741,9 +748,10 @@ async function loadDatosIBR(){
 }
 
 function drawDataSparkline(svgId, vals, color, suffix){
+  _sparkCache[svgId]={vals,color,suffix};
   const svg=document.getElementById(svgId);
   if(!svg||!vals.length) return;
-  const W=svg.parentElement?Math.max(svg.parentElement.clientWidth||0,400):800;
+  const W=Math.max(svg.closest('.dpanel')?.clientWidth||svg.parentElement?.clientWidth||0,600);
   const H=220, PL=38, PR=8, PT=14, PB=24;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const cW=W-PL-PR, cH=H-PT-PB;
