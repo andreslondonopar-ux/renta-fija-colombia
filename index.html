@@ -281,33 +281,58 @@ svg{display:block;width:100%}
         <div class="dpanel" id="dpanel-est">
           <div style="font-size:12px;font-weight:700;color:var(--amber3);margin-bottom:14px">Datos Estimados</div>
 
+          <!-- IPC Mensual -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">IPC Mensual Estimado</div>
             <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">
-              Formato CSV: <code style="color:var(--amber3)">YYYY-MM-DD;0.1312</code> &nbsp;o&nbsp; <code style="color:var(--amber3)">DD/MM/YYYY;13,12%</code> (una fila por mes)
+              Formato: <code style="color:var(--amber3)">YYYY-MM-DD;0.52%</code> &nbsp;o&nbsp; <code style="color:var(--amber3)">DD/MM/YYYY;0,52%</code> · una fila por mes
             </div>
             <label class="est-drop" id="ipc-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstIPC(this)">
-              Arrastrar CSV o hacer clic para subir IPC estimado
+              Arrastrar CSV o hacer clic · IPC mensual estimado
             </label>
-            <div id="ipc-est-status" style="font-size:9px;color:var(--txt3);margin-top:6px"></div>
-            <button class="btn-sm" style="margin-top:6px" onclick="clearEstIPC()">Borrar IPC estimado</button>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+              <div id="ipc-est-status" style="font-size:9px;color:var(--txt3);flex:1"></div>
+              <button class="btn-sm" onclick="clearEstIPC()">Borrar</button>
+            </div>
+            <div id="ipc-est-preview" style="margin-top:8px"></div>
           </div>
 
+          <!-- IPC Anual -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">IPC Anual Estimado</div>
+            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">
+              Formato: <code style="color:var(--amber3)">YYYY-MM-DD;5.09%</code> · una fila por mes
+            </div>
+            <label class="est-drop" id="ipc-anual-drop">
+              <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstIPCAnual(this)">
+              Arrastrar CSV o hacer clic · IPC anual estimado
+            </label>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+              <div id="ipc-anual-est-status" style="font-size:9px;color:var(--txt3);flex:1"></div>
+              <button class="btn-sm" onclick="clearEstIPCAnual()">Borrar</button>
+            </div>
+            <div id="ipc-anual-est-preview" style="margin-top:8px"></div>
+          </div>
+
+          <!-- FRA -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">Curva FRA Estimada</div>
             <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">
-              Formato CSV: <code style="color:var(--amber3)">fecha_inicio;fecha_fin;fra%</code> (una fila por tramo)
+              Formato: <code style="color:var(--amber3)">fecha_inicio;fecha_fin;fra%</code> · una fila por tramo
             </div>
             <label class="est-drop" id="fra-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstFRA(this)">
-              Arrastrar CSV o hacer clic para subir curva FRA estimada
+              Arrastrar CSV o hacer clic · curva FRA estimada
             </label>
-            <div id="fra-est-status" style="font-size:9px;color:var(--txt3);margin-top:6px"></div>
-            <button class="btn-sm" style="margin-top:6px" onclick="clearEstFRA()">Borrar FRA estimado</button>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+              <div id="fra-est-status" style="font-size:9px;color:var(--txt3);flex:1"></div>
+              <button class="btn-sm" onclick="clearEstFRA()">Borrar</button>
+            </div>
+            <div id="fra-est-preview" style="margin-top:8px"></div>
           </div>
 
-          <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="padding-top:14px;border-top:1px solid var(--border)">
             <button class="btn-sm" style="color:var(--red3);border-color:var(--red2)" onclick="clearAllEst()">Borrar todos los estimados</button>
           </div>
         </div>
@@ -650,12 +675,12 @@ function switchDataTab(id,el){
   el.classList.add('active');
   const panel=document.getElementById('dpanel-'+id);
   if(panel) panel.classList.add('active');
-  // Re-draw sparkline now that panel is visible
   const svgId='svg-'+id+'-data';
   if(_sparkCache[svgId]){
     const{vals,color,suffix}=_sparkCache[svgId];
     requestAnimationFrame(()=>drawDataSparkline(svgId,vals,color,suffix));
   }
+  if(id==='est') initEstPreviews();
 }
 
 // ── DATOS SECTION LOADER
@@ -912,6 +937,7 @@ function drawDataSparkline(svgId, vals, color, suffix){
 
 // ── ESTIMADOS (localStorage)
 const LS_IPC_EST='rf_ipc_est_v1';
+const LS_IPC_ANUAL_EST='rf_ipc_anual_est_v1';
 const LS_FRA_EST='rf_fra_est_v1';
 
 function parseEstCSV(text){
@@ -930,23 +956,89 @@ function parseEstCSV(text){
   return result;
 }
 
+function renderEstPreviewKV(data, elId, label){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  const keys=Object.keys(data).sort();
+  if(!keys.length){el.innerHTML='';return;}
+  const rows=keys.map(k=>`<tr>
+    <td style="padding:3px 8px;color:var(--txt2)">${k}</td>
+    <td style="padding:3px 8px;text-align:right;font-family:monospace;color:var(--amber3)">${(data[k]*100).toFixed(3)}%</td>
+  </tr>`).join('');
+  el.innerHTML=`<div style="font-size:9px;color:var(--txt3);margin-bottom:4px">✓ ${keys.length} filas · primero: ${keys[0]} · último: ${keys[keys.length-1]}</div>
+  <div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)">
+    <table style="width:100%;border-collapse:collapse;font-size:10px">
+      <thead style="position:sticky;top:0;background:var(--bg3)"><tr>
+        <th style="padding:3px 8px;text-align:left;color:var(--txt3)">Fecha</th>
+        <th style="padding:3px 8px;text-align:right;color:var(--txt3)">${label}</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function renderEstPreviewFRA(data, elId){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  if(!data.length){el.innerHTML='';return;}
+  const rows=data.map(({d1,d2,v})=>`<tr>
+    <td style="padding:3px 8px;color:var(--txt2)">${d1}</td>
+    <td style="padding:3px 8px;color:var(--txt2)">${d2}</td>
+    <td style="padding:3px 8px;text-align:right;font-family:monospace;color:var(--amber3)">${(v*100).toFixed(3)}%</td>
+  </tr>`).join('');
+  el.innerHTML=`<div style="font-size:9px;color:var(--txt3);margin-bottom:4px">✓ ${data.length} tramos</div>
+  <div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)">
+    <table style="width:100%;border-collapse:collapse;font-size:10px">
+      <thead style="position:sticky;top:0;background:var(--bg3)"><tr>
+        <th style="padding:3px 8px;text-align:left;color:var(--txt3)">Desde</th>
+        <th style="padding:3px 8px;text-align:left;color:var(--txt3)">Hasta</th>
+        <th style="padding:3px 8px;text-align:right;color:var(--txt3)">FRA</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
 function loadEstIPC(input){
-  const file=input.files[0];
-  if(!file) return;
+  const file=input.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=e=>{
     const parsed=parseEstCSV(e.target.result);
     const n=Object.keys(parsed).length;
-    if(!n){document.getElementById('ipc-est-status').textContent='Sin datos validos';return;}
+    const st=document.getElementById('ipc-est-status');
+    if(!n){st.textContent='Sin datos válidos';return;}
     localStorage.setItem(LS_IPC_EST,JSON.stringify(parsed));
-    document.getElementById('ipc-est-status').textContent=`Cargado: ${n} periodos`;
+    st.textContent=`Cargado: ${n} períodos`;
+    renderEstPreviewKV(parsed,'ipc-est-preview','IPC mensual');
   };
   reader.readAsText(file);
 }
 
 function clearEstIPC(){
   localStorage.removeItem(LS_IPC_EST);
-  document.getElementById('ipc-est-status').textContent='IPC estimado borrado';
+  document.getElementById('ipc-est-status').textContent='Borrado';
+  document.getElementById('ipc-est-preview').innerHTML='';
+}
+
+function loadEstIPCAnual(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const parsed=parseEstCSV(e.target.result);
+    const n=Object.keys(parsed).length;
+    const st=document.getElementById('ipc-anual-est-status');
+    if(!n){st.textContent='Sin datos válidos';return;}
+    localStorage.setItem(LS_IPC_ANUAL_EST,JSON.stringify(parsed));
+    st.textContent=`Cargado: ${n} períodos`;
+    renderEstPreviewKV(parsed,'ipc-anual-est-preview','IPC anual');
+  };
+  reader.readAsText(file);
+}
+
+function clearEstIPCAnual(){
+  localStorage.removeItem(LS_IPC_ANUAL_EST);
+  document.getElementById('ipc-anual-est-status').textContent='Borrado';
+  document.getElementById('ipc-anual-est-preview').innerHTML='';
 }
 
 function parseEstFRA(text){
@@ -966,29 +1058,54 @@ function parseEstFRA(text){
 }
 
 function loadEstFRA(input){
-  const file=input.files[0];
-  if(!file) return;
+  const file=input.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=e=>{
     const parsed=parseEstFRA(e.target.result);
     const n=parsed.length;
-    if(!n){document.getElementById('fra-est-status').textContent='Sin datos validos';return;}
+    const st=document.getElementById('fra-est-status');
+    if(!n){st.textContent='Sin datos válidos';return;}
     localStorage.setItem(LS_FRA_EST,JSON.stringify(parsed));
-    document.getElementById('fra-est-status').textContent=`Cargado: ${n} tramos FRA`;
+    st.textContent=`Cargado: ${n} tramos FRA`;
+    renderEstPreviewFRA(parsed,'fra-est-preview');
   };
   reader.readAsText(file);
 }
 
 function clearEstFRA(){
   localStorage.removeItem(LS_FRA_EST);
-  document.getElementById('fra-est-status').textContent='FRA estimado borrado';
+  document.getElementById('fra-est-status').textContent='Borrado';
+  document.getElementById('fra-est-preview').innerHTML='';
 }
 
 function clearAllEst(){
-  localStorage.removeItem(LS_IPC_EST);
-  localStorage.removeItem(LS_FRA_EST);
-  document.getElementById('ipc-est-status').textContent='';
-  document.getElementById('fra-est-status').textContent='';
+  [LS_IPC_EST,LS_IPC_ANUAL_EST,LS_FRA_EST].forEach(k=>localStorage.removeItem(k));
+  ['ipc-est-status','ipc-anual-est-status','fra-est-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});
+  ['ipc-est-preview','ipc-anual-est-preview','fra-est-preview'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
+}
+
+function initEstPreviews(){
+  try{
+    const ipc=JSON.parse(localStorage.getItem(LS_IPC_EST)||'{}');
+    if(Object.keys(ipc).length){
+      document.getElementById('ipc-est-status').textContent=`Cargado: ${Object.keys(ipc).length} períodos`;
+      renderEstPreviewKV(ipc,'ipc-est-preview','IPC mensual');
+    }
+  }catch(e){}
+  try{
+    const anual=JSON.parse(localStorage.getItem(LS_IPC_ANUAL_EST)||'{}');
+    if(Object.keys(anual).length){
+      document.getElementById('ipc-anual-est-status').textContent=`Cargado: ${Object.keys(anual).length} períodos`;
+      renderEstPreviewKV(anual,'ipc-anual-est-preview','IPC anual');
+    }
+  }catch(e){}
+  try{
+    const fra=JSON.parse(localStorage.getItem(LS_FRA_EST)||'[]');
+    if(fra.length){
+      document.getElementById('fra-est-status').textContent=`Cargado: ${fra.length} tramos FRA`;
+      renderEstPreviewFRA(fra,'fra-est-preview');
+    }
+  }catch(e){}
 }
 </script>
 </body>
