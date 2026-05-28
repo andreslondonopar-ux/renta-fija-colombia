@@ -320,7 +320,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         <span style="margin-left:auto;font-size:9px;color:var(--txt3);font-weight:400">Línea verde = inicio estimación FRA</span>
       </div>
       <div style="display:flex;gap:10px;flex:1;min-height:0">
-        <div style="flex:0 0 150px;overflow-y:auto;overflow-x:hidden;border:1px solid var(--border);border-radius:var(--r)" id="ibr-table-main">
+        <div style="flex:0 0 230px;overflow-y:auto;overflow-x:hidden;border:1px solid var(--border);border-radius:var(--r)" id="ibr-table-main">
           <div style="padding:20px;color:var(--txt3);text-align:center;opacity:.5;font-size:10px">Cargue FRA para ver estimados</div>
         </div>
         <div style="flex:1;min-width:0;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px">
@@ -1227,6 +1227,40 @@ function renderIBRChart(){
   });
 }
 
+// ── COLOMBIA HOLIDAYS + NEXT BUSINESS DAY ──────────────────────────────
+(function(){
+  const iso = d => d.toISOString().slice(0,10);
+  const addD = (base,n) => { const d=new Date(base); d.setDate(d.getDate()+n); return d; };
+  const nextMon = d => { const dow=d.getDay(); if(dow!==1) d.setDate(d.getDate()+(dow===0?1:8-dow)); return d; };
+  const EASTERS = {'2020':'2020-04-12','2021':'2021-04-04','2022':'2022-04-17','2023':'2023-04-09','2024':'2024-03-31','2025':'2025-04-20','2026':'2026-04-05','2027':'2027-03-28'};
+  window.CO_HOLIDAYS = new Set();
+  const FIXED    = ['01-01','05-01','07-20','08-07','12-08','12-25'];
+  const EMILIANI = ['01-06','03-19','06-29','08-15','10-12','11-01','11-11'];
+  for(let y=2019;y<=2028;y++){
+    FIXED.forEach(d=>CO_HOLIDAYS.add(`${y}-${d}`));
+    EMILIANI.forEach(dm=>CO_HOLIDAYS.add(iso(nextMon(new Date(`${y}-${dm}T12:00:00`)))));
+    const eISO=EASTERS[y];
+    if(eISO){
+      const e=new Date(eISO+'T12:00:00');
+      CO_HOLIDAYS.add(iso(addD(e,-3)));                    // Jueves Santo
+      CO_HOLIDAYS.add(iso(addD(e,-2)));                    // Viernes Santo
+      CO_HOLIDAYS.add(iso(nextMon(addD(e,39))));           // Ascensión
+      CO_HOLIDAYS.add(iso(nextMon(addD(e,60))));           // Corpus Christi
+      CO_HOLIDAYS.add(iso(nextMon(addD(e,68))));           // Sagrado Corazón
+    }
+  }
+})();
+
+function nextBD(isoDate){
+  let d=new Date(isoDate+'T12:00:00');
+  for(let i=0;i<10;i++){
+    d.setDate(d.getDate()+1);
+    const s=d.toISOString().slice(0,10);
+    if(d.getDay()!==0&&d.getDay()!==6&&!CO_HOLIDAYS.has(s)) return s;
+  }
+  return d.toISOString().slice(0,10);
+}
+
 // ── TABLA IBR HISTÓRICA + FRA ──────────────────────────────
 function renderIBRTable(){
   const el = document.getElementById('ibr-table-main');
@@ -1241,26 +1275,32 @@ function renderIBRTable(){
   const rows = allDates.map(iso=>{
     const isHist = IBR_REAL_DATA[iso] !== undefined;
     const isFRA  = FRA_DATA && FRA_DATA[iso] !== undefined;
-    const val    = isFRA && !isHist ? FRA_DATA[iso] : IBR_REAL_DATA[iso];
-    if(val === undefined) return '';
+    const aplicado = isFRA && !isHist ? FRA_DATA[iso] : IBR_REAL_DATA[iso];
+    if(aplicado === undefined) return '';
+    // IBR publicado hoy = tasa anunciada por BanRep hoy → se aplica el próximo día hábil
+    const pubISO = nextBD(iso);
+    const publicado = isFRA && !isHist ? ibrFRA(pubISO) : ibrReal(pubISO);
     const isFirst = iso === firstFRA;
     const sepStyle = isFirst ? 'border-top:2px solid var(--green);' : '';
     const [y,m,d] = iso.split('-');
-    const color = val > 0.10 ? 'var(--red3)' : val > 0.07 ? 'var(--amber3)' : 'var(--green3)';
+    const apColor = aplicado > 0.10 ? 'var(--red3)' : aplicado > 0.07 ? 'var(--amber3)' : 'var(--green3)';
+    const pubColor = publicado != null ? (publicado > 0.10 ? 'var(--red3)' : publicado > 0.07 ? 'var(--amber3)' : 'var(--green3)') : 'var(--txt3)';
     return `<tr style="${sepStyle}">
-      <td style="padding:3px 6px;color:var(--txt2);font-size:10px;white-space:nowrap">${d}/${m}</td>
-      <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700;color:${color};font-size:10px">${(val*100).toFixed(2)}%</td>
+      <td style="padding:3px 5px;color:var(--txt2);font-size:10px;white-space:nowrap">${d}/${m}</td>
+      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-size:10px;color:${pubColor}">${publicado!=null?(publicado*100).toFixed(2)+'%':'—'}</td>
+      <td style="padding:3px 5px;text-align:right;font-family:monospace;font-weight:700;color:${apColor};font-size:10px">${(aplicado*100).toFixed(2)}%</td>
     </tr>`;
   }).filter(Boolean).join('');
   el.innerHTML = `
     <table style="width:100%;border-collapse:collapse">
       <thead style="position:sticky;top:0;z-index:2;background:var(--bg3)"><tr>
-        <th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--txt3)">Fecha</th>
-        <th style="padding:4px 6px;text-align:right;font-size:9px;color:var(--txt3)">IBR</th>
+        <th style="padding:4px 5px;text-align:left;font-size:9px;color:var(--txt3)">Fecha</th>
+        <th style="padding:4px 5px;text-align:right;font-size:9px;color:var(--txt3)">Publicado</th>
+        <th style="padding:4px 5px;text-align:right;font-size:9px;color:var(--txt3);font-weight:900">Aplicado</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div style="padding:6px 14px;font-size:9px;color:var(--txt3)">Últimos 60 históricos · BanRep · IBR ON Aplicado${hasFRA?' + FRA estimado':''}</div>`;
+    <div style="padding:6px 10px;font-size:9px;color:var(--txt3)">T+1: publicado hoy → aplicado mañana${hasFRA?' · +FRA estimado':''}</div>`;
   renderIBRChart();
 }
 
