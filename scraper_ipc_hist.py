@@ -20,7 +20,7 @@ DATA_FILE = Path("datos_ipc.json")
 SUAMECA_URL = (
     "https://suameca.banrep.gov.co/estadisticas-economicas-back/rest/"
     "estadisticaEconomicaRestService/consultaInformacionSerieXTipoDatoXFechaDesde"
-    "?idSerie=15000&tipoDato=9&cantDatos=12&frecuenciaDatos=year"
+    "?idSerie=15000&tipoDato=20&cantDatos=12&frecuenciaDatos=year"
 )
 
 
@@ -78,25 +78,17 @@ def fetch_suameca():
         print("[IPC] suameca: data vacia")
         return [], {}
 
-    # Construir dict {YYYY-MM: index_value}
-    idx = {}
+    # tipoDato=20 entrega variacion anual directamente en % (ej: 5.68)
+    # Convertir a decimal (0.0568) y construir lista
+    result = []
+    pub_dates = {}
     for entry in raw_data:
         if not isinstance(entry, (list, tuple)) or len(entry) < 2:
             continue
-        ts_ms, val = entry[0], entry[1]
+        ts_ms, val_pct = entry[0], entry[1]
         ym = datetime.fromtimestamp(int(ts_ms) / 1000, tz=timezone.utc).strftime("%Y-%m")
-        idx[ym] = float(val)
-
-    # Calcular variacion anual
-    result = []
-    pub_dates = {}
-    for ym in sorted(idx):
         y, m = int(ym[:4]), int(ym[5:7])
-        prev_ym = "%d-%02d" % (y - 1, m)
-        if prev_ym not in idx:
-            continue
-        ann_var = round(idx[ym] / idx[prev_ym] - 1, 4)
-        result.append({"y": y, "m": m, "v": ann_var})
+        result.append({"y": y, "m": m, "v": round(float(val_pct) / 100, 4)})
         pub_dates[ym] = pub_date_for(y, m)
 
     print("[IPC] suameca: %d entradas de variacion anual calculadas" % len(result))
