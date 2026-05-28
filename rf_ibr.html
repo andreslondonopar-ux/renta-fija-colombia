@@ -829,17 +829,17 @@ function calcular(showTIR=false){
     <div class="c-hdr">Tabla de flujos descontados</div>
     <div class="c-body"><div class="tscroll"><table class="ft"><thead><tr>
       <th>#</th><th>Fecha pago</th><th>Período inicio</th><th>F</th><th>G</th>
-      <th>IBR</th><th>Cupón NA/12</th><th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $</th><th>t·PV</th><th>% precio</th>
+      <th>IBR</th><th>Cupón NA/12</th><th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $ (sin desc.)</th><th>Flujo $ (descontado)</th><th>t·PV</th><th>% precio</th>
     </tr></thead><tbody>
-      <tr style="color:var(--red3);font-style:italic"><td>0</td><td>${fmtDate(liq)}</td><td colspan="10" style="text-align:left;padding-left:8px">−${fmtP(vGiro)} &nbsp; Liquidación</td></tr>
+      <tr style="color:var(--red3);font-style:italic"><td>0</td><td>${fmtDate(liq)}</td><td colspan="11" style="text-align:left;padding-left:8px">−${fmtP(vGiro)} &nbsp; Liquidación</td></tr>
       ${flows.map(f=>`<tr>
         <td>${f.num}</td><td>${fmtDate(f.fecha)}</td><td>${fmtDate(f.cur)}</td>
         <td>${f.F}</td><td>${f.G}</td><td style="text-align:center">${f.M||0}</td>
         <td><span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(34,197,94,.12);color:var(--green3)">${fmt(f.ibr*100,4)}%</span></td>
         <td>${fmt(f.cpPer,6)}%</td><td>${fmt(f.cf,6)}</td><td>${fmt(f.pv,6)}</td>
-        <td>${fmtP(f.pv/100*nom)}</td><td>${fmt(f.tY*f.pv,6)}</td><td>${fmt(f.pv/price*100,2)}%</td>
+        <td style="color:var(--amber3);font-weight:600">${fmtP(f.cf/100*nom)}</td><td>${fmtP(f.pv/100*nom)}</td><td>${fmt(f.tY*f.pv,6)}</td><td>${fmt(f.pv/price*100,2)}%</td>
       </tr>`).join('')}
-      <tr class="total"><td colspan="8">TOTAL</td><td>${fmt(price,6)}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,6)}</td><td>100%</td></tr>
+      <tr class="total"><td colspan="8">TOTAL</td><td>${fmt(price,6)}</td><td style="color:var(--amber3)">${fmtP(flows.reduce((s,f)=>s+f.cf/100*nom,0))}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,6)}</td><td>100%</td></tr>
     </tbody></table></div></div>
   </div>`;
 

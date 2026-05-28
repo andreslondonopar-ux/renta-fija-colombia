@@ -204,8 +204,8 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       </div>
       <div class="field"><label>Base</label>
         <select id="base">
-          <option value="365">365/365 (Act/Act)</option>
-          <option value="360">360/360 (30/360)</option>
+          <option value="365">365/365</option>
+          <option value="360">30/360</option>
         </select>
       </div>
       <div class="field"><label>Spread cupón EA (%)</label>
@@ -961,7 +961,7 @@ function calcular(showTIR=false){
     <div class="c-hdr">Resultados principales
       <span class="badge ${bCls}">${estado}</span>
       <span class="badge" style="background:rgba(59,130,246,.15);color:var(--blue3);border-color:var(--blue2)">${modeNames[mode]}</span>
-      <span class="badge" style="background:rgba(16,185,129,.1);color:var(--green3);border-color:var(--green)">${base}/${base}</span>
+      <span class="badge" style="background:rgba(16,185,129,.1);color:var(--green3);border-color:var(--green)">${base===360?'30/360':'365/365'}</span>
     </div>
     <div class="c-body">
       <div class="mg4" style="margin-bottom:10px">

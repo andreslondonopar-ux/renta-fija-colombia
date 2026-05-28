@@ -1005,11 +1005,11 @@ function calcular(showTIR){
     <div class="c-hdr">Tabla de flujos descontados</div>
     <div class="c-body"><div class="tscroll"><table class="ft"><thead><tr>
       <th>#</th><th>Fecha pago</th><th>Días cupón</th><th>Días desc.</th><th>Bis.Cupón</th><th>Bis.Desc.</th>
-      <th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $ (UVR)</th><th>t·PV</th><th>% precio</th>
+      <th>CFt (%)</th><th>PV CF (%)</th><th>Flujo $ (sin desc.)</th><th>Flujo $ (descontado)</th><th>t·PV</th><th>% precio</th>
     </tr></thead><tbody>
-      <tr style="color:var(--red3);font-style:italic"><td>0</td><td>${fmtDate(liq)}</td><td colspan="9" style="text-align:left;padding-left:8px">−${fmtP(vGiro)} &nbsp; Liquidación</td></tr>
-      ${flows.map(f=>`<tr><td>${f.num}</td><td>${fmtDate(f.fecha)}</td><td>${f.dC}</td><td>${f.dD}</td><td style='text-align:center'>${f.L}</td><td style='text-align:center'>${f.M}</td><td>${fmt(f.cf,4)}</td><td>${fmt(f.pv,4)}</td><td>${fmtP(f.pv/100*nom*uvrVal)}</td><td>${fmt(f.tY*f.pv,4)}</td><td>${fmt(f.pv/price*100,2)}%</td></tr>`).join('')}
-      <tr class="total"><td colspan="7">TOTAL</td><td>${fmt(price,4)}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,4)}</td><td>100%</td></tr>
+      <tr style="color:var(--red3);font-style:italic"><td>0</td><td>${fmtDate(liq)}</td><td colspan="10" style="text-align:left;padding-left:8px">−${fmtP(vGiro)} &nbsp; Liquidación</td></tr>
+      ${flows.map(f=>`<tr><td>${f.num}</td><td>${fmtDate(f.fecha)}</td><td>${f.dC}</td><td>${f.dD}</td><td style='text-align:center'>${f.L}</td><td style='text-align:center'>${f.M}</td><td>${fmt(f.cf,4)}</td><td>${fmt(f.pv,4)}</td><td style="color:var(--amber3);font-weight:600">${fmtP(f.cf/100*nom*uvrVal)}</td><td>${fmtP(f.pv/100*nom*uvrVal)}</td><td>${fmt(f.tY*f.pv,4)}</td><td>${fmt(f.pv/price*100,2)}%</td></tr>`).join('')}
+      <tr class="total"><td colspan="7">TOTAL</td><td>${fmt(price,4)}</td><td style="color:var(--amber3)">${fmtP(flows.reduce((s,f)=>s+f.cf/100*nom*uvrVal,0))}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,4)}</td><td>100%</td></tr>
     </tbody></table></div></div>
   </div>`;
 
