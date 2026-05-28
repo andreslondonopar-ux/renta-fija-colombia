@@ -487,7 +487,7 @@ function trunc6(x){return Math.floor(x*1e6)/1e6;}
 
 
 // ── IPC DATA ─────────────────────────────────────────────────────────
-const IPC_TABLE=[
+let IPC_TABLE=[
   {y:2020,m:1,v:0.0362},{y:2020,m:2,v:0.0372},{y:2020,m:3,v:0.0386},{y:2020,m:4,v:0.0351},
   {y:2020,m:5,v:0.0285},{y:2020,m:6,v:0.0219},{y:2020,m:7,v:0.0197},{y:2020,m:8,v:0.0188},
   {y:2020,m:9,v:0.0197},{y:2020,m:10,v:0.0175},{y:2020,m:11,v:0.0149},{y:2020,m:12,v:0.0161},
@@ -509,7 +509,7 @@ const IPC_TABLE=[
   {y:2026,m:1,v:0.0535},{y:2026,m:2,v:0.0529},{y:2026,m:3,v:0.0556},
 ];
 
-const IPC_PUB_DATES = {
+let IPC_PUB_DATES = {
   "2020-01":"2020-02-07","2020-02":"2020-03-06","2020-03":"2020-04-07","2020-04":"2020-05-08",
   "2020-05":"2020-06-05","2020-06":"2020-07-07","2020-07":"2020-08-10","2020-08":"2020-09-07",
   "2020-09":"2020-10-07","2020-10":"2020-11-09","2020-11":"2020-12-07","2020-12":"2021-01-08",
@@ -1329,5 +1329,22 @@ function renderIPCChart(){
 
 renderIPCTable();
 renderIPCChart();
+
+// ── Carga async desde datos_ipc.json (no bloquea, fallback al hardcode)
+async function loadIPCData(){
+  try{
+    const r=await fetch('datos_ipc.json?_='+Date.now());
+    if(!r.ok)return;
+    const d=await r.json();
+    if(!d.data||!d.data.length)return;
+    let changed=false;
+    if(d.data.length>IPC_TABLE.length){IPC_TABLE=d.data;changed=true;}
+    if(d.pub_dates&&Object.keys(d.pub_dates).length>Object.keys(IPC_PUB_DATES).length){
+      IPC_PUB_DATES=d.pub_dates;changed=true;
+    }
+    if(changed){renderIPCTable();renderIPCChart();}
+  }catch(e){}
+}
+loadIPCData();
 </script>
 </html>

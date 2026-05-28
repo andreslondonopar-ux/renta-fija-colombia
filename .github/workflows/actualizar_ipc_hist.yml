@@ -1,0 +1,39 @@
+name: Actualizar IPC historico
+
+on:
+  schedule:
+    # Entre el 8-12 de cada mes a las 14:00 UTC (cuando DANE publica)
+    - cron: '0 14 8,9,10,11,12 * *'
+  workflow_dispatch:
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install requests playwright
+
+      - name: Instalar browser
+        run: python -m playwright install chromium
+
+      - name: Actualizar IPC
+        run: python scraper_ipc_hist.py
+
+      - name: Commit datos actualizados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add datos_ipc.json
+          git diff --staged --quiet || git commit -m "auto: datos IPC $(date +'%Y-%m-%d')"
+          git push
