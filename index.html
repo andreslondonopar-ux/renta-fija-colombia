@@ -460,35 +460,35 @@ function drawCurve(svgId,pts,color,H=160,showZero=false){
   const placed=[]; // [{cx,cy,tx,ty,tw}] placed labels
   const FONT=8.5, CHW=5.2; // approx char width at font-size 8.5
   let dots='',xlbls='',lastX=-99,lastLX=-99;
-  const minGap=30;
+  const minGap=30, xLblGap=54;
   pts.forEach((p,i)=>{
     const cx=px(p.x),cy=py(p.y);
     const isFirst=i===0,isLast=i===pts.length-1;
     if(!isFirst&&!isLast&&cx-lastX<minGap) return;
     lastX=cx;
     dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
-    // TIR label: position above or below based on chart position, clamp inside bounds
+    // TIR label: place above or below with enough clearance from dot and line
     const lbl=p.y.toFixed(2)+'%';
     const tw=lbl.length*CHW;
-    // Prefer above if point is in lower half, below if in upper half
-    const inUpperHalf=cy<PT+cH*0.5;
-    const MARGIN=11;
-    let ty=inUpperHalf?Math.min(cy+MARGIN,PT+cH-2):Math.max(cy-4,PT+MARGIN);
-    // Check collision with already-placed labels (simple y-band check)
+    const spaceAbove=cy-PT, spaceBelow=PT+cH-cy;
+    const wantAbove=spaceAbove>=spaceBelow; // prefer whichever side has more room
+    const ABOVE=14, BELOW=16;
+    let ty=wantAbove?cy-ABOVE:cy+BELOW;
+    ty=Math.max(PT+8,Math.min(PT+cH-4,ty));
     let anchor=cx<PL+tw/2+2?'start':cx>W-PR-tw/2-2?'end':'middle';
     const txStart=anchor==='start'?cx:anchor==='end'?cx-tw:cx-tw/2;
-    // Shift vertically if overlapping placed label
+    // Shift vertically to avoid overlapping already-placed labels
     for(const prev of placed){
-      if(Math.abs(txStart-(prev.tx||prev.cx))<tw+4&&Math.abs(ty-prev.ty)<10){
-        ty=inUpperHalf?ty+10:ty-10;
-        ty=Math.max(PT+MARGIN,Math.min(PT+cH-2,ty));
+      if(Math.abs(txStart-(prev.tx||prev.cx))<tw+4&&Math.abs(ty-prev.ty)<11){
+        ty=wantAbove?ty-12:ty+12;
+        ty=Math.max(PT+8,Math.min(PT+cH-4,ty));
         break;
       }
     }
     placed.push({cx,cy,ty,tx:txStart});
     dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${anchor}" font-size="${FONT}" fill="${color}" font-weight="700">${lbl}</text>`;
-    // X-axis label (bond name)
-    if(cx-lastLX>=minGap||isLast){
+    // X-axis label (bond name) — wider gap to avoid overlap on long date strings
+    if(cx-lastLX>=xLblGap||isLast){
       const xanchor=cx<PL+28?'start':cx>W-PR-28?'end':'middle';
       xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${xanchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
       lastLX=cx;
