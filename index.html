@@ -674,8 +674,8 @@ function switchDataTab(id,el){
   if(panel) panel.classList.add('active');
   const svgId='svg-'+id+'-data';
   if(_sparkCache[svgId]){
-    const{vals,color,suffix}=_sparkCache[svgId];
-    requestAnimationFrame(()=>drawDataSparkline(svgId,vals,color,suffix));
+    const{vals,color,suffix,dates}=_sparkCache[svgId];
+    requestAnimationFrame(()=>drawDataSparkline(svgId,vals,color,suffix,dates));
   }
   if(id==='est') initEstPreviews();
 }
@@ -769,7 +769,7 @@ async function loadDatosIPC(){
     const data=d.data||[];
     const pubDates=d.pub_dates||{};
     renderIPCCalendar(data, pubDates);
-    drawDataSparkline('svg-ipc-data', data.slice(-48).map(r=>r.v*100), '#3b82f6', '%');
+    const ipcSlice=data.slice(-48);const ipcDates=ipcSlice.map(r=>`${r.y}-${String(r.m).padStart(2,'0')}-01`);drawDataSparkline('svg-ipc-data',ipcSlice.map(r=>r.v*100),'#3b82f6','%',ipcDates);
   }catch(e){
     if(badge){badge.textContent='sin datos';badge.className='data-badge';}
     console.warn('datos_ipc.json:',e);
@@ -786,7 +786,7 @@ async function loadDatosUVR(){
     const data=d.data||{};
     const dates=Object.keys(data).sort();
     renderUVRCalendar(data);
-    drawDataSparkline('svg-uvr-data', dates.slice(-60).map(dt=>data[dt]), '#10b981', '');
+    const uvr365=dates.slice(-365);drawDataSparkline('svg-uvr-data',uvr365.map(dt=>data[dt]),'#10b981','',uvr365);
   }catch(e){
     if(badge){badge.textContent='sin datos';badge.className='data-badge';}
     console.warn('datos_uvr.json:',e);
@@ -900,19 +900,20 @@ async function loadDatosIBR(){
     const dates=Object.keys(data).sort();
     const recent=dates.slice(-60);
     renderIBRCalendar(data);
-    drawDataSparkline('svg-ibr-data', recent.map(dt=>data[dt]*100), '#ef4444', '%');
+    drawDataSparkline('svg-ibr-data',recent.map(dt=>data[dt]*100),'#ef4444','%',recent);
   }catch(e){
     if(badge){badge.textContent='sin datos';badge.className='data-badge';}
     console.warn('datos_ibr.json:',e);
   }
 }
 
-function drawDataSparkline(svgId, vals, color, suffix){
-  _sparkCache[svgId]={vals,color,suffix};
+
+function drawDataSparkline(svgId, vals, color, suffix, dates){
+  _sparkCache[svgId]={vals,color,suffix,dates};
   const svg=document.getElementById(svgId);
   if(!svg||!vals.length) return;
   const W=Math.max(svg.closest('.dpanel')?.clientWidth||svg.parentElement?.clientWidth||0,600);
-  const H=220, PL=38, PR=8, PT=14, PB=24;
+  const H=220, PL=42, PR=8, PT=14, PB=28;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const cW=W-PL-PR, cH=H-PT-PB;
   let mn=Math.min(...vals), mx=Math.max(...vals);
@@ -920,16 +921,31 @@ function drawDataSparkline(svgId, vals, color, suffix){
   const rngY=mx-mn;
   const px=i=>PL+i/(vals.length-1||1)*cW;
   const py=v=>PT+cH-(v-mn)/rngY*cH;
+  const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   let grid='';
   for(let i=0;i<=3;i++){
     const yv=mn+rngY*i/3, yp=py(yv);
     grid+=`<line x1="${PL}" y1="${yp.toFixed(1)}" x2="${W-PR}" y2="${yp.toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
     grid+=`<text x="${PL-3}" y="${(yp+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#4a5568">${yv.toFixed(suffix?1:2)}${suffix}</text>`;
   }
+  let xAxis=`<line x1="${PL}" y1="${(PT+cH).toFixed(1)}" x2="${W-PR}" y2="${(PT+cH).toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
+  if(dates&&dates.length){
+    const n=dates.length, step=Math.max(1,Math.floor(n/7));
+    const seen=new Set();
+    for(let i=0;i<n;i+=step){
+      const d=dates[i]; if(!d) continue;
+      const p=d.split('-'); if(p.length<2) continue;
+      const lbl=MN[parseInt(p[1])-1]+' '+p[0].slice(2);
+      if(seen.has(lbl)) continue; seen.add(lbl);
+      const xp=px(i).toFixed(1);
+      xAxis+=`<line x1="${xp}" y1="${(PT+cH).toFixed(1)}" x2="${xp}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3550" stroke-width="1"/>`;
+      xAxis+=`<text x="${xp}" y="${(PT+cH+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#4a5568">${lbl}</text>`;
+    }
+  }
   const pts=vals.map((v,i)=>({x:px(i),y:py(v)}));
   const pathD=pts.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
   const area=`${pathD} L${px(vals.length-1).toFixed(1)},${(PT+cH).toFixed(1)} L${PL},${(PT+cH).toFixed(1)} Z`;
-  svg.innerHTML=`<defs><linearGradient id="g-${svgId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".25"/><stop offset="1" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#g-${svgId})"/><path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none"/>`;
+  svg.innerHTML=`<defs><linearGradient id="g-${svgId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".25"/><stop offset="1" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs>${grid}${xAxis}<path d="${area}" fill="url(#g-${svgId})"/><path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none"/>`;
 }
 
 // ── ESTIMADOS — SISTEMA DE PRESETS ──────────────────────────────────
