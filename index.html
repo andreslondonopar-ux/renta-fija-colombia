@@ -113,7 +113,7 @@ svg{display:block;width:100%}
 </div>
 
 <div class="ticker-wrap">
-  <div class="ticker-label">SEN ·</div>
+  <div class="ticker-label">MERCADO ·</div>
   <div class="ticker-scroll">
     <div class="ticker-inner" id="ticker-inner"></div>
   </div>
@@ -377,15 +377,44 @@ function buildTicker(items){
   requestAnimationFrame(()=>{inner.style.animation='';});
 }
 
-function buildTickerFromCOL(){
-  const items=[
-    ...COL_DATA.map(r=>({name:r.name,tir:r.tir,color:'var(--amber3)'})),
-    {name:'IBR ON',v:'10.912%',color:'var(--txt)'},
-    {name:'IPC abr',v:'5.68%',color:'var(--blue3)'},
-    {name:'BanRep',v:'11.25%',color:'var(--amber3)'},
+// Ticker de mercado: Yahoo Finance + datos macro Colombia
+const _TICKER_SYMS=[
+  {sym:'USDCOP=X',  name:'USD/COP', color:'var(--blue3)',  fmt:v=>v.toFixed(0)},
+  {sym:'CL=F',      name:'WTI',     color:'#f59e0b',       fmt:v=>'US$'+v.toFixed(2)},
+  {sym:'GC=F',      name:'Oro',     color:'var(--amber3)', fmt:v=>'US$'+v.toFixed(0)},
+  {sym:'^GSPC',     name:'S&P500',  color:'var(--green3)', fmt:v=>v.toFixed(0)},
+  {sym:'^IXIC',     name:'NASDAQ',  color:'#a78bfa',       fmt:v=>v.toFixed(0)},
+  {sym:'BTC-USD',   name:'BTC',     color:'#fb923c',       fmt:v=>'US$'+Math.round(v).toLocaleString('en')},
+  {sym:'EURGBP=X',  name:'EUR/GBP', color:'var(--txt2)',   fmt:v=>v.toFixed(4)},
+];
+let _tickerBuilt=false;
+async function buildTickerMarket(){
+  const macroItems=[
+    {n:'IBR ON',   v:'10.91%',color:'var(--txt)'},
+    {n:'IPC abr',  v:'5.68%', color:'var(--blue3)'},
+    {n:'BanRep',   v:'11.25%',color:'var(--amber3)'},
   ];
+  // Fetch Yahoo Finance batch quote
+  const items=[...macroItems];
+  try{
+    const syms=_TICKER_SYMS.map(s=>s.sym).join(',');
+    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketPrice,shortName`;
+    const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    const r=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+    if(r.ok){
+      const d=await r.json();
+      const results=d?.quoteResponse?.result||[];
+      results.forEach(q=>{
+        const cfg=_TICKER_SYMS.find(s=>s.sym===q.symbol);
+        if(cfg&&q.regularMarketPrice!=null)
+          items.push({n:cfg.name,v:cfg.fmt(q.regularMarketPrice),color:cfg.color});
+      });
+    }
+  }catch(e){}
   buildTicker(items);
+  _tickerBuilt=true;
 }
+function buildTickerFromCOL(){ if(!_tickerBuilt) buildTickerMarket(); }
 
 // ── MACRO — carga desde FRED (Fed Funds) y fallback estático para Colombia
 async function loadMacro(){
@@ -426,7 +455,7 @@ async function loadMacro(){
         US_DATA=d.ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
         document.getElementById('us-status').textContent=`✓ ${d.ust.date}`;
         document.getElementById('us-status').className='curve-status status-ok';
-        document.getElementById('us-date').textContent=`US Treasury · ${d.ust.date} · GitHub Actions`;
+        document.getElementById('us-date').textContent=`US Treasury · ${d.ust.date}`;
         renderUS();
       }
       if(st) st.textContent=`↺ ${d.fecha||''} · TE`;
@@ -619,9 +648,9 @@ async function loadUSTreasury(){
               PREV_US_DATE=usnap.date;
               PREV_US_PTS=usnap.rates.map(r=>({x:r.years,y:r.tir})).filter(r=>r.tir>0);
             }
-            document.getElementById('us-status').textContent=`✓ ${ust.date} · GitHub Actions`;
+            document.getElementById('us-status').textContent=`✓ ${ust.date}`;
             document.getElementById('us-status').className='curve-status status-ok';
-            document.getElementById('us-date').textContent=`US Treasury · ${ust.date} · ${ust.source||'GitHub Actions'}`;
+            document.getElementById('us-date').textContent=`US Treasury · ${ust.date}`;
             renderUS();
             return;
           }
