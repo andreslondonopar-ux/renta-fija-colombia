@@ -457,21 +457,16 @@ function drawCurve(svgId,pts,color,H=160,showZero=false){
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
   // Label placement: track used y-bands to avoid overlap
-  let dots='',xlbls='',lastX=-99;
-  const minGap=20;
-  // TIR labels: vertical, close to each dot
+  let dots='',xlbls='';
+  // TIR labels: all points, vertical
   pts.forEach((p,i)=>{
     const cx=px(p.x),cy=py(p.y);
-    const isFirst=i===0,isLast=i===pts.length-1;
-    if(!isFirst&&!isLast&&cx-lastX<minGap) return;
-    lastX=cx;
-    dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
+    dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
     const lbl=p.y.toFixed(2)+'%';
-    // Place label above or below based on available space
     const spaceAbove=cy-PT, spaceBelow=PT+cH-cy;
     const above=spaceAbove>=spaceBelow;
-    const ty=above?Math.max(PT+20,cy-22):Math.min(PT+cH-20,cy+22);
-    dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${color}" transform="rotate(-90 ${cx.toFixed(1)} ${ty.toFixed(1)})">${lbl}</text>`;
+    const ty=above?Math.max(PT+20,cy-20):Math.min(PT+cH-20,cy+20);
+    dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="8" font-weight="700" fill="${color}" transform="rotate(-90 ${cx.toFixed(1)} ${ty.toFixed(1)})">${lbl}</text>`;
   });
   // X-axis: plazo labels for ALL points, gap to avoid overlap
   let lastLX=-99;
