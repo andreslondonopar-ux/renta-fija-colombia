@@ -395,9 +395,14 @@ const _MKT_SYMS=[
   {sym:'GC=F',n:'Oro',dec:0,suf:' USD'},
   {sym:'^GSPC',n:'S&P 500',dec:0},{sym:'^DJI',n:'DOW',dec:0},
   {sym:'^IXIC',n:'Nasdaq',dec:0},{sym:'^VIX',n:'VIX',dec:2},
-  {sym:'BTC-USD',n:'BTC',dec:0,suf:' USD'},{sym:'DX-Y.NYB',n:'DXY',dec:2},
-  {sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
+  {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
 ];
+const _YPX=[
+  u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+  u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+];
+function _ab(ms){const c=new AbortController();setTimeout(()=>c.abort(),ms);return c.signal;}
 function _setTicker(items){
   const el=document.getElementById('ticker-inner');
   if(!el||!items.length) return;
@@ -409,27 +414,24 @@ function _setTicker(items){
 }
 async function _loadMarketTicker(){
   const syms=_MKT_SYMS.map(s=>s.sym).join(',');
-  const fields='regularMarketPrice,regularMarketChange,regularMarketChangePercent';
-  for(const base of['query1','query2']){
-    try{
-      const url=`https://${base}.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=${fields}`;
-      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-      if(!r.ok) continue;
-      const d=await r.json();
-      const results=d?.quoteResponse?.result||[];
-      if(!results.length) continue;
-      const items=[];
-      results.forEach(q=>{
-        const cfg=_MKT_SYMS.find(s=>s.sym===q.symbol);
-        if(!cfg||q.regularMarketPrice==null) return;
-        const price=q.regularMarketPrice;
-        const chgPct=q.regularMarketChangePercent??0;
-        const up=(q.regularMarketChange??0)>=0;
-        items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
-      });
-      if(items.length>=4){_setTicker(items);try{localStorage.setItem('rf_ticker_cache',JSON.stringify(items));}catch(e){}return;}
-    }catch{continue;}
+  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+  const [yRes,cRes]=await Promise.allSettled([
+    Promise.any(_YPX.map(async p=>{const r=await fetch(p(url),{signal:_ab(6000)});if(!r.ok)throw 0;const j=await r.json();if(!j?.quoteResponse?.result?.length)throw 0;return j.quoteResponse.result;})),
+    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true',{signal:_ab(5000)}).then(r=>r.json()),
+  ]);
+  const items=[];
+  if(yRes.status==='fulfilled') yRes.value.forEach(q=>{
+    const cfg=_MKT_SYMS.find(s=>s.sym===q.symbol);
+    if(!cfg||q.regularMarketPrice==null) return;
+    const up=(q.regularMarketChange??0)>=0;
+    items.push({n:cfg.n,v:q.regularMarketPrice.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+((q.regularMarketChangePercent??0).toFixed(2))+'%'});
+  });
+  if(cRes.status==='fulfilled'){
+    const d=cRes.value;
+    const fmtC=(v,c)=>({v:Math.round(v).toLocaleString('es-CO')+' USD',up:c>=0,c:(c>=0?'+':'')+c.toFixed(2)+'%'});
+    items.push({n:'BTC',...fmtC(d.bitcoin.usd,d.bitcoin.usd_24h_change)},{n:'ETH',...fmtC(d.ethereum.usd,d.ethereum.usd_24h_change)});
   }
+  if(items.length>=4){_setTicker(items);try{localStorage.setItem('rf_ticker_cache',JSON.stringify(items));}catch(e){};}
 }
 // Fallback: localStorage cache (reciente) > hardcodeado (antiguo)
 try{const c=JSON.parse(localStorage.getItem('rf_ticker_cache')||'null');if(c?.length>=4)_setTicker(c);else _setTicker(_MKT_FB);}catch(e){_setTicker(_MKT_FB);}
