@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -284,52 +284,49 @@ svg{display:block;width:100%}
           <!-- IPC Mensual -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">IPC Mensual Estimado</div>
-            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">
-              Formato: <code style="color:var(--amber3)">YYYY-MM-DD;0.52%</code> &nbsp;o&nbsp; <code style="color:var(--amber3)">DD/MM/YYYY;0,52%</code> · una fila por mes
-            </div>
+            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;0.52%</code> &nbsp;o&nbsp; <code style="color:var(--amber3)">DD/MM/YYYY;0,52%</code> · una fila por mes</div>
             <label class="est-drop" id="ipc-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstIPC(this)">
               Arrastrar CSV o hacer clic · IPC mensual estimado
             </label>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-              <div id="ipc-est-status" style="font-size:9px;color:var(--txt3);flex:1"></div>
-              <button class="btn-sm" onclick="clearEstIPC()">Borrar</button>
+            <div id="ipcm-save-row" style="display:none;align-items:center;gap:6px;margin-top:8px">
+              <input id="ipcm-preset-name" type="text" placeholder="Nombre del escenario" style="flex:1;padding:5px 8px;font-size:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);font-family:inherit;outline:none">
+              <button class="btn-sm" onclick="saveCurrentPreset('ipcm')">Guardar</button>
             </div>
-            <div id="ipc-est-preview" style="margin-top:8px"></div>
+            <div id="ipcm-preset-list" style="margin-top:8px"></div>
+            <div id="ipcm-preset-preview" style="margin-top:6px"></div>
           </div>
 
           <!-- IPC Anual -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">IPC Anual Estimado</div>
-            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">
-              Formato: <code style="color:var(--amber3)">YYYY-MM-DD;5.09%</code> · una fila por mes
-            </div>
+            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;5.09%</code> · una fila por mes</div>
             <label class="est-drop" id="ipc-anual-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstIPCAnual(this)">
               Arrastrar CSV o hacer clic · IPC anual estimado
             </label>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-              <div id="ipc-anual-est-status" style="font-size:9px;color:var(--txt3);flex:1"></div>
-              <button class="btn-sm" onclick="clearEstIPCAnual()">Borrar</button>
+            <div id="ipca-save-row" style="display:none;align-items:center;gap:6px;margin-top:8px">
+              <input id="ipca-preset-name" type="text" placeholder="Nombre del escenario" style="flex:1;padding:5px 8px;font-size:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);font-family:inherit;outline:none">
+              <button class="btn-sm" onclick="saveCurrentPreset('ipca')">Guardar</button>
             </div>
-            <div id="ipc-anual-est-preview" style="margin-top:8px"></div>
+            <div id="ipca-preset-list" style="margin-top:8px"></div>
+            <div id="ipca-preset-preview" style="margin-top:6px"></div>
           </div>
 
           <!-- FRA -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">Curva FRA Estimada (IBR)</div>
-            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">
-              Formato: <code style="color:var(--amber3)">YYYY-MM-DD;6.50%</code> · una fila por fecha
-            </div>
+            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;6.50%</code> · una fila por fecha</div>
             <label class="est-drop" id="fra-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstFRA(this)">
               Arrastrar CSV o hacer clic · curva FRA estimada
             </label>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-              <div id="fra-est-status" style="font-size:9px;color:var(--txt3);flex:1"></div>
-              <button class="btn-sm" onclick="clearEstFRA()">Borrar</button>
+            <div id="fra-save-row" style="display:none;align-items:center;gap:6px;margin-top:8px">
+              <input id="fra-preset-name" type="text" placeholder="Nombre del escenario" style="flex:1;padding:5px 8px;font-size:11px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);font-family:inherit;outline:none">
+              <button class="btn-sm" onclick="saveCurrentPreset('fra')">Guardar</button>
             </div>
-            <div id="fra-est-preview" style="margin-top:8px"></div>
+            <div id="fra-preset-list" style="margin-top:8px"></div>
+            <div id="fra-preset-preview" style="margin-top:6px"></div>
           </div>
 
           <div style="padding-top:14px;border-top:1px solid var(--border)">
@@ -935,18 +932,84 @@ function drawDataSparkline(svgId, vals, color, suffix){
   svg.innerHTML=`<defs><linearGradient id="g-${svgId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".25"/><stop offset="1" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#g-${svgId})"/><path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none"/>`;
 }
 
-// ── ESTIMADOS (localStorage)
-const LS_IPC_EST='rf_ipc_est_v1';
-const LS_IPC_ANUAL_EST='rf_ipc_anual_est_v1';
-const LS_FRA_EST='rf_fra_est_v1';
+// ── ESTIMADOS — SISTEMA DE PRESETS ──────────────────────────────────
+const PRESET_CFG={
+  ipcm:{pk:'rf_ipcm_presets_v1',ak:'rf_ipcm_active_v1',compat:'rf_ipc_est_v1'},
+  ipca:{pk:'rf_ipca_presets_v1',ak:'rf_ipca_active_v1',compat:null},
+  fra: {pk:'rf_fra_presets_v1', ak:'rf_fra_active_v1', compat:'rf_fra_est_v1'},
+};
+let _pending={};
+function getPresets(t){try{return JSON.parse(localStorage.getItem(PRESET_CFG[t].pk)||'{}')}catch(e){return {}}}
+function getActive(t){return localStorage.getItem(PRESET_CFG[t].ak)||null}
+function activatePreset(t,name){
+  localStorage.setItem(PRESET_CFG[t].ak,name);
+  const p=getPresets(t)[name];
+  if(p&&PRESET_CFG[t].compat) localStorage.setItem(PRESET_CFG[t].compat,JSON.stringify(p.data));
+  renderPresetList(t);
+}
+function deletePreset(t,name){
+  const ps=getPresets(t); delete ps[name];
+  localStorage.setItem(PRESET_CFG[t].pk,JSON.stringify(ps));
+  if(getActive(t)===name){
+    localStorage.removeItem(PRESET_CFG[t].ak);
+    if(PRESET_CFG[t].compat) localStorage.removeItem(PRESET_CFG[t].compat);
+    const rem=Object.keys(ps); if(rem.length) activatePreset(t,rem[rem.length-1]);
+  }
+  renderPresetList(t);
+}
+function saveCurrentPreset(t){
+  const nm=document.getElementById(t+'-preset-name');
+  const name=(nm?nm.value.trim():'')||('Escenario '+new Date().toLocaleDateString('es-CO'));
+  const data=_pending[t];
+  if(!data||!Object.keys(data).length) return;
+  const ps=getPresets(t); ps[name]={data,saved:new Date().toISOString().slice(0,10)};
+  localStorage.setItem(PRESET_CFG[t].pk,JSON.stringify(ps));
+  delete _pending[t];
+  const row=document.getElementById(t+'-save-row'); if(row) row.style.display='none';
+  if(nm) nm.value='';
+  activatePreset(t,name);
+}
+function renderPresetList(t){
+  const listEl=document.getElementById(t+'-preset-list');
+  const prevEl=document.getElementById(t+'-preset-preview');
+  if(!listEl) return;
+  const ps=getPresets(t),active=getActive(t),names=Object.keys(ps);
+  const lbl={ipcm:'IPC mensual',ipca:'IPC anual',fra:'FRA'};
+  if(!names.length){
+    listEl.innerHTML='<div style="font-size:9px;color:var(--txt3);padding:4px 0">Sin escenarios guardados</div>';
+    if(prevEl) prevEl.innerHTML=''; return;
+  }
+  listEl.innerHTML=names.map(n=>{
+    const p=ps[n],isAct=n===active,cnt=Object.keys(p.data).length;
+    const d=Object.keys(p.data).sort(),rng=cnt?d[0]+' → '+d[d.length-1]:'';
+    const ns=n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;background:${isAct?'rgba(59,130,246,.12)':'var(--bg3)'};border:1px solid ${isAct?'var(--blue)':'var(--border)'};margin-bottom:3px">
+      <span style="font-size:12px;color:${isAct?'var(--blue3)':'var(--txt3)'}">&#x25CF;</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:10px;font-weight:${isAct?700:400};color:${isAct?'var(--txt)':'var(--txt2)'}">${n}</div>
+        <div style="font-size:8px;color:var(--txt3)">${cnt} reg &middot; ${rng}</div>
+      </div>
+      ${!isAct?`<button class="btn-sm" style="padding:2px 8px;font-size:9px" onclick="activatePreset('${t}','${ns}')">Activar</button>`:'<span style="font-size:9px;color:var(--blue3);padding:0 4px">Activo</span>'}
+      <button class="btn-sm" style="padding:2px 8px;font-size:9px;color:var(--red3);border-color:var(--red2)" onclick="deletePreset('${t}','${ns}')">&#x2715;</button>
+    </div>`;
+  }).join('');
+  if(active&&ps[active]&&prevEl) renderEstPreviewKV(ps[active].data,t+'-preset-preview',lbl[t]||t);
+}
+function migrateOldEstData(){
+  [{t:'ipcm',ok:'rf_ipc_est_v1'},{t:'fra',ok:'rf_fra_est_v1'}].forEach(({t,ok})=>{
+    if(!Object.keys(getPresets(t)).length){
+      try{const raw=localStorage.getItem(ok);if(raw){const d=JSON.parse(raw);if(Object.keys(d).length){const ps={};ps['Importado']={data:d,saved:new Date().toISOString().slice(0,10)};localStorage.setItem(PRESET_CFG[t].pk,JSON.stringify(ps));localStorage.setItem(PRESET_CFG[t].ak,'Importado');}}}catch(e){}
+    }
+  });
+}
+</body>
+</html>
 
 function parseEstCSV(text){
   const lines=text.trim().split(/\r?\n/);
   const result={};
   for(const line of lines){
     if(!line.trim()||line.startsWith('#')) continue;
-    // Detectar delimitador: ; primero, luego tab, luego coma
-    // (no incluir coma como delimitador porque es separador decimal en formato colombiano)
     const delim=line.includes(';')?';':line.includes('\t')?'\t':',';
     const parts=line.split(delim);
     if(parts.length<2) continue;
@@ -969,7 +1032,7 @@ function renderEstPreviewKV(data, elId, label){
     <td style="padding:3px 8px;color:var(--txt2)">${k}</td>
     <td style="padding:3px 8px;text-align:right;font-family:monospace;color:var(--amber3)">${(data[k]*100).toFixed(3)}%</td>
   </tr>`).join('');
-  el.innerHTML=`<div style="font-size:9px;color:var(--txt3);margin-bottom:4px">✓ ${keys.length} filas · primero: ${keys[0]} · último: ${keys[keys.length-1]}</div>
+  el.innerHTML=`<div style="font-size:9px;color:var(--txt3);margin-bottom:4px">✓ ${keys.length} filas · ${keys[0]} → ${keys[keys.length-1]}</div>
   <div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)">
     <table style="width:100%;border-collapse:collapse;font-size:10px">
       <thead style="position:sticky;top:0;background:var(--bg3)"><tr>
@@ -981,98 +1044,42 @@ function renderEstPreviewKV(data, elId, label){
   </div>`;
 }
 
-
-function loadEstIPC(input){
+function _onUpload(t, input){
   const file=input.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=e=>{
     const parsed=parseEstCSV(e.target.result);
     const n=Object.keys(parsed).length;
-    const st=document.getElementById('ipc-est-status');
-    if(!n){st.textContent='Sin datos válidos';return;}
-    localStorage.setItem(LS_IPC_EST,JSON.stringify(parsed));
-    st.textContent=`Cargado: ${n} períodos`;
-    renderEstPreviewKV(parsed,'ipc-est-preview','IPC mensual');
+    if(!n){alert('Sin datos válidos');return;}
+    _pending[t]=parsed;
+    const row=document.getElementById(t+'-save-row'); if(row) row.style.display='flex';
+    const nm=document.getElementById(t+'-preset-name');
+    const labels={ipcm:'IPC mensual ',ipca:'IPC anual ',fra:'FRA '};
+    if(nm&&!nm.value) nm.value=(labels[t]||'')+new Date().toLocaleDateString('es-CO');
   };
   reader.readAsText(file);
 }
-
-function clearEstIPC(){
-  localStorage.removeItem(LS_IPC_EST);
-  document.getElementById('ipc-est-status').textContent='Borrado';
-  document.getElementById('ipc-est-preview').innerHTML='';
-}
-
-function loadEstIPCAnual(input){
-  const file=input.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const parsed=parseEstCSV(e.target.result);
-    const n=Object.keys(parsed).length;
-    const st=document.getElementById('ipc-anual-est-status');
-    if(!n){st.textContent='Sin datos válidos';return;}
-    localStorage.setItem(LS_IPC_ANUAL_EST,JSON.stringify(parsed));
-    st.textContent=`Cargado: ${n} períodos`;
-    renderEstPreviewKV(parsed,'ipc-anual-est-preview','IPC anual');
-  };
-  reader.readAsText(file);
-}
-
-function clearEstIPCAnual(){
-  localStorage.removeItem(LS_IPC_ANUAL_EST);
-  document.getElementById('ipc-anual-est-status').textContent='Borrado';
-  document.getElementById('ipc-anual-est-preview').innerHTML='';
-}
-
-function loadEstFRA(input){
-  const file=input.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const parsed=parseEstCSV(e.target.result);
-    const n=Object.keys(parsed).length;
-    const st=document.getElementById('fra-est-status');
-    if(!n){st.textContent='Sin datos válidos';return;}
-    localStorage.setItem(LS_FRA_EST,JSON.stringify(parsed));
-    st.textContent=`Cargado: ${n} fechas FRA`;
-    renderEstPreviewKV(parsed,'fra-est-preview','FRA');
-  };
-  reader.readAsText(file);
-}
-
-function clearEstFRA(){
-  localStorage.removeItem(LS_FRA_EST);
-  document.getElementById('fra-est-status').textContent='Borrado';
-  document.getElementById('fra-est-preview').innerHTML='';
-}
+function loadEstIPC(i){_onUpload('ipcm',i);}
+function loadEstIPCAnual(i){_onUpload('ipca',i);}
+function loadEstFRA(i){_onUpload('fra',i);}
 
 function clearAllEst(){
-  [LS_IPC_EST,LS_IPC_ANUAL_EST,LS_FRA_EST].forEach(k=>localStorage.removeItem(k));
-  ['ipc-est-status','ipc-anual-est-status','fra-est-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});
-  ['ipc-est-preview','ipc-anual-est-preview','fra-est-preview'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
+  if(!confirm('¿Borrar todos los escenarios guardados?')) return;
+  Object.keys(PRESET_CFG).forEach(t=>{
+    localStorage.removeItem(PRESET_CFG[t].pk);
+    localStorage.removeItem(PRESET_CFG[t].ak);
+    if(PRESET_CFG[t].compat) localStorage.removeItem(PRESET_CFG[t].compat);
+  });
+  _pending={};
+  ['ipcm','ipca','fra'].forEach(t=>{
+    renderPresetList(t);
+    const row=document.getElementById(t+'-save-row'); if(row) row.style.display='none';
+  });
 }
 
 function initEstPreviews(){
-  try{
-    const ipc=JSON.parse(localStorage.getItem(LS_IPC_EST)||'{}');
-    if(Object.keys(ipc).length){
-      document.getElementById('ipc-est-status').textContent=`Cargado: ${Object.keys(ipc).length} períodos`;
-      renderEstPreviewKV(ipc,'ipc-est-preview','IPC mensual');
-    }
-  }catch(e){}
-  try{
-    const anual=JSON.parse(localStorage.getItem(LS_IPC_ANUAL_EST)||'{}');
-    if(Object.keys(anual).length){
-      document.getElementById('ipc-anual-est-status').textContent=`Cargado: ${Object.keys(anual).length} períodos`;
-      renderEstPreviewKV(anual,'ipc-anual-est-preview','IPC anual');
-    }
-  }catch(e){}
-  try{
-    const fra=JSON.parse(localStorage.getItem(LS_FRA_EST)||'{}');
-    if(Object.keys(fra).length){
-      document.getElementById('fra-est-status').textContent=`Cargado: ${Object.keys(fra).length} fechas FRA`;
-      renderEstPreviewKV(fra,'fra-est-preview','FRA');
-    }
-  }catch(e){}
+  migrateOldEstData();
+  ['ipcm','ipca','fra'].forEach(t=>renderPresetList(t));
 }
 </script>
 </body>
