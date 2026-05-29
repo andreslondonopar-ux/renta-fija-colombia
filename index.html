@@ -457,42 +457,31 @@ function drawCurve(svgId,pts,color,H=160,showZero=false){
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
   // Label placement: track used y-bands to avoid overlap
-  const placed=[]; // [{cx,cy,tx,ty,tw}] placed labels
-  const FONT=8.5, CHW=5.2; // approx char width at font-size 8.5
-  let dots='',xlbls='',lastX=-99,lastLX=-99;
-  const minGap=30, xLblGap=54;
+  let dots='',xlbls='',lastX=-99;
+  const minGap=30;
+  // TIR labels: vertical, close to each dot
   pts.forEach((p,i)=>{
     const cx=px(p.x),cy=py(p.y);
     const isFirst=i===0,isLast=i===pts.length-1;
     if(!isFirst&&!isLast&&cx-lastX<minGap) return;
     lastX=cx;
     dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
-    // TIR label: place above or below with enough clearance from dot and line
     const lbl=p.y.toFixed(2)+'%';
-    const tw=lbl.length*CHW;
+    // Place label above or below based on available space; 22px offset from dot center
     const spaceAbove=cy-PT, spaceBelow=PT+cH-cy;
-    const wantAbove=spaceAbove>=spaceBelow; // prefer whichever side has more room
-    const ABOVE=14, BELOW=16;
-    let ty=wantAbove?cy-ABOVE:cy+BELOW;
-    ty=Math.max(PT+8,Math.min(PT+cH-4,ty));
-    let anchor=cx<PL+tw/2+2?'start':cx>W-PR-tw/2-2?'end':'middle';
-    const txStart=anchor==='start'?cx:anchor==='end'?cx-tw:cx-tw/2;
-    // Shift vertically to avoid overlapping already-placed labels
-    for(const prev of placed){
-      if(Math.abs(txStart-(prev.tx||prev.cx))<tw+4&&Math.abs(ty-prev.ty)<11){
-        ty=wantAbove?ty-12:ty+12;
-        ty=Math.max(PT+8,Math.min(PT+cH-4,ty));
-        break;
-      }
-    }
-    placed.push({cx,cy,ty,tx:txStart});
-    dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${anchor}" font-size="${FONT}" fill="${color}" font-weight="700">${lbl}</text>`;
-    // X-axis label (bond name) — wider gap to avoid overlap on long date strings
-    if(cx-lastLX>=xLblGap||isLast){
-      const xanchor=cx<PL+28?'start':cx>W-PR-28?'end':'middle';
-      xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${xanchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
-      lastLX=cx;
-    }
+    const above=spaceAbove>=spaceBelow;
+    const ty=above?Math.max(PT+6,cy-22):Math.min(PT+cH-6,cy+22);
+    const xanchor=cx<PL+6?'start':cx>W-PR-6?'end':'middle';
+    dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${xanchor}" font-size="8.5" font-weight="700" fill="${color}" transform="rotate(-90 ${cx.toFixed(1)} ${ty.toFixed(1)})">${lbl}</text>`;
+  });
+  // X-axis: year labels for ALL points, small gap to fit short strings
+  let lastLX=-99;
+  pts.forEach((p,i)=>{
+    const cx=px(p.x);
+    if(cx-lastLX<20) return;
+    lastLX=cx;
+    const xanchor=cx<PL+12?'start':cx>W-PR-12?'end':'middle';
+    xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${xanchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
   });
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="${color}" stop-opacity="0.22"/>
@@ -514,7 +503,7 @@ function renderCol(){
       <td style="color:var(--txt3)">${r.plazo.toFixed(2)}</td>
     </tr>`;
   }).join('');
-  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.name.replace('TES TF ','').replace('TES ','')})),'#f59e0b');
+  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:(r.vencimiento||'').substring(0,4)})),'#f59e0b');
   buildTickerFromCOL();
   }
 
