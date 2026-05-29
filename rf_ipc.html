@@ -1239,9 +1239,15 @@ function renderIPCTable(){
   const hist = [...IPC_TABLE].slice(-36).reverse();
   const lastHistEntry = IPC_TABLE[IPC_TABLE.length-1];
   const lastHistSortT = lastHistEntry ? lastHistEntry.y*100+lastHistEntry.m : 0;
+  // Deduplicar por mes: si hay múltiples fechas del mismo mes, tomar la última
+  const estByMonth = {};
+  if(hasEst) Object.entries(estimados).forEach(([k,v])=>{
+    const [y,m]=[parseInt(k.split('-')[0]),parseInt(k.split('-')[1])];
+    const mk=`${y}-${m}`;
+    if(!estByMonth[mk]||k>estByMonth[mk].k) estByMonth[mk]={k,y,m,v,est:true};
+  });
   const estRows = hasEst
-    ? Object.entries(estimados)
-        .map(([k,v])=>({y:parseInt(k.split('-')[0]),m:parseInt(k.split('-')[1]),v,est:true}))
+    ? Object.values(estByMonth)
         .filter(r => r.y*100+r.m > lastHistSortT)
         .sort((a,b)=>b.y!==a.y?b.y-a.y:b.m-a.m)
     : [];
