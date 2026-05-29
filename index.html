@@ -170,7 +170,7 @@ svg{display:block;width:100%}
             </div>
             <span class="curve-status status-loading" id="col-status">&#x23F3; Cargando...</span>
           </div>
-          <svg id="svg-col" viewBox="0 0 700 160" style="width:100%;height:150px;flex-shrink:0"></svg>
+          <svg id="svg-col" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
           <div style="overflow-y:auto;flex:1">
             <table class="yt">
               <thead><tr>
@@ -193,7 +193,7 @@ svg{display:block;width:100%}
             </div>
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
           </div>
-          <svg id="svg-us" viewBox="0 0 700 160" style="width:100%;height:150px;flex-shrink:0"></svg>
+          <svg id="svg-us" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
           <div style="overflow-y:auto;flex:1">
             <table class="yt">
               <thead><tr>
@@ -434,11 +434,11 @@ async function loadMacro(){
 }
 
 // ── SVG CURVE
-function drawCurve(svgId,pts,color,H=160,showZero=false){
+function drawCurve(svgId,pts,color,H=190,showZero=false){
   const svg=document.getElementById(svgId);if(!svg||!pts.length)return;
   const W=Math.max(svg.clientWidth||0,svg.parentElement?.clientWidth||0,500);
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  const PL=36,PR=6,PT=16,PB=22,cW=W-PL-PR,cH=H-PT-PB;
+  const PL=36,PR=6,PT=16,PB=42,cW=W-PL-PR,cH=H-PT-PB;
   const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
   const minX=Math.min(...xs),maxX=Math.max(...xs);
   let minY=Math.min(...ys),maxY=Math.max(...ys);
@@ -468,14 +468,13 @@ function drawCurve(svgId,pts,color,H=160,showZero=false){
     const ty=above?Math.max(PT+20,cy-20):Math.min(PT+cH-20,cy+20);
     dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="8" font-weight="700" fill="${color}" transform="rotate(-90 ${cx.toFixed(1)} ${ty.toFixed(1)})">${lbl}</text>`;
   });
-  // X-axis: plazo labels for ALL points, gap to avoid overlap
-  let lastLX=-99;
+  // X-axis: ALL bonds, staggered in 2 rows so close labels don't overlap
   pts.forEach((p,i)=>{
     const cx=px(p.x);
-    if(cx-lastLX<22) return;
-    lastLX=cx;
+    const yrow=i%2===0?H-6:H-19;
     const xanchor=cx<PL+14?'start':cx>W-PR-14?'end':'middle';
-    xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${xanchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
+    xlbls+=`<line x1="${cx.toFixed(1)}" y1="${(PT+cH).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3a55" stroke-width="1"/>`;
+    xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xanchor}" font-size="8" fill="#4a5568">${p.label||''}</text>`;
   });
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="${color}" stop-opacity="0.22"/>
