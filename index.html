@@ -10,7 +10,7 @@
 body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
 :root{
   --bg:#0a0e1a;--bg2:#0f1629;--bg3:#141d35;--bg4:#1a2540;
-  --txt:#e8eaf0;--txt2:#8892a4;--txt3:#4a5568;
+  --txt:#e8eaf0;--txt2:#b8c4d4;--txt3:#8090a8;
   --border:#1e2d4a;--border2:#263554;--r:6px;--r2:10px;
   --amber:#f59e0b;--amber2:#78350f;--amber3:#fcd34d;
   --blue:#3b82f6;--blue2:#1d4ed8;--blue3:#93c5fd;
@@ -174,10 +174,9 @@ svg{display:block;width:100%}
           <div style="overflow-y:auto;flex:1">
             <table class="yt">
               <thead><tr>
-                <th style="text-align:left">T&iacute;tulo</th>
+                <th style="text-align:left">Plazo</th>
                 <th>Vencimiento</th>
                 <th>TIR</th>
-                <th>Plazo (a)</th>
               </tr></thead>
               <tbody id="col-tbody"></tbody>
             </table>
@@ -198,6 +197,7 @@ svg{display:block;width:100%}
             <table class="yt">
               <thead><tr>
                 <th style="text-align:left">Plazo</th>
+                <th>Vencimiento</th>
                 <th>TIR</th>
               </tr></thead>
               <tbody id="us-tbody"></tbody>
@@ -454,7 +454,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   for(let i=0;i<=4;i++){
     const yv=minY+rngY*i/4,yp=py(yv);
     grid+=`<line x1="${PL}" y1="${yp.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yp.toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
-    grid+=`<text x="${PL-4}" y="${(yp+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#4a5568">${yv.toFixed(1)}%</text>`;
+    grid+=`<text x="${PL-4}" y="${(yp+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#8090a8">${yv.toFixed(1)}%</text>`;
   }
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
@@ -490,7 +490,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
     const yrow=row===0?H-6:H-19;
     const xa=cx<PL+14?'start':cx>W-PR-14?'end':'middle';
     xlbls+=`<line x1="${cx.toFixed(1)}" y1="${(PT+cH).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3a55" stroke-width="1"/>`;
-    xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xa}" font-size="8" fill="#4a5568">${p.label||''}</text>`;
+    xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xa}" font-size="8" fill="#8090a8">${p.label||''}</text>`;
   });
   const TW=82,TH=34;
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
@@ -504,7 +504,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   ${dots}${xlbls}
   <g id="tip-${svgId}" display="none" pointer-events="none">
     <rect id="tip-bg-${svgId}" width="${TW}" height="${TH}" rx="3" fill="#0d1628" stroke="#263554" stroke-width="1"/>
-    <text id="tip-a-${svgId}" x="7" y="13" font-size="9" fill="#6b7a99" font-family="'Segoe UI',monospace"></text>
+    <text id="tip-a-${svgId}" x="7" y="13" font-size="9" fill="#9aaabf" font-family="'Segoe UI',monospace"></text>
     <text id="tip-b-${svgId}" x="7" y="27" font-size="12" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
   </g>
   <rect id="ovl-${svgId}" x="${PL}" y="${PT}" width="${cW}" height="${cH}" fill="transparent" style="cursor:crosshair"/>`;
@@ -539,14 +539,12 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
 
 function renderCol(){
   const tbody=document.getElementById('col-tbody');
-  tbody.innerHTML=COL_DATA.map(r=>{
-    return`<tr>
-      <td style="text-align:left;font-weight:700;color:var(--txt)">${r.name}</td>
-      <td style="color:var(--txt2)">${r.venc||'—'}</td>
-      <td style="font-weight:700;color:var(--amber3)">${r.tir.toFixed(2)}%</td>
-      <td style="color:var(--txt3)">${r.plazo.toFixed(2)}</td>
-    </tr>`;
-  }).join('');
+  const fmtP=y=>y<1?Math.round(y*12)+'M':(y<10?y.toFixed(1).replace('.0',''):Math.round(y))+'A';
+  tbody.innerHTML=COL_DATA.map(r=>`<tr>
+    <td style="text-align:left;font-weight:700;color:var(--txt)">${fmtP(r.plazo)}</td>
+    <td style="color:var(--txt2)">${r.venc||'—'}</td>
+    <td style="font-weight:700;color:var(--amber3)">${r.tir.toFixed(2)}%</td>
+  </tr>`).join('');
   drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.plazo<1?Math.round(r.plazo*12)+'M':(r.plazo<10?r.plazo.toFixed(1).replace('.0',''):Math.round(r.plazo))+'A'})),'#f59e0b',190,false,PREV_COL_PTS,PREV_COL_DATE);
   buildTickerFromCOL();
   }
@@ -676,12 +674,11 @@ async function loadUSTreasury(){
 
 function renderUS(){
   const tbody=document.getElementById('us-tbody');
-  tbody.innerHTML=US_DATA.map(r=>{
-    return`<tr>
-      <td style="text-align:left;font-weight:700;color:var(--txt2)">${r.plazo}</td>
-      <td style="font-weight:700;color:var(--blue3)">${r.tir.toFixed(2)}%</td>
-    </tr>`;
-  }).join('');
+  tbody.innerHTML=US_DATA.map(r=>`<tr>
+    <td style="text-align:left;font-weight:700;color:var(--txt)">${r.plazo}</td>
+    <td style="color:var(--txt2)">—</td>
+    <td style="font-weight:700;color:var(--blue3)">${r.tir.toFixed(2)}%</td>
+  </tr>`).join('');
   drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6',190,false,PREV_US_PTS,PREV_US_DATE);
 }
 
@@ -994,7 +991,7 @@ function drawDataSparkline(svgId, vals, color, suffix, dates){
   for(let i=0;i<=3;i++){
     const yv=mn+rngY*i/3, yp=py(yv);
     grid+=`<line x1="${PL}" y1="${yp.toFixed(1)}" x2="${W-PR}" y2="${yp.toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
-    grid+=`<text x="${PL-3}" y="${(yp+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#4a5568">${yv.toFixed(suffix?1:2)}${suffix}</text>`;
+    grid+=`<text x="${PL-3}" y="${(yp+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#8090a8">${yv.toFixed(suffix?1:2)}${suffix}</text>`;
   }
   let xAxis=`<line x1="${PL}" y1="${(PT+cH).toFixed(1)}" x2="${W-PR}" y2="${(PT+cH).toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
   if(dates&&dates.length){
@@ -1007,7 +1004,7 @@ function drawDataSparkline(svgId, vals, color, suffix, dates){
       if(seen.has(lbl)) continue; seen.add(lbl);
       const xp=px(i).toFixed(1);
       xAxis+=`<line x1="${xp}" y1="${(PT+cH).toFixed(1)}" x2="${xp}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3550" stroke-width="1"/>`;
-      xAxis+=`<text x="${xp}" y="${(PT+cH+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#4a5568">${lbl}</text>`;
+      xAxis+=`<text x="${xp}" y="${(PT+cH+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#8090a8">${lbl}</text>`;
     }
   }
   const pts=vals.map((v,i)=>({x:px(i),y:py(v)}));
@@ -1022,7 +1019,7 @@ function drawDataSparkline(svgId, vals, color, suffix, dates){
     <circle id="dot-${svgId}" cx="0" cy="0" r="3" fill="${color}" stroke="#0f1629" stroke-width="1.5" display="none" pointer-events="none"/>
     <g id="tip-${svgId}" display="none" pointer-events="none">
       <rect x="0" y="0" width="${TW}" height="${TH}" fill="#0a0e1a" stroke="#263554" rx="3" stroke-width="1"/>
-      <text id="tip-d-${svgId}" x="7" y="13" font-size="9" fill="#4a5568" font-family="'Segoe UI',sans-serif"></text>
+      <text id="tip-d-${svgId}" x="7" y="13" font-size="9" fill="#8090a8" font-family="'Segoe UI',sans-serif"></text>
       <text id="tip-v-${svgId}" x="7" y="28" font-size="12" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
     </g>
     <rect id="ovl-${svgId}" x="${PL}" y="${PT}" width="${cW}" height="${cH}" fill="transparent" style="cursor:crosshair"/>`;
