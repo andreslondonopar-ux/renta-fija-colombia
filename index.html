@@ -456,42 +456,13 @@ function drawCurve(svgId,pts,color,H=190,showZero=false){
   }
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
-  // Label placement: track used y-bands to avoid overlap
+  // Dots (all points)
   let dots='',xlbls='';
-  // Build initial label positions for all points
-  const lbls=pts.map(p=>{
-    const cx=px(p.x),cy=py(p.y);
-    const above=(cy-PT)>=(PT+cH-cy);
-    const ty=above?Math.max(PT+20,cy-22):Math.min(PT+cH-20,cy+22);
-    return{cx,cy,ty,lbl:p.y.toFixed(2)+'%'};
+  const dotData=pts.map(p=>({cx:px(p.x),cy:py(p.y),label:p.label||'',tir:p.y.toFixed(2)+'%'}));
+  dotData.forEach(d=>{
+    dots+=`<circle cx="${d.cx.toFixed(1)}" cy="${d.cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
   });
-  // Iterative collision resolution: push overlapping labels apart
-  const LH=17,LW=9; // rotated label: half-height=17px, width=9px (font-size)
-  for(let it=0;it<60;it++){
-    let mv=false;
-    for(let a=0;a<lbls.length;a++)for(let b=a+1;b<lbls.length;b++){
-      const la=lbls[a],lb=lbls[b];
-      if(Math.abs(la.cx-lb.cx)>LW) continue; // too far apart in x to overlap
-      const ov=LH*2+1-Math.abs(la.ty-lb.ty);
-      if(ov<=0) continue;
-      const sh=ov/2+0.5;
-      if(la.ty<=lb.ty){la.ty-=sh;lb.ty+=sh;}else{la.ty+=sh;lb.ty-=sh;}
-      la.ty=Math.max(PT+LH+2,Math.min(PT+cH-LH-2,la.ty));
-      lb.ty=Math.max(PT+LH+2,Math.min(PT+cH-LH-2,lb.ty));
-      mv=true;
-    }
-    if(!mv)break;
-  }
-  // Draw dots, leader lines when label was pushed far, then labels
-  lbls.forEach(({cx,cy,ty,lbl})=>{
-    dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
-    if(Math.abs(ty-cy)>LH+8){
-      const y1=(ty>cy?cy+4:cy-4).toFixed(1),y2=(ty>cy?ty-LH:ty+LH).toFixed(1);
-      dots+=`<line x1="${cx.toFixed(1)}" y1="${y1}" x2="${cx.toFixed(1)}" y2="${y2}" stroke="${color}" stroke-width="0.7" stroke-dasharray="2,2" stroke-opacity="0.55"/>`;
-    }
-    dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="8" font-weight="700" fill="${color}" transform="rotate(-90 ${cx.toFixed(1)} ${ty.toFixed(1)})">${lbl}</text>`;
-  });
-  // X-axis: ALL bonds, staggered in 2 rows so close labels don't overlap
+  // X-axis: ALL bonds, staggered 2 rows
   pts.forEach((p,i)=>{
     const cx=px(p.x);
     const yrow=i%2===0?H-6:H-19;
@@ -499,6 +470,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false){
     xlbls+=`<line x1="${cx.toFixed(1)}" y1="${(PT+cH).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3a55" stroke-width="1"/>`;
     xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xanchor}" font-size="8" fill="#4a5568">${p.label||''}</text>`;
   });
+  const TW=82,TH=34;
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="${color}" stop-opacity="0.22"/>
     <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
@@ -506,7 +478,40 @@ function drawCurve(svgId,pts,color,H=190,showZero=false){
   ${grid}
   <path d="${areaD}" fill="url(#g${svgId})"/>
   <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>
-  ${dots}${xlbls}`;
+  ${dots}${xlbls}
+  <g id="tip-${svgId}" display="none" pointer-events="none">
+    <rect id="tip-bg-${svgId}" width="${TW}" height="${TH}" rx="3" fill="#0d1628" stroke="#263554" stroke-width="1"/>
+    <text id="tip-a-${svgId}" x="7" y="13" font-size="9" fill="#6b7a99" font-family="'Segoe UI',monospace"></text>
+    <text id="tip-b-${svgId}" x="7" y="27" font-size="12" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
+  </g>
+  <rect id="ovl-${svgId}" x="${PL}" y="${PT}" width="${cW}" height="${cH}" fill="transparent" style="cursor:crosshair"/>`;
+  // Hover interactivity
+  const ovl=document.getElementById('ovl-'+svgId);
+  const tip=document.getElementById('tip-'+svgId);
+  const tipBg=document.getElementById('tip-bg-'+svgId);
+  const tipA=document.getElementById('tip-a-'+svgId);
+  const tipB=document.getElementById('tip-b-'+svgId);
+  if(!ovl)return;
+  const showTip=(d,mx,my)=>{
+    tipA.textContent=d.label;
+    tipB.textContent=d.tir;
+    let tx=mx+10,ty=my-TH-6;
+    if(tx+TW>W-PR)tx=mx-TW-10;
+    if(ty<PT)ty=my+8;
+    tipBg.setAttribute('x',tx);tipBg.setAttribute('y',ty);
+    tipA.setAttribute('x',tx+7);tipA.setAttribute('y',ty+13);
+    tipB.setAttribute('x',tx+7);tipB.setAttribute('y',ty+27);
+    tip.setAttribute('display','');
+  };
+  ovl.addEventListener('mousemove',e=>{
+    const r=svg.getBoundingClientRect();
+    const mx=(e.clientX-r.left)*(W/r.width), my=(e.clientY-r.top)*(H/r.height);
+    let near=null,best=Infinity;
+    dotData.forEach(d=>{const dist=Math.hypot(d.cx-mx,d.cy-my);if(dist<best){best=dist;near=d;}});
+    if(near&&best<30)showTip(near,mx,my);
+    else tip.setAttribute('display','none');
+  });
+  ovl.addEventListener('mouseleave',()=>tip.setAttribute('display','none'));
 }
 
 function renderCol(){
