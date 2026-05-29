@@ -949,8 +949,8 @@ function parseEstCSV(text){
     if(parts.length<2) continue;
     let dateStr=parts[0].trim();
     let valStr=parts[1].trim().replace('%','').replace(',','.');
-    const m=dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if(m) dateStr=`${m[3]}-${m[2]}-${m[1]}`;
+    const m=dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m) dateStr=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
     try{ result[dateStr]=parseFloat(valStr)/100; }catch(e){}
   }
   return result;
