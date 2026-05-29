@@ -374,50 +374,48 @@ try{const cached=JSON.parse(localStorage.getItem('rf_ticker_cache')||'null');if(
 if(!$('tickerTrack').innerHTML) setTicker(FALLBACK);
 $('tickerStatus').textContent=$('tickerStatus').textContent||'ref.';
 
-// Crypto va por CoinGecko (sin proxy, CORS ok). Resto por Yahoo vía proxy race.
-const YAHOO=[
-  {sym:'USDCOP=X',n:'USD/COP',dec:0},{sym:'EURUSD=X',n:'EUR/USD',dec:4},
+// ── FUENTES DIRECTAS (sin proxy) + Yahoo como best-effort ─────────
+const _YSYMS=[
   {sym:'CL=F',n:'WTI',dec:2,suf:' USD'},{sym:'BZ=F',n:'Brent',dec:2,suf:' USD'},
-  {sym:'GC=F',n:'Oro',dec:0,suf:' USD'},{sym:'SI=F',n:'Plata',dec:2,suf:' USD'},
-  {sym:'^GSPC',n:'S&P 500',dec:0},{sym:'^DJI',n:'DOW',dec:0},
+  {sym:'GC=F',n:'Oro',dec:0,suf:' USD'},{sym:'^GSPC',n:'S&P 500',dec:0},
   {sym:'^IXIC',n:'Nasdaq',dec:0},{sym:'^VIX',n:'VIX',dec:2},
-  {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
+  {sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
 ];
-const _YPROXIES=[
-  u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-  u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-];
-function _abrt(ms){const c=new AbortController();setTimeout(()=>c.abort(),ms);return c.signal;}
-async function _yahooFetch(){
-  const syms=YAHOO.map(s=>s.sym).join(',');
-  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-  const d=await Promise.any(_YPROXIES.map(async p=>{
-    const r=await fetch(p(url),{signal:_abrt(6000)});
-    if(!r.ok) throw 0;
-    const j=await r.json();
-    if(!j?.quoteResponse?.result?.length) throw 0;
-    return j;
-  }));
-  return d.quoteResponse.result;
+function _sig(ms){const c=new AbortController();setTimeout(()=>c.abort(),ms);return c.signal;}
+
+async function _fetchRates(){
+  // open.er-api.com: CORS directo, sin proxy, devuelve USD/COP y EUR
+  const d=await fetch('https://open.er-api.com/v6/latest/USD',{signal:_sig(4000)}).then(r=>r.json());
+  const cop=d.rates?.COP, eur=d.rates?.EUR;
+  const items=[];
+  if(cop) items.push({n:'USD/COP',v:Math.round(cop).toLocaleString('es-CO'),up:true,c:''});
+  if(eur) items.push({n:'EUR/USD',v:(1/eur).toFixed(4),up:true,c:''});
+  return items;
 }
-async function _cryptoFetch(){
-  const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true',{signal:_abrt(5000)});
-  const d=await r.json();
-  const fmt=(v,c)=>({v:Math.round(v).toLocaleString('es-CO')+' USD',up:c>=0,c:(c>=0?'+':'')+c.toFixed(2)+'%'});
-  return[{n:'BTC',...fmt(d.bitcoin.usd,d.bitcoin.usd_24h_change)},{n:'ETH',...fmt(d.ethereum.usd,d.ethereum.usd_24h_change)}];
+async function _fetchCrypto(){
+  const d=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true',{signal:_sig(5000)}).then(r=>r.json());
+  const f=(v,c)=>({v:Math.round(v).toLocaleString('es-CO')+' USD',up:c>=0,c:(c>=0?'+':'')+c.toFixed(2)+'%'});
+  return[{n:'BTC',...f(d.bitcoin.usd,d.bitcoin.usd_24h_change)},{n:'ETH',...f(d.ethereum.usd,d.ethereum.usd_24h_change)}];
+}
+async function _fetchYahoo(){
+  const syms=_YSYMS.map(s=>s.sym).join(',');
+  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+  const d=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,{signal:_sig(8000)}).then(r=>r.json());
+  return(d?.quoteResponse?.result||[]).map(q=>{
+    const cfg=_YSYMS.find(s=>s.sym===q.symbol);
+    if(!cfg||q.regularMarketPrice==null) return null;
+    const up=(q.regularMarketChange??0)>=0;
+    return{n:cfg.n,v:q.regularMarketPrice.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+((q.regularMarketChangePercent??0).toFixed(2))+'%'};
+  }).filter(Boolean);
 }
 async function loadTicker(){
-  const [yRes,cRes]=await Promise.allSettled([_yahooFetch(),_cryptoFetch()]);
-  const items=[];
-  if(yRes.status==='fulfilled') yRes.value.forEach(q=>{
-    const cfg=YAHOO.find(s=>s.sym===q.symbol);
-    if(!cfg||q.regularMarketPrice==null) return;
-    const up=(q.regularMarketChange??0)>=0;
-    items.push({n:cfg.n,v:q.regularMarketPrice.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+((q.regularMarketChangePercent??0).toFixed(2))+'%'});
-  });
-  if(cRes.status==='fulfilled') items.push(...cRes.value);
-  if(items.length>=4){
+  const [rRes,cRes,yRes]=await Promise.allSettled([_fetchRates(),_fetchCrypto(),_fetchYahoo()]);
+  const items=[
+    ...(rRes.status==='fulfilled'?rRes.value:[]),
+    ...(cRes.status==='fulfilled'?cRes.value:[]),
+    ...(yRes.status==='fulfilled'?yRes.value:[]),
+  ];
+  if(items.length>=2){
     setTicker(items);
     try{localStorage.setItem('rf_ticker_cache',JSON.stringify(items));}catch(e){}
     $('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
