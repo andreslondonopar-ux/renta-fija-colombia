@@ -382,48 +382,36 @@ const YAHOO=[
   {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
 ];
 
-async function fetchOne(sym){
-  // Intentar query1 y query2 de Yahoo, ambas vía allorigins
-  const bases=[
-    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
-  ];
-  for(const url of bases){
+async function loadTicker(){
+  // Un solo request batch al endpoint v7/quote que incluye regularMarketChangePercent
+  const syms=YAHOO.map(s=>s.sym).join(',');
+  const fields='regularMarketPrice,regularMarketChange,regularMarketChangePercent';
+  for(const base of['query1','query2']){
     try{
+      const url=`https://${base}.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=${fields}`;
       const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
       if(!r.ok) continue;
       const d=await r.json();
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(!meta?.regularMarketPrice) continue;
-      const price=meta.regularMarketPrice;
-      // Usar regularMarketPreviousClose si está disponible (más preciso que previousClose)
-      const prev=meta.regularMarketPreviousClose||meta.previousClose||price;
-      const chg=price-prev;
-      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
-    }catch{ continue; }
+      const results=d?.quoteResponse?.result||[];
+      if(!results.length) continue;
+      const items=[];
+      results.forEach(q=>{
+        const cfg=YAHOO.find(s=>s.sym===q.symbol);
+        if(!cfg||q.regularMarketPrice==null) return;
+        const price=q.regularMarketPrice;
+        const chgPct=q.regularMarketChangePercent??0;
+        const up=(q.regularMarketChange??0)>=0;
+        const vStr=price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||'');
+        items.push({n:cfg.n,v:vStr,up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
+      });
+      if(items.length>=5){
+        setTicker(items);
+        $('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
+        $('tickerStatus').style.color='var(--green3)';
+      }
+      return;
+    }catch{continue;}
   }
-  return null;
-}
-
-async function loadTicker(){
-  const results=await Promise.allSettled(YAHOO.map(s=>fetchOne(s.sym)));
-  const items=[];
-  results.forEach((r,i)=>{
-    const cfg=YAHOO[i];
-    if(r.status==='fulfilled'&&r.value){
-      const{price,chg,chgPct}=r.value;
-      const up=chg>=0;
-      const vStr=price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||'');
-      const cStr=(up?'+':'')+chgPct.toFixed(2)+'%';
-      items.push({n:cfg.n,v:vStr,up,c:cStr});
-    }
-  });
-  if(items.length>=5){
-    setTicker(items);
-    $('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
-    $('tickerStatus').style.color='var(--green3)';
-  }
-  // Si ninguno funciona: fallback ya está mostrándose, no hacer nada
 }
 loadTicker();
 setInterval(loadTicker,60000);

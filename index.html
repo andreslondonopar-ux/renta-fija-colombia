@@ -407,35 +407,29 @@ function _setTicker(items){
   el.style.animation='none';
   requestAnimationFrame(()=>{el.style.animation='';});
 }
-async function _fetchYahoo(sym){
+async function _loadMarketTicker(){
+  const syms=_MKT_SYMS.map(s=>s.sym).join(',');
+  const fields='regularMarketPrice,regularMarketChange,regularMarketChangePercent';
   for(const base of['query1','query2']){
     try{
-      const url=`https://${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
+      const url=`https://${base}.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=${fields}`;
       const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
       if(!r.ok) continue;
       const d=await r.json();
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(!meta?.regularMarketPrice) continue;
-      const price=meta.regularMarketPrice;
-      const prev=meta.regularMarketPreviousClose||meta.previousClose||price;
-      const chg=price-prev;
-      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
+      const results=d?.quoteResponse?.result||[];
+      if(!results.length) continue;
+      const items=[];
+      results.forEach(q=>{
+        const cfg=_MKT_SYMS.find(s=>s.sym===q.symbol);
+        if(!cfg||q.regularMarketPrice==null) return;
+        const price=q.regularMarketPrice;
+        const chgPct=q.regularMarketChangePercent??0;
+        const up=(q.regularMarketChange??0)>=0;
+        items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
+      });
+      if(items.length>=4){_setTicker(items);return;}
     }catch{continue;}
   }
-  return null;
-}
-async function _loadMarketTicker(){
-  const res=await Promise.allSettled(_MKT_SYMS.map(s=>_fetchYahoo(s.sym)));
-  const items=[];
-  res.forEach((r,i)=>{
-    const cfg=_MKT_SYMS[i];
-    if(r.status==='fulfilled'&&r.value){
-      const{price,chg,chgPct}=r.value;
-      const up=chg>=0;
-      items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
-    }
-  });
-  if(items.length>=4) _setTicker(items);
 }
 _setTicker(_MKT_FB); // fallback inmediato
 _loadMarketTicker();
