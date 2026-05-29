@@ -192,7 +192,6 @@ svg{display:block;width:100%}
               <div class="curve-sub" id="us-date">Cargando...</div>
             </div>
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
-            <button class="btn-sm" onclick="loadUSTreasury()">&#x21BB;</button>
           </div>
           <svg id="svg-us" viewBox="0 0 700 160" style="width:100%;height:150px;flex-shrink:0"></svg>
           <div style="overflow-y:auto;flex:1">
@@ -457,21 +456,42 @@ function drawCurve(svgId,pts,color,H=160,showZero=false){
   }
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
+  // Label placement: track used y-bands to avoid overlap
+  const placed=[]; // [{cx,cy,tx,ty,tw}] placed labels
+  const FONT=8.5, CHW=5.2; // approx char width at font-size 8.5
   let dots='',xlbls='',lastX=-99,lastLX=-99;
-  const minGap=36;
+  const minGap=30;
   pts.forEach((p,i)=>{
     const cx=px(p.x),cy=py(p.y);
     const isFirst=i===0,isLast=i===pts.length-1;
-    if(isFirst||isLast||cx-lastX>=minGap){
-      dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
-      const ty=i%2===0?cy-8:cy+16;
-      dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="9" fill="${color}" font-weight="700">${p.y.toFixed(2)}%</text>`;
-      if(cx-lastLX>=minGap||isLast){
-        const anchor=cx<PL+28?'start':cx>W-PR-28?'end':'middle';
-        xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${anchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
-        lastLX=cx;
+    if(!isFirst&&!isLast&&cx-lastX<minGap) return;
+    lastX=cx;
+    dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
+    // TIR label: position above or below based on chart position, clamp inside bounds
+    const lbl=p.y.toFixed(2)+'%';
+    const tw=lbl.length*CHW;
+    // Prefer above if point is in lower half, below if in upper half
+    const inUpperHalf=cy<PT+cH*0.5;
+    const MARGIN=11;
+    let ty=inUpperHalf?Math.min(cy+MARGIN,PT+cH-2):Math.max(cy-4,PT+MARGIN);
+    // Check collision with already-placed labels (simple y-band check)
+    let anchor=cx<PL+tw/2+2?'start':cx>W-PR-tw/2-2?'end':'middle';
+    const txStart=anchor==='start'?cx:anchor==='end'?cx-tw:cx-tw/2;
+    // Shift vertically if overlapping placed label
+    for(const prev of placed){
+      if(Math.abs(txStart-(prev.tx||prev.cx))<tw+4&&Math.abs(ty-prev.ty)<10){
+        ty=inUpperHalf?ty+10:ty-10;
+        ty=Math.max(PT+MARGIN,Math.min(PT+cH-2,ty));
+        break;
       }
-      lastX=cx;
+    }
+    placed.push({cx,cy,ty,tx:txStart});
+    dots+=`<text x="${cx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${anchor}" font-size="${FONT}" fill="${color}" font-weight="700">${lbl}</text>`;
+    // X-axis label (bond name)
+    if(cx-lastLX>=minGap||isLast){
+      const xanchor=cx<PL+28?'start':cx>W-PR-28?'end':'middle';
+      xlbls+=`<text x="${cx.toFixed(1)}" y="${(H-4).toFixed(1)}" text-anchor="${xanchor}" font-size="8.5" fill="#4a5568">${p.label||''}</text>`;
+      lastLX=cx;
     }
   });
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
@@ -484,7 +504,6 @@ function drawCurve(svgId,pts,color,H=160,showZero=false){
   ${dots}${xlbls}`;
 }
 
-// ── COLOMBIA
 function renderCol(){
   const tbody=document.getElementById('col-tbody');
   tbody.innerHTML=COL_DATA.map(r=>{
