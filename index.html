@@ -427,11 +427,12 @@ async function _loadMarketTicker(){
         const up=(q.regularMarketChange??0)>=0;
         items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
       });
-      if(items.length>=4){_setTicker(items);return;}
+      if(items.length>=4){_setTicker(items);try{localStorage.setItem('rf_ticker_cache',JSON.stringify(items));}catch(e){}return;}
     }catch{continue;}
   }
 }
-_setTicker(_MKT_FB); // fallback inmediato
+// Fallback: localStorage cache (reciente) > hardcodeado (antiguo)
+try{const c=JSON.parse(localStorage.getItem('rf_ticker_cache')||'null');if(c?.length>=4)_setTicker(c);else _setTicker(_MKT_FB);}catch(e){_setTicker(_MKT_FB);}
 _loadMarketTicker();
 setInterval(_loadMarketTicker,60000);
 function buildTickerFromCOL(){} // ticker ya no usa datos COL

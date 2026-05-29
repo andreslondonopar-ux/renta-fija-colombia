@@ -369,8 +369,10 @@ function setTicker(items){
   requestAnimationFrame(()=>{ el.style.animation=''; });
 }
 
-setTicker(FALLBACK);
-$('tickerStatus').textContent='ref.';
+// Usar cache localStorage si existe (más reciente que el fallback hardcodeado)
+try{const cached=JSON.parse(localStorage.getItem('rf_ticker_cache')||'null');if(cached?.length>=5){setTicker(cached);$('tickerStatus').textContent='cache';}}catch(e){}
+if(!$('tickerTrack').innerHTML) setTicker(FALLBACK);
+$('tickerStatus').textContent=$('tickerStatus').textContent||'ref.';
 
 const YAHOO=[
   {sym:'USDCOP=X',n:'USD/COP',dec:0},{sym:'EURUSD=X',n:'EUR/USD',dec:4},
@@ -406,6 +408,7 @@ async function loadTicker(){
       });
       if(items.length>=5){
         setTicker(items);
+        try{localStorage.setItem('rf_ticker_cache',JSON.stringify(items));}catch(e){}
         $('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
         $('tickerStatus').style.color='var(--green3)';
       }
