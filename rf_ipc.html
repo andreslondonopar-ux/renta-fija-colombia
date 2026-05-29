@@ -251,12 +251,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <!-- Curva inflación (modos curva) -->
       <div id="ipc-curve-section" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
         <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Curva de inflación estimada</div>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 8px;background:rgba(59,130,246,.1);border:1px dashed var(--blue);border-radius:var(--r)">
-          <span style="font-size:11px;color:var(--blue3)">📂 Cargar CSV (fecha;IPC%)</span>
-          <input type="file" id="ipc-curve-file" accept=".csv" style="display:none" onchange="loadIPCCurve(this)">
-        </label>
-        <div style="margin-top:6px;font-size:10px;color:var(--txt3)" id="ipc-curve-status">Sin curva cargada</div>
-        <div style="font-size:9px;color:var(--txt3);margin-top:3px">Formato: DD/MM/AAAA;13,12%</div>
+        <div style="font-size:10px;color:var(--txt3)" id="ipc-curve-status">Cargando desde Estimados...</div>
       </div>
 
             <div class="hr"></div>
@@ -1347,5 +1342,27 @@ async function loadIPCData(){
   }catch(e){}
 }
 loadIPCData();
+
+function autoLoadIPCFromLS(){
+  const stat=$('ipc-curve-status');
+  try{
+    const raw=localStorage.getItem('rf_ipc_est_v1');
+    if(!raw){
+      if(stat) stat.innerHTML='⚠ Sin curva IPC · <a href="index.html" style="color:var(--blue3);text-decoration:none">carga en Inicio → Estimados</a>';
+      return;
+    }
+    const data=JSON.parse(raw);
+    const n=Object.keys(data).length;
+    if(!n){if(stat)stat.innerHTML='⚠ Sin datos · <a href="index.html" style="color:var(--blue3);text-decoration:none">Estimados</a>';return;}
+    IPC_CURVE_DATA=data;
+    ipcCurveLoaded=true;
+    const dates=Object.keys(data).sort();
+    if(stat){
+      stat.innerHTML=`✓ ${n} registros (${dates[0]} → ${dates[dates.length-1]}) · <a href="index.html" style="color:var(--blue3);font-size:9px;text-decoration:none">actualizar</a>`;
+      stat.style.color='var(--green3)';
+    }
+  }catch(e){if(stat)stat.textContent='Error cargando estimados';}
+}
+autoLoadIPCFromLS();
 </script>
 </html>

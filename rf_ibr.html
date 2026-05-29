@@ -237,12 +237,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <div id="fra-section">
         <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
           <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Curva FRA</div>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 8px;background:rgba(34,197,94,.1);border:1px dashed var(--green);border-radius:var(--r)">
-            <span style="font-size:11px;color:var(--green3)">📂 Cargar CSV (fecha,tasa)</span>
-            <input type="file" id="fra-file" accept=".csv,.xlsx" style="display:none" onchange="loadFRA(this)">
-          </label>
-          <div style="margin-top:6px;font-size:10px;color:var(--txt3)" id="fra-status">Sin curva cargada</div>
-          <div style="font-size:9px;color:var(--txt3);margin-top:4px">Formato: columna fecha | columna tasa (decimal o %)</div>
+          <div style="font-size:10px;color:var(--txt3)" id="fra-status">Cargando desde Estimados...</div>
         </div>
       </div>
 
@@ -1287,3 +1282,28 @@ async function loadIBRData(){
 loadIBRData();
 </script>
 </html>
+
+<script>
+function autoLoadFRAFromLS(){
+  const stat=$('fra-status');
+  try{
+    const raw=localStorage.getItem('rf_fra_est_v1');
+    if(!raw){
+      if(stat) stat.innerHTML='⚠ Sin FRA · <a href="index.html" style="color:var(--green3);text-decoration:none">carga en Inicio → Estimados</a>';
+      return;
+    }
+    const data=JSON.parse(raw);
+    const n=Object.keys(data).length;
+    if(!n){if(stat)stat.innerHTML='⚠ Sin datos · <a href="index.html" style="color:var(--green3);text-decoration:none">Estimados</a>';return;}
+    FRA_DATA=data;
+    fraLoaded=true;
+    const dates=Object.keys(data).sort();
+    if(stat){
+      stat.innerHTML='✓ '+n+' registros ('+dates[0]+' → '+dates[dates.length-1]+') · <a href="index.html" style="color:var(--green3);font-size:9px;text-decoration:none">actualizar</a>';
+      stat.style.color='var(--green3)';
+    }
+    renderIBRTable();
+  }catch(e){if(stat)stat.textContent='Error cargando estimados';}
+}
+autoLoadFRAFromLS();
+</script>

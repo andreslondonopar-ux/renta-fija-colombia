@@ -245,13 +245,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <!-- IPC mensual proyectado -->
       <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
         <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">IPC mensual estimado (UVR futura)</div>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 8px;background:rgba(245,158,11,.1);border:1px dashed var(--amber);border-radius:var(--r)">
-          <span style="font-size:11px;color:var(--amber3)">📂 Cargar estimación IPC mensual</span>
-          <input type="file" id="uvr-ipc-file" accept=".csv" style="display:none" onchange="loadIPCMensual(this)">
-        </label>
-        <div style="margin-top:6px;font-size:10px;color:var(--txt3)" id="uvr-ipc-status">Sin curva cargada — solo UVR histórica disponible</div>
-        <div style="font-size:9px;color:var(--txt3);margin-top:3px">Formato: DD/MM/AAAA;0,52% (fecha pub · IPC mensual estimado)</div>
-        <div style="font-size:9px;color:var(--txt3);margin-top:2px">Proyecta UVRs desde el último histórico. Encadena automáticamente.</div>
+        <div style="font-size:10px;color:var(--txt3)" id="uvr-ipc-status">Cargando desde Estimados...</div>
       </div>
 
             <div class="hr"></div>
@@ -1241,6 +1235,7 @@ async function loadUVRData(){
     if(Object.keys(d.data).length>Object.keys(UVR_DATA).length){
       UVR_DATA=d.data;
       renderUVRTable();
+      if(ipcMensualLoaded){ buildHistoricalIPC(); buildProjectedUVR(); renderUVRTable(); }
     }
   }catch(e){}
 }
@@ -1291,5 +1286,28 @@ async function loadIPCContext(){
   }catch(e){if(el)el.innerHTML='<div style="font-size:10px;color:var(--txt3)">Sin datos</div>';}
 }
 loadIPCContext();
+
+function autoLoadIPCMensualFromLS(){
+  const stat=$('uvr-ipc-status');
+  try{
+    const raw=localStorage.getItem('rf_ipc_est_v1');
+    if(!raw){
+      if(stat) stat.innerHTML='⚠ Sin IPC mensual · <a href="index.html" style="color:var(--amber3);text-decoration:none">carga en Inicio → Estimados</a>';
+      return;
+    }
+    const data=JSON.parse(raw);
+    const n=Object.keys(data).length;
+    if(!n){if(stat)stat.innerHTML='⚠ Sin datos · <a href="index.html" style="color:var(--amber3);text-decoration:none">Estimados</a>';return;}
+    IPC_MENSUAL_DATA=data;
+    ipcMensualLoaded=true;
+    const dates=Object.keys(data).sort();
+    if(stat){
+      stat.innerHTML=`✓ ${n} registros (${dates[0]} → ${dates[dates.length-1]}) · <a href="index.html" style="color:var(--amber3);font-size:9px;text-decoration:none">actualizar</a>`;
+      stat.style.color='var(--amber3)';
+    }
+    if(Object.keys(UVR_DATA).length){ buildHistoricalIPC(); buildProjectedUVR(); renderUVRTable(); }
+  }catch(e){if(stat)stat.textContent='Error cargando estimados';}
+}
+autoLoadIPCMensualFromLS();
 </script>
 </html>
