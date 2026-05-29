@@ -491,6 +491,12 @@ function buildFlows(antISO,liqISO,vencISO,freq,base,tipo,cpRaw,ytm){
   return flows;
 }
 
+function _irrBisect(cfs,days){
+  const npv=r=>cfs.reduce((s,c,i)=>s+c/Math.pow(1+r,days[i]/365),0);
+  let lo=-0.99,hi=20;if(npv(lo)*npv(hi)>0)return null;
+  for(let i=0;i<300;i++){const mid=(lo+hi)/2;if(hi-lo<1e-10)break;npv(mid)>0?(lo=mid):(hi=mid);}
+  return(lo+hi)/2;
+}
 function calcBond(antISO,liqISO,vencISO,freq,base,tipo,cpRaw,ytm,nom){
   const flows=buildFlows(antISO,liqISO,vencISO,freq,base,tipo,cpRaw,ytm);
   if(!flows.length)return null;
@@ -714,6 +720,26 @@ function calcular(showTIR){
       <tr class="total"><td colspan="5">TOTAL</td><td></td><td>${fmt(flows.reduce((s,f)=>s+f.cf,0),4)}</td><td>${fmt(price,4)}</td><td style="color:var(--amber3)">${fmtP(flows.reduce((s,f)=>s+f.cf/100*nom,0))}</td><td>${fmtP(vGiro)}</td><td>${fmt(dmN,4)}</td><td>100%</td></tr>
     </tbody></table></div></div>
   </div>`;
+
+  // TIR DE TENENCIA — IRR para cada período de salida asumiendo mismo rendimiento
+  {
+    const _lD=new Date(liq+'T12:00:00'),_vD=new Date(venc+'T12:00:00');
+    const _rows=[];
+    [3,6,9,12,18].forEach(mos=>{
+      const ex=addMonths(liq,mos);const exD=new Date(ex+'T12:00:00');
+      if(exD>=_vD)return;
+      const cfs=[-price],days=[0];let antEx=ant;
+      for(const f of flows){
+        const fD=new Date(f.fecha+'T12:00:00');
+        if(fD<exD){cfs.push(f.cf);days.push(Math.round((fD-_lD)/86400000));antEx=f.fecha;}
+        else break;
+      }
+      const er=calcBond(antEx,ex,venc,freq,base,tipo,cpRaw,ytm,nom);if(!er)return;
+      cfs.push(er.price);days.push(Math.round((exD-_lD)/86400000));
+      const irr=_irrBisect(cfs,days);if(irr!==null)_rows.push([mos,irr*100]);
+    });
+    if(_rows.length)$('main').insertAdjacentHTML('beforeend',`<div class="card"><div class="c-hdr">// TIR de Tenencia <span style="font-size:9px;font-weight:400;color:var(--txt3)">mismo rendimiento de salida</span></div><div class="c-body"><table class="ft" style="max-width:280px"><thead><tr><th style="text-align:left">Plazo</th><th>TIR Estimada</th></tr></thead><tbody>${_rows.map(([m,t])=>`<tr><td>${m} Meses</td><td style="font-weight:700;color:var(--amber3)">${t.toFixed(2)}%</td></tr>`).join('')}</tbody></table></div></div>`);
+  }
 
   // Curva precio-rendimiento
   const yArr=[],pArr=[],lArr=[];
