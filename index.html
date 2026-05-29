@@ -31,6 +31,9 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .ticker-item{display:inline-flex;align-items:center;gap:5px;padding:0 16px;border-right:1px solid var(--border2);font-size:11px;height:34px}
 .tn{color:var(--txt3);font-size:9px;font-weight:700}
 .tv{font-weight:700}
+.tick-dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
+.tick-dot.up{background:#22c55e}.tick-dot.dn{background:#ef4444}
+.tick-chg{font-size:9px;font-weight:600}.tick-chg.up{color:#22c55e}.tick-chg.dn{color:#ef4444}
 @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .page{display:flex;gap:0;min-height:calc(100vh - 54px - 34px)}
 .left{width:270px;flex-shrink:0;border-right:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
@@ -377,44 +380,67 @@ function buildTicker(items){
   requestAnimationFrame(()=>{inner.style.animation='';});
 }
 
-// Ticker de mercado: Yahoo Finance + datos macro Colombia
-const _TICKER_SYMS=[
-  {sym:'USDCOP=X',  name:'USD/COP', color:'var(--blue3)',  fmt:v=>v.toFixed(0)},
-  {sym:'CL=F',      name:'WTI',     color:'#f59e0b',       fmt:v=>'US$'+v.toFixed(2)},
-  {sym:'GC=F',      name:'Oro',     color:'var(--amber3)', fmt:v=>'US$'+v.toFixed(0)},
-  {sym:'^GSPC',     name:'S&P500',  color:'var(--green3)', fmt:v=>v.toFixed(0)},
-  {sym:'^IXIC',     name:'NASDAQ',  color:'#a78bfa',       fmt:v=>v.toFixed(0)},
-  {sym:'BTC-USD',   name:'BTC',     color:'#fb923c',       fmt:v=>'US$'+Math.round(v).toLocaleString('en')},
-  {sym:'EURGBP=X',  name:'EUR/GBP', color:'var(--txt2)',   fmt:v=>v.toFixed(4)},
+// ── TICKER MERCADO — idéntico al de las calculadoras ──────────────
+const _MKT_FB=[
+  {n:'USD/COP',v:'4.218',up:true,c:'+12'},{n:'EUR/USD',v:'1.0832',up:false,c:'-0.2%'},
+  {n:'WTI',v:'67.42',up:false,c:'-0.8%'},{n:'Brent',v:'71.18',up:false,c:'-0.7%'},
+  {n:'Oro',v:'3.285',up:true,c:'+0.3%'},{n:'S&P 500',v:'5.631',up:true,c:'+0.2%'},
+  {n:'Nasdaq',v:'17.842',up:true,c:'+0.4%'},{n:'VIX',v:'18.4',up:false,c:'-1.1%'},
+  {n:'BTC',v:'96.420',up:true,c:'+1.4%'},{n:'DXY',v:'104.2',up:true,c:'+0.1%'},
+  {n:'UST 10Y',v:'4.21%',up:true,c:'+2bp'},
 ];
-let _tickerBuilt=false;
-async function buildTickerMarket(){
-  const macroItems=[
-    {n:'IBR ON',   v:'10.91%',color:'var(--txt)'},
-    {n:'IPC abr',  v:'5.68%', color:'var(--blue3)'},
-    {n:'BanRep',   v:'11.25%',color:'var(--amber3)'},
-  ];
-  // Fetch Yahoo Finance batch quote
-  const items=[...macroItems];
-  try{
-    const syms=_TICKER_SYMS.map(s=>s.sym).join(',');
-    const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketPrice,shortName`;
-    const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    const r=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
-    if(r.ok){
-      const d=await r.json();
-      const results=d?.quoteResponse?.result||[];
-      results.forEach(q=>{
-        const cfg=_TICKER_SYMS.find(s=>s.sym===q.symbol);
-        if(cfg&&q.regularMarketPrice!=null)
-          items.push({n:cfg.name,v:cfg.fmt(q.regularMarketPrice),color:cfg.color});
-      });
-    }
-  }catch(e){}
-  buildTicker(items);
-  _tickerBuilt=true;
+const _MKT_SYMS=[
+  {sym:'USDCOP=X',n:'USD/COP',dec:0},{sym:'EURUSD=X',n:'EUR/USD',dec:4},
+  {sym:'CL=F',n:'WTI',dec:2,suf:' USD'},{sym:'BZ=F',n:'Brent',dec:2,suf:' USD'},
+  {sym:'GC=F',n:'Oro',dec:0,suf:' USD'},
+  {sym:'^GSPC',n:'S&P 500',dec:0},{sym:'^DJI',n:'DOW',dec:0},
+  {sym:'^IXIC',n:'Nasdaq',dec:0},{sym:'^VIX',n:'VIX',dec:2},
+  {sym:'BTC-USD',n:'BTC',dec:0,suf:' USD'},{sym:'DX-Y.NYB',n:'DXY',dec:2},
+  {sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
+];
+function _setTicker(items){
+  const el=document.getElementById('ticker-inner');
+  if(!el||!items.length) return;
+  let arr=[...items];
+  while(arr.length<16) arr=[...arr,...items];
+  el.innerHTML=arr.map(i=>`<div class="ticker-item"><span class="tick-dot ${i.up?'up':'dn'}"></span><span class="tn">${i.n}</span><span class="tv"> ${i.v}</span><span class="tick-chg ${i.up?'up':'dn'}"> ${i.c}</span></div>`).join('');
+  el.style.animation='none';
+  requestAnimationFrame(()=>{el.style.animation='';});
 }
-function buildTickerFromCOL(){ if(!_tickerBuilt) buildTickerMarket(); }
+async function _fetchYahoo(sym){
+  for(const base of['query1','query2']){
+    try{
+      const url=`https://${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
+      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+      if(!r.ok) continue;
+      const d=await r.json();
+      const meta=d?.chart?.result?.[0]?.meta;
+      if(!meta?.regularMarketPrice) continue;
+      const price=meta.regularMarketPrice;
+      const prev=meta.regularMarketPreviousClose||meta.previousClose||price;
+      const chg=price-prev;
+      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
+    }catch{continue;}
+  }
+  return null;
+}
+async function _loadMarketTicker(){
+  const res=await Promise.allSettled(_MKT_SYMS.map(s=>_fetchYahoo(s.sym)));
+  const items=[];
+  res.forEach((r,i)=>{
+    const cfg=_MKT_SYMS[i];
+    if(r.status==='fulfilled'&&r.value){
+      const{price,chg,chgPct}=r.value;
+      const up=chg>=0;
+      items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
+    }
+  });
+  if(items.length>=4) _setTicker(items);
+}
+_setTicker(_MKT_FB); // fallback inmediato
+_loadMarketTicker();
+setInterval(_loadMarketTicker,60000);
+function buildTickerFromCOL(){} // ticker ya no usa datos COL
 
 // ── MACRO — carga desde FRED (Fed Funds) y fallback estático para Colombia
 async function loadMacro(){
