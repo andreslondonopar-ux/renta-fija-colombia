@@ -1050,7 +1050,8 @@ function parseEstFRA(text){
   const result=[];
   for(const line of lines){
     if(!line.trim()||line.startsWith('#')) continue;
-    const parts=line.split(/[;,\t]/);
+    const delim=line.includes(';')?';':line.includes('\t')?'\t':',';
+    const parts=line.split(delim);
     if(parts.length<3) continue;
     let d1=parts[0].trim(), d2=parts[1].trim();
     let valStr=parts[2].trim().replace('%','').replace(',','.');
