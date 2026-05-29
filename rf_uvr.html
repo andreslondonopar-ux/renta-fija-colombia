@@ -1290,7 +1290,7 @@ loadIPCContext();
 function autoLoadIPCMensualFromLS(){
   const stat=$('uvr-ipc-status');
   try{
-    const raw=localStorage.getItem('rf_ipc_est_v1');
+    const raw=localStorage.getItem('rf_ipcm_est_v1')||localStorage.getItem('rf_ipc_est_v1');
     if(!raw){
       if(stat) stat.innerHTML='⚠ Sin IPC mensual · <a href="index.html" style="color:var(--amber3);text-decoration:none">carga en Inicio → Estimados</a>';
       return;
