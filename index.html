@@ -174,7 +174,7 @@ svg{display:block;width:100%}
           <div style="overflow-y:auto;flex:1">
             <table class="yt">
               <thead><tr>
-                <th style="text-align:left">Plazo</th>
+                <th style="text-align:left">T&iacute;tulo</th>
                 <th>Vencimiento</th>
                 <th>TIR</th>
               </tr></thead>
@@ -539,9 +539,8 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
 
 function renderCol(){
   const tbody=document.getElementById('col-tbody');
-  const fmtP=y=>y<1?Math.round(y*12)+'M':(y<10?y.toFixed(1).replace('.0',''):Math.round(y))+'A';
   tbody.innerHTML=COL_DATA.map(r=>`<tr>
-    <td style="text-align:left;font-weight:700;color:var(--txt)">${fmtP(r.plazo)}</td>
+    <td style="text-align:left;font-weight:700;color:var(--txt)">${r.name}</td>
     <td style="color:var(--txt2)">${r.venc||'—'}</td>
     <td style="font-weight:700;color:var(--amber3)">${r.tir.toFixed(2)}%</td>
   </tr>`).join('');
