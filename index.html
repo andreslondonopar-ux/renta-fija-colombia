@@ -945,7 +945,47 @@ function drawDataSparkline(svgId, vals, color, suffix, dates){
   const pts=vals.map((v,i)=>({x:px(i),y:py(v)}));
   const pathD=pts.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
   const area=`${pathD} L${px(vals.length-1).toFixed(1)},${(PT+cH).toFixed(1)} L${PL},${(PT+cH).toFixed(1)} Z`;
-  svg.innerHTML=`<defs><linearGradient id="g-${svgId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".25"/><stop offset="1" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs>${grid}${xAxis}<path d="${area}" fill="url(#g-${svgId})"/><path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none"/>`;
+  const TW=92, TH=36;
+  svg.innerHTML=`<defs><linearGradient id="g-${svgId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".25"/><stop offset="1" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs>
+    ${grid}${xAxis}
+    <path d="${area}" fill="url(#g-${svgId})"/>
+    <path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none"/>
+    <line id="cur-${svgId}" x1="0" y1="${PT}" x2="0" y2="${PT+cH}" stroke="#4a5568" stroke-width="1" stroke-dasharray="3,2" display="none" pointer-events="none"/>
+    <circle id="dot-${svgId}" cx="0" cy="0" r="3" fill="${color}" stroke="#0f1629" stroke-width="1.5" display="none" pointer-events="none"/>
+    <g id="tip-${svgId}" display="none" pointer-events="none">
+      <rect x="0" y="0" width="${TW}" height="${TH}" fill="#0a0e1a" stroke="#263554" rx="3" stroke-width="1"/>
+      <text id="tip-d-${svgId}" x="7" y="13" font-size="9" fill="#4a5568" font-family="'Segoe UI',sans-serif"></text>
+      <text id="tip-v-${svgId}" x="7" y="28" font-size="12" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
+    </g>
+    <rect id="ovl-${svgId}" x="${PL}" y="${PT}" width="${cW}" height="${cH}" fill="transparent" style="cursor:crosshair"/>`;
+  // Interactividad
+  const ovl=document.getElementById('ovl-'+svgId);
+  const cur=document.getElementById('cur-'+svgId);
+  const dot=document.getElementById('dot-'+svgId);
+  const tip=document.getElementById('tip-'+svgId);
+  const tipD=document.getElementById('tip-d-'+svgId);
+  const tipV=document.getElementById('tip-v-'+svgId);
+  if(!ovl) return;
+  ovl.addEventListener('mousemove',e=>{
+    const r=svg.getBoundingClientRect();
+    const sx=(e.clientX-r.left)*(W/r.width);
+    const idx=Math.max(0,Math.min(vals.length-1,Math.round((sx-PL)/cW*(vals.length-1))));
+    const v=vals[idx], xp=px(idx), yp=py(v);
+    cur.setAttribute('x1',xp); cur.setAttribute('x2',xp); cur.removeAttribute('display');
+    dot.setAttribute('cx',xp); dot.setAttribute('cy',yp.toFixed(1)); dot.removeAttribute('display');
+    const d=dates?dates[idx]:null;
+    tipD.textContent=d?(d.length>7?d.slice(0,10).split('-').reverse().join('/'):MN[parseInt(d.split('-')[1])-1]+' '+d.split('-')[0]):'';
+    tipV.textContent=v.toFixed(suffix?2:4)+(suffix||'');
+    let tx=xp+10; if(tx+TW>W-PR) tx=xp-TW-10;
+    let ty=PT+4;
+    tip.setAttribute('transform',`translate(${tx.toFixed(1)},${ty})`);
+    tip.removeAttribute('display');
+  });
+  ovl.addEventListener('mouseleave',()=>{
+    cur.setAttribute('display','none');
+    dot.setAttribute('display','none');
+    tip.setAttribute('display','none');
+  });
 }
 
 // ── ESTIMADOS — SISTEMA DE PRESETS ──────────────────────────────────
