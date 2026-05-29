@@ -246,6 +246,22 @@ def main():
         except Exception as e:
             print(f"macro_data.json error: {e}")
 
+    # Cargar historial del archivo anterior (máx 5 snapshots = 5 días hábiles)
+    ust_history = []
+    try:
+        if ust_path.exists():
+            old_ust = json.loads(ust_path.read_text())
+            if old_ust.get('rates') and old_ust.get('date'):
+                snap = {
+                    'date': old_ust['date'],
+                    'rates': [{'plazo': r['plazo'], 'years': r['years'], 'tir': r['tir']}
+                              for r in old_ust['rates']]
+                }
+                ust_history = [snap] + old_ust.get('history', [])
+    except Exception as e:
+        print(f"Aviso historial UST: {e}")
+    result['history'] = ust_history[:5]
+
     Path("ust_data.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n✓ ust_data.json: {len(result['rates'])} plazos · {result['date']} · {result['source']}")
     for r in result["rates"]:

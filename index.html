@@ -361,6 +361,7 @@ let COL_DATA=[
   {name:'TES 2050',venc:'26/10/2050',cupon:7.25,tir:13.09,plazo:24.54},
 ];
 let US_DATA=[];
+let PREV_COL_PTS=null,PREV_COL_DATE='',PREV_US_PTS=null,PREV_US_DATE='';
 
 // ── TICKER — robusto, siempre con fallback
 function buildTicker(items){
@@ -434,7 +435,7 @@ async function loadMacro(){
 }
 
 // ── SVG CURVE
-function drawCurve(svgId,pts,color,H=190,showZero=false){
+function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''){
   const svg=document.getElementById(svgId);if(!svg||!pts.length)return;
   const W=Math.max(svg.clientWidth||0,svg.parentElement?.clientWidth||0,500);
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
@@ -442,6 +443,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false){
   const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
   const minX=Math.min(...xs),maxX=Math.max(...xs);
   let minY=Math.min(...ys),maxY=Math.max(...ys);
+  if(prevPts){prevPts.forEach(p=>{minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);});}
   if(showZero){minY=Math.min(minY,0);maxY=Math.max(maxY,0);}
   const rng=maxY-minY||0.5;
   minY-=rng*0.08; maxY+=rng*0.12;
@@ -456,19 +458,39 @@ function drawCurve(svgId,pts,color,H=190,showZero=false){
   }
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
-  // Dots (all points)
+  // Curva fantasma (5 días hábiles atrás)
+  let ghost='';
+  if(prevPts&&prevPts.length>1){
+    const ps=[...prevPts].sort((a,b)=>a.x-b.x);
+    const gPath=ps.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
+    ghost=`<path d="${gPath}" fill="none" stroke="${color}" stroke-width="1.5" stroke-dasharray="5,3" stroke-opacity="0.35"/>`;
+    ps.forEach(p=>{ghost+=`<circle cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="2.5" fill="${color}" fill-opacity="0.3" stroke="none"/>`;});
+    if(prevDate){
+      const lp=ps[ps.length-1];
+      const gx=Math.min(px(lp.x)+4,W-PR-34),gy=py(lp.y)-5;
+      ghost+=`<text x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" font-size="7.5" fill="${color}" fill-opacity="0.5">${prevDate}</text>`;
+    }
+  }
+  // Dots (todos los puntos)
   let dots='',xlbls='';
   const dotData=pts.map(p=>({cx:px(p.x),cy:py(p.y),label:p.label||'',tir:p.y.toFixed(2)+'%'}));
   dotData.forEach(d=>{
     dots+=`<circle cx="${d.cx.toFixed(1)}" cy="${d.cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1.5"/>`;
   });
-  // X-axis: ALL bonds, staggered 2 rows
+  // Eje X: 2 filas inteligentes — elige la fila con espacio, no fila fija por índice
+  const rowLX=[-99,-99],XGAP=22;
   pts.forEach((p,i)=>{
     const cx=px(p.x);
-    const yrow=i%2===0?H-6:H-19;
-    const xanchor=cx<PL+14?'start':cx>W-PR-14?'end':'middle';
+    const pref=i%2,alt=1-pref;
+    let row=-1;
+    if(cx-rowLX[pref]>=XGAP)row=pref;
+    else if(cx-rowLX[alt]>=XGAP)row=alt;
+    if(row===-1)return;
+    rowLX[row]=cx;
+    const yrow=row===0?H-6:H-19;
+    const xa=cx<PL+14?'start':cx>W-PR-14?'end':'middle';
     xlbls+=`<line x1="${cx.toFixed(1)}" y1="${(PT+cH).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3a55" stroke-width="1"/>`;
-    xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xanchor}" font-size="8" fill="#4a5568">${p.label||''}</text>`;
+    xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xa}" font-size="8" fill="#4a5568">${p.label||''}</text>`;
   });
   const TW=82,TH=34;
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
@@ -477,6 +499,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false){
   </linearGradient></defs>
   ${grid}
   <path d="${areaD}" fill="url(#g${svgId})"/>
+  ${ghost}
   <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>
   ${dots}${xlbls}
   <g id="tip-${svgId}" display="none" pointer-events="none">
@@ -524,7 +547,7 @@ function renderCol(){
       <td style="color:var(--txt3)">${r.plazo.toFixed(2)}</td>
     </tr>`;
   }).join('');
-  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.plazo<1?Math.round(r.plazo*12)+'M':(r.plazo<10?r.plazo.toFixed(1).replace('.0',''):Math.round(r.plazo))+'A'})),'#f59e0b');
+  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.plazo<1?Math.round(r.plazo*12)+'M':(r.plazo<10?r.plazo.toFixed(1).replace('.0',''):Math.round(r.plazo))+'A'})),'#f59e0b',190,false,PREV_COL_PTS,PREV_COL_DATE);
   buildTickerFromCOL();
   }
 
@@ -535,12 +558,22 @@ async function loadColJSON(){
     const data=await resp.json();
     if(data.tes&&data.tes.length>3){
       COL_DATA=data.tes.map(t=>({
+        codigo:t.codigo,
         name:t.name,
         venc:t.vencimiento?t.vencimiento.split('-').reverse().join('/'):'—',
         cupon:t.cupon||0,
         tir:t.tir,
         plazo:t.plazo
       }));
+      const hist=data.history||[];
+      if(hist.length){
+        const snap=hist[Math.min(4,hist.length-1)];
+        PREV_COL_DATE=snap.fecha;
+        PREV_COL_PTS=snap.tirs.map(h=>{
+          const cur=COL_DATA.find(r=>r.codigo===h.codigo);
+          return cur?{x:cur.plazo,y:h.tir}:null;
+        }).filter(Boolean);
+      }
       document.getElementById('col-status').textContent='✓ '+data.fecha;
       document.getElementById('col-status').className='curve-status status-ok';
       document.getElementById('col-sub').textContent=`BanRep SEN · ${data.fecha} · ${data.tes.length} títulos`;
@@ -583,6 +616,12 @@ async function loadUSTreasury(){
         if(ust?.rates?.length>=5){
           US_DATA=ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
           if(US_DATA.length>=5){
+            const uh=(dj.rates?dj:dj.ust)?.history||[];
+            if(uh.length){
+              const usnap=uh[Math.min(4,uh.length-1)];
+              PREV_US_DATE=usnap.date;
+              PREV_US_PTS=usnap.rates.map(r=>({x:r.years,y:r.tir})).filter(r=>r.tir>0);
+            }
             document.getElementById('us-status').textContent=`✓ ${ust.date} · GitHub Actions`;
             document.getElementById('us-status').className='curve-status status-ok';
             document.getElementById('us-date').textContent=`US Treasury · ${ust.date} · ${ust.source||'GitHub Actions'}`;
@@ -643,7 +682,7 @@ function renderUS(){
       <td style="font-weight:700;color:var(--blue3)">${r.tir.toFixed(2)}%</td>
     </tr>`;
   }).join('');
-  drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6');
+  drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6',190,false,PREV_US_PTS,PREV_US_DATE);
 }
 
 function interpolateCol(years){

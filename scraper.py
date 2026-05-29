@@ -175,10 +175,28 @@ def main():
         print("No se encontraron datos TES TF")
         return
 
+    # Cargar historial del archivo anterior (máx 5 snapshots = 5 días hábiles)
+    history = []
+    try:
+        import os
+        if os.path.exists('datos_curva.json'):
+            with open('datos_curva.json', encoding='utf-8') as f_old:
+                old = json.load(f_old)
+            if old.get('tes') and old.get('fecha'):
+                snap = {
+                    'fecha': old['fecha'],
+                    'tirs': [{'codigo': b['codigo'], 'tir': b['tir'], 'plazo': b['plazo']}
+                             for b in old['tes']]
+                }
+                history = [snap] + old.get('history', [])
+    except Exception as e:
+        print(f"Aviso historial: {e}")
+
     result = {
         'fecha': datetime.now().strftime('%Y-%m-%d'),
         'fuente': 'BanRep SEN',
         'tes': tes_data,
+        'history': history[:5],
     }
     with open('datos_curva.json', 'w') as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
