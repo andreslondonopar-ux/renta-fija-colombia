@@ -2,27 +2,27 @@
   "colombia": {
     "interest_rate": {
       "value": 11.25,
-      "source": "Trading Economics · 2026-05-28"
+      "source": "Trading Economics · 2026-05-29"
     },
     "inflation": {
       "value": 5.68,
-      "source": "Trading Economics · 2026-05-28"
+      "source": "Trading Economics · 2026-05-29"
     },
     "inflation_mom": {
       "value": 0.78,
-      "source": "Trading Economics · 2026-05-28"
+      "source": "Trading Economics · 2026-05-29"
     },
     "gdp_annual": {
       "value": 2.2,
-      "source": "Trading Economics · 2026-05-28"
+      "source": "Trading Economics · 2026-05-29"
     },
     "unemployment": {
       "value": 8.8,
-      "source": "Trading Economics · 2026-05-28"
+      "source": "Trading Economics · 2026-05-29"
     },
     "trade_balance": {
       "value": -0.84,
-      "source": "Trading Economics · 2026-05-28"
+      "source": "Trading Economics · 2026-05-29"
     }
   },
   "ust": {
@@ -97,8 +97,8 @@
     "source": "US Treasury XML",
     "updated": "2026-05-28T23:16:43Z"
   },
-  "fecha": "2026-05-28",
-  "updated": "2026-05-28T23:08:06Z",
+  "fecha": "2026-05-29",
+  "updated": "2026-05-29T17:32:06Z",
   "sources": [
     "TradingEconomics (6 indicadores)"
   ]
