@@ -830,21 +830,18 @@ function calcular(showTIR=false){
       const ex=addMonths(liq,mos);const exD=new Date(ex+'T12:00:00');
       if(exD>=_vD)return;
       const cfs=[-price],days=[0];let antEx=ant;
-      const holdIpcs=[];
       for(const f of flows){
         const fD=new Date(f.fecha+'T12:00:00');
-        if(fD<=exD){cfs.push(f.cf);days.push(Math.round((fD-_lD)/86400000));antEx=f.fecha;holdIpcs.push(f.ipcVal);}
+        if(fD<=exD){cfs.push(f.cf);days.push(Math.round((fD-_lD)/86400000));antEx=f.fecha;}
         else break;
       }
       const er=calcBondIPC(antEx,ex,venc,mp,sc,st,nom,mode,base);if(!er||isNaN(er.price))return;
       cfs.push(er.price);days.push(Math.round((exD-_lD)/86400000));
       const irr=_irrBisect(cfs,days);if(irr===null)return;
       const tirNom=irr*100;
-      const ipcRef=holdIpcs.length>0?Math.pow(holdIpcs.reduce((p,v)=>p*(1+v),1),1/holdIpcs.length)-1:(flows.length>0?flows[0].ipcVal:0);
-      const tirReal=((1+tirNom/100)/(1+ipcRef)-1)*100;
-      _rows.push([mos,tirNom,tirReal]);
+      _rows.push([mos,tirNom]);
     });
-    if(_rows.length)tirTenHtml=`<div class="card" style="flex:0 0 260px"><div class="c-hdr">// TIR de Tenencia IPC <span style="font-size:9px;font-weight:400;color:var(--txt3)">mismo spread de salida</span></div><div class="c-body"><table class="ft"><thead><tr><th style="text-align:left">Plazo</th><th>Estimada</th><th>Real</th></tr></thead><tbody>${_rows.map(([m,tirNom,tirReal])=>`<tr><td>${m}m</td><td style="font-weight:700;color:var(--amber3)">${tirNom.toFixed(2)}%</td><td style="font-weight:700;color:var(--green3)">${tirReal.toFixed(2)}%</td></tr>`).join('')}</tbody></table></div></div>`;
+    if(_rows.length)tirTenHtml=`<div class="card" style="flex:1"><div class="c-hdr">// TIR de Tenencia IPC <span style="font-size:9px;font-weight:400;color:var(--txt3)">mismo spread de salida</span></div><div class="c-body"><table class="ft" style="width:100%"><thead><tr><th style="text-align:left">Plazo</th><th>TIR Estimada</th></tr></thead><tbody>${_rows.map(([m,tirNom])=>`<tr><td>${m}m</td><td style="font-weight:700;color:var(--amber3)">${tirNom.toFixed(2)}%</td></tr>`).join('')}</tbody></table></div></div>`;
   }
 
   // TIR real
