@@ -1180,6 +1180,12 @@ function calcularInverso(){
 // ── INIT ──────────────────────────────────────────────────────────────
 $('liq').value='2025-01-30';
 $('venc').value='2029-02-27';
+(function(){
+  const NS='rfc_ipc',IDS=['liq','venc','freq','base','sc','st','ipc-mode','nom_val','nom_display','f_venta','st_venta'];
+  try{const s=JSON.parse(localStorage.getItem(NS)||'{}');IDS.forEach(id=>{const el=$(id);if(el&&s[id]!==undefined)el.value=s[id];});autoCA();}catch(e){}
+  const save=()=>{try{const d={};IDS.forEach(id=>{const el=$(id);if(el)d[id]=el.value;});localStorage.setItem(NS,JSON.stringify(d));}catch(e){}};
+  IDS.forEach(id=>{const el=$(id);if(el){el.addEventListener('change',save);el.addEventListener('input',save);}});
+})();
 onModeChange();
 updateClock();
 setInterval(updateClock,1000);
