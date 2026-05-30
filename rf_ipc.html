@@ -502,7 +502,7 @@ let IPC_TABLE=[
   {y:2025,m:1,v:0.0522},{y:2025,m:2,v:0.0528},{y:2025,m:3,v:0.0509},{y:2025,m:4,v:0.0516},
   {y:2025,m:5,v:0.0505},{y:2025,m:6,v:0.0482},{y:2025,m:7,v:0.0490},{y:2025,m:8,v:0.0510},
   {y:2025,m:9,v:0.0518},{y:2025,m:10,v:0.0551},{y:2025,m:11,v:0.0530},{y:2025,m:12,v:0.0510},
-  {y:2026,m:1,v:0.0535},{y:2026,m:2,v:0.0529},{y:2026,m:3,v:0.0556},{y:2026,m:4,v:0.0568},
+  {y:2026,m:1,v:0.0535},{y:2026,m:2,v:0.0529},{y:2026,m:3,v:0.0556},{y:2026,m:4,v:0.0570},
 ];
 
 let IPC_PUB_DATES = {
@@ -821,9 +821,9 @@ function calcular(showTIR=false){
     return{bp,yS:stS,pS:prnS,plS:r.pl,dmS:r.dmod,dv01S,gan:(prnS-priceRnd)/100*nom*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1)};
   }).filter(Boolean);
 
-  // TIR DE TENENCIA IPC — escenario base: estimada (nominal) + real
+  // TIR DE TENENCIA IPC — solo modos curva
   let tirTenHtml='';
-  {
+  if(isCurva){
     const _lD=new Date(liq+'T12:00:00'),_vD=new Date(venc+'T12:00:00');
     const _rows=[];
     [3,6,9,12,18].forEach(mos=>{
