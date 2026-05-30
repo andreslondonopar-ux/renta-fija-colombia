@@ -916,25 +916,31 @@ function calcular(showTIR){
     return{bp,yS,pS,plS:r.pl,dmS:r.dmod,dv01S,gan};
   }).filter(Boolean);
 
-  // TIR DE TENENCIA UVR — pre-compute before innerHTML
+  // TIR DE TENENCIA UVR — matriz: plazo × variación de tasa al salir
   let tirTenHtml='';
   {
     const _lD=new Date(liq+'T12:00:00'),_vD=new Date(venc+'T12:00:00');
-    const _rows=[];
+    const _bps=[-100,-50,0,50,100];
+    const _mats=[];
     [3,6,9,12,18].forEach(mos=>{
       const ex=addMonths(liq,mos);const exD=new Date(ex+'T12:00:00');
       if(exD>=_vD)return;
-      const cfs=[-price],days=[0];let antEx=ant;
+      const baseCfs=[-price],baseDays=[0];let antEx=ant;
       for(const f of flows){
         const fD=new Date(f.fecha+'T12:00:00');
-        if(fD<exD){cfs.push(f.cf);days.push(Math.round((fD-_lD)/86400000));antEx=f.fecha;}
+        if(fD<exD){baseCfs.push(f.cf);baseDays.push(Math.round((fD-_lD)/86400000));antEx=f.fecha;}
         else break;
       }
-      const er=calcBond(antEx,ex,venc,freq,base,tipo,cpRaw,ytm,nom);if(!er)return;
-      cfs.push(er.price);days.push(Math.round((exD-_lD)/86400000));
-      const irr=_irrBisect(cfs,days);if(irr!==null)_rows.push([mos,irr*100]);
+      const exitD=Math.round((exD-_lD)/86400000);
+      const irrs=_bps.map(bp=>{
+        const yEx=ytm+bp/10000;if(yEx<=0)return null;
+        const er=calcBond(antEx,ex,venc,freq,base,tipo,cpRaw,yEx,nom);if(!er)return null;
+        const irr=_irrBisect([...baseCfs,er.price],[...baseDays,exitD]);
+        return irr!==null?irr*100:null;
+      });
+      if(irrs.some(v=>v!==null))_mats.push([mos,irrs]);
     });
-    if(_rows.length)tirTenHtml=`<div class="card" style="align-self:flex-start;min-width:280px"><div class="c-hdr">// TIR de Tenencia UVR <span style="font-size:9px;font-weight:400;color:var(--txt3)">mismo rendimiento de salida</span></div><div class="c-body"><table class="ft" style="max-width:280px"><thead><tr><th style="text-align:left">Plazo</th><th>TIR Estimada</th></tr></thead><tbody>${_rows.map(([m,t])=>`<tr><td>${m} Meses</td><td style="font-weight:700;color:var(--green3)">${t.toFixed(2)}%</td></tr>`).join('')}</tbody></table></div></div>`;
+    if(_mats.length)tirTenHtml=`<div class="card" style="flex:1;min-width:0"><div class="c-hdr">// TIR de Tenencia UVR <span style="font-size:9px;font-weight:400;color:var(--txt3)">retorno (EA) por plazo y Δtasa al salir</span></div><div class="c-body"><div class="tscroll"><table class="st"><thead><tr><th>Plazo</th>${_bps.map(bp=>`<th style="font-size:10px">${bp===0?'0bp':bp>0?'+'+bp+'bp':bp+'bp'}</th>`).join('')}</tr></thead><tbody>${_mats.map(([m,irrs])=>`<tr><td>${m}m</td>${irrs.map((v,i)=>{if(v===null)return'<td>—</td>';const cur=_bps[i]===0;const clr=cur?'color:var(--amber3)':v>ytm*100?'color:var(--green3)':'color:var(--red3)';return`<td style="${clr};font-weight:${cur?700:400}">${v.toFixed(2)}%</td>`;}).join('')}</tr>`).join('')}</tbody></table></div></div></div>`;
   }
 
   // TIR real
@@ -1028,7 +1034,7 @@ function calcular(showTIR){
     <div class="c-hdr">Curva precio-rendimiento</div>
     <div class="c-body"><div class="chart-wrap"><canvas id="ch1"></canvas></div></div>
   </div>
-  <div style="display:flex;gap:14px;align-items:flex-start">
+  <div style="display:flex;gap:14px;align-items:stretch">
     ${tirTenHtml}
     <div class="card" style="flex:1;min-width:0">
       <div class="c-hdr">Análisis de escenarios</div>
