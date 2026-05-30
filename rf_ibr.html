@@ -761,7 +761,7 @@ function calcular(showTIR=false){
       const baseCfs=[-price],baseDays=[0];let antEx=ant;
       for(const f of flows){
         const fD=new Date(f.fecha+'T12:00:00');
-        if(fD<exD){baseCfs.push(f.cf);baseDays.push(Math.round((fD-_lD)/86400000));antEx=f.fecha;}
+        if(fD<=exD){baseCfs.push(f.cf);baseDays.push(Math.round((fD-_lD)/86400000));antEx=f.fecha;}
         else break;
       }
       const exitD=Math.round((exD-_lD)/86400000);
