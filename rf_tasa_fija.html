@@ -1101,16 +1101,7 @@ function calcPF(){
       </tbody>
     </table></div></div>
   </div>
-  <div class="card">
-    <div class="c-hdr">Escenarios del portafolio</div>
-    <div class="c-body"><div class="tscroll"><table class="st"><thead><tr><th>Escenario</th><th>Δ Valor</th><th>Nuevo VM</th><th>Retorno</th></tr></thead><tbody>
-      ${[-200,-150,-100,-75,-50,-25,0,25,50,75,100,150,200].map(bp=>{
-        const gan=rows.reduce((s,r)=>{const pS=r.res.price+(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*r.res.price;return s+(pS-r.res.price)/100*r.nom;},0);
-        const cls=bp===0?'cur':bp<0?'dn':'up';const gc=bp===0?'':gan>=0?'color:var(--green3)':'color:var(--red3)';
-        return`<tr class="${cls}"><td>${bp===0?'★ Actual':bp>0?'+'+bp+'bp':bp+'bp'}</td><td style="${gc}">${bp===0?'—':(gan>=0?'+':'')+fmtM(gan)}</td><td>${fmtM(totalVM+gan)}</td><td style="${gc}">${bp===0?'—':(gan/totalVM*100>=0?'+':'')+fmt(gan/totalVM*100,3)+'%'}</td></tr>`;
-      }).join('')}
-    </tbody></table></div></div>
-  </div>`;
+  `;
   window._pfRows=rows;window._pfTotalVM=totalVM;updatePFScen();
 
   // ── ESTRATEGIA ESPECULATIVA ────────────────────────────────
