@@ -353,6 +353,69 @@ function fmtDate(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m
 function fmtNom(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('nom_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 function fmtCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 function fmtPFCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('pf_caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
+
+function fmtEspecNom(el,id){
+  const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;
+  el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'0';
+  const d=window._especData;if(!d)return;
+  const r=d.rows.find(r=>r.id===id);if(!r)return;
+  r.nomActual=n;
+  recalcEspec();
+}
+
+function recalcEspec(){
+  const d=window._especData;if(!d)return;
+  const{rows,cajaPFV,bpDestacado,BPS,modoRelativo}=d;
+
+  function dv01DeNom(r,nom){return r.res.dmod*(r.res.priceRnd/100)*nom/10000*r.sign;}
+  function ganDeNom(r,nom,bp){return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*(r.res.priceRnd/100)*nom*r.sign;}
+
+  // Actualizar DVO1 y % por bono
+  rows.forEach(r=>{
+    const nom=r.nomActual;
+    const dv01=dv01DeNom(r,nom);
+    const pct=cajaPFV>0?(r.res.priceRnd/100)*nom/cajaPFV*100:0;
+    const dEl=$('espec-dv01-'+r.id);
+    if(dEl){dEl.textContent=(dv01>=0?'+':'')+fmtM(dv01);dEl.style.color=dv01>=0?'var(--green3)':'var(--red3)';}
+    const pEl=$('espec-pct-'+r.id);
+    if(pEl)pEl.textContent=fmt(pct,1)+'%';
+  });
+
+  // DVO1 neto
+  const netDV01=rows.reduce((s,r)=>s+dv01DeNom(r,r.nomActual),0);
+  const ndEl=$('espec-net-dv01');
+  if(ndEl){ndEl.textContent=(netDV01>=0?'+':'')+fmtM(netDV01);ndEl.style.color=netDV01>=0?'var(--green3)':'var(--red3)';}
+
+  // Escenarios
+  BPS.forEach((bp,i)=>{
+    rows.forEach(r=>{
+      const g=ganDeNom(r,r.nomActual,bp);
+      const el=$(`espec-g-${r.id}-${i}`);
+      if(el){el.textContent=(g>=0?'+':'')+fmtM(g);el.style.color=g>=0?'var(--green3)':'var(--red3)';}
+    });
+    const neto=rows.reduce((s,r)=>s+ganDeNom(r,r.nomActual,bp),0);
+    const el=$('espec-net-'+i);
+    if(el){el.textContent=(neto>=0?'+':'')+fmtM(neto);el.style.color=neto>=0?'var(--green3)':'var(--red3)';}
+  });
+
+  // DVO1 neutro
+  if(modoRelativo){
+    const L=rows.find(r=>r.dir==='long'),S=rows.find(r=>r.dir==='short');
+    if(L&&S){
+      const nomL=L.nomActual,dv01L=dv01DeNom(L,nomL);
+      const nomSN=Math.abs(dv01L)*10000/(S.res.dmod*(S.res.priceRnd/100));
+      const ratio=nomL/nomSN;
+      const wrap=$('espec-neutro-wrap');
+      if(wrap)wrap.innerHTML=`<div class="info-box" style="margin-top:10px">
+        <strong style="color:var(--amber3)">Referencia DVO1-neutro:</strong><br>
+        ▲ Largo <strong>${fmtDate(L.vencISO)}</strong>: nominal ${fmtM(nomL)} · DVO1 +${fmtM(Math.abs(dv01L))}<br>
+        ▼ Corto <strong>${fmtDate(S.vencISO)}</strong>: nominal necesario <strong style="color:var(--amber3)">${fmtM(nomSN)}</strong> · DVO1 −${fmtM(Math.abs(dv01L))}<br>
+        Ratio largo/corto: <strong style="color:var(--blue3)">${fmt(ratio,3)}x</strong>
+        &nbsp;·&nbsp; Con este sizing la ganancia neta ante paralelo ≈ $0.
+      </div>`;
+    }
+  }
+}
 // Init display
 document.addEventListener('DOMContentLoaded',()=>{const el=$('pf_caja_display');if(el)el.value=(10000000000).toLocaleString('es-CO',{maximumFractionDigits:0});});
 
@@ -1054,55 +1117,62 @@ function calcPF(){
   const cajaPFV=parseFloat($('pf_caja_val')?.value)||0;
   const bpDestacado=parseFloat($('pf_bp_espec')?.value)||-50;
   if(cajaPFV>0 && rows.length>0){
-    // Cada bono usa la caja completa independientemente
+    const BPS=[-200,-150,-100,-75,-50,-25,0,25,50,75,100,150,200];
     const especRows=rows.map(r=>{
       const dir=getBondDir(r.id);
       const sign=dir==='long'?1:-1;
       const nomC=cajaPFV/(r.res.priceRnd/100);
-      const dv01C=r.res.dmod*cajaPFV/10000;
-      return{...r,dir,sign,nomC,dv01Signed:dv01C*sign};
+      return{...r,dir,sign,nomC,nomActual:nomC};
     });
-
     const longs=especRows.filter(r=>r.dir==='long');
     const shorts=especRows.filter(r=>r.dir==='short');
     const modoRelativo=longs.length===1&&shorts.length===1;
 
-    const netDV01=especRows.reduce((s,r)=>s+r.dv01Signed,0);
+    // Guardar para recalcEspec
+    window._especData={rows:especRows,cajaPFV,bpDestacado,BPS,modoRelativo};
 
-    // Ganancia por bp: (−D*·Δr + ½·Conv·Δr²) × caja × signo
-    function ganPorBp(r,bp){
-      return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*cajaPFV*r.sign;
-    }
+    function dv01DeNom(r,nom){return r.res.dmod*(r.res.priceRnd/100)*nom/10000*r.sign;}
+    function ganDeNom(r,nom,bp){return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*(r.res.priceRnd/100)*nom*r.sign;}
+    function pctDeCaja(r,nom){return cajaPFV>0?(r.res.priceRnd/100)*nom/cajaPFV*100:0;}
 
-    let neutroHTML='';
-    if(modoRelativo){
+    function neutroInfo(){
+      if(!modoRelativo) return'';
       const L=longs[0],S=shorts[0];
-      const dv01L=L.res.dmod*cajaPFV/10000;
-      const nomCortoNeutro=dv01L*10000/(S.res.dmod*(S.res.priceRnd/100));
-      const ratio=(cajaPFV/(L.res.priceRnd/100))/nomCortoNeutro;
-      neutroHTML=`<div class="info-box" style="margin-top:10px">
-        <strong style="color:var(--amber3)">Referencia DVO1-neutro (para neutralizar riesgo paralelo):</strong><br>
-        ▲ Largo <strong>${fmtDate(L.vencISO)}</strong>: nominal ${fmtM(cajaPFV/(L.res.priceRnd/100))} · DVO1 +${fmtM(dv01L)}<br>
-        ▼ Corto <strong>${fmtDate(S.vencISO)}</strong>: nominal necesario <strong style="color:var(--amber3)">${fmtM(nomCortoNeutro)}</strong> · DVO1 −${fmtM(dv01L)}<br>
-        Ratio nominal largo/corto: <strong style="color:var(--blue3)">${fmt(ratio,3)}x</strong>
-        &nbsp;·&nbsp; La tabla de escenarios usa <strong>misma caja en cada pierna</strong>. Con este sizing el neto ante paralelo sería ≈$0.
+      const nomL=L.nomActual,dv01L=dv01DeNom(L,nomL);
+      const nomSN=Math.abs(dv01L)*10000/(S.res.dmod*(S.res.priceRnd/100));
+      const ratio=nomL/nomSN;
+      return`<div class="info-box" style="margin-top:10px" id="espec-neutro">
+        <strong style="color:var(--amber3)">Referencia DVO1-neutro:</strong><br>
+        ▲ Largo <strong>${fmtDate(L.vencISO)}</strong>: nominal ${fmtM(nomL)} · DVO1 +${fmtM(Math.abs(dv01L))}<br>
+        ▼ Corto <strong>${fmtDate(S.vencISO)}</strong>: nominal necesario <strong style="color:var(--amber3)">${fmtM(nomSN)}</strong> · DVO1 −${fmtM(Math.abs(dv01L))}<br>
+        Ratio largo/corto: <strong style="color:var(--blue3)">${fmt(ratio,3)}x</strong>
+        &nbsp;·&nbsp; Con este sizing la ganancia neta ante paralelo ≈ $0.
       </div>`;
     }
 
-    // Tabla de escenarios
-    const BPS=[-200,-150,-100,-75,-50,-25,0,25,50,75,100,150,200];
-    const scenRows=BPS.map(bp=>{
-      const gans=especRows.map(r=>ganPorBp(r,bp));
-      const neto=gans.reduce((s,g)=>s+g,0);
-      const isDestacado=bp===bpDestacado;
-      return{bp,gans,neto,isDestacado};
-    });
+    function scenTableHTML(){
+      return BPS.map((bp,i)=>{
+        const cls=bp===bpDestacado?'cur':bp<0?'dn':'up';
+        const rowStyle=bp===bpDestacado?'outline:1px solid var(--amber);outline-offset:-1px':'';
+        const lbl=bp===0?'★ Actual':bp>0?'+'+bp+'bp':bp+'bp';
+        const cells=especRows.map(r=>{
+          const g=ganDeNom(r,r.nomActual,bp);
+          return`<td id="espec-g-${r.id}-${i}" style="${g>=0?'color:var(--green3)':'color:var(--red3)'}">${g>=0?'+':''}${fmtM(g)}</td>`;
+        }).join('');
+        const neto=especRows.reduce((s,r)=>s+ganDeNom(r,r.nomActual,bp),0);
+        return`<tr class="${cls}" style="${rowStyle}"><td>${lbl}</td>${cells}
+          <td id="espec-net-${i}" style="${neto>=0?'color:var(--green3)':'color:var(--red3)'};font-weight:700">${neto>=0?'+':''}${fmtM(neto)}</td></tr>`;
+      }).join('');
+    }
+
+    const netDV01=especRows.reduce((s,r)=>s+dv01DeNom(r,r.nomActual),0);
+    const nomInputStyle='width:130px;padding:3px 6px;border:1px solid var(--border2);border-radius:var(--r);font-size:11px;color:var(--txt);background:var(--bg2);font-family:monospace;text-align:right;margin-bottom:2px';
 
     const especCard=document.createElement('div');
     especCard.className='card';
     especCard.style.borderColor='var(--amber)';
     especCard.innerHTML=`
-      <div class="c-hdr" style="border-color:var(--amber)">⚡ Estrategia especulativa · Caja ${fmtM(cajaPFV)}</div>
+      <div class="c-hdr" style="border-color:var(--amber)">⚡ Estrategia especulativa · Caja ref. ${fmtM(cajaPFV)}</div>
       <div class="c-body">
         <div class="tscroll" style="margin-bottom:10px">
           <table class="pf-bond-table">
@@ -1110,54 +1180,46 @@ function calcPF(){
               <th style="text-align:left">Vencimiento</th>
               <th style="text-align:left">Dirección</th>
               <th>D. Mod.</th>
-              <th>Exposición nominal</th>
+              <th>Nominal <span style="color:var(--amber3);font-size:9px">(editable)</span></th>
+              <th>% caja</th>
               <th>DVO1 (firmado)</th>
             </tr></thead>
             <tbody>
               ${especRows.map(r=>{
-                const dcs=r.dv01Signed>=0?'color:var(--green3)':'color:var(--red3)';
+                const dv01=dv01DeNom(r,r.nomActual);
+                const pct=pctDeCaja(r,r.nomActual);
+                const dcs=dv01>=0?'color:var(--green3)':'color:var(--red3)';
                 const dirStyle=r.dir==='long'?'color:var(--green3);font-weight:700':'color:var(--red3);font-weight:700';
                 return`<tr>
                   <td style="text-align:left;color:var(--txt2)">${fmtDate(r.vencISO)}</td>
                   <td style="text-align:left;${dirStyle}">${r.dir==='long'?'▲ Largo':'▼ Corto'}</td>
                   <td>${fmt(r.res.dmod,4)}</td>
-                  <td>${fmtM(r.nomC)}</td>
-                  <td style="${dcs}">${r.dv01Signed>=0?'+':''}${fmtM(r.dv01Signed)}</td>
+                  <td><input type="text" id="espec-nom-${r.id}"
+                    value="${Math.round(r.nomActual).toLocaleString('es-CO',{maximumFractionDigits:0})}"
+                    oninput="fmtEspecNom(this,${r.id})"
+                    style="${nomInputStyle}"></td>
+                  <td id="espec-pct-${r.id}" style="font-size:11px;color:var(--txt3)">${fmt(pct,1)}%</td>
+                  <td id="espec-dv01-${r.id}" style="${dcs}">${dv01>=0?'+':''}${fmtM(dv01)}</td>
                 </tr>`;
               }).join('')}
-              <tr class="pf-total"><td colspan="4">DVO1 NETO</td>
-                <td style="${netDV01>=0?'color:var(--green3)':'color:var(--red3)'}">${netDV01>=0?'+':''}${fmtM(netDV01)}</td>
+              <tr class="pf-total"><td colspan="5">DVO1 NETO</td>
+                <td id="espec-net-dv01" style="${netDV01>=0?'color:var(--green3)':'color:var(--red3)'}">${netDV01>=0?'+':''}${fmtM(netDV01)}</td>
               </tr>
             </tbody>
           </table>
         </div>
         <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:700">// Escenarios de ganancia / pérdida</div>
         <div class="tscroll">
-          <table class="st">
+          <table class="st" id="espec-scen-table">
             <thead><tr>
               <th style="text-align:left">Escenario</th>
               ${especRows.map(r=>`<th>${fmtDate(r.vencISO)}<br><span style="font-size:9px;font-weight:400">${r.dir==='long'?'▲':'▼'}</span></th>`).join('')}
               <th>Neto</th>
             </tr></thead>
-            <tbody>
-              ${scenRows.map(({bp,gans,neto,isDestacado})=>{
-                const cls=isDestacado?'cur':bp<0?'dn':'up';
-                const rowStyle=isDestacado?'outline:1px solid var(--amber);outline-offset:-1px':'';
-                const lbl=bp===0?'★ Actual':bp>0?'+'+bp+'bp':bp+'bp';
-                const cells=gans.map(g=>{
-                  const gc=g>=0?'color:var(--green3)':'color:var(--red3)';
-                  return`<td style="${gc}">${g>=0?'+':''}${fmtM(g)}</td>`;
-                }).join('');
-                const nc=neto>=0?'color:var(--green3)':'color:var(--red3)';
-                return`<tr class="${cls}" style="${rowStyle}">
-                  <td>${lbl}</td>${cells}
-                  <td style="${nc};font-weight:700">${neto>=0?'+':''}${fmtM(neto)}</td>
-                </tr>`;
-              }).join('')}
-            </tbody>
+            <tbody id="espec-scen-body">${scenTableHTML()}</tbody>
           </table>
         </div>
-        ${neutroHTML}
+        <div id="espec-neutro-wrap">${neutroInfo()}</div>
       </div>`;
     $('pfResults').appendChild(especCard);
   }
