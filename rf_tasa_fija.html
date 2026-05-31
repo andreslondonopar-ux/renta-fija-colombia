@@ -574,6 +574,8 @@ function recalcEspec(){
       </div>`;
     }
   }
+  // Mantener simulador sincronizado con nomActual actualizado
+  onSimSlider();
 }
 // Init display
 document.addEventListener('DOMContentLoaded',()=>{const el=$('pf_caja_display');if(el)el.value=(10000000000).toLocaleString('es-CO',{maximumFractionDigits:0});});
