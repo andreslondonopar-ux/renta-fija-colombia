@@ -1485,7 +1485,7 @@ function guardarEnPortafolio(){
     pl:r.pl||0,ic:r.ic||0,vGiro:r.vGiro||0,
     dmac:r.dmac||0,dmod:r.dmod||0,conv:r.conv||0,
     dv01:Math.abs(r.dv01||0)*sign,
-    tirAvg:0,cupsRem:flows.length,nextCupon:nxt.fecha||'',
+    tirAvg:parseFloat($('ytm')?.value)/100||0,cupsRem:flows.length,nextCupon:nxt.fecha||'',
   };
   try{
     const list=JSON.parse(localStorage.getItem('rf_portfolio')||'[]');
