@@ -281,8 +281,81 @@ function isShortBond(b){
 }
 
 // ── AGGREGATE VIEW ────────────────────────────────────────────
+function aggCalc(bonds){
+  const tot=bonds.reduce((s,b)=>s+Math.abs(b.vGiro),0)||1;
+  const totVGiro=bonds.reduce((s,b)=>s+(b.dir==='short'?-1:1)*b.vGiro,0);
+  const totDV01net=bonds.reduce((s,b)=>s+signedDV01(b),0);
+  const totDV01gross=bonds.reduce((s,b)=>s+Math.abs(b.dv01),0);
+  const nLong=bonds.filter(b=>b.dir!=='short').length;
+  const nShort=bonds.filter(b=>b.dir==='short').length;
+  const wAvg=fn=>bonds.reduce((s,b)=>s+fn(b)*(Math.abs(b.vGiro)/tot),0);
+  return{tot,totVGiro,totDV01net,totDV01gross,nLong,nShort,
+    wDmod:wAvg(b=>b.dmod),wDmac:wAvg(b=>b.dmac),wConv:wAvg(b=>b.conv),
+    wPrice:wAvg(b=>b.priceRnd),wIC:wAvg(b=>b.ic),wPL:wAvg(b=>b.pl),wCpPct:wAvg(b=>b.cpPct)};
+}
+
+function buildAggSummaryHTML(m,n){
+  return`<div class="mg mg6" style="margin-bottom:10px">
+    <div class="m" style="border-color:var(--purple)"><div class="m-lbl">Valor total (abs)</div><div class="m-val" style="color:var(--purple3);font-size:14px">${fmtM(m.tot)}</div><div class="m-unit">${n} posición${n!==1?'es':''}</div></div>
+    <div class="m"><div class="m-lbl">Valor giro neto</div><div class="m-val" style="font-size:14px;color:${m.totVGiro>=0?'var(--green3)':'var(--red3)'}">${fmtM(m.totVGiro)}</div><div class="m-unit">largo − corto</div></div>
+    <div class="m"><div class="m-lbl">DV01 neto</div><div class="m-val" style="font-size:14px;color:${m.totDV01net>=0?'var(--green3)':'var(--red3)'}">${(m.totDV01net>=0?'+':'')+fmtP(m.totDV01net)}</div><div class="m-unit">${m.totDV01net>0?'neto largo':m.totDV01net<0?'neto corto':'neutro'}</div></div>
+    <div class="m"><div class="m-lbl">DV01 bruto</div><div class="m-val" style="font-size:14px">${fmtP(m.totDV01gross)}</div><div class="m-unit">exposición total</div></div>
+    <div class="m"><div class="m-lbl">Posiciones</div><div class="m-val" style="font-size:14px"><span style="color:var(--green3)">${m.nLong}L</span> / <span style="color:var(--red3)">${m.nShort}C</span></div><div class="m-unit">largo / corto</div></div>
+  </div>
+  <div class="mg mg4">
+    <div class="m"><div class="m-lbl">D. Macaulay pond.</div><div class="m-val">${fmt(m.wDmac,4)}</div><div class="m-unit">años</div></div>
+    <div class="m"><div class="m-lbl">D. Modificada pond.</div><div class="m-val">${fmt(m.wDmod,4)}</div><div class="m-unit">pond. por valor</div></div>
+    <div class="m"><div class="m-lbl">Convexidad pond.</div><div class="m-val">${fmt(m.wConv,4)}</div><div class="m-unit">—</div></div>
+    <div class="m"><div class="m-lbl">Precio sucio pond.</div><div class="m-val">${pct(m.wPrice,4)}</div><div class="m-unit">% del par</div></div>
+  </div>`;
+}
+
+function recalcAggregate(){
+  const bonds=window._aggBonds; if(!bonds) return;
+  bonds.forEach((b,i)=>{
+    const el=document.getElementById('agg-nom-'+i); if(!el) return;
+    const nomNew=parseInt((el.value||'').replace(/\./g,'').replace(/[^0-9]/g,''))||b._nomOrig;
+    const scale=b._nomOrig>0?nomNew/b._nomOrig:1;
+    b.nom=nomNew; b.vGiro=b._vGiroOrig*scale; b.dv01=b._dv01Orig*scale;
+  });
+  const m=aggCalc(bonds);
+  const s=document.getElementById('agg-summary'); if(s) s.innerHTML=buildAggSummaryHTML(m,bonds.length);
+  bonds.forEach((b,i)=>{
+    const sdv01=signedDV01(b);
+    const vgiroPct=m.tot>0?Math.abs(b.vGiro)/m.tot*100:0;
+    const dv01pct=m.totDV01gross>0?Math.abs(b.dv01)/m.totDV01gross*100:0;
+    const bar=`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(vgiroPct,100).toFixed(1)}%;background:var(--purple)"></div></div><span style="font-size:9px;min-width:32px">${vgiroPct.toFixed(1)}%</span></div>`;
+    const dbar=`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(dv01pct,100).toFixed(1)}%;background:var(--amber)"></div></div><span style="font-size:9px;min-width:32px">${dv01pct.toFixed(1)}%</span></div>`;
+    const vg=document.getElementById('agg-vg-'+i); if(vg) vg.textContent=fmtM(b.vGiro);
+    const pc=document.getElementById('agg-pct-'+i); if(pc) pc.innerHTML=bar;
+    const dv=document.getElementById('agg-dv01-'+i); if(dv){dv.textContent=(sdv01>=0?'+':'')+fmtP(sdv01);dv.style.color=sdv01>=0?'var(--green3)':'var(--red3)';}
+    const dp=document.getElementById('agg-dp-'+i); if(dp) dp.innerHTML=dbar;
+    const nomEl=document.getElementById('agg-nom-'+i);
+    if(nomEl) nomEl.value=b.nom.toLocaleString('es-CO',{maximumFractionDigits:0});
+  });
+  const tf=document.getElementById('agg-tfoot');
+  if(tf) tf.innerHTML=`<tr>
+    <td colspan="3" style="text-align:left">TOTAL PORTAFOLIO</td>
+    <td>—</td><td>—</td><td>${pct(m.wCpPct,2)}</td>
+    <td>${pct(m.wPrice,3)}</td><td>${pct(m.wPL,3)}</td><td>${pct(m.wIC,3)}</td>
+    <td>—</td><td style="color:var(--purple3)">${fmtM(m.totVGiro)}</td><td>100%</td>
+    <td>${fmt(m.wDmac,4)}</td><td>${fmt(m.wDmod,4)}</td><td>${fmt(m.wConv,4)}</td>
+    <td style="color:${m.totDV01net>=0?'var(--green3)':'var(--red3)'}">${(m.totDV01net>=0?'+':'')+fmtP(m.totDV01net)}</td>
+    <td>100%</td>
+  </tr>`;
+}
+
+function resetAggNom(){
+  const bonds=window._aggBonds; if(!bonds) return;
+  bonds.forEach((b,i)=>{
+    b.nom=b._nomOrig; b.vGiro=b._vGiroOrig; b.dv01=b._dv01Orig;
+    const el=document.getElementById('agg-nom-'+i);
+    if(el) el.value=b._nomOrig.toLocaleString('es-CO',{maximumFractionDigits:0});
+  });
+  recalcAggregate();
+}
+
 function renderAggregate(pf){
-  // Normalizar todos los campos numéricos defensivamente
   const bonds=pf.bonds.map(b=>({
     ...b,
     nom:      parseFloat(b.nom)      || 0,
@@ -297,36 +370,17 @@ function renderAggregate(pf){
     cpPct:    parseFloat(b.cpPct)    || 0,
     cupsRem:  parseFloat(b.cupsRem)  || 0,
   }));
-  const tot=bonds.reduce((s,b)=>s+Math.abs(b.vGiro),0)||1;
-  const totVGiro=bonds.reduce((s,b)=>s+(b.dir==='short'?-1:1)*b.vGiro,0);
-  const totDV01net=bonds.reduce((s,b)=>s+signedDV01(b),0);
-  const totDV01gross=bonds.reduce((s,b)=>s+Math.abs(b.dv01),0);
-  const totNom=bonds.reduce((s,b)=>s+b.nom,0);
-  const nLong=bonds.filter(b=>b.dir!=='short').length;
-  const nShort=bonds.filter(b=>b.dir==='short').length;
+  // Guardar originales para reset y escalado
+  bonds.forEach(b=>{b._nomOrig=b.nom;b._vGiroOrig=b.vGiro;b._dv01Orig=b.dv01;});
+  window._aggBonds=bonds;
 
-  // Weighted averages by abs vGiro
-  const wAvg=fn=>bonds.reduce((s,b)=>s+fn(b)*(Math.abs(b.vGiro)/tot),0);
-  const wDmod=wAvg(b=>b.dmod);
-  const wDmac=wAvg(b=>b.dmac);
-  const wConv=wAvg(b=>b.conv);
-  const wPrice=wAvg(b=>b.priceRnd);
-  const wIC=wAvg(b=>b.ic);
-  const wPL=wAvg(b=>b.pl);
-  const wCpPct=wAvg(b=>b.cpPct);
+  const m=aggCalc(bonds);
+  const nomStyle='width:110px;padding:2px 5px;border:1px solid var(--border2);border-radius:var(--r);font-size:10px;color:var(--amber3);background:var(--bg2);font-family:monospace;text-align:right';
 
-  // Carry anual
-  const carryAnual=bonds.reduce((s,b)=>{
-    const sign=b.dir==='short'?-1:1;
-    return s+sign*b.cpPct/100*b.nom;
-  },0);
-  const carryDiario=carryAnual/365;
-  const breakEven1d=Math.abs(totDV01net)>0?Math.abs(carryDiario/totDV01net)*100:0;
-  // Per-bond table
-  const bondRows=bonds.map(b=>{
+  const bondRows=bonds.map((b,i)=>{
     const sdv01=signedDV01(b);
-    const dv01pct=totDV01gross>0?Math.abs(b.dv01||0)/totDV01gross*100:0;
-    const vgiroPct=tot>0?Math.abs(b.vGiro||0)/tot*100:0;
+    const dv01pct=m.totDV01gross>0?Math.abs(b.dv01)/m.totDV01gross*100:0;
+    const vgiroPct=m.tot>0?Math.abs(b.vGiro)/m.tot*100:0;
     const isShort=b.dir==='short';
     return`<tr>
       <td><span class="tag" style="background:${b.ac2||'#1a2540'};color:${b.ac3||'#e8eaf0'};border-color:${b.ac||'#1e2d4a'}">${b.tipo||'RF'}</span></td>
@@ -338,38 +392,27 @@ function renderAggregate(pf){
       <td>${pct(b.priceRnd||0,4)}</td>
       <td>${pct(b.pl||0,4)}</td>
       <td>${pct(b.ic||0,4)}</td>
-      <td>${fmtM(b.vGiro||0)}</td>
-      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(vgiroPct,100).toFixed(1)}%;background:var(--purple)"></div></div><span style="font-size:9px;min-width:32px">${vgiroPct.toFixed(1)}%</span></div></td>
+      <td><input id="agg-nom-${i}" type="text" value="${b.nom.toLocaleString('es-CO',{maximumFractionDigits:0})}" style="${nomStyle}" oninput="recalcAggregate()" inputmode="numeric"></td>
+      <td id="agg-vg-${i}">${fmtM(b.vGiro)}</td>
+      <td id="agg-pct-${i}"><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(vgiroPct,100).toFixed(1)}%;background:var(--purple)"></div></div><span style="font-size:9px;min-width:32px">${vgiroPct.toFixed(1)}%</span></div></td>
       <td>${fmt(b.dmac||0,4)}</td>
       <td>${fmt(b.dmod||0,4)}</td>
       <td>${fmt(b.conv||0,4)}</td>
-      <td style="color:${sdv01>=0?'var(--green3)':'var(--red3)'}">${(sdv01>=0?'+':'')+fmtP(sdv01)}</td>
-      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(dv01pct,100).toFixed(1)}%;background:var(--amber)"></div></div><span style="font-size:9px;min-width:32px">${dv01pct.toFixed(1)}%</span></div></td>
+      <td id="agg-dv01-${i}" style="color:${sdv01>=0?'var(--green3)':'var(--red3)'}">${(sdv01>=0?'+':'')+fmtP(sdv01)}</td>
+      <td id="agg-dp-${i}"><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(dv01pct,100).toFixed(1)}%;background:var(--amber)"></div></div><span style="font-size:9px;min-width:32px">${dv01pct.toFixed(1)}%</span></div></td>
     </tr>`;
   }).join('');
 
   $('main-content').innerHTML=`
     <div class="card">
       <div class="c-hdr">📊 ${pf.name} · Resumen del portafolio</div>
-      <div class="c-body">
-        <div class="mg mg6" style="margin-bottom:10px">
-          <div class="m" style="border-color:var(--purple)"><div class="m-lbl">Valor total (abs)</div><div class="m-val" style="color:var(--purple3);font-size:14px">${fmtM(tot)}</div><div class="m-unit">${bonds.length} posición${bonds.length!==1?'es':''}</div></div>
-          <div class="m"><div class="m-lbl">Valor giro neto</div><div class="m-val" style="font-size:14px;color:${totVGiro>=0?'var(--green3)':'var(--red3)'}">${fmtM(totVGiro)}</div><div class="m-unit">largo − corto</div></div>
-          <div class="m"><div class="m-lbl">DV01 neto</div><div class="m-val" style="font-size:14px;color:${totDV01net>=0?'var(--green3)':'var(--red3)'}">${(totDV01net>=0?'+':'')+fmtP(totDV01net)}</div><div class="m-unit">${totDV01net>0?'neto largo':totDV01net<0?'neto corto':'neutro'}</div></div>
-          <div class="m"><div class="m-lbl">DV01 bruto</div><div class="m-val" style="font-size:14px">${fmtP(totDV01gross)}</div><div class="m-unit">exposición total</div></div>
-          <div class="m"><div class="m-lbl">Posiciones</div><div class="m-val" style="font-size:14px"><span style="color:var(--green3)">${nLong}L</span> / <span style="color:var(--red3)">${nShort}C</span></div><div class="m-unit">largo / corto</div></div>
-        </div>
-        <div class="mg mg4">
-          <div class="m"><div class="m-lbl">D. Macaulay pond.</div><div class="m-val">${fmt(wDmac,4)}</div><div class="m-unit">años</div></div>
-          <div class="m"><div class="m-lbl">D. Modificada pond.</div><div class="m-val">${fmt(wDmod,4)}</div><div class="m-unit">pond. por valor</div></div>
-          <div class="m"><div class="m-lbl">Convexidad pond.</div><div class="m-val">${fmt(wConv,4)}</div><div class="m-unit">—</div></div>
-          <div class="m"><div class="m-lbl">Precio sucio pond.</div><div class="m-val">${pct(wPrice,4)}</div><div class="m-unit">% del par</div></div>
-        </div>
-      </div>
+      <div class="c-body" id="agg-summary">${buildAggSummaryHTML(m,bonds.length)}</div>
     </div>
 
     <div class="card">
-      <div class="c-hdr">Detalle de posiciones</div>
+      <div class="c-hdr">Detalle de posiciones <span style="font-size:9px;color:var(--amber3);font-weight:400;margin-left:6px">· Nominal editable → métricas se actualizan en tiempo real</span>
+        <button onclick="resetAggNom()" style="margin-left:auto;padding:3px 10px;font-size:9px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--txt3);cursor:pointer;font-family:inherit">↺ Reset</button>
+      </div>
       <div class="c-body" style="padding:0">
         <div class="tscroll" style="max-height:300px;overflow-y:auto">
           <table class="ft">
@@ -378,18 +421,19 @@ function renderAggregate(pf){
               <th style="text-align:left">Bono</th>
               <th>Dir.</th><th>Vencimiento</th><th>Cups.</th>
               <th>T. Cupón</th><th>P. Sucio</th><th>P. Limpio</th><th>I. Corrido</th>
+              <th style="min-width:120px;color:var(--amber3)">Nominal ($)</th>
               <th>Valor giro</th><th style="min-width:110px">% PF</th>
               <th>D. Mac</th><th>D. Mod</th><th>Convex.</th>
               <th>DV01 (±)</th><th style="min-width:110px">% DV01</th>
             </tr></thead>
             <tbody>${bondRows}</tbody>
-            <tfoot><tr>
-              <td colspan="2" style="text-align:left">TOTAL PORTAFOLIO</td>
-              <td>—</td><td>—</td><td>—</td><td>${pct(wCpPct,2)}</td>
-              <td>${pct(wPrice,3)}</td><td>${pct(wPL,3)}</td><td>${pct(wIC,3)}</td>
-              <td style="color:var(--purple3)">${fmtM(totVGiro)}</td><td>100%</td>
-              <td>${fmt(wDmac,4)}</td><td>${fmt(wDmod,4)}</td><td>${fmt(wConv,4)}</td>
-              <td style="color:${totDV01net>=0?'var(--green3)':'var(--red3)'}">${(totDV01net>=0?'+':'')+fmtP(totDV01net)}</td>
+            <tfoot id="agg-tfoot"><tr>
+              <td colspan="3" style="text-align:left">TOTAL PORTAFOLIO</td>
+              <td>—</td><td>—</td><td>${pct(m.wCpPct,2)}</td>
+              <td>${pct(m.wPrice,3)}</td><td>${pct(m.wPL,3)}</td><td>${pct(m.wIC,3)}</td>
+              <td>—</td><td style="color:var(--purple3)">${fmtM(m.totVGiro)}</td><td>100%</td>
+              <td>${fmt(m.wDmac,4)}</td><td>${fmt(m.wDmod,4)}</td><td>${fmt(m.wConv,4)}</td>
+              <td style="color:${m.totDV01net>=0?'var(--green3)':'var(--red3)'}">${(m.totDV01net>=0?'+':'')+fmtP(m.totDV01net)}</td>
               <td>100%</td>
             </tr></tfoot>
           </table>
