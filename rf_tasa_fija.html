@@ -370,8 +370,9 @@ function recalcEspec(){
   function ganDeNom(r,nom,bp){return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*(r.res.priceRnd/100)*nom*r.sign;}
 
   rows.forEach(r=>{
-    const nom=r.nomActual;
+    const nom=r.nomActual,vg=cajaPFV*r.pct/100;
     const dv01=dv01DeNom(r,nom);
+    const vgEl=$('espec-vg-'+r.id);if(vgEl)vgEl.textContent=fmtM(vg);
     const nEl=$('espec-nom-'+r.id);if(nEl)nEl.textContent=fmtM(nom);
     const dEl=$('espec-dv01-'+r.id);
     if(dEl){dEl.textContent=(dv01>=0?'+':'')+fmtM(dv01);dEl.style.color=dv01>=0?'var(--green3)':'var(--red3)';}
@@ -382,8 +383,10 @@ function recalcEspec(){
   if(ndEl){ndEl.textContent=(netDV01>=0?'+':'')+fmtM(netDV01);ndEl.style.color=netDV01>=0?'var(--green3)':'var(--red3)';}
 
   const totalPct=rows.reduce((s,r)=>s+r.pct,0);
+  const totalVG=rows.reduce((s,r)=>s+cajaPFV*r.pct/100,0);
   const tpEl=$('espec-total-pct');
   if(tpEl){tpEl.textContent=fmt(totalPct,1)+'%';tpEl.style.color=Math.abs(totalPct-100)<0.1?'var(--green3)':'var(--amber3)';}
+  const tvgEl=$('espec-total-vg');if(tvgEl)tvgEl.textContent=fmtM(totalVG);
 
   BPS.forEach((bp,i)=>{
     rows.forEach(r=>{
@@ -1174,6 +1177,7 @@ function calcPF(){
               <th style="text-align:left">Dirección</th>
               <th>D. Mod.</th>
               <th>% de caja <span style="color:var(--amber3);font-size:9px">(editable)</span></th>
+              <th>Valor de giro</th>
               <th>Nominal</th>
               <th>DVO1 (firmado)</th>
             </tr></thead>
@@ -1194,6 +1198,7 @@ function calcPF(){
                       <span style="color:var(--amber3);font-size:12px;font-weight:700">%</span>
                     </div>
                   </td>
+                  <td id="espec-vg-${r.id}" style="color:var(--blue3);font-weight:700">${fmtM(cajaPFV*r.pct/100)}</td>
                   <td id="espec-nom-${r.id}" style="color:var(--txt2);font-size:11px">${fmtM(r.nomActual)}</td>
                   <td id="espec-dv01-${r.id}" style="${dcs}">${dv01>=0?'+':''}${fmtM(dv01)}</td>
                 </tr>`;
@@ -1201,6 +1206,7 @@ function calcPF(){
               <tr class="pf-total">
                 <td colspan="3">TOTALES</td>
                 <td id="espec-total-pct" style="text-align:right;color:var(--amber3)">${fmt(especRows.reduce((s,r)=>s+r.pct,0),1)}%</td>
+                <td id="espec-total-vg" style="color:var(--blue3);font-weight:700">${fmtM(especRows.reduce((s,r)=>s+cajaPFV*r.pct/100,0))}</td>
                 <td></td>
                 <td id="espec-net-dv01" style="${netDV01>=0?'color:var(--green3)':'color:var(--red3)'}">${netDV01>=0?'+':''}${fmtM(netDV01)}</td>
               </tr>
