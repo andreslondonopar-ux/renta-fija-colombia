@@ -89,7 +89,12 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .compare-sep{padding:4px 12px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;background:var(--bg4);border-bottom:1px solid var(--border)}
 /* Highlight best/worst in compare */
 .best{color:var(--green3)}.worst{color:var(--red3)}.neutral{color:var(--txt)}
+/* Estrategia relativa */
+.est-dir-btn{padding:3px 9px;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--border2);font-family:inherit;background:var(--bg3);color:var(--txt3);transition:all .12s;white-space:nowrap}
+.est-dir-l{background:var(--green2)!important;color:var(--green3)!important;border-color:var(--green)!important}
+.est-dir-s{background:var(--red2)!important;color:var(--red3)!important;border-color:var(--red)!important}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -533,6 +538,7 @@ function renderCompare(pf){
         <div class="compare-grid">${cards}</div>
       </div>
     </div>
+    ${buildEstrategiaCard(bonds)}
     <div class="card">
       <div class="c-hdr">🏆 Destacados por métrica</div>
       <div class="c-body" style="padding:0">
@@ -561,6 +567,225 @@ function renderCompare(pf){
         </div>
       </div>
     </div>`;
+  // Init strategy chart after DOM update
+  setTimeout(initEstrategiaChart, 50);
+}
+
+// ── ESTRATEGIA RELATIVA ───────────────────────────────────────
+let _estChart=null;
+
+function buildEstrategiaCard(bonds){
+  if(!bonds||!bonds.length)return'';
+  const hoy=new Date();
+  function plazo(iso){return Math.max(0.01,(new Date(iso)-hoy)/(365.25*24*3600*1000));}
+
+  // Estado inicial: dirección del portafolio, escala 100%
+  const state=bonds.map((b,i)=>({
+    dir:b.dir||'long', scale:100,
+    plazo:plazo(b.venc||b.nextCupon||''),
+    yield:(b.tirAvg||0)*100
+  }));
+  window._estState=state;
+  window._estBonds=bonds;
+
+  const tipoColor={TF:'#f59e0b',IBR:'#3b82f6',IPC:'#10b981',UVR:'#8b5cf6'};
+  const rows=bonds.map((b,i)=>{
+    const tc=tipoColor[b.tipo]||'#8892a4';
+    const dc=state[i].dir==='long'?'est-dir-l':'est-dir-s';
+    return`<tr>
+      <td style="text-align:left">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${tc}22;color:${tc};border:1px solid ${tc}66">${b.tipo||'—'}</span>
+      </td>
+      <td style="text-align:left;color:var(--txt2)">${fmtDate(b.venc)}</td>
+      <td style="text-align:left">
+        <button id="est-dir-${i}" class="est-dir-btn ${dc}" onclick="toggleEstDir(${i})">${state[i].dir==='long'?'▲ Largo':'▼ Corto'}</button>
+      </td>
+      <td>${fmt(b.dmod||0,3)}</td>
+      <td style="text-align:right">
+        <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
+          <input type="number" id="est-scale-${i}" value="100" min="0" max="200" step="10"
+            oninput="onEstSlider()" style="width:60px;padding:2px 5px;border:1px solid var(--border2);border-radius:var(--r);font-size:11px;color:var(--amber3);background:var(--bg2);font-family:monospace;text-align:right">
+          <span style="font-size:10px;color:var(--amber3)">%</span>
+        </div>
+      </td>
+      <td id="est-vg-${i}" style="color:var(--blue3)">${fmtM((b.vGiro||0))}</td>
+      <td id="est-dv01-${i}" style="color:var(--green3)">${fmtM(Math.abs(b.dv01||0))}</td>
+    </tr>`;
+  }).join('');
+
+  const sliders=bonds.map((b,i)=>{
+    const dc=state[i].dir==='long'?'#22c55e':'#ef4444';
+    const tipo=b.tipo||'TF';
+    const tipoLabel=tipo==='IBR'?'Δspread':tipo==='IPC'?'Δspread':tipo==='UVR'?'Δspread':'Δyield';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="min-width:200px;flex-shrink:0">
+        <span style="font-size:10px;font-weight:700;color:${state[i].dir==='long'?'var(--green3)':'var(--red3)'}" id="est-sdir-${i}">${state[i].dir==='long'?'▲ Largo':'▼ Corto'}</span>
+        <span style="font-size:9px;color:var(--txt3);margin-left:6px">${b.label||fmtDate(b.venc)} · D* ${fmt(b.dmod||0,2)}</span>
+      </div>
+      <input type="range" id="est-bp-${i}" min="-200" max="200" step="5" value="0"
+        oninput="onEstSlider()" style="flex:1;accent-color:${dc}">
+      <div style="min-width:55px;text-align:right;font-size:11px;font-weight:700;font-family:monospace;color:var(--amber3)" id="est-bplbl-${i}">0bp</div>
+      <div style="min-width:90px;text-align:right;font-size:11px;font-family:monospace;color:var(--txt3)" id="est-pl-${i}">—</div>
+    </div>`;
+  }).join('');
+
+  return`<div class="card" style="border-color:var(--amber)">
+    <div class="c-hdr" style="border-color:var(--amber)">⚡ Estrategia relativa · ${bonds.length} bono${bonds.length>1?'s':''}</div>
+    <div class="c-body">
+      <div class="tscroll" style="margin-bottom:12px">
+        <table class="ft">
+          <thead><tr><th style="text-align:left">Tipo</th><th style="text-align:left">Vcto</th><th style="text-align:left">Dirección</th><th>D. Mod.</th><th>Escala %</th><th>Valor giro</th><th>DV01</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">// Simulador de curva</div>
+      <div style="position:relative;height:300px;margin-bottom:12px"><canvas id="est-canvas"></canvas></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">
+        <span>Bono</span><span style="flex:1;margin:0 10px;text-align:center">← Mover →</span><span>Δbp</span><span style="min-width:90px;text-align:right">P&L</span>
+      </div>
+      ${sliders}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border2);margin-top:4px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:11px;color:var(--txt2)">P&L neto:</span>
+          <span id="est-net" style="font-size:22px;font-weight:800;font-family:monospace;color:var(--txt)">$0</span>
+        </div>
+        <button onclick="resetEstrategia()" style="padding:4px 12px;font-size:10px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--txt3);cursor:pointer;font-family:inherit">↺ Reset</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function initEstrategiaChart(){
+  const bonds=window._estBonds;const state=window._estState;
+  if(!bonds||!bonds.length)return;
+  const ctx=$('est-canvas');if(!ctx)return;
+  try{if(_estChart)_estChart.destroy();}catch(e){}
+
+  const hoy=new Date();
+  function plazo(iso){return Math.max(0.01,(new Date(iso)-hoy)/(365.25*24*3600*1000));}
+
+  const tipoColor={TF:'#f59e0b',IBR:'#3b82f6',IPC:'#10b981',UVR:'#8b5cf6'};
+  const refPts=bonds.map((b,i)=>({x:plazo(b.venc||''),y:(b.tirAvg||0)*100}));
+  window._estRef=refPts;
+
+  const ptColors=bonds.map((b,i)=>state[i].dir==='long'?'#22c55e':'#ef4444');
+  const ptSim=bonds.map((b,i)=>state[i].dir==='long'?'#86efac':'#fca5a5');
+
+  function buildChart(curvaPts){
+    try{if(_estChart)_estChart.destroy();}catch(e){}
+    _estChart=new Chart(ctx,{type:'scatter',
+      data:{datasets:[
+        {label:'Curva TF Colombia',data:curvaPts,type:'line',borderColor:'rgba(148,163,184,.55)',borderWidth:1.8,pointRadius:3,pointBackgroundColor:'rgba(148,163,184,.4)',fill:false,tension:.35,showLine:true,order:3},
+        {label:'Posición actual',data:refPts.map(p=>({x:p.x,y:p.y})),backgroundColor:ptColors,pointRadius:5,pointHoverRadius:7,order:1},
+        {label:'Posición simulada',data:refPts.map(p=>({x:p.x,y:p.y})),backgroundColor:ptSim,pointStyle:'triangle',pointRadius:6,order:2}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,animation:{duration:80},
+        plugins:{legend:{display:true,position:'top',labels:{color:'#8892a4',font:{size:10},boxWidth:12}},
+          tooltip:{callbacks:{label:c=>{
+            if(c.datasetIndex===0)return`Curva: ${fmt(c.parsed.y,2)}%`;
+            const b=bonds[c.dataIndex];if(!b)return'';
+            const bp=parseInt(($('est-bp-'+c.dataIndex)||{value:'0'}).value);
+            return c.datasetIndex===1?`${b.label||fmtDate(b.venc)}: ${fmt(c.parsed.y,2)}%`:`Simulado: ${fmt(c.parsed.y,2)}% (${bp>0?'+':''}${bp}bp)`;
+          }}}},
+        scales:{
+          x:{title:{display:true,text:'Plazo (años)',color:'#4a5568',font:{size:10}},ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'},min:0,suggestedMax:25},
+          y:{title:{display:true,text:'Yield / TIR EA (%)',color:'#4a5568',font:{size:10}},ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(1)+'%'},grid:{color:'rgba(255,255,255,.03)'}}
+        }},
+      plugins:[{id:'estLabels',afterDraw(chart){
+        const d=window._estBonds;if(!d)return;
+        const ds=chart.data.datasets[2];if(!ds||!ds.data)return;
+        const meta=chart.getDatasetMeta(2);if(!meta)return;
+        const ctx2=chart.ctx;
+        meta.data.forEach((pt,i)=>{
+          const bp=parseInt(($('est-bp-'+i)||{value:'0'}).value);if(bp===0)return;
+          const b=bonds[i];const st=state[i];
+          const sign=st.dir==='long'?1:-1;
+          const scale=(parseFloat(($('est-scale-'+i)||{value:'100'}).value)||100)/100;
+          const nom=(b.nom||0)*scale;
+          const pl=(-(b.dmod||0)*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*((b.priceRnd||100)/100)*nom*sign;
+          const col=st.dir==='long'?'#86efac':'#fca5a5';
+          const lbl=`${bp>0?'+':''}${bp}bp  ${pl>=0?'+':''}${fmtM(pl)}`;
+          ctx2.save();ctx2.font='bold 10px monospace';ctx2.fillStyle=col;ctx2.textAlign='center';
+          ctx2.fillText(lbl,pt.x,pt.y-12);
+          const rMeta=chart.getDatasetMeta(1);
+          if(rMeta&&rMeta.data[i]){
+            const rp=rMeta.data[i];
+            ctx2.strokeStyle=col+'88';ctx2.lineWidth=1.5;ctx2.setLineDash([4,3]);
+            ctx2.beginPath();ctx2.moveTo(rp.x,rp.y);ctx2.lineTo(pt.x,pt.y);ctx2.stroke();ctx2.setLineDash([]);
+          }
+          ctx2.restore();
+        });
+      }}]
+    });
+  }
+
+  fetch('datos_curva.json').then(r=>{if(!r.ok)throw new Error();return r.json();})
+    .then(curva=>{
+      const pts=curva.filter(b=>b.plazo>0.05&&b.tir>0&&b.tir<30).sort((a,b)=>a.plazo-b.plazo).map(b=>({x:b.plazo,y:b.tir}));
+      buildChart(pts.length>=2?pts:buildFallbackCurva(refPts));
+    }).catch(()=>buildChart(buildFallbackCurva(refPts)));
+}
+
+function buildFallbackCurva(refPts){
+  const sorted=[...refPts].sort((a,b)=>a.x-b.x);
+  if(sorted.length<2)return sorted.map(p=>({x:p.x,y:p.y}));
+  const pts=[];
+  const slope=(sorted[1].y-sorted[0].y)/(sorted[1].x-sorted[0].x);
+  for(let t=0.5;t<sorted[0].x;t+=0.5)pts.push({x:t,y:Math.max(0,sorted[0].y-slope*(sorted[0].x-t))});
+  sorted.forEach(p=>pts.push({x:p.x,y:p.y}));
+  const last=sorted[sorted.length-1],prev=sorted[sorted.length-2];
+  const s2=(last.y-prev.y)/(last.x-prev.x);
+  for(let t=last.x+0.5;t<=last.x+5;t+=0.5)pts.push({x:t,y:Math.max(0,last.y+s2*(t-last.x))});
+  return pts;
+}
+
+function toggleEstDir(i){
+  const state=window._estState;if(!state||!state[i])return;
+  state[i].dir=state[i].dir==='long'?'short':'long';
+  const btn=$('est-dir-'+i),sdir=$('est-sdir-'+i);
+  const isL=state[i].dir==='long';
+  if(btn){btn.className='est-dir-btn '+(isL?'est-dir-l':'est-dir-s');btn.textContent=isL?'▲ Largo':'▼ Corto';}
+  if(sdir){sdir.textContent=isL?'▲ Largo':'▼ Corto';sdir.style.color=isL?'var(--green3)':'var(--red3)';}
+  onEstSlider();
+}
+
+function onEstSlider(){
+  const bonds=window._estBonds;const state=window._estState;const ref=window._estRef;
+  if(!bonds||!state)return;
+  let total=0;
+  const simPts=[];
+  bonds.forEach((b,i)=>{
+    const bp=parseInt(($('est-bp-'+i)||{value:'0'}).value)||0;
+    const scale=(parseFloat(($('est-scale-'+i)||{value:'100'}).value)||100)/100;
+    const sign=state[i].dir==='long'?1:-1;
+    const nom=(b.nom||0)*scale;
+    const pl=(-(b.dmod||0)*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*((b.priceRnd||100)/100)*nom*sign;
+    total+=pl;
+    const lblEl=$('est-bplbl-'+i);if(lblEl)lblEl.textContent=(bp>0?'+':'')+bp+'bp';
+    const plEl=$('est-pl-'+i);
+    if(plEl){plEl.textContent=(pl>=0?'+':'')+fmtM(pl);plEl.style.color=pl>=0?'var(--green3)':'var(--red3)';}
+    const vg=(b.vGiro||0)*scale;
+    const vgEl=$('est-vg-'+i);if(vgEl)vgEl.textContent=fmtM(vg);
+    const dv01=Math.abs(b.dv01||0)*scale;
+    const dv01El=$('est-dv01-'+i);if(dv01El)dv01El.textContent=fmtM(dv01);
+    simPts.push(ref?{x:ref[i].x,y:ref[i].y+bp/100}:{x:0,y:0});
+  });
+  const netEl=$('est-net');
+  if(netEl){netEl.textContent=(total>=0?'+':'')+fmtM(total);netEl.style.color=total>=0?'var(--green3)':'var(--red3)';}
+  if(_estChart&&_estChart.data.datasets[2]){_estChart.data.datasets[2].data=simPts;_estChart.update('none');}
+}
+
+function resetEstrategia(){
+  const bonds=window._estBonds;if(!bonds)return;
+  bonds.forEach((_,i)=>{
+    const bp=$('est-bp-'+i);if(bp)bp.value=0;
+    const sc=$('est-scale-'+i);if(sc)sc.value=100;
+    const lbl=$('est-bplbl-'+i);if(lbl)lbl.textContent='0bp';
+    const pl=$('est-pl-'+i);if(pl){pl.textContent='—';pl.style.color='var(--txt3)';}
+  });
+  const netEl=$('est-net');if(netEl){netEl.textContent='$0';netEl.style.color='var(--txt)';}
+  const ref=window._estRef;
+  if(_estChart&&ref){_estChart.data.datasets[2].data=ref.map(p=>({x:p.x,y:p.y}));_estChart.update('none');}
 }
 
 // ── INIT ──────────────────────────────────────────────────────
