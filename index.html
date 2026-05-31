@@ -174,7 +174,11 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="col-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-col" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div style="overflow-y:auto;flex:1;min-height:180px">
+          <div onclick="toggleRefTable('col')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
+            <span id="col-ref-arrow" style="font-size:9px;color:#4a5568">▾</span>
+            <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias TES</span>
+          </div>
+          <div id="col-ref-wrap" style="overflow-y:auto;flex:1;min-height:180px">
             <table class="yt">
               <thead><tr>
                 <th style="text-align:left">T&iacute;tulo</th>
@@ -196,7 +200,11 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-us" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div style="overflow-y:auto;flex:1;min-height:180px">
+          <div onclick="toggleRefTable('us')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
+            <span id="us-ref-arrow" style="font-size:9px;color:#4a5568">▾</span>
+            <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias UST</span>
+          </div>
+          <div id="us-ref-wrap" style="overflow-y:auto;flex:1;min-height:180px">
             <table class="yt">
               <thead><tr>
                 <th style="text-align:left">Plazo</th>
@@ -513,11 +521,6 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
       ghost+=`<circle cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="3" fill="${color}" fill-opacity="0.45" stroke="#0a0e1a" stroke-width="1"/>`;
     });
     ghostDotData=ps.map(p=>({cx:px(p.x),cy:py(p.y),label:prevDate||'Anterior',tir:p.y.toFixed(2)+'%',isGhost:true}));
-    if(prevDate){
-      const lp=ps[ps.length-1];
-      const gx=Math.min(px(lp.x)+4,W-PR-34),gy=py(lp.y)-5;
-      ghost+=`<text x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" font-size="7.5" fill="${color}" fill-opacity="0.6">${prevDate}</text>`;
-    }
   }
   // Dots (todos los puntos)
   let dots='',xlbls='';
@@ -540,7 +543,17 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
     xlbls+=`<line x1="${cx.toFixed(1)}" y1="${(PT+cH).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3a55" stroke-width="1"/>`;
     xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xa}" font-size="8" fill="#8090a8">${p.label||''}</text>`;
   });
-  const TW=82,TH=34;
+  // Leyenda debajo del eje X (solo si hay curva histórica)
+  let legend='';
+  if(ghostDotData.length){
+    const lx=PL, ly=H-2;
+    legend+=`<line x1="${lx}" y1="${ly}" x2="${lx+14}" y2="${ly}" stroke="${color}" stroke-width="2"/>`;
+    legend+=`<text x="${lx+17}" y="${ly+3.5}" font-size="7.5" fill="#8090a8">Actual</text>`;
+    const lx2=lx+60;
+    legend+=`<line x1="${lx2}" y1="${ly}" x2="${lx2+14}" y2="${ly}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,2" stroke-opacity="0.6"/>`;
+    legend+=`<text x="${lx2+17}" y="${ly+3.5}" font-size="7.5" fill="#8090a8">${ghostDotData[0]?.label||'Anterior'}</text>`;
+  }
+  const TW=92,TH=34;
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="${color}" stop-opacity="0.22"/>
     <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
@@ -549,7 +562,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   <path d="${areaD}" fill="url(#g${svgId})"/>
   ${ghost}
   <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>
-  ${dots}${xlbls}
+  ${dots}${xlbls}${legend}
   <g id="tip-${svgId}" display="none" pointer-events="none">
     <rect id="tip-bg-${svgId}" width="${TW}" height="${TH}" rx="3" fill="#0d1628" stroke="#263554" stroke-width="1"/>
     <text id="tip-a-${svgId}" x="7" y="13" font-size="9" fill="#9aaabf" font-family="'Segoe UI',monospace"></text>
@@ -586,6 +599,15 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
     else tip.setAttribute('display','none');
   });
   ovl.addEventListener('mouseleave',()=>tip.setAttribute('display','none'));
+}
+
+function toggleRefTable(id){
+  const wrap=document.getElementById(id+'-ref-wrap');
+  const arrow=document.getElementById(id+'-ref-arrow');
+  if(!wrap||!arrow)return;
+  const open=wrap.style.display!=='none';
+  wrap.style.display=open?'none':'';
+  arrow.textContent=open?'▸':'▾';
 }
 
 function renderCol(){
