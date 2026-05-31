@@ -1052,18 +1052,21 @@ function calcPF(){
 
   // ── ESTRATEGIA ESPECULATIVA ────────────────────────────────
   const cajaPFV=parseFloat($('pf_caja_val')?.value)||0;
-  const bpEspecV=parseFloat($('pf_bp_espec')?.value)||-50;
+  const bpDestacado=parseFloat($('pf_bp_espec')?.value)||-50;
   if(cajaPFV>0 && rows.length>0){
     const especRows=rows.map(r=>{
       const dir=getBondDir(r.id);
       const sign=dir==='long'?1:-1;
       const nomC=cajaPFV/(r.res.priceRnd/100);
       const dv01C=r.res.dmod*cajaPFV/10000;
-      const ganC=(-r.res.dmod*(bpEspecV/10000)+0.5*r.res.conv*(bpEspecV/10000)**2)*cajaPFV;
-      return{...r,dir,sign,nomC,dv01Signed:dv01C*sign,ganSigned:ganC*sign};
+      return{...r,dir,sign,nomC,dv01Signed:dv01C*sign};
     });
     const netDV01=especRows.reduce((s,r)=>s+r.dv01Signed,0);
-    const netGan=especRows.reduce((s,r)=>s+r.ganSigned,0);
+
+    // Función ganancia por bp para una fila
+    function ganPorBp(r,bp){
+      return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*cajaPFV*r.sign;
+    }
 
     // DVO1-neutro: 1 largo + 1 corto
     const longs=especRows.filter(r=>r.dir==='long');
@@ -1083,13 +1086,22 @@ function calcPF(){
       </div>`;
     }
 
+    // Tabla de escenarios
+    const BPS=[-200,-150,-100,-75,-50,-25,0,25,50,75,100,150,200];
+    const scenRows=BPS.map(bp=>{
+      const gans=especRows.map(r=>ganPorBp(r,bp));
+      const neto=gans.reduce((s,g)=>s+g,0);
+      const isDestacado=bp===bpDestacado;
+      return{bp,gans,neto,isDestacado};
+    });
+
     const especCard=document.createElement('div');
     especCard.className='card';
     especCard.style.borderColor='var(--amber)';
     especCard.innerHTML=`
-      <div class="c-hdr" style="border-color:var(--amber)">⚡ Estrategia especulativa · Caja ${fmtM(cajaPFV)} · ${bpEspecV>0?'+':''}${bpEspecV}bp</div>
+      <div class="c-hdr" style="border-color:var(--amber)">⚡ Estrategia especulativa · Caja ${fmtM(cajaPFV)}</div>
       <div class="c-body">
-        <div class="tscroll">
+        <div class="tscroll" style="margin-bottom:10px">
           <table class="pf-bond-table">
             <thead><tr>
               <th style="text-align:left">Vencimiento</th>
@@ -1097,28 +1109,48 @@ function calcPF(){
               <th>D. Mod.</th>
               <th>Nominal c/ caja</th>
               <th>DVO1 (firmado)</th>
-              <th>Ganancia ${bpEspecV>0?'+':''}${bpEspecV}bp</th>
             </tr></thead>
             <tbody>
               ${especRows.map(r=>{
                 const dcs=r.dv01Signed>=0?'color:var(--green3)':'color:var(--red3)';
-                const gcs=r.ganSigned>=0?'color:var(--green3)':'color:var(--red3)';
-                const dirLabel=r.dir==='long'?'▲ Largo':'▼ Corto';
                 const dirStyle=r.dir==='long'?'color:var(--green3);font-weight:700':'color:var(--red3);font-weight:700';
                 return`<tr>
                   <td style="text-align:left;color:var(--txt2)">${fmtDate(r.vencISO)}</td>
-                  <td style="text-align:left;${dirStyle}">${dirLabel}</td>
+                  <td style="text-align:left;${dirStyle}">${r.dir==='long'?'▲ Largo':'▼ Corto'}</td>
                   <td>${fmt(r.res.dmod,4)}</td>
                   <td>${fmtM(r.nomC)}</td>
                   <td style="${dcs}">${r.dv01Signed>=0?'+':''}${fmtM(r.dv01Signed)}</td>
-                  <td style="${gcs}">${r.ganSigned>=0?'+':''}${fmtM(r.ganSigned)}</td>
                 </tr>`;
               }).join('')}
-              <tr class="pf-total">
-                <td colspan="4">POSICIÓN NETA</td>
+              <tr class="pf-total"><td colspan="4">DVO1 NETO</td>
                 <td style="${netDV01>=0?'color:var(--green3)':'color:var(--red3)'}">${netDV01>=0?'+':''}${fmtM(netDV01)}</td>
-                <td style="${netGan>=0?'color:var(--green3)':'color:var(--red3)'}">${netGan>=0?'+':''}${fmtM(netGan)}</td>
               </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:700">// Escenarios de ganancia / pérdida</div>
+        <div class="tscroll">
+          <table class="st">
+            <thead><tr>
+              <th style="text-align:left">Escenario</th>
+              ${especRows.map(r=>`<th>${fmtDate(r.vencISO)}<br><span style="font-size:9px;font-weight:400">${r.dir==='long'?'▲':'▼'}</span></th>`).join('')}
+              <th>Neto</th>
+            </tr></thead>
+            <tbody>
+              ${scenRows.map(({bp,gans,neto,isDestacado})=>{
+                const cls=isDestacado?'cur':bp<0?'dn':'up';
+                const rowStyle=isDestacado?'outline:1px solid var(--amber);outline-offset:-1px':'';
+                const lbl=bp===0?'★ Actual':bp>0?'+'+bp+'bp':bp+'bp';
+                const cells=gans.map(g=>{
+                  const gc=g>=0?'color:var(--green3)':'color:var(--red3)';
+                  return`<td style="${gc}">${g>=0?'+':''}${fmtM(g)}</td>`;
+                }).join('');
+                const nc=neto>=0?'color:var(--green3)':'color:var(--red3)';
+                return`<tr class="${cls}" style="${rowStyle}">
+                  <td>${lbl}</td>${cells}
+                  <td style="${nc};font-weight:700">${neto>=0?'+':''}${fmtM(neto)}</td>
+                </tr>`;
+              }).join('')}
             </tbody>
           </table>
         </div>
