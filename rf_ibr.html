@@ -213,7 +213,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <div class="s-lbl">// Fechas</div>
       <div class="field">
         <label>Liquidación</label>
-        <input type="date" id="liq" value="2025-07-10" oninput="autoCA()" onchange="autoCA()">
+        <input type="date" id="liq" value="2025-07-22" oninput="autoCA()" onchange="autoCA()">
       </div>
       <div class="field"><label>Vencimiento</label>
         <input type="date" id="venc" value="2027-07-10" onchange="autoCA()">
@@ -599,9 +599,9 @@ function onModeChange(){
   const oldCard=$('ibr-tir-real-card'); if(oldCard) oldCard.remove();
   // Update defaults
   if(mode==='estimada'){
-    $('liq').value='2025-07-10'; $('venc').value='2027-07-10';
+    $('liq').value='2025-07-22'; $('venc').value='2027-07-10';
   } else {
-    $('liq').value='2025-03-05'; $('venc').value='2026-03-05';
+    $('liq').value='2025-03-19'; $('venc').value='2026-03-05';
   }
   autoCA();
 }
@@ -837,7 +837,7 @@ function calcular(showTIR=false){
       <div class="mg4" style="margin-bottom:10px">
         <div class="m ${bCls}"><div class="m-lbl">Precio sucio</div><div class="m-val">${fmt(priceRnd,4)}%</div><div class="m-unit">% del par</div></div>
         <div class="m"><div class="m-lbl">Precio limpio</div><div class="m-val ${mCls}">${fmt(pl,4)}%</div><div class="m-unit">% del par</div></div>
-        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus} días causados</div></div>
+        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus===0?'⚠ liq. en fecha cupón':dCaus+' días causados'}</div></div>
         <div class="m amber"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
       <div class="mg4">

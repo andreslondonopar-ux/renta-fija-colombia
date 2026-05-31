@@ -1058,7 +1058,7 @@ function calcular(showTIR=false){
       <div class="mg4" style="margin-bottom:10px">
         <div class="m blue"><div class="m-lbl">Precio sucio</div><div class="m-val">${fmt(priceRnd,4)}%</div><div class="m-unit">% del par</div></div>
         <div class="m"><div class="m-lbl">Precio limpio</div><div class="m-val ${mCls}">${fmt(pl,4)}%</div><div class="m-unit">% del par</div></div>
-        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus} días causados</div></div>
+        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus===0?'⚠ liq. en fecha cupón':dCaus+' días causados'}</div></div>
         <div class="m ${mCls}"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
       <div class="mg4"${tirVencMetric?' style="grid-template-columns:repeat(5,1fr)"':''}>
