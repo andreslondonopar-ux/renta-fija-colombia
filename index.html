@@ -174,7 +174,7 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="col-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-col" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div style="overflow-y:auto;flex:1">
+          <div style="overflow-y:auto;flex:1;min-height:180px">
             <table class="yt">
               <thead><tr>
                 <th style="text-align:left">T&iacute;tulo</th>
@@ -196,7 +196,7 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-us" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div style="overflow-y:auto;flex:1">
+          <div style="overflow-y:auto;flex:1;min-height:180px">
             <table class="yt">
               <thead><tr>
                 <th style="text-align:left">Plazo</th>
@@ -502,17 +502,21 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   }
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
-  // Curva fantasma (5 días hábiles atrás)
+  // Curva fantasma (días anteriores) — interactiva
   let ghost='';
+  let ghostDotData=[];
   if(prevPts&&prevPts.length>1){
     const ps=[...prevPts].sort((a,b)=>a.x-b.x);
     const gPath=ps.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
-    ghost=`<path d="${gPath}" fill="none" stroke="${color}" stroke-width="1.5" stroke-dasharray="5,3" stroke-opacity="0.35"/>`;
-    ps.forEach(p=>{ghost+=`<circle cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="2.5" fill="${color}" fill-opacity="0.3" stroke="none"/>`;});
+    ghost=`<path d="${gPath}" fill="none" stroke="${color}" stroke-width="1.5" stroke-dasharray="5,3" stroke-opacity="0.5"/>`;
+    ps.forEach(p=>{
+      ghost+=`<circle cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="3" fill="${color}" fill-opacity="0.45" stroke="#0a0e1a" stroke-width="1"/>`;
+    });
+    ghostDotData=ps.map(p=>({cx:px(p.x),cy:py(p.y),label:prevDate||'Anterior',tir:p.y.toFixed(2)+'%',isGhost:true}));
     if(prevDate){
       const lp=ps[ps.length-1];
       const gx=Math.min(px(lp.x)+4,W-PR-34),gy=py(lp.y)-5;
-      ghost+=`<text x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" font-size="7.5" fill="${color}" fill-opacity="0.5">${prevDate}</text>`;
+      ghost+=`<text x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" font-size="7.5" fill="${color}" fill-opacity="0.6">${prevDate}</text>`;
     }
   }
   // Dots (todos los puntos)
@@ -560,12 +564,14 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   const tipB=document.getElementById('tip-b-'+svgId);
   if(!ovl)return;
   const showTip=(d,mx,my)=>{
-    tipA.textContent=d.label;
+    tipA.textContent=d.isGhost?`${d.label} ···`:d.label;
+    tipA.setAttribute('fill',d.isGhost?color+'99':'#9aaabf');
     tipB.textContent=d.tir;
     let tx=mx+10,ty=my-TH-6;
     if(tx+TW>W-PR)tx=mx-TW-10;
     if(ty<PT)ty=my+8;
     tipBg.setAttribute('x',tx);tipBg.setAttribute('y',ty);
+    tipBg.setAttribute('stroke',d.isGhost?color+'55':'#263554');
     tipA.setAttribute('x',tx+7);tipA.setAttribute('y',ty+13);
     tipB.setAttribute('x',tx+7);tipB.setAttribute('y',ty+27);
     tip.setAttribute('display','');
@@ -575,7 +581,8 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
     const mx=(e.clientX-r.left)*(W/r.width), my=(e.clientY-r.top)*(H/r.height);
     let near=null,best=Infinity;
     dotData.forEach(d=>{const dist=Math.hypot(d.cx-mx,d.cy-my);if(dist<best){best=dist;near=d;}});
-    if(near&&best<30)showTip(near,mx,my);
+    ghostDotData.forEach(d=>{const dist=Math.hypot(d.cx-mx,d.cy-my);if(dist<best){best=dist;near=d;}});
+    if(near&&best<32)showTip(near,mx,my);
     else tip.setAttribute('display','none');
   });
   ovl.addEventListener('mouseleave',()=>tip.setAttribute('display','none'));
