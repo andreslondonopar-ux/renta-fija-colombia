@@ -823,14 +823,13 @@ function calcular(showTIR=false){
   }).filter(Boolean);
 
   // TIR al vencimiento automática
-  let tirVencCard='';
+  let tirVencMetric='';
   {
-    const xCFsV=[-vGiro],xDatesV=[liq];let totalRec=0;
-    flows.forEach(f=>{const a=f.cf/100*nom;xCFsV.push(a);xDatesV.push(f.fecha);totalRec+=a;});
+    const xCFsV=[-vGiro],xDatesV=[liq];
+    flows.forEach(f=>{xCFsV.push(f.cf/100*nom);xDatesV.push(f.fecha);});
     const tv=xirr(xCFsV,xDatesV,liq)*100;
     const diasV=daysReal(liq,venc);
-    const tirVencLbl=isReal?'TIR real al vencimiento':'TIR estimada al vencimiento';
-    if(!isNaN(tv))tirVencCard=`<div class="card"><div class="c-hdr">${tirVencLbl} <span style="font-size:9px;font-weight:400;color:var(--txt3)">sin supuesto de salida</span></div><div class="c-body"><div class="mg4"><div class="m green"><div class="m-lbl">${tirVencLbl}</div><div class="m-val green" style="font-size:20px">${fmt(tv,4)}%</div><div class="m-unit">${diasV} días de inversión</div></div><div class="m"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtDate(liq)}</div></div><div class="m green"><div class="m-lbl">Total a recibir</div><div class="m-val green" style="font-size:14px">${fmtM(totalRec)}</div><div class="m-unit">${fmtDate(venc)}</div></div></div></div></div>`;
+    if(!isNaN(tv))tirVencMetric=`<div class="m green"><div class="m-lbl">TIR al vencimiento</div><div class="m-val green" style="font-size:15px">${fmt(tv,4)}%</div><div class="m-unit">${diasV}d · ${isReal?'real':'estimada'} (XIRR)</div></div>`;
   }
 
   // TIR DE TENENCIA IPC — solo modos curva
@@ -1016,10 +1015,10 @@ function calcular(showTIR=false){
         <div class="m"><div class="m-lbl">Spread cupón</div><div class="m-val" style="font-size:15px">${fmt(sc*100,2)}%</div><div class="m-unit">EA sobre IPC</div></div>
         <div class="m"><div class="m-lbl">Pagos / año</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} meses</div></div>
         <div class="m"><div class="m-lbl">Cupones restantes</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">hasta vencimiento</div></div>
+        ${tirVencMetric}
       </div>
     </div>
   </div>
-  ${tirVencCard}
   <div class="card">
     <div class="c-hdr">Medidas de riesgo</div>
     <div class="c-body">
