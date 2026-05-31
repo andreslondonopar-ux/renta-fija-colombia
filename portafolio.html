@@ -700,8 +700,11 @@ function initEstrategiaChart(){
           const b=bonds[i];const st=state[i];
           const sign=st.dir==='long'?1:-1;
           const scale=(parseFloat(($('est-scale-'+i)||{value:'100'}).value)||100)/100;
-          const nom=(b.nom||0)*scale;
-          const pl=(-(b.dmod||0)*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*((b.priceRnd||100)/100)*nom*sign;
+          let price2=parseFloat(b.priceRnd||100);if(price2<2)price2*=100;
+          let nom=(b.nom||0);
+          if(!nom&&b.dv01&&b.dmod)nom=Math.abs(b.dv01)*10000/(b.dmod*(price2/100));
+          nom*=scale;
+          const pl=(-(b.dmod||0)*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*(price2/100)*nom*sign;
           const col=st.dir==='long'?'#86efac':'#fca5a5';
           const lbl=`${bp>0?'+':''}${bp}bp  ${pl>=0?'+':''}${fmtM(pl)}`;
           ctx2.save();ctx2.font='bold 10px monospace';ctx2.fillStyle=col;ctx2.textAlign='center';
@@ -757,8 +760,12 @@ function onEstSlider(){
     const bp=parseInt(($('est-bp-'+i)||{value:'0'}).value)||0;
     const scale=(parseFloat(($('est-scale-'+i)||{value:'100'}).value)||100)/100;
     const sign=state[i].dir==='long'?1:-1;
-    const nom=(b.nom||0)*scale;
-    const pl=(-(b.dmod||0)*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*((b.priceRnd||100)/100)*nom*sign;
+    let price=parseFloat(b.priceRnd||100);if(price<2)price*=100;
+    // Si nom=0 (bonos guardados antes del fix), derivar de DV01
+    let nom=(b.nom||0);
+    if(!nom&&b.dv01&&b.dmod)nom=Math.abs(b.dv01)*10000/(b.dmod*(price/100));
+    nom*=scale;
+    const pl=(-(b.dmod||0)*(bp/10000)+0.5*(b.conv||0)*(bp/10000)**2)*(price/100)*nom*sign;
     total+=pl;
     const lblEl=$('est-bplbl-'+i);if(lblEl)lblEl.textContent=(bp>0?'+':'')+bp+'bp';
     const plEl=$('est-pl-'+i);

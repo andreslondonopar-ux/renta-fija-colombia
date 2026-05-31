@@ -816,7 +816,7 @@ function calcBond(antISO,liqISO,vencISO,freq,base,tipo,cpRaw,ytm,nom){
   const priceRnd=Math.floor(price*1000)/1000;
   const vGiro=(priceRnd/100)*nom;
   const dv01=dmod*(priceRnd/100)*nom/10000;
-  return{flows,price,ic,pl,dmac,dmod,conv,dv01,vGiro,priceRnd,dmN,cpFirst};
+  return{flows,price,ic,pl,dmac,dmod,conv,dv01,vGiro,priceRnd,dmN,cpFirst,nom};
 }
 
 function xirr(cashflows,dates,d0){
