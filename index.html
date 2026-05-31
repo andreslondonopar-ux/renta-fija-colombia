@@ -145,6 +145,17 @@ svg{display:block;width:100%}
         <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="mac-trade-sub">cargando...</div></div>
       </div>
     </div>
+    <div>
+      <div class="sec-title">// Macro USA</div>
+      <div class="macro-grid">
+        <div class="mi"><div class="mi-lbl">Fed Rate</div><div class="mi-val" id="us-mac-rate" style="color:var(--amber3)">—</div><div class="mi-sub" id="us-mac-rate-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">CPI Anual</div><div class="mi-val" id="us-mac-cpi" style="color:var(--blue3)">—</div><div class="mi-sub" id="us-mac-cpi-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">CPI Mensual</div><div class="mi-val" id="us-mac-cpim" style="color:var(--blue3)">—</div><div class="mi-sub" id="us-mac-cpim-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">PIB Anual</div><div class="mi-val" id="us-mac-gdp" style="color:var(--green3)">—</div><div class="mi-sub" id="us-mac-gdp-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="us-mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="us-mac-unem-sub">cargando...</div></div>
+        <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="us-mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="us-mac-trade-sub">cargando...</div></div>
+      </div>
+    </div>
     <div style="font-size:9px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
       Herramienta pedagógica · Curso Renta Fija Colombia 2026<br>
       <span style="color:var(--amber3)">🇨🇴 Colombia:</span> BanRep SEN · actualización diaria<br>
@@ -449,13 +460,20 @@ async function loadMacro(){
   };
   const st=document.getElementById('macro-status');
 
-  // Fallback
+  // Fallback Colombia
   set('mac-banrep','11.25%','BanRep · abr 2026');
   set('mac-ipc',   '5.68%', 'DANE · abr 2026');
   set('mac-ipcm',  '0.78%', 'DANE · abr 2026');
   set('mac-gdp',   '2.20%', 'DANE · T1 2026');
   set('mac-unem',  '8.80%', 'DANE · mar 2026');
   set('mac-trade', '—',     'Trading Economics');
+  // Fallback USA
+  set('us-mac-rate', '4.25%',        'Fed · 2026');
+  set('us-mac-cpi',  '2.70%',        'BLS · 2026');
+  set('us-mac-cpim', '0.20%',        'BLS · 2026');
+  set('us-mac-gdp',  '2.40%',        'BEA · 2026');
+  set('us-mac-unem', '4.20%',        'BLS · 2026');
+  set('us-mac-trade','-140.00 B USD','BEA · 2026');
 
   // macro_data.json generado por GitHub Actions (Trading Economics via Playwright)
   try{
@@ -473,6 +491,18 @@ async function loadMacro(){
       if(col.trade_balance?.value!=null){
         const tb=col.trade_balance.value;
         set('mac-trade',(tb>=0?'+':'')+parseFloat(tb).toFixed(2)+' B USD', col.trade_balance.source);
+      }
+
+      // Macro USA
+      const usa=d.usa||{};
+      if(usa.interest_rate?.value!=null) set('us-mac-rate', fmt(usa.interest_rate.value), usa.interest_rate.source);
+      if(usa.inflation?.value!=null)     set('us-mac-cpi',  fmt(usa.inflation.value),     usa.inflation.source);
+      if(usa.inflation_mom?.value!=null) set('us-mac-cpim', fmt(usa.inflation_mom.value), usa.inflation_mom.source);
+      if(usa.gdp_annual?.value!=null)    set('us-mac-gdp',  fmt(usa.gdp_annual.value),    usa.gdp_annual.source);
+      if(usa.unemployment?.value!=null)  set('us-mac-unem', fmt(usa.unemployment.value),  usa.unemployment.source);
+      if(usa.trade_balance?.value!=null){
+        const tb=usa.trade_balance.value;
+        set('us-mac-trade',(tb>=0?'+':'')+parseFloat(tb).toFixed(2)+' B USD', usa.trade_balance.source);
       }
 
       // UST desde macro_data.json

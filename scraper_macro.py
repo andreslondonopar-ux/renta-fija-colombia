@@ -1,6 +1,6 @@
 """
-scraper_macro.py — Indicadores macro Colombia via Trading Economics
-Playwright abre tradingeconomics.com/colombia/indicators y lee la tabla.
+scraper_macro.py — Indicadores macro Colombia y USA via Trading Economics
+Playwright abre tradingeconomics.com/{país}/indicators y lee la tabla.
 """
 import json, re, datetime
 from pathlib import Path
@@ -8,13 +8,22 @@ from pathlib import Path
 TODAY = datetime.date.today().isoformat()
 NOW   = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-FALLBACK = {
+FALLBACK_COL = {
     "interest_rate": {"value": 11.25, "source": "BanRep · fallback"},
     "inflation":     {"value": 5.68,  "source": "DANE · fallback"},
     "inflation_mom": {"value": 0.78,  "source": "DANE · fallback"},
     "gdp_annual":    {"value": 2.2,   "source": "DANE · fallback"},
     "unemployment":  {"value": 8.8,   "source": "DANE · fallback"},
     "trade_balance": {"value": -1200, "source": "DANE · fallback"},
+}
+
+FALLBACK_USA = {
+    "interest_rate": {"value": 4.25,  "source": "Fed · fallback"},
+    "inflation":     {"value": 2.7,   "source": "BLS · fallback"},
+    "inflation_mom": {"value": 0.2,   "source": "BLS · fallback"},
+    "gdp_annual":    {"value": 2.4,   "source": "BEA · fallback"},
+    "unemployment":  {"value": 4.2,   "source": "BLS · fallback"},
+    "trade_balance": {"value": -140,  "source": "BEA · fallback"},
 }
 
 # Indicadores a buscar — (key, texto exacto en TE, es_porcentaje)
@@ -27,10 +36,10 @@ INDICATORS = [
     ("trade_balance", "Balance of Trade",       False),
 ]
 
-def scrape_te():
+def scrape_te(country_slug):
     from playwright.sync_api import sync_playwright
 
-    url = "https://tradingeconomics.com/colombia/indicators"
+    url = f"https://tradingeconomics.com/{country_slug}/indicators"
     result = {}
 
     with sync_playwright() as p:
@@ -48,7 +57,6 @@ def scrape_te():
         page.goto(url, wait_until="domcontentloaded", timeout=45000)
         page.wait_for_timeout(4000)
 
-        # Cerrar popups de cookies/consent
         for sel in [
             "button:has-text('Accept')", "button:has-text('I Accept')",
             "button:has-text('Agree')", "[id*='cookie'] button",
@@ -62,7 +70,6 @@ def scrape_te():
                     break
             except: pass
 
-        # Esperar tabla
         try:
             page.wait_for_selector("table", timeout=10000)
         except:
@@ -71,7 +78,6 @@ def scrape_te():
         text = page.inner_text("body")
         print(f"  Texto: {len(text)} chars")
 
-        # Estrategia 1: leer filas de tabla con locator
         try:
             rows = page.locator("table tr").all()
             print(f"  Filas en tabla: {len(rows)}")
@@ -88,7 +94,6 @@ def scrape_te():
                     for key, name, is_pct in INDICATORS:
                         if key in result: continue
                         if name.lower() in indicator_cell.lower():
-                            # Extraer número de value_cell
                             num = re.search(r'-?[\d,]+\.?\d*', value_cell.replace(',','.'))
                             if num:
                                 try:
@@ -100,7 +105,6 @@ def scrape_te():
         except Exception as e:
             print(f"  Error leyendo tabla: {e}")
 
-        # Estrategia 2: regex sobre texto completo
         for key, name, is_pct in INDICATORS:
             if key in result: continue
             patterns = [
@@ -123,23 +127,38 @@ def scrape_te():
 
 
 def main():
-    print(f"=== Macro Colombia · {TODAY} ===\n")
+    print(f"=== Macro Colombia + USA · {TODAY} ===\n")
 
-    col = dict(FALLBACK)
+    # ── Colombia ──────────────────────────────────────────────────
+    col = dict(FALLBACK_COL)
     sources = []
-
     try:
-        scraped = scrape_te()
+        scraped = scrape_te("colombia")
         if scraped:
             col.update(scraped)
-            sources.append(f"TradingEconomics ({len(scraped)} indicadores)")
-            print(f"\n✓ Scraped: {len(scraped)} indicadores")
+            sources.append(f"TradingEconomics COL ({len(scraped)} ind.)")
+            print(f"\n✓ Colombia scraped: {len(scraped)} indicadores")
         else:
-            print("\n✗ Sin datos de TE — usando fallback")
-            sources.append("fallback")
+            print("\n✗ Colombia: sin datos de TE — usando fallback")
+            sources.append("COL fallback")
     except Exception as e:
-        print(f"\n✗ Error: {e}")
-        sources.append("fallback")
+        print(f"\n✗ Colombia error: {e}")
+        sources.append("COL fallback")
+
+    # ── USA ───────────────────────────────────────────────────────
+    usa = dict(FALLBACK_USA)
+    try:
+        scraped_usa = scrape_te("united-states")
+        if scraped_usa:
+            usa.update(scraped_usa)
+            sources.append(f"TradingEconomics USA ({len(scraped_usa)} ind.)")
+            print(f"\n✓ USA scraped: {len(scraped_usa)} indicadores")
+        else:
+            print("\n✗ USA: sin datos de TE — usando fallback")
+            sources.append("USA fallback")
+    except Exception as e:
+        print(f"\n✗ USA error: {e}")
+        sources.append("USA fallback")
 
     # Preservar UST existente
     macro_path = Path("macro_data.json")
@@ -151,6 +170,7 @@ def main():
 
     result = {
         "colombia": col,
+        "usa":      usa,
         "ust":      existing_ust or {"date": TODAY, "rates": []},
         "fecha":    TODAY,
         "updated":  NOW,
@@ -159,7 +179,11 @@ def main():
 
     macro_path.write_text(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n✓ macro_data.json guardado · {sources}")
+    print("\n── Colombia ──")
     for k, v in col.items():
+        print(f"  {k}: {v['value']} ({v['source']})")
+    print("\n── USA ──")
+    for k, v in usa.items():
         print(f"  {k}: {v['value']} ({v['source']})")
 
 
