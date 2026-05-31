@@ -749,12 +749,13 @@ function onModeChange(){
   if(curveSection){
     curveSection.style.display = (mode==='inicio_curva'||mode==='final_curva') ? 'block' : 'none';
   }
-  // Show TIR real section only for real modes
+  // Show sell section for real and curve modes
   const isReal = mode.includes('real');
+  const isCurvaMode = mode.includes('curva');
   const tirSection = $('tir-real-section');
   const tirHr = $('tir-real-hr');
-  if(tirSection){ tirSection.style.display = isReal ? 'block' : 'none'; }
-  if(tirHr){ tirHr.style.display = isReal ? 'block' : 'none'; }
+  if(tirSection){ tirSection.style.display = (isReal||isCurvaMode) ? 'block' : 'none'; }
+  if(tirHr){ tirHr.style.display = (isReal||isCurvaMode) ? 'block' : 'none'; }
   autoCA();
 }
 
