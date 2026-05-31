@@ -314,7 +314,8 @@ function recalcAggregate(){
   const bonds=window._aggBonds; if(!bonds) return;
   bonds.forEach((b,i)=>{
     const el=document.getElementById('agg-nom-'+i); if(!el) return;
-    const nomNew=parseInt((el.value||'').replace(/\./g,'').replace(/[^0-9]/g,''))||b._effNomOrig;
+    const _nr=parseInt((el.value||'').replace(/\./g,'').replace(/[^0-9]/g,''));
+    const nomNew=isNaN(_nr)?b._effNomOrig:_nr;
     const scale=b._effNomOrig>0?nomNew/b._effNomOrig:1;
     b.nom=nomNew; b.vGiro=b._vGiroOrig*scale; b.dv01=b._dv01Orig*scale;
   });
@@ -714,7 +715,7 @@ function initEstrategiaChart(){
           const bp=parseInt(($('est-bp-'+i)||{value:'0'}).value);if(bp===0)return;
           const b=bonds[i];const st=state[i];
           const sign=st.dir==='long'?1:-1;
-          const scale=(parseFloat(($('est-scale-'+i)||{value:'100'}).value)||100)/100;
+          const scale=(()=>{const v=parseFloat(($('est-scale-'+i)||{value:'100'}).value);return(isNaN(v)?100:v)/100;})();
           let price2=parseFloat(b.priceRnd||100);if(price2<2)price2*=100;
           let nom=(b.nom||0);
           if(!nom&&b.dv01&&b.dmod)nom=Math.abs(b.dv01)*10000/(b.dmod*(price2/100));
@@ -773,7 +774,7 @@ function onEstSlider(){
   const simPts=[];
   bonds.forEach((b,i)=>{
     const bp=parseInt(($('est-bp-'+i)||{value:'0'}).value)||0;
-    const scale=(parseFloat(($('est-scale-'+i)||{value:'100'}).value)||100)/100;
+    const scale=(()=>{const v=parseFloat(($('est-scale-'+i)||{value:'100'}).value);return(isNaN(v)?100:v)/100;})();
     const sign=state[i].dir==='long'?1:-1;
     let price=parseFloat(b.priceRnd||100);if(price<2)price*=100;
     // Si nom=0 (bonos guardados antes del fix), derivar de DV01
