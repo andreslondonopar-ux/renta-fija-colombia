@@ -52,6 +52,14 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .pf{grid-column:1/-1;border-color:var(--purple)}.pf:hover{border-color:var(--purple)}.pf h2{color:var(--purple3)}
 .pf .ci{background:var(--purple2);border-color:var(--purple);color:var(--purple3)}
 .macro-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.clocks-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.ck{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 8px}
+.ck-city{font-size:7.5px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:4px;margin-bottom:1px}
+.ck-time{font-size:13px;font-weight:700;font-family:monospace;color:var(--txt);line-height:1.1}
+.ck-exch{font-size:7.5px;color:var(--txt3);margin-top:1px}
+.ck-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.ck-open{background:var(--green)}
+.ck-closed{background:var(--txt3)}
 .mi{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 9px}
 .mi-lbl{font-size:8px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
 .mi-val{font-size:14px;font-weight:700}
@@ -155,6 +163,10 @@ svg{display:block;width:100%}
         <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="us-mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="us-mac-unem-sub">cargando...</div></div>
         <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="us-mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="us-mac-trade-sub">cargando...</div></div>
       </div>
+    </div>
+    <div>
+      <div class="sec-title">// Mercados · Hora local</div>
+      <div class="clocks-grid" id="clocks-grid"></div>
     </div>
     <div style="font-size:9px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
       Herramienta pedagógica · Curso Renta Fija Colombia 2026<br>
@@ -826,6 +838,48 @@ loadColJSON();
 loadUSTreasury();
 loadMacro();
 window.addEventListener('resize',()=>{if(COL_DATA.length)renderCol();if(US_DATA.length)renderUS();});
+
+// ── WORLD CLOCKS ──────────────────────────────────────────────
+const MARKETS=[
+  {city:'Bogotá',    flag:'🇨🇴', tz:'America/Bogota',     exch:'BVC',      open:[9,0],  close:[15,30], days:[1,2,3,4,5]},
+  {city:'Nueva York',flag:'🇺🇸', tz:'America/New_York',   exch:'NYSE·NDQ', open:[9,30], close:[16,0],  days:[1,2,3,4,5]},
+  {city:'São Paulo', flag:'🇧🇷', tz:'America/Sao_Paulo',  exch:'B3',       open:[10,0], close:[17,0],  days:[1,2,3,4,5]},
+  {city:'Londres',   flag:'🇬🇧', tz:'Europe/London',      exch:'LSE',      open:[8,0],  close:[16,30], days:[1,2,3,4,5]},
+  {city:'Frankfurt', flag:'🇩🇪', tz:'Europe/Berlin',      exch:'XETRA',    open:[9,0],  close:[17,30], days:[1,2,3,4,5]},
+  {city:'Dubái',     flag:'🇦🇪', tz:'Asia/Dubai',         exch:'DFM·ADX',  open:[10,0], close:[14,0],  days:[0,1,2,3,4]},
+  {city:'Mumbai',    flag:'🇮🇳', tz:'Asia/Kolkata',       exch:'BSE·NSE',  open:[9,15], close:[15,30], days:[1,2,3,4,5]},
+  {city:'Hong Kong', flag:'🇭🇰', tz:'Asia/Hong_Kong',     exch:'HKEX',     open:[9,30], close:[16,0],  days:[1,2,3,4,5]},
+  {city:'Shanghái',  flag:'🇨🇳', tz:'Asia/Shanghai',      exch:'SSE·SZSE', open:[9,30], close:[15,0],  days:[1,2,3,4,5]},
+  {city:'Tokio',     flag:'🇯🇵', tz:'Asia/Tokyo',         exch:'TSE',      open:[9,0],  close:[15,30], days:[1,2,3,4,5]},
+  {city:'Sídney',    flag:'🇦🇺', tz:'Australia/Sydney',   exch:'ASX',      open:[10,0], close:[16,0],  days:[1,2,3,4,5]},
+];
+
+function isMarketOpen(m, now){
+  const local=new Date(now.toLocaleString('en-US',{timeZone:m.tz}));
+  const day=local.getDay();
+  if(!m.days.includes(day)) return false;
+  const mins=local.getHours()*60+local.getMinutes();
+  const oMins=m.open[0]*60+m.open[1];
+  const cMins=m.close[0]*60+m.close[1];
+  return mins>=oMins && mins<cMins;
+}
+
+function renderClocks(){
+  const now=new Date();
+  const grid=document.getElementById('clocks-grid');
+  if(!grid) return;
+  grid.innerHTML=MARKETS.map(m=>{
+    const timeStr=now.toLocaleTimeString('es-CO',{timeZone:m.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    const open=isMarketOpen(m,now);
+    return`<div class="ck">
+      <div class="ck-city"><span class="ck-dot ${open?'ck-open':'ck-closed'}"></span>${m.flag} ${m.city}</div>
+      <div class="ck-time">${timeStr}</div>
+      <div class="ck-exch" style="color:${open?'var(--green3)':'var(--txt3)'}">${m.exch} · ${open?'Abierto':'Cerrado'}</div>
+    </div>`;
+  }).join('');
+}
+renderClocks();
+setInterval(renderClocks, 1000);
 
 // ── MAIN TABS
 function switchMainTab(id,el){
