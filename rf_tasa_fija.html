@@ -263,41 +263,51 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       </div>
       <button class="btn btn-green" onclick="calcular(true)">▶ Calcular TIR</button>
       <div class="hr"></div>
-      <div class="s-lbl">// Fondeo</div>
-      <div class="field-2">
-        <div class="field"><label>Tasa fondeo (% EA)</label>
-          <input type="number" id="fondeo_tasa" value="11.25" step="0.01" min="0">
-        </div>
-        <div class="field"><label>Días fondeo</label>
-          <input type="number" id="fondeo_dias" value="30" step="1" min="1">
-        </div>
+      <div class="toggle-row" onclick="toggleFondeo()">
+        <span class="toggle-label">⛽ Fondeo</span>
+        <div class="toggle-switch" id="fondeoToggle"><div class="toggle-knob"></div></div>
       </div>
-      <button class="btn btn-amber" onclick="calcularFondeo()">▶ Calcular fondeo</button>
+      <div class="caja-panel" id="fondeoPanel">
+        <div class="field-2">
+          <div class="field"><label>Tasa fondeo (% EA)</label>
+            <input type="number" id="fondeo_tasa" value="11.25" step="0.01" min="0">
+          </div>
+          <div class="field"><label>Días fondeo</label>
+            <input type="number" id="fondeo_dias" value="30" step="1" min="1">
+          </div>
+        </div>
+        <button class="btn btn-amber" onclick="calcularFondeo()">▶ Calcular fondeo</button>
+      </div>
       <div class="hr"></div>
-      <div class="s-lbl">// Calculadora inversa</div>
-      <div class="field">
-        <label>Objetivo</label>
-        <select id="inv-tipo" onchange="updateInvPlaceholder()">
-          <option value="dv01">DV01 objetivo ($)</option>
-          <option value="vgiro">Valor de giro objetivo ($)</option>
-          <option value="ganancia">Ganancia objetivo ($) con Δtasa</option>
-          <option value="tasa">Tasa para precio objetivo (%)</option>
-        </select>
+      <div class="toggle-row" onclick="toggleInverso()">
+        <span class="toggle-label">⟳ Calculadora inversa</span>
+        <div class="toggle-switch" id="inversoToggle"><div class="toggle-knob"></div></div>
       </div>
-      <div class="field" id="inv-field-valor">
-        <label id="inv-lbl-valor">DV01 objetivo ($)</label>
-        <input type="text" id="inv-valor" placeholder="ej: 5.000.000" oninput="fmtInvValor(this)" inputmode="numeric">
-        <input type="hidden" id="inv-valor-v">
+      <div class="caja-panel" id="inversoPanel">
+        <div class="field">
+          <label>Objetivo</label>
+          <select id="inv-tipo" onchange="updateInvPlaceholder()">
+            <option value="dv01">DV01 objetivo ($)</option>
+            <option value="vgiro">Valor de giro objetivo ($)</option>
+            <option value="ganancia">Ganancia objetivo ($) con Δtasa</option>
+            <option value="tasa">Tasa para precio objetivo (%)</option>
+          </select>
+        </div>
+        <div class="field" id="inv-field-valor">
+          <label id="inv-lbl-valor">DV01 objetivo ($)</label>
+          <input type="text" id="inv-valor" placeholder="ej: 5.000.000" oninput="fmtInvValor(this)" inputmode="numeric">
+          <input type="hidden" id="inv-valor-v">
+        </div>
+        <div class="field" id="inv-field-bp" style="display:none">
+          <label>Movimiento de tasa (bp)</label>
+          <input type="number" id="inv-bp" value="-50" step="1">
+        </div>
+        <div class="field" id="inv-field-precio" style="display:none">
+          <label>Precio objetivo (%)</label>
+          <input type="number" id="inv-precio" value="100" step="0.001" min="0">
+        </div>
+        <button class="btn" style="background:rgba(139,92,246,.2);border:1px solid #7c3aed;color:#c4b5fd;margin-top:4px" onclick="calcularInverso()">⟳ Calcular inverso</button>
       </div>
-      <div class="field" id="inv-field-bp" style="display:none">
-        <label>Movimiento de tasa (bp)</label>
-        <input type="number" id="inv-bp" value="-50" step="1">
-      </div>
-      <div class="field" id="inv-field-precio" style="display:none">
-        <label>Precio objetivo (%)</label>
-        <input type="number" id="inv-precio" value="100" step="0.001" min="0">
-      </div>
-      <button class="btn" style="background:rgba(139,92,246,.2);border:1px solid #7c3aed;color:#c4b5fd;margin-top:4px" onclick="calcularInverso()">⟳ Calcular inverso</button>
     </div>
   </div>
   <div class="main" id="main">
@@ -626,6 +636,10 @@ function showTab(t){
 
 let cajaOpen=false;
 function toggleCaja(){cajaOpen=!cajaOpen;$('cajaToggle').classList.toggle('on',cajaOpen);$('cajaPanel').classList.toggle('open',cajaOpen);}
+let fondeoOpen=false;
+function toggleFondeo(){fondeoOpen=!fondeoOpen;$('fondeoToggle').classList.toggle('on',fondeoOpen);$('fondeoPanel').classList.toggle('open',fondeoOpen);}
+let inversoOpen=false;
+function toggleInverso(){inversoOpen=!inversoOpen;$('inversoToggle').classList.toggle('on',inversoOpen);$('inversoPanel').classList.toggle('open',inversoOpen);}
 
 // ── TICKER ROBUSTO ────────────────────────────────────────────
 const FALLBACK=[
