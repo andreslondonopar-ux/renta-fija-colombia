@@ -419,16 +419,32 @@ function initSimulador(){
             return c.datasetIndex===1?`${r.dir==='long'?'▲':'▼'} ${fmtDate(r.vencISO)}: ${fmt(c.parsed.y,2)}%`:`Simulado: ${fmt(c.parsed.y,2)}% (${bp>0?'+':''}${bp}bp)`;
           }}}},
         scales:{
-          x:{title:{display:true,text:'Plazo (años)',color:'#4a5568',font:{size:10}},ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'}},
+          x:{title:{display:true,text:'Plazo (años)',color:'#4a5568',font:{size:10}},ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'},min:0,suggestedMax:25},
           y:{title:{display:true,text:'Yield (%)',color:'#4a5568',font:{size:10}},ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(1)+'%'},grid:{color:'rgba(255,255,255,.03)'}}
         }}
     });
   }
 
-  fetch('datos_curva.json').then(r=>r.json()).then(curva=>{
+  function fallbackCurva(){
+    // Curva sintética interpolada entre los bonos del portafolio
+    const sorted=[...refPts].sort((a,b)=>a.x-b.x);
+    if(sorted.length<2) return sorted.map(p=>({x:p.x,y:p.y}));
+    const pts=[];
+    // Extender hacia la izquierda
+    const slope=(sorted[1].y-sorted[0].y)/(sorted[1].x-sorted[0].x);
+    for(let t=0.5;t<sorted[0].x;t+=0.5) pts.push({x:t,y:Math.max(0,sorted[0].y-slope*(sorted[0].x-t))});
+    sorted.forEach(p=>pts.push({x:p.x,y:p.y}));
+    // Extender hacia la derecha
+    const last=sorted[sorted.length-1],prev=sorted[sorted.length-2];
+    const s2=(last.y-prev.y)/(last.x-prev.x);
+    for(let t=last.x+0.5;t<=last.x+5;t+=0.5) pts.push({x:t,y:Math.max(0,last.y+s2*(t-last.x))});
+    return pts;
+  }
+
+  fetch('datos_curva.json').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(curva=>{
     const pts=curva.filter(b=>b.plazo>0.05&&b.tir>0&&b.tir<30).sort((a,b)=>a.plazo-b.plazo).map(b=>({x:b.plazo,y:b.tir}));
-    buildChart(pts);
-  }).catch(()=>buildChart([]));
+    buildChart(pts.length>=2?pts:fallbackCurva());
+  }).catch(()=>buildChart(fallbackCurva()));
 }
 
 function onSimSlider(){
