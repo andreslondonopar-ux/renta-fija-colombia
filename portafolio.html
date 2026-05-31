@@ -341,6 +341,7 @@ function recalcAggregate(){
     <td style="color:${m.totDV01net>=0?'var(--green3)':'var(--red3)'}">${(m.totDV01net>=0?'+':'')+fmtP(m.totDV01net)}</td>
     <td>100%</td>
   </tr>`;
+  if(typeof onEstSlider==='function') onEstSlider();
 }
 
 function resetAggNom(){
