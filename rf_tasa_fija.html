@@ -354,6 +354,79 @@ function fmtNom(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/
 function fmtCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 function fmtPFCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('pf_caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 
+function buildMultivarHTML(){
+  const d=window._especData;if(!d||!d.rows.length)return'';
+  const{rows}=d;const n=rows.length;
+  function gan(r,nom,bp){return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*(r.res.priceRnd/100)*nom*r.sign;}
+  const BPS=[-200,-150,-100,-75,-50,-25,0,25,50,75,100,150,200];
+  const hdr=`<div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px">// Análisis de sensibilidad relativa</div>`;
+
+  if(n===2){
+    const[r1,r2]=rows;
+    // pre-calcular para escala de color
+    let absMax=0;
+    const matrix=BPS.map(bp1=>BPS.map(bp2=>{const v=gan(r1,r1.nomActual,bp1)+gan(r2,r2.nomActual,bp2);absMax=Math.max(absMax,Math.abs(v));return v;}));
+    function bg(v){const t=absMax>0?Math.min(Math.abs(v)/absMax,1):0;return v>=0?`rgba(34,197,94,${(t*.6+.08).toFixed(2)})`:`rgba(239,68,68,${(t*.6+.08).toFixed(2)})`;}
+    function tc(v){return v>=0?'#86efac':'#fca5a5';}
+    return hdr+`<div style="font-size:10px;color:var(--txt2);margin-bottom:6px">
+        Filas → <span style="${r1.dir==='long'?'color:var(--green3)':'color:var(--red3)'}">${r1.dir==='long'?'▲':'▼'} ${fmtDate(r1.vencISO)}</span> &nbsp;·&nbsp;
+        Columnas → <span style="${r2.dir==='long'?'color:var(--green3)':'color:var(--red3)'}">${r2.dir==='long'?'▲':'▼'} ${fmtDate(r2.vencISO)}</span>
+      </div>
+      <div class="tscroll"><table style="border-collapse:collapse;font-size:10px;font-family:monospace">
+        <thead><tr>
+          <th style="padding:4px 6px;background:var(--bg3);border:1px solid var(--border);color:var(--txt3)">↓ \\ →</th>
+          ${BPS.map(bp=>`<th style="padding:4px 6px;background:var(--bg3);border:1px solid var(--border);color:var(--txt3);white-space:nowrap">${bp>0?'+':''}${bp}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${matrix.map((row,i)=>`<tr>
+            <td style="padding:4px 6px;background:var(--bg3);border:1px solid var(--border);color:var(--txt2);font-weight:700;white-space:nowrap">${BPS[i]>0?'+':''}${BPS[i]}bp</td>
+            ${row.map(v=>`<td style="padding:3px 5px;border:1px solid rgba(255,255,255,.04);background:${bg(v)};color:${tc(v)};text-align:right;white-space:nowrap">${v>=0?'+':''}${fmtM(v)}</td>`).join('')}
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+  }
+
+  // 3+ bonos: escenarios predefinidos
+  const scens3=[
+    {name:'Paralelo −200bp',bps:[-200,-200,-200,-200]},
+    {name:'Paralelo −100bp',bps:[-100,-100,-100,-100]},
+    {name:'Paralelo −50bp', bps:[-50,-50,-50,-50]},
+    {name:'★ Sin cambio',   bps:[0,0,0,0]},
+    {name:'Paralelo +50bp', bps:[50,50,50,50]},
+    {name:'Paralelo +100bp',bps:[100,100,100,100]},
+    {name:'Paralelo +200bp',bps:[200,200,200,200]},
+    {name:'Flattening suave (-100/−50/0)',  bps:[-100,-50,0,50]},
+    {name:'Flattening fuerte (−200/−100/0)',bps:[-200,-100,0,100]},
+    {name:'Steepening suave (0/+50/+100)', bps:[0,50,100,150]},
+    {name:'Steepening fuerte (0/+100/+200)',bps:[0,100,200,300]},
+    {name:'Bull flat (−150/−100/−50)',     bps:[-150,-100,-50,0]},
+    {name:'Bear steep (+50/+100/+150)',    bps:[50,100,150,200]},
+    {name:'Butterfly+ (alas ↓, belly ↑)', bps:[-50,100,-50,100]},
+    {name:'Butterfly− (alas ↑, belly ↓)', bps:[50,-100,50,-100]},
+    {name:'Twist: corto↑ largo↓',         bps:[100,50,-50,-100]},
+    {name:'Twist: corto↓ largo↑',         bps:[-100,-50,50,100]},
+  ];
+  return hdr+`<div class="tscroll"><table class="st">
+    <thead><tr>
+      <th style="text-align:left">Escenario</th>
+      ${rows.map(r=>`<th>${fmtDate(r.vencISO)}<br><span style="font-size:9px;font-weight:400;color:${r.dir==='long'?'var(--green3)':'var(--red3)'}">${r.dir==='long'?'▲':'▼'}</span></th>`).join('')}
+      <th>P&L Neto</th>
+    </tr></thead>
+    <tbody>
+      ${scens3.map(sc=>{
+        const bps=sc.bps.slice(0,n);
+        const neto=rows.reduce((s,r,i)=>s+gan(r,r.nomActual,bps[i]??0),0);
+        const gc=neto>=0?'color:var(--green3)':'color:var(--red3)';
+        const bpCells=rows.map((r,i)=>{const b=bps[i]??0;return`<td style="color:var(--txt3);font-size:10px">${b>0?'+':''}${b}bp</td>`;}).join('');
+        return`<tr class="${sc.name.includes('★')?'cur':''}">
+          <td style="text-align:left;font-size:11px">${sc.name}</td>${bpCells}
+          <td style="${gc};font-weight:700">${neto>=0?'+':''}${fmtM(neto)}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div>`;
+}
+
 function optimizarEspec(modo){
   const d=window._especData;if(!d||!d.rows.length)return;
   const{rows,cajaPFV,bpDestacado}=d;
@@ -442,6 +515,8 @@ function recalcEspec(){
     const el=$('espec-net-'+i);
     if(el){el.textContent=(neto>=0?'+':'')+fmtM(neto);el.style.color=neto>=0?'var(--green3)':'var(--red3)';}
   });
+
+  const mv=$('espec-multivar-wrap');if(mv)mv.innerHTML=buildMultivarHTML();
 
   if(modoRelativo){
     const L=rows.find(r=>r.dir==='long'),S=rows.find(r=>r.dir==='short');
@@ -1269,6 +1344,7 @@ function calcPF(){
           </table>
         </div>
         <div id="espec-neutro-wrap">${neutroWrap()}</div>
+        <div id="espec-multivar-wrap">${buildMultivarHTML()}</div>
       </div>`;
     $('pfResults').appendChild(especCard);
   }
