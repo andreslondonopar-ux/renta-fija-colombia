@@ -363,6 +363,8 @@ function showTab(t){
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calc','pf'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $('page-'+t).classList.add('active');
+  const saveBtn=$('btn-save-pf');
+  if(saveBtn) saveBtn.style.display=t==='pf'?'none':'block';
 }
 
 let cajaOpen=false;
