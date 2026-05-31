@@ -149,6 +149,9 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg3)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.bdir-btn{padding:3px 8px;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--border2);font-family:inherit;background:var(--bg3);color:var(--txt3);transition:all .12s;white-space:nowrap}
+.bdir-l-on{background:var(--green2)!important;color:var(--green3)!important;border-color:var(--green)!important}
+.bdir-s-on{background:var(--red2)!important;color:var(--red3)!important;border-color:var(--red)!important}
 </style>
 </head>
 <body>
@@ -321,6 +324,15 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
           <label style="font-size:10px;color:var(--txt2);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em">Fecha valoración</label>
           <input type="date" id="pf_fecha" style="padding:6px 8px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);background:var(--bg3);color-scheme:dark">
         </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:10px;color:var(--amber3);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em">💼 Caja espec. ($)</label>
+          <input type="text" id="pf_caja_display" placeholder="10.000.000.000" oninput="fmtPFCaja(this)" inputmode="numeric" style="width:130px;padding:6px 8px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);background:var(--bg3);font-family:monospace">
+          <input type="hidden" id="pf_caja_val" value="10000000000">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:10px;color:var(--amber3);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em">Δ bp</label>
+          <input type="number" id="pf_bp_espec" value="-50" step="1" style="width:60px;padding:6px 8px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);background:var(--bg3);font-family:monospace;text-align:center">
+        </div>
         <button class="btn btn-blue btn-sm" onclick="calcPF()">▶ Calcular portafolio</button>
         <button class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border2);color:var(--txt2)" onclick="addBond()">+ Añadir bono</button>
       </div>
@@ -340,6 +352,9 @@ function fmtDate(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m
 
 function fmtNom(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('nom_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 function fmtCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
+function fmtPFCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('pf_caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
+// Init display
+document.addEventListener('DOMContentLoaded',()=>{const el=$('pf_caja_display');if(el)el.value=(10000000000).toLocaleString('es-CO',{maximumFractionDigits:0});});
 
 function updateClock(){$('clock').textContent=new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});}
 setInterval(updateClock,1000);updateClock();
@@ -936,8 +951,13 @@ let bondCount=0;
 function addBond(){
   bondCount++;const id=bondCount;
   const div=document.createElement('div');div.id='bond-'+id;div.className='bond-card';
+  div.dataset.dir='long';
   div.innerHTML=`<div class="bond-card-hdr">
-    <span class="bond-num">Bono #${id}</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="bond-num">Bono #${id}</span>
+      <button id="bdir-l-${id}" class="bdir-btn bdir-l-on" onclick="setBondDir(${id},'long')">▲ Largo</button>
+      <button id="bdir-s-${id}" class="bdir-btn" onclick="setBondDir(${id},'short')">▼ Corto</button>
+    </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span class="bond-result" id="br-${id}"></span>
       <button class="del-btn" onclick="document.getElementById('bond-${id}').remove()">✕</button>
@@ -1009,10 +1029,10 @@ function calcPF(){
   <div class="card">
     <div class="c-hdr">Composición del portafolio</div>
     <div class="c-body"><div class="tscroll"><table class="pf-bond-table">
-      <thead><tr><th>Bono</th><th>Vencimiento</th><th>Nominal</th><th>Precio sucio</th><th>Valor mercado</th><th>Peso %</th><th>D. Mod.</th><th>DV01</th><th>Contrib. D*</th></tr></thead>
+      <thead><tr><th>Bono</th><th>Dir.</th><th>Vencimiento</th><th>Nominal</th><th>Precio sucio</th><th>Valor mercado</th><th>Peso %</th><th>D. Mod.</th><th>DV01</th><th>Contrib. D*</th></tr></thead>
       <tbody>
-        ${rows.map(r=>{const w=r.res.vGiro/totalVM*100;return`<tr><td>Bono #${r.id}</td><td>${fmtDate(r.vencISO)}</td><td>${fmtM(r.nom)}</td><td>${fmt(r.res.price,4)}%</td><td>${fmtM(r.res.vGiro)}</td><td>${fmt(w,2)}%<div class="weight-bar"><div class="weight-fill" style="width:${w}%"></div></div></td><td>${fmt(r.res.dmod,4)}</td><td>${fmtP(r.res.dv01)}</td><td>${fmt(r.res.dmod*w/100,4)}</td></tr>`;}).join('')}
-        <tr class="pf-total"><td colspan="2">TOTAL</td><td>${fmtM(totalNom)}</td><td>—</td><td>${fmtM(totalVM)}</td><td>100%</td><td>${fmt(dmodPF,4)}</td><td>${fmtP(dv01PF)}</td><td>${fmt(dmodPF,4)}</td></tr>
+        ${rows.map(r=>{const w=r.res.vGiro/totalVM*100;const dir=getBondDir(r.id);const dcs=dir==='long'?'color:var(--green3)':'color:var(--red3)';return`<tr><td>Bono #${r.id}</td><td style="${dcs};font-weight:700">${dir==='long'?'▲':'▼'}</td><td>${fmtDate(r.vencISO)}</td><td>${fmtM(r.nom)}</td><td>${fmt(r.res.price,4)}%</td><td>${fmtM(r.res.vGiro)}</td><td>${fmt(w,2)}%<div class="weight-bar"><div class="weight-fill" style="width:${w}%"></div></div></td><td>${fmt(r.res.dmod,4)}</td><td>${fmtP(r.res.dv01)}</td><td>${fmt(r.res.dmod*w/100,4)}</td></tr>`;}).join('')}
+        <tr class="pf-total"><td colspan="3">TOTAL</td><td>${fmtM(totalNom)}</td><td>—</td><td>${fmtM(totalVM)}</td><td>100%</td><td>${fmt(dmodPF,4)}</td><td>${fmtP(dv01PF)}</td><td>${fmt(dmodPF,4)}</td></tr>
       </tbody>
     </table></div></div>
   </div>
@@ -1027,6 +1047,83 @@ function calcPF(){
     </tbody></table></div></div>
   </div>`;
   window._pfRows=rows;window._pfTotalVM=totalVM;updatePFScen();
+
+  // ── ESTRATEGIA ESPECULATIVA ────────────────────────────────
+  const cajaPFV=parseFloat($('pf_caja_val')?.value)||0;
+  const bpEspecV=parseFloat($('pf_bp_espec')?.value)||-50;
+  if(cajaPFV>0 && rows.length>0){
+    const especRows=rows.map(r=>{
+      const dir=getBondDir(r.id);
+      const sign=dir==='long'?1:-1;
+      const nomC=cajaPFV/(r.res.priceRnd/100);
+      const dv01C=r.res.dmod*cajaPFV/10000;
+      const ganC=(-r.res.dmod*(bpEspecV/10000)+0.5*r.res.conv*(bpEspecV/10000)**2)*cajaPFV;
+      return{...r,dir,sign,nomC,dv01Signed:dv01C*sign,ganSigned:ganC*sign};
+    });
+    const netDV01=especRows.reduce((s,r)=>s+r.dv01Signed,0);
+    const netGan=especRows.reduce((s,r)=>s+r.ganSigned,0);
+
+    // DVO1-neutro: 1 largo + 1 corto
+    const longs=especRows.filter(r=>r.dir==='long');
+    const shorts=especRows.filter(r=>r.dir==='short');
+    let neutroHTML='';
+    if(longs.length===1&&shorts.length===1){
+      const L=longs[0],S=shorts[0];
+      const dv01L=L.res.dmod*cajaPFV/10000;
+      const nomCortoNeutro=dv01L*10000/(S.res.dmod*(S.res.priceRnd/100));
+      const ratio=(cajaPFV/(L.res.priceRnd/100))/nomCortoNeutro;
+      neutroHTML=`<div class="info-box" style="margin-top:10px">
+        <strong style="color:var(--amber3)">DVO1 neutro (riesgo paralelo neutralizado):</strong><br>
+        Largo <strong>${fmtDate(L.vencISO)}</strong>: nominal ${fmtM(cajaPFV/(L.res.priceRnd/100))} · DVO1 +${fmtM(dv01L)}<br>
+        Corto <strong>${fmtDate(S.vencISO)}</strong>: nominal necesario <strong style="color:var(--amber3)">${fmtM(nomCortoNeutro)}</strong> · DVO1 −${fmtM(dv01L)}<br>
+        Ratio nominal largo/corto: <strong style="color:var(--blue3)">${fmt(ratio,3)}x</strong>
+        &nbsp;·&nbsp; Con esta cobertura, ganancia neta ≈ <strong style="color:var(--txt3)">$0</strong> ante paralelo · solo ganas/pierdes si el spread entre referencias se mueve.
+      </div>`;
+    }
+
+    const especCard=document.createElement('div');
+    especCard.className='card';
+    especCard.style.borderColor='var(--amber)';
+    especCard.innerHTML=`
+      <div class="c-hdr" style="border-color:var(--amber)">⚡ Estrategia especulativa · Caja ${fmtM(cajaPFV)} · ${bpEspecV>0?'+':''}${bpEspecV}bp</div>
+      <div class="c-body">
+        <div class="tscroll">
+          <table class="pf-bond-table">
+            <thead><tr>
+              <th style="text-align:left">Vencimiento</th>
+              <th style="text-align:left">Dirección</th>
+              <th>D. Mod.</th>
+              <th>Nominal c/ caja</th>
+              <th>DVO1 (firmado)</th>
+              <th>Ganancia ${bpEspecV>0?'+':''}${bpEspecV}bp</th>
+            </tr></thead>
+            <tbody>
+              ${especRows.map(r=>{
+                const dcs=r.dv01Signed>=0?'color:var(--green3)':'color:var(--red3)';
+                const gcs=r.ganSigned>=0?'color:var(--green3)':'color:var(--red3)';
+                const dirLabel=r.dir==='long'?'▲ Largo':'▼ Corto';
+                const dirStyle=r.dir==='long'?'color:var(--green3);font-weight:700':'color:var(--red3);font-weight:700';
+                return`<tr>
+                  <td style="text-align:left;color:var(--txt2)">${fmtDate(r.vencISO)}</td>
+                  <td style="text-align:left;${dirStyle}">${dirLabel}</td>
+                  <td>${fmt(r.res.dmod,4)}</td>
+                  <td>${fmtM(r.nomC)}</td>
+                  <td style="${dcs}">${r.dv01Signed>=0?'+':''}${fmtM(r.dv01Signed)}</td>
+                  <td style="${gcs}">${r.ganSigned>=0?'+':''}${fmtM(r.ganSigned)}</td>
+                </tr>`;
+              }).join('')}
+              <tr class="pf-total">
+                <td colspan="4">POSICIÓN NETA</td>
+                <td style="${netDV01>=0?'color:var(--green3)':'color:var(--red3)'}">${netDV01>=0?'+':''}${fmtM(netDV01)}</td>
+                <td style="${netGan>=0?'color:var(--green3)':'color:var(--red3)'}">${netGan>=0?'+':''}${fmtM(netGan)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        ${neutroHTML}
+      </div>`;
+    $('pfResults').appendChild(especCard);
+  }
 }
 function updatePFScen(){
   if(!window._pfRows)return;
@@ -1036,7 +1133,16 @@ function updatePFScen(){
 }
 addBond();addBond();addBond();
 
-// ── DIRECCIÓN ─────────────────────────────────────────────────
+// ── DIRECCIÓN PORTAFOLIO ───────────────────────────────────────
+function setBondDir(id,dir){
+  const lB=$('bdir-l-'+id),sB=$('bdir-s-'+id);
+  if(lB){lB.classList.toggle('bdir-l-on',dir==='long');}
+  if(sB){sB.classList.toggle('bdir-s-on',dir==='short');}
+  const card=$('bond-'+id);if(card)card.dataset.dir=dir;
+}
+function getBondDir(id){return $('bond-'+id)?.dataset?.dir||'long';}
+
+// ── DIRECCIÓN CALCULADORA ──────────────────────────────────────
 let _posDir='long';
 function setDirection(dir){
   _posDir=dir;const isLong=dir==='long';
