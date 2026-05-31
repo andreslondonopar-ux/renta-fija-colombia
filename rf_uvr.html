@@ -259,6 +259,21 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       </div>
       <button class="btn btn-blue" onclick="calcular(false)">▶ Calcular</button>
       <div class="hr"></div>
+      <div class="toggle-row" onclick="toggleCaja()">
+        <span class="toggle-label">💼 Restricción de caja</span>
+        <div class="toggle-switch" id="cajaToggle"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="caja-panel" id="cajaPanel">
+        <div class="field"><label>Caja disponible ($)</label>
+          <input type="text" id="caja_display" value="12.000.000.000" oninput="fmtCaja(this)" inputmode="numeric">
+          <input type="hidden" id="caja_val" value="12000000000">
+        </div>
+        <div class="field"><label>Movimiento esperado (bp)</label>
+          <input type="number" id="caja_bp" value="-50" step="1">
+        </div>
+        <button class="btn btn-amber" onclick="calcular(false)">▶ Calcular con caja</button>
+      </div>
+      <div class="hr"></div>
       <div class="s-lbl">// Escenario de venta</div>
       <div class="field"><label>Fecha de venta</label>
         <input type="date" id="f_venta" value="2026-03-24">
@@ -1028,6 +1043,28 @@ function calcular(showTIR){
   }
   const crossIdx=stepsL,crossPrice=price;
 
+  // Restricción de caja
+  let cajaHTML='';
+  if(cajaOpen){
+    const caja=parseFloat($('caja_val').value)||0;
+    const bp=parseFloat($('caja_bp').value)||0;
+    const nomC=caja/(priceRnd/100);
+    const dv01C=dmod*(priceRnd/100)*nomC/10000;
+    const ganancia=(-dmod*(bp/10000)+0.5*conv*(bp/10000)**2)*(priceRnd/100)*nomC;
+    cajaHTML=`<div class="card" style="border-color:var(--amber)">
+      <div class="c-hdr" style="border-color:var(--amber)">💼 Restricción de caja</div>
+      <div class="c-body">
+        <div class="mg4" style="margin-bottom:10px">
+          <div class="m amber"><div class="m-lbl">Caja disponible</div><div class="m-val" style="font-size:14px">${fmtM(caja)}</div><div class="m-unit">${fmtP(caja)}</div></div>
+          <div class="m"><div class="m-lbl">Nominal comprable</div><div class="m-val" style="font-size:14px">${fmtM(nomC)}</div><div class="m-unit">a precio ${fmt(priceRnd,4)}%</div></div>
+          <div class="m blue"><div class="m-lbl">DV01 posición</div><div class="m-val" style="font-size:14px">${fmtP(dv01C)}</div><div class="m-unit">$ por 1bp</div></div>
+          <div class="m ${ganancia>=0?'green':'red'}"><div class="m-lbl">Gan/Pérd (${bp>0?'+':''}${bp}bp)</div><div class="m-val" style="font-size:14px;color:${ganancia>=0?'var(--green3)':'var(--red3)'}">${fmtM(ganancia)}</div><div class="m-unit">incl. convexidad</div></div>
+        </div>
+        <div class="info-box">Caja <strong style="color:var(--amber3)">${fmtM(caja)}</strong> → compra <strong>${fmtM(nomC)}</strong> nominal · DV01 total: <strong style="color:var(--blue3)">${fmtP(dv01C)}</strong> · Ante ${bp>0?'+':''}${bp}bp: <strong style="color:${ganancia>=0?'var(--green3)':'var(--red3)'}">${fmtM(ganancia)}</strong></div>
+      </div>
+    </div>`;
+  }
+
   // Render
   $('main').innerHTML=`
   <div class="card">
@@ -1059,6 +1096,7 @@ function calcular(showTIR){
       <div class="info-box">+50bp → <span style="color:var(--red3)">−${fmtM(dv01*50)}</span> &nbsp;|&nbsp; −50bp → <span style="color:var(--green3)">+${fmtM(dv01*50)}</span> &nbsp;|&nbsp; +100bp → <span style="color:var(--red3)">−${fmtM(dv01*100)}</span> &nbsp;|&nbsp; −100bp → <span style="color:var(--green3)">+${fmtM(dv01*100)}</span></div>
     </div>
   </div>
+  ${cajaHTML}
   <div class="card">
     <div class="c-hdr">Curva precio-rendimiento</div>
     <div class="c-body"><div class="chart-wrap"><canvas id="ch1"></canvas></div></div>
