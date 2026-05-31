@@ -799,7 +799,7 @@ function calcular(showTIR=false){
         <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus} días causados</div></div>
         <div class="m amber"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
-      <div class="mg4">
+      <div class="mg4"${tirVencMetric?' style="grid-template-columns:repeat(5,1fr)"':''}>
         <div class="m green"><div class="m-lbl">IBR promedio</div><div class="m-val" style="font-size:15px">${fmt(avgIBR*100,4)}%</div><div class="m-unit">promedio de ${flows.length} flujos</div></div>
         <div class="m green"><div class="m-lbl">TIR negociación EA</div><div class="m-val" style="font-size:15px">${fmt(TIR_EA*100,4)}%</div><div class="m-unit">((1+NA/${freqP})^${freqP})-1</div></div>
         <div class="m"><div class="m-lbl">Pagos / año</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} mes(es)</div></div>

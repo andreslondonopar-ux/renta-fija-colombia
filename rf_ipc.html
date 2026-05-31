@@ -1010,7 +1010,7 @@ function calcular(showTIR=false){
         <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${dCaus} días causados</div></div>
         <div class="m ${mCls}"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
-      <div class="mg4">
+      <div class="mg4"${tirVencMetric?' style="grid-template-columns:repeat(5,1fr)"':''}>
         <div class="m blue"><div class="m-lbl">IPC vigente · liq</div><div class="m-val" style="font-size:15px">${fmt(ipcLiqVal*100,2)}%</div><div class="m-unit">${ipcLiqRec?ipcLbl(ipcLiqRec):'—'}</div></div>
         <div class="m"><div class="m-lbl">Spread cupón</div><div class="m-val" style="font-size:15px">${fmt(sc*100,2)}%</div><div class="m-unit">EA sobre IPC</div></div>
         <div class="m"><div class="m-lbl">Pagos / año</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} meses</div></div>
