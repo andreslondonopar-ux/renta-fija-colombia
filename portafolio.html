@@ -322,43 +322,6 @@ function renderAggregate(pf){
   },0);
   const carryDiario=carryAnual/365;
   const breakEven1d=Math.abs(totDV01net)>0?Math.abs(carryDiario/totDV01net)*100:0;
-  // Parallel scenarios
-  const scens=[-300,-200,-100,-50,-25,0,25,50,100,200,300];
-  const scenRows=scens.map(bp=>{
-    const pgTotal=bonds.reduce((s,b)=>s+calcPG(b,bp),0);
-    const z=bp===0;
-    const col=pgTotal>0?'var(--green3)':pgTotal<0?'var(--red3)':'var(--txt)';
-    const retorno=Math.abs(totVGiro)>0?pgTotal/Math.abs(totVGiro)*100:0;
-    return`<tr class="${z?'row-zero':''}">
-      <td style="color:${bp<0?'var(--green3)':bp>0?'var(--red3)':'var(--txt)'};text-align:left">${bp>0?'+':''}${bp}bp</td>
-      <td style="color:${col}">${z?'★ Actual':fmtM(pgTotal)}</td>
-      <td style="color:${col}">${z?'—':(retorno>=0?'+':'')+fmt(retorno,3)+'%'}</td>
-      <td style="color:var(--txt3)">${z?'—':fmtM(Math.abs(pgTotal)/bonds.length)}</td>
-    </tr>`;
-  }).join('');
-
-  // Curve scenarios
-  const curveScens=[
-    {label:'+100bp corto / flat largo', fn:b=>isShortBond(b)?100:0},
-    {label:'+50bp corto / flat largo',  fn:b=>isShortBond(b)?50:0},
-    {label:'+25bp corto / flat largo',  fn:b=>isShortBond(b)?25:0},
-    {label:'flat',                       fn:b=>0},
-    {label:'-25bp largo / flat corto',  fn:b=>!isShortBond(b)?-25:0},
-    {label:'-50bp largo / flat corto',  fn:b=>!isShortBond(b)?-50:0},
-    {label:'-100bp largo / flat corto', fn:b=>!isShortBond(b)?-100:0},
-  ];
-  const curveRows=curveScens.map(sc=>{
-    const pgTotal=bonds.reduce((s,b)=>s+calcPG(b,sc.fn(b)),0);
-    const z=sc.label==='flat';
-    const col=pgTotal>0?'var(--green3)':pgTotal<0?'var(--red3)':'var(--txt)';
-    const retorno=Math.abs(totVGiro)>0?pgTotal/Math.abs(totVGiro)*100:0;
-    return`<tr class="${z?'row-zero':''}">
-      <td style="text-align:left">${sc.label}</td>
-      <td style="color:${col}">${z?'★ Neutro':fmtM(pgTotal)}</td>
-      <td style="color:${col}">${z?'—':(retorno>=0?'+':'')+fmt(retorno,3)+'%'}</td>
-    </tr>`;
-  }).join('');
-
   // Per-bond table
   const bondRows=bonds.map(b=>{
     const sdv01=signedDV01(b);
@@ -664,8 +627,13 @@ function initEstrategiaChart(){
   function plazo(iso){return Math.max(0.01,(new Date(iso)-hoy)/(365.25*24*3600*1000));}
 
   const tipoColor={TF:'#f59e0b',IBR:'#3b82f6',IPC:'#10b981',UVR:'#8b5cf6'};
-  const refPts=bonds.map((b,i)=>({x:plazo(b.venc||''),y:(b.tirAvg||0)*100}));
+  // Si tirAvg=0 (bond guardado antes del fix), usar cpPct como proxy del yield
+  const refPts=bonds.map((b,i)=>{
+    const y=(b.tirAvg&&b.tirAvg>0)?(b.tirAvg*100):(b.cpPct||0);
+    return{x:plazo(b.venc||''),y};
+  });
   window._estRef=refPts;
+  const sinYield=bonds.some(b=>!(b.tirAvg&&b.tirAvg>0));
 
   const ptColors=bonds.map((b,i)=>state[i].dir==='long'?'#22c55e':'#ef4444');
   const ptSim=bonds.map((b,i)=>state[i].dir==='long'?'#86efac':'#fca5a5');
