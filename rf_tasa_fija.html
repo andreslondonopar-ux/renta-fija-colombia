@@ -501,9 +501,10 @@ function onSimSlider(){
     const el=$('sim-'+r.id);const bp=el?parseInt(el.value):0;
     const lbl=$('sim-lbl-'+r.id);if(lbl)lbl.textContent=(bp>0?'+':'')+bp+'bp';
     const pl=gan(r,r.nomActual,bp);totalPrecio+=pl;
-    // Carry: (TIR - fondeo) * VG * sign * dias/365
+    // Carry: usa yield simulado (entrada + Δbp) para reflejar el nivel al que entrarías
     const vg=d.cajaPFV*r.pct/100;
-    const carry=(r.ytm-fondeo)*vg*r.sign*(dias/365);
+    const yieldSim=r.ytm+bp/10000;
+    const carry=(yieldSim-fondeo)*vg*r.sign*(dias/365);
     totalCarry+=carry;
     const plEl=$('sim-pl-'+r.id);
     if(plEl){plEl.textContent=(pl>=0?'+':'')+fmtM(pl);plEl.style.color=pl>=0?'var(--green3)':'var(--red3)';}
