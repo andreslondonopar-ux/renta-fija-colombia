@@ -18,12 +18,12 @@ FALLBACK_COL = {
 }
 
 FALLBACK_USA = {
-    "interest_rate": {"value": 4.25,  "source": "Fed · fallback"},
-    "inflation":     {"value": 2.7,   "source": "BLS · fallback"},
-    "inflation_mom": {"value": 0.2,   "source": "BLS · fallback"},
-    "gdp_annual":    {"value": 2.4,   "source": "BEA · fallback"},
-    "unemployment":  {"value": 4.2,   "source": "BLS · fallback"},
-    "trade_balance": {"value": -140,  "source": "BEA · fallback"},
+    "interest_rate": {"value": 3.75,   "source": "Fed · fallback abr 2026"},
+    "inflation":     {"value": 3.8,    "source": "BLS · fallback abr 2026"},
+    "inflation_mom": {"value": 0.6,    "source": "BLS · fallback abr 2026"},
+    "gdp_annual":    {"value": 2.7,    "source": "BEA · fallback mar 2026"},
+    "unemployment":  {"value": 4.3,    "source": "BLS · fallback abr 2026"},
+    "trade_balance": {"value": -60.31, "source": "BEA · fallback mar 2026"},
 }
 
 # Indicadores a buscar — (key, texto exacto en TE, es_porcentaje)
