@@ -162,10 +162,10 @@ svg{display:block;width:100%}
 
     <!-- TAB: MERCADO -->
     <div class="main-panel active" id="panel-mercado">
-      <div style="display:flex;flex:1;min-height:0;overflow:hidden">
+      <div style="display:flex;flex:1;min-height:0;overflow-y:auto;align-items:flex-start">
 
         <!-- COLOMBIA -->
-        <div class="curve-box" style="flex:1;min-width:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+        <div class="curve-box" style="flex:1;min-width:0;border-right:1px solid var(--border);display:flex;flex-direction:column">
           <div class="curve-hdr">
             <div>
               <div class="curve-title" style="color:var(--amber3)">&#x1F1E8;&#x1F1F4; Curva TES Tasa Fija &mdash; Colombia</div>
@@ -174,11 +174,12 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="col-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-col" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
+          <div id="legend-svg-col" style="display:none;align-items:center;padding:3px 8px 3px;font-size:8px;color:#8090a8;gap:0;flex-shrink:0;border-top:1px solid var(--border)"></div>
           <div onclick="toggleRefTable('col')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
             <span id="col-ref-arrow" style="font-size:9px;color:#4a5568">▾</span>
             <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias TES</span>
           </div>
-          <div id="col-ref-wrap" style="overflow-y:auto;flex:1;min-height:180px">
+          <div id="col-ref-wrap" style="overflow-y:auto;max-height:600px;min-height:180px">
             <table class="yt">
               <thead><tr>
                 <th style="text-align:left">T&iacute;tulo</th>
@@ -191,7 +192,7 @@ svg{display:block;width:100%}
         </div>
 
         <!-- USA -->
-        <div class="curve-box" style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden">
+        <div class="curve-box" style="flex:1;min-width:0;display:flex;flex-direction:column">
           <div class="curve-hdr">
             <div>
               <div class="curve-title" style="color:var(--blue3)">&#x1F1FA;&#x1F1F8; Curva US Treasury</div>
@@ -200,11 +201,12 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-us" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
+          <div id="legend-svg-us" style="display:none;align-items:center;padding:3px 8px 3px;font-size:8px;color:#8090a8;gap:0;flex-shrink:0;border-top:1px solid var(--border)"></div>
           <div onclick="toggleRefTable('us')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
             <span id="us-ref-arrow" style="font-size:9px;color:#4a5568">▾</span>
             <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias UST</span>
           </div>
-          <div id="us-ref-wrap" style="overflow-y:auto;flex:1;min-height:180px">
+          <div id="us-ref-wrap" style="overflow-y:auto;max-height:600px;min-height:180px">
             <table class="yt">
               <thead><tr>
                 <th style="text-align:left">Plazo</th>
@@ -543,16 +545,6 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
     xlbls+=`<line x1="${cx.toFixed(1)}" y1="${(PT+cH).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3a55" stroke-width="1"/>`;
     xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xa}" font-size="8" fill="#8090a8">${p.label||''}</text>`;
   });
-  // Leyenda debajo del eje X (solo si hay curva histórica)
-  let legend='';
-  if(ghostDotData.length){
-    const lx=PL, ly=H-2;
-    legend+=`<line x1="${lx}" y1="${ly}" x2="${lx+14}" y2="${ly}" stroke="${color}" stroke-width="2"/>`;
-    legend+=`<text x="${lx+17}" y="${ly+3.5}" font-size="7.5" fill="#8090a8">Actual</text>`;
-    const lx2=lx+60;
-    legend+=`<line x1="${lx2}" y1="${ly}" x2="${lx2+14}" y2="${ly}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,2" stroke-opacity="0.6"/>`;
-    legend+=`<text x="${lx2+17}" y="${ly+3.5}" font-size="7.5" fill="#8090a8">${ghostDotData[0]?.label||'Anterior'}</text>`;
-  }
   const TW=92,TH=34;
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="${color}" stop-opacity="0.22"/>
@@ -562,7 +554,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   <path d="${areaD}" fill="url(#g${svgId})"/>
   ${ghost}
   <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>
-  ${dots}${xlbls}${legend}
+  ${dots}${xlbls}
   <g id="tip-${svgId}" display="none" pointer-events="none">
     <rect id="tip-bg-${svgId}" width="${TW}" height="${TH}" rx="3" fill="#0d1628" stroke="#263554" stroke-width="1"/>
     <text id="tip-a-${svgId}" x="7" y="13" font-size="9" fill="#9aaabf" font-family="'Segoe UI',monospace"></text>
@@ -599,14 +591,35 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
     else tip.setAttribute('display','none');
   });
   ovl.addEventListener('mouseleave',()=>tip.setAttribute('display','none'));
+  // Leyenda HTML debajo del SVG
+  const legendEl=document.getElementById('legend-'+svgId);
+  if(legendEl){
+    if(ghostDotData.length){
+      const gLabel=ghostDotData[0]?.label||'Anterior';
+      legendEl.innerHTML=`<span style="display:inline-flex;align-items:center;gap:4px">
+        <svg width="18" height="8" style="flex-shrink:0"><line x1="0" y1="4" x2="18" y2="4" stroke="${color}" stroke-width="2"/></svg>
+        <span>Actual</span>
+      </span>
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-left:12px">
+        <svg width="18" height="8" style="flex-shrink:0"><line x1="0" y1="4" x2="18" y2="4" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,2" stroke-opacity="0.6"/></svg>
+        <span style="opacity:.65">${gLabel}</span>
+      </span>`;
+      legendEl.style.display='flex';
+    } else {
+      legendEl.style.display='none';
+    }
+  }
 }
 
 function toggleRefTable(id){
   const wrap=document.getElementById(id+'-ref-wrap');
   const arrow=document.getElementById(id+'-ref-arrow');
   if(!wrap||!arrow)return;
-  const open=wrap.style.display!=='none';
-  wrap.style.display=open?'none':'';
+  const open=wrap.style.maxHeight!=='0px';
+  wrap.style.maxHeight=open?'0px':'600px';
+  wrap.style.minHeight=open?'0':'';
+  wrap.style.overflow='hidden';
+  if(!open) wrap.style.overflowY='auto';
   arrow.textContent=open?'▸':'▾';
 }
 
