@@ -314,8 +314,8 @@ function recalcAggregate(){
   const bonds=window._aggBonds; if(!bonds) return;
   bonds.forEach((b,i)=>{
     const el=document.getElementById('agg-nom-'+i); if(!el) return;
-    const nomNew=parseInt((el.value||'').replace(/\./g,'').replace(/[^0-9]/g,''))||b._nomOrig;
-    const scale=b._nomOrig>0?nomNew/b._nomOrig:1;
+    const nomNew=parseInt((el.value||'').replace(/\./g,'').replace(/[^0-9]/g,''))||b._effNomOrig;
+    const scale=b._effNomOrig>0?nomNew/b._effNomOrig:1;
     b.nom=nomNew; b.vGiro=b._vGiroOrig*scale; b.dv01=b._dv01Orig*scale;
   });
   const m=aggCalc(bonds);
@@ -330,8 +330,6 @@ function recalcAggregate(){
     const pc=document.getElementById('agg-pct-'+i); if(pc) pc.innerHTML=bar;
     const dv=document.getElementById('agg-dv01-'+i); if(dv){dv.textContent=(sdv01>=0?'+':'')+fmtP(sdv01);dv.style.color=sdv01>=0?'var(--green3)':'var(--red3)';}
     const dp=document.getElementById('agg-dp-'+i); if(dp) dp.innerHTML=dbar;
-    const nomEl=document.getElementById('agg-nom-'+i);
-    if(nomEl) nomEl.value=b.nom.toLocaleString('es-CO',{maximumFractionDigits:0});
   });
   const tf=document.getElementById('agg-tfoot');
   if(tf) tf.innerHTML=`<tr>
@@ -350,7 +348,7 @@ function resetAggNom(){
   bonds.forEach((b,i)=>{
     b.nom=b._nomOrig; b.vGiro=b._vGiroOrig; b.dv01=b._dv01Orig;
     const el=document.getElementById('agg-nom-'+i);
-    if(el) el.value=b._nomOrig.toLocaleString('es-CO',{maximumFractionDigits:0});
+    if(el) el.value=b._effNomOrig.toLocaleString('es-CO',{maximumFractionDigits:0});
   });
   recalcAggregate();
 }
@@ -371,7 +369,11 @@ function renderAggregate(pf){
     cupsRem:  parseFloat(b.cupsRem)  || 0,
   }));
   // Guardar originales para reset y escalado
-  bonds.forEach(b=>{b._nomOrig=b.nom;b._vGiroOrig=b.vGiro;b._dv01Orig=b.dv01;});
+  // _effNomOrig: nominal real si está guardado, sino derivado de vGiro/precio
+  bonds.forEach(b=>{
+    b._nomOrig=b.nom; b._vGiroOrig=b.vGiro; b._dv01Orig=b.dv01;
+    b._effNomOrig=b.nom>0?b.nom:(b.priceRnd>0?Math.round(b.vGiro/(b.priceRnd/100)):0);
+  });
   window._aggBonds=bonds;
 
   const m=aggCalc(bonds);
@@ -392,7 +394,7 @@ function renderAggregate(pf){
       <td>${pct(b.priceRnd||0,4)}</td>
       <td>${pct(b.pl||0,4)}</td>
       <td>${pct(b.ic||0,4)}</td>
-      <td><input id="agg-nom-${i}" type="text" value="${b.nom.toLocaleString('es-CO',{maximumFractionDigits:0})}" style="${nomStyle}" oninput="recalcAggregate()" inputmode="numeric"></td>
+      <td><input id="agg-nom-${i}" type="text" value="${b._effNomOrig.toLocaleString('es-CO',{maximumFractionDigits:0})}" style="${nomStyle}" oninput="recalcAggregate()" inputmode="numeric"></td>
       <td id="agg-vg-${i}">${fmtM(b.vGiro)}</td>
       <td id="agg-pct-${i}"><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(vgiroPct,100).toFixed(1)}%;background:var(--purple)"></div></div><span style="font-size:9px;min-width:32px">${vgiroPct.toFixed(1)}%</span></div></td>
       <td>${fmt(b.dmac||0,4)}</td>
