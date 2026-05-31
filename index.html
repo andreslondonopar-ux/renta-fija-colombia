@@ -174,7 +174,7 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="col-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-col" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div id="legend-svg-col" style="display:none;align-items:center;padding:3px 8px 3px;font-size:8px;color:#8090a8;gap:0;flex-shrink:0;border-top:1px solid var(--border)"></div>
+          <div id="legend-svg-col" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:8px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
           <div onclick="toggleRefTable('col')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
             <span id="col-ref-arrow" style="font-size:9px;color:#4a5568">▾</span>
             <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias TES</span>
@@ -201,7 +201,7 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-us" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div id="legend-svg-us" style="display:none;align-items:center;padding:3px 8px 3px;font-size:8px;color:#8090a8;gap:0;flex-shrink:0;border-top:1px solid var(--border)"></div>
+          <div id="legend-svg-us" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:8px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
           <div onclick="toggleRefTable('us')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
             <span id="us-ref-arrow" style="font-size:9px;color:#4a5568">▾</span>
             <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias UST</span>
@@ -596,14 +596,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   if(legendEl){
     if(ghostDotData.length){
       const gLabel=ghostDotData[0]?.label||'Anterior';
-      legendEl.innerHTML=`<span style="display:inline-flex;align-items:center;gap:4px">
-        <svg width="18" height="8" style="flex-shrink:0"><line x1="0" y1="4" x2="18" y2="4" stroke="${color}" stroke-width="2"/></svg>
-        <span>Actual</span>
-      </span>
-      <span style="display:inline-flex;align-items:center;gap:4px;margin-left:12px">
-        <svg width="18" height="8" style="flex-shrink:0"><line x1="0" y1="4" x2="18" y2="4" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,2" stroke-opacity="0.6"/></svg>
-        <span style="opacity:.65">${gLabel}</span>
-      </span>`;
+      legendEl.innerHTML=`<svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="${color}" stroke-width="2"/></svg>&thinsp;Actual&emsp;<svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,2" stroke-opacity="0.6"/></svg>&thinsp;<span style="opacity:.65">${gLabel}</span>`;
       legendEl.style.display='flex';
     } else {
       legendEl.style.display='none';
