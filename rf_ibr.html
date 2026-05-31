@@ -1196,11 +1196,17 @@ function renderIBRChart(){
   if(!canvas) return;
   const hasFRA = typeof FRA_DATA !== 'undefined' && Object.keys(FRA_DATA).length > 0;
   const histSample = Object.keys(IBR_REAL_DATA).sort().slice(-60);
-  const fraSample  = hasFRA ? Object.keys(FRA_DATA).sort() : [];
+  const lastHistDate = histSample.length ? histSample[histSample.length-1] : '';
+  const maxFRADate = lastHistDate
+    ? new Date(new Date(lastHistDate).getTime()+3*365*24*3600*1000).toISOString().slice(0,10)
+    : '';
+  const fraSample = hasFRA
+    ? Object.keys(FRA_DATA).filter(d=>FRA_DATA[d]<=0.5&&(!maxFRADate||d<=maxFRADate)).sort()
+    : [];
   const allDatesChart = [...new Set([...histSample,...fraSample])].sort();
   const labels    = allDatesChart.map(d=>{ const[y,m,dd]=d.split('-'); return dd+'/'+m+'/'+String(y).slice(2); });
   const histVals  = allDatesChart.map(d=>IBR_REAL_DATA[d]!=null?(IBR_REAL_DATA[d]*100).toFixed(4):null);
-  const fraVals   = allDatesChart.map(d=>hasFRA&&FRA_DATA[d]!=null&&IBR_REAL_DATA[d]==null?(FRA_DATA[d]*100).toFixed(4):null);
+  const fraVals   = allDatesChart.map(d=>hasFRA&&FRA_DATA[d]!=null&&FRA_DATA[d]<=0.5&&IBR_REAL_DATA[d]==null?(FRA_DATA[d]*100).toFixed(4):null);
   const lastHistI = allDatesChart.map(d=>IBR_REAL_DATA[d]!=null).lastIndexOf(true);
   const bridgeVals= allDatesChart.map((d,i)=>{
     if(i===lastHistI) return (IBR_REAL_DATA[d]*100).toFixed(4);
