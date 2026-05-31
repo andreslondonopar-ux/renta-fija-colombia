@@ -133,9 +133,6 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .pf-metric-val{font-size:22px;font-weight:800;color:var(--txt);font-family:monospace}
 .pf-metric-val.blue{color:var(--blue3)}.pf-metric-val.green{color:var(--green3)}.pf-metric-val.amber{color:var(--amber3)}
 .pf-metric-unit{font-size:11px;color:var(--txt3);margin-top:3px}
-.pf-scen-input{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border-top:1px solid var(--border)}
-.pf-scen-input input{width:80px;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg2);font-family:monospace;text-align:center}
-.pf-scen-result{font-size:13px;font-weight:700;font-family:monospace}
 .pf-bond-table{width:100%;border-collapse:collapse;font-size:11px}
 .pf-bond-table th{text-align:right;padding:6px 10px;border-bottom:1px solid var(--border2);color:var(--txt2);font-weight:700;font-size:10px;text-transform:uppercase;background:var(--bg3)}
 .pf-bond-table th:first-child,.pf-bond-table th:nth-child(2){text-align:left}
@@ -1309,12 +1306,6 @@ function calcPF(){
       <div class="pf-metric"><div class="pf-metric-lbl">DV01 total</div><div class="pf-metric-val green">${fmtP(dv01PF)}</div><div class="pf-metric-unit">$ por 1bp en todas las tasas</div></div>
       <div class="pf-metric"><div class="pf-metric-lbl">Convexidad portafolio</div><div class="pf-metric-val">${fmt(convPF,4)}</div><div class="pf-metric-unit">pond. por valor de mercado</div></div>
     </div>
-    <div class="pf-scen-input">
-      <span style="font-size:11px;color:var(--txt2)">Simular:</span>
-      <input type="number" id="pf_bp" value="-30" step="1" oninput="updatePFScen()">
-      <span style="font-size:11px;color:var(--txt2)">bp → Gan/Pérd portafolio:</span>
-      <span class="pf-scen-result" id="pf_scen_result"></span>
-    </div>
   </div>
   <div class="card">
     <div class="c-hdr">Composición del portafolio</div>
@@ -1327,7 +1318,7 @@ function calcPF(){
     </table></div></div>
   </div>
   `;
-  window._pfRows=rows;window._pfTotalVM=totalVM;updatePFScen();
+  window._pfRows=rows;window._pfTotalVM=totalVM;
 
   // ── ESTRATEGIA ESPECULATIVA ────────────────────────────────
   const cajaPFV=parseFloat($('pf_caja_val')?.value)||0;
@@ -1432,12 +1423,6 @@ function calcPF(){
     initSimulador();
     setTimeout(actualizarEscenarios,100);
   }
-}
-function updatePFScen(){
-  if(!window._pfRows)return;
-  const bp=parseFloat($('pf_bp').value)||0;
-  const gan=window._pfRows.reduce((s,r)=>{const pS=r.res.price+(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*r.res.price;return s+(pS-r.res.price)/100*r.nom;},0);
-  const el=$('pf_scen_result');el.textContent=(gan>=0?'+':'')+fmtM(gan);el.style.color=gan>=0?'var(--green3)':'var(--red3)';
 }
 addBond();addBond();addBond();
 
