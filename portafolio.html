@@ -434,7 +434,10 @@ function renderAggregate(pf){
       </div>
     </div>
 
-`;
+    ${buildEstrategiaCard(bonds)}
+  `;
+  setTimeout(initEstrategiaChart, 50);
+}
 }
 
 // ── COMPARE VIEW — fichas verticales lado a lado ───────────────
@@ -538,7 +541,6 @@ function renderCompare(pf){
         <div class="compare-grid">${cards}</div>
       </div>
     </div>
-    ${buildEstrategiaCard(bonds)}
     <div class="card">
       <div class="c-hdr">🏆 Destacados por métrica</div>
       <div class="c-body" style="padding:0">
@@ -567,8 +569,6 @@ function renderCompare(pf){
         </div>
       </div>
     </div>`;
-  // Init strategy chart after DOM update
-  setTimeout(initEstrategiaChart, 50);
 }
 
 // ── ESTRATEGIA RELATIVA ───────────────────────────────────────
