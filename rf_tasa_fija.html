@@ -354,6 +354,50 @@ function fmtNom(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/
 function fmtCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 function fmtPFCaja(el){const n=parseInt(el.value.replace(/\./g,'').replace(/[^0-9]/g,''))||0;$('pf_caja_val').value=n;el.value=n>0?n.toLocaleString('es-CO',{maximumFractionDigits:0}):'';}
 
+function optimizarEspec(modo){
+  const d=window._especData;if(!d||!d.rows.length)return;
+  const{rows,cajaPFV,bpDestacado}=d;
+  const longs=rows.filter(r=>r.dir==='long');
+  const shorts=rows.filter(r=>r.dir==='short');
+  const newPcts={};
+
+  if(modo==='max_gan'){
+    // Concentra 100% en el bono con mayor contribución al escenario
+    function contrib(r){return(-r.res.dmod*(bpDestacado/10000)+0.5*r.res.conv*(bpDestacado/10000)**2)*r.sign;}
+    const best=rows.reduce((b,r)=>contrib(r)>contrib(b)?r:b);
+    rows.forEach(r=>newPcts[r.id]=r.id===best.id?100:0);
+
+  }else if(modo==='dv01_neutro'){
+    if(longs.length!==1||shorts.length!==1){alert('DVO1 neutro requiere exactamente 1 bono largo y 1 corto.');return;}
+    const L=longs[0],S=shorts[0];
+    const sum=L.res.dmod+S.res.dmod;
+    newPcts[L.id]=100*S.res.dmod/sum;
+    newPcts[S.id]=100*L.res.dmod/sum;
+
+  }else if(modo==='igual_dv01'){
+    // pct_r ∝ 1/D_mod_r → cada bono aporta igual DVO1 absoluto
+    const invSum=rows.reduce((s,r)=>s+1/r.res.dmod,0);
+    rows.forEach(r=>newPcts[r.id]=100/(r.res.dmod*invSum));
+  }
+
+  rows.forEach(r=>{
+    const pct=newPcts[r.id]??r.pct;
+    r.pct=pct;r.nomActual=(cajaPFV*pct/100)/(r.res.priceRnd/100);
+    const el=$('espec-pct-'+r.id);if(el)el.value=fmt(pct,1);
+  });
+  recalcEspec();
+}
+
+function resetEspec(){
+  const d=window._especData;if(!d||!d.rows.length)return;
+  const pct=100/d.rows.length;
+  d.rows.forEach(r=>{
+    r.pct=pct;r.nomActual=(d.cajaPFV*pct/100)/(r.res.priceRnd/100);
+    const el=$('espec-pct-'+r.id);if(el)el.value=fmt(pct,1);
+  });
+  recalcEspec();
+}
+
 function onEspecPct(id){
   const d=window._especData;if(!d)return;
   const r=d.rows.find(r=>r.id===id);if(!r)return;
@@ -1161,6 +1205,15 @@ function calcPF(){
     especCard.innerHTML=`
       <div class="c-hdr" style="border-color:var(--amber)">⚡ Estrategia especulativa · Caja ${fmtM(cajaPFV)}</div>
       <div class="c-body">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+          <select id="espec-opt-modo" style="padding:5px 8px;font-size:11px;border:1px solid var(--border2);border-radius:var(--r);color:var(--txt);background:var(--bg3);font-family:inherit;flex:1;min-width:200px">
+            <option value="max_gan">Máx. ganancia · escenario ${bpDestacado>0?'+':''}${bpDestacado}bp</option>
+            <option value="dv01_neutro">DVO1 neutro (largo + corto)</option>
+            <option value="igual_dv01">Igual DVO1 por bono</option>
+          </select>
+          <button onclick="optimizarEspec(document.getElementById('espec-opt-modo').value)" style="padding:5px 14px;font-size:11px;font-weight:700;border:1px solid var(--amber);border-radius:var(--r);background:rgba(245,158,11,.15);color:var(--amber3);cursor:pointer;font-family:inherit">⚡ Optimizar</button>
+          <button onclick="resetEspec()" style="padding:5px 10px;font-size:11px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--txt3);cursor:pointer;font-family:inherit">↺ Reset</button>
+        </div>
         <div class="tscroll" style="margin-bottom:10px">
           <table class="pf-bond-table">
             <thead><tr>
