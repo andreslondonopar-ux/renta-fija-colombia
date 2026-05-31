@@ -1054,47 +1054,38 @@ function calcPF(){
   const cajaPFV=parseFloat($('pf_caja_val')?.value)||0;
   const bpDestacado=parseFloat($('pf_bp_espec')?.value)||-50;
   if(cajaPFV>0 && rows.length>0){
-    // Primera pasada: asignar dirección y nominal base (caja completa en cada bono)
+    // Cada bono usa la caja completa independientemente
     const especRows=rows.map(r=>{
       const dir=getBondDir(r.id);
       const sign=dir==='long'?1:-1;
       const nomC=cajaPFV/(r.res.priceRnd/100);
       const dv01C=r.res.dmod*cajaPFV/10000;
-      return{...r,dir,sign,nomC,dv01Signed:dv01C*sign,nomEfectivo:nomC};
+      return{...r,dir,sign,nomC,dv01Signed:dv01C*sign};
     });
 
     const longs=especRows.filter(r=>r.dir==='long');
     const shorts=especRows.filter(r=>r.dir==='short');
-
-    // Si hay exactamente 1 largo + 1 corto: caja al largo, corto = DVO1-neutro
     const modoRelativo=longs.length===1&&shorts.length===1;
-    if(modoRelativo){
-      const L=especRows.find(r=>r.dir==='long');
-      const S=especRows.find(r=>r.dir==='short');
-      const dv01L=L.res.dmod*cajaPFV/10000;
-      const nomCortoNeutro=dv01L*10000/(S.res.dmod*(S.res.priceRnd/100));
-      S.nomEfectivo=nomCortoNeutro;
-      S.dv01Signed=-(S.res.dmod*(S.res.priceRnd/100)*nomCortoNeutro/10000);
-    }
 
     const netDV01=especRows.reduce((s,r)=>s+r.dv01Signed,0);
 
-    // Ganancia por bp usando el nominal efectivo de cada bono
+    // Ganancia por bp: (−D*·Δr + ½·Conv·Δr²) × caja × signo
     function ganPorBp(r,bp){
-      return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*(r.res.priceRnd/100)*r.nomEfectivo*r.sign;
+      return(-r.res.dmod*(bp/10000)+0.5*r.res.conv*(bp/10000)**2)*cajaPFV*r.sign;
     }
 
     let neutroHTML='';
     if(modoRelativo){
       const L=longs[0],S=shorts[0];
       const dv01L=L.res.dmod*cajaPFV/10000;
-      const ratio=L.nomEfectivo/S.nomEfectivo;
+      const nomCortoNeutro=dv01L*10000/(S.res.dmod*(S.res.priceRnd/100));
+      const ratio=(cajaPFV/(L.res.priceRnd/100))/nomCortoNeutro;
       neutroHTML=`<div class="info-box" style="margin-top:10px">
-        <strong style="color:var(--amber3)">Posición relativa DVO1-neutro · caja al largo:</strong><br>
-        ▲ Largo <strong>${fmtDate(L.vencISO)}</strong>: caja ${fmtM(cajaPFV)} → nominal ${fmtM(L.nomEfectivo)} · DVO1 +${fmtM(dv01L)}<br>
-        ▼ Corto <strong>${fmtDate(S.vencISO)}</strong>: nominal DVO1-neutro <strong style="color:var(--amber3)">${fmtM(S.nomEfectivo)}</strong> · DVO1 −${fmtM(dv01L)}<br>
+        <strong style="color:var(--amber3)">Referencia DVO1-neutro (para neutralizar riesgo paralelo):</strong><br>
+        ▲ Largo <strong>${fmtDate(L.vencISO)}</strong>: nominal ${fmtM(cajaPFV/(L.res.priceRnd/100))} · DVO1 +${fmtM(dv01L)}<br>
+        ▼ Corto <strong>${fmtDate(S.vencISO)}</strong>: nominal necesario <strong style="color:var(--amber3)">${fmtM(nomCortoNeutro)}</strong> · DVO1 −${fmtM(dv01L)}<br>
         Ratio nominal largo/corto: <strong style="color:var(--blue3)">${fmt(ratio,3)}x</strong>
-        &nbsp;·&nbsp; Ganancia neta ante paralelo ≈ <strong style="color:var(--txt3)">$0</strong> · solo ganas si el spread entre referencias se comprime a tu favor.
+        &nbsp;·&nbsp; La tabla de escenarios usa <strong>misma caja en cada pierna</strong>. Con este sizing el neto ante paralelo sería ≈$0.
       </div>`;
     }
 
@@ -1119,21 +1110,18 @@ function calcPF(){
               <th style="text-align:left">Vencimiento</th>
               <th style="text-align:left">Dirección</th>
               <th>D. Mod.</th>
-              <th>${modoRelativo?'Nominal efectivo':'Nominal c/ caja'}</th>
+              <th>Nominal c/ caja</th>
               <th>DVO1 (firmado)</th>
             </tr></thead>
             <tbody>
               ${especRows.map(r=>{
                 const dcs=r.dv01Signed>=0?'color:var(--green3)':'color:var(--red3)';
                 const dirStyle=r.dir==='long'?'color:var(--green3);font-weight:700':'color:var(--red3);font-weight:700';
-                const nomLabel=modoRelativo&&r.dir==='short'
-                  ?`<span style="color:var(--amber3)">${fmtM(r.nomEfectivo)}</span> <span style="font-size:9px;color:var(--txt3)">(DVO1-neutro)</span>`
-                  :fmtM(r.nomEfectivo);
                 return`<tr>
                   <td style="text-align:left;color:var(--txt2)">${fmtDate(r.vencISO)}</td>
                   <td style="text-align:left;${dirStyle}">${r.dir==='long'?'▲ Largo':'▼ Corto'}</td>
                   <td>${fmt(r.res.dmod,4)}</td>
-                  <td>${nomLabel}</td>
+                  <td>${fmtM(r.nomC)}</td>
                   <td style="${dcs}">${r.dv01Signed>=0?'+':''}${fmtM(r.dv01Signed)}</td>
                 </tr>`;
               }).join('')}
