@@ -263,6 +263,17 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       </div>
       <button class="btn btn-green" onclick="calcular(true)">▶ Calcular TIR</button>
       <div class="hr"></div>
+      <div class="s-lbl">// Fondeo</div>
+      <div class="field-2">
+        <div class="field"><label>Tasa fondeo (% EA)</label>
+          <input type="number" id="fondeo_tasa" value="11.25" step="0.01" min="0">
+        </div>
+        <div class="field"><label>Días fondeo</label>
+          <input type="number" id="fondeo_dias" value="30" step="1" min="1">
+        </div>
+      </div>
+      <button class="btn btn-amber" onclick="calcularFondeo()">▶ Calcular fondeo</button>
+      <div class="hr"></div>
       <div class="s-lbl">// Calculadora inversa</div>
       <div class="field">
         <label>Objetivo</label>
@@ -550,11 +561,67 @@ function autoCA(){
 }
 $('liq').value='2026-02-24';$('venc').value='2028-03-12';autoCA();
 (function(){
-  const NS='rfc_tf',IDS=['liq','venc','freq','base','coupon','tipo','ytm','nom_val','nom_display','f_venta','ytm_venta'];
+  const NS='rfc_tf',IDS=['liq','venc','freq','base','coupon','tipo','ytm','nom_val','nom_display','f_venta','ytm_venta','fondeo_tasa','fondeo_dias'];
   try{const s=JSON.parse(localStorage.getItem(NS)||'{}');IDS.forEach(id=>{const el=$(id);if(el&&s[id]!==undefined)el.value=s[id];});autoCA();}catch(e){}
   const save=()=>{try{const d={};IDS.forEach(id=>{const el=$(id);if(el)d[id]=el.value;});localStorage.setItem(NS,JSON.stringify(d));}catch(e){}};
   IDS.forEach(id=>{const el=$(id);if(el){el.addEventListener('change',save);el.addEventListener('input',save);}});
 })();
+
+function addDays(iso,n){
+  const d=new Date(iso+'T12:00:00');
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+}
+function findAntForLiq(ant,targetLiq,mp){
+  let cur=ant;
+  while(true){const nxt=addMonths(cur,mp);if(nxt>targetLiq)return cur;cur=nxt;}
+}
+function calcularFondeo(){
+  calcular(false);
+  const liq=$('liq').value,venc=$('venc').value,ant=$('c_ant_iso').value;
+  if(!liq||!venc||!ant)return;
+  const freq=parseInt($('freq').value),base=parseInt($('base').value)||365;
+  const tipo=$('tipo').value,cpRaw=parseFloat($('coupon').value)/100;
+  const ytm=parseFloat($('ytm').value)/100,nom=parseFloat($('nom_val').value)||0;
+  const tasaFondeo=parseFloat($('fondeo_tasa').value)/100;
+  const diasFondeo=parseInt($('fondeo_dias').value);
+  if(isNaN(tasaFondeo)||isNaN(diasFondeo)||nom<=0||diasFondeo<=0)return;
+  const res=calcBond(ant,liq,venc,freq,base,tipo,cpRaw,ytm,nom);
+  if(!res)return;
+  const{vGiro,dv01}=res;
+  const liqFondeo=addDays(liq,diasFondeo);
+  if(liqFondeo>=venc){alert('Días de fondeo supera el vencimiento');return;}
+  const mp=12/freq;
+  const antFondeo=findAntForLiq(ant,liqFondeo,mp);
+  const resFondeo=calcBond(antFondeo,liqFondeo,venc,freq,base,tipo,cpRaw,ytm,nom);
+  if(!resFondeo)return;
+  const valorFondeo=(resFondeo.priceRnd/100)*nom;
+  const costoFondeo=vGiro*Math.pow(1+tasaFondeo,diasFondeo/365);
+  const carryNeto=valorFondeo-costoFondeo;
+  const engorde=carryNeto/dv01;
+  const engordeDia=engorde/diasFondeo;
+  const pos=carryNeto>=0;
+  const card=document.createElement('div');
+  card.className='card';
+  card.style.borderColor=pos?'var(--amber)':'var(--red)';
+  card.innerHTML=`
+    <div class="c-hdr" style="border-color:${pos?'var(--amber)':'var(--red)'}">Fondeo y Carry Trade <span style="font-size:9px;font-weight:400;color:var(--txt3)">${diasFondeo} días · ${fmt(tasaFondeo*100,2)}% EA</span></div>
+    <div class="c-body">
+      <div class="mg4" style="margin-bottom:8px">
+        <div class="m"><div class="m-lbl">Valor giro hoy</div><div class="m-val" style="font-size:14px;color:var(--amber3)">${fmtM(vGiro)}</div><div class="m-unit">${fmtDate(liq)}</div></div>
+        <div class="m"><div class="m-lbl">Costo fondeo</div><div class="m-val" style="font-size:14px">${fmtM(costoFondeo)}</div><div class="m-unit">${fmtDate(liqFondeo)}</div></div>
+        <div class="m"><div class="m-lbl">Valor bono en ${diasFondeo}d</div><div class="m-val green" style="font-size:14px">${fmtM(valorFondeo)}</div><div class="m-unit">al ${fmt(ytm*100,4)}% · misma TIR</div></div>
+        <div class="m ${pos?'green':'red'}"><div class="m-lbl">Carry Neto</div><div class="m-val ${pos?'green':'red'}" style="font-size:14px">${(pos?'+':'')+fmtM(carryNeto)}</div><div class="m-unit">${pos?'Engorde ▲':'Adelgaza ▼'}</div></div>
+      </div>
+      <div class="mg4">
+        <div class="m"><div class="m-lbl">${pos?'Engorde':'Adelgaza'}</div><div class="m-val" style="font-size:20px;color:${pos?'var(--amber3)':'var(--red3)'}">${fmt(Math.abs(engorde),3)} pb</div><div class="m-unit">en ${diasFondeo} días · pb total</div></div>
+        <div class="m"><div class="m-lbl">${pos?'Engorde':'Adelgaza'} / día</div><div class="m-val" style="font-size:16px">${fmt(Math.abs(engordeDia),4)} pb/día</div><div class="m-unit">DV01 = ${fmtP(dv01)}</div></div>
+      </div>
+    </div>`;
+  const chartCard=$('ch1')?.closest('.card');
+  if(chartCard)$('main').insertBefore(card,chartCard);
+  else $('main').appendChild(card);
+}
 
 let ch1=null;
 
