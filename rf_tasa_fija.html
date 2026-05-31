@@ -869,9 +869,12 @@ function calcularFondeo(){
   const antFondeo=findAntForLiq(ant,liqFondeo,mp);
   const resFondeo=calcBond(antFondeo,liqFondeo,venc,freq,base,tipo,cpRaw,ytm,nom);
   if(!resFondeo)return;
+  const isShort=_posDir==='short';
   const valorFondeo=(resFondeo.priceRnd/100)*nom;
-  const costoFondeo=vGiro*Math.pow(1+tasaFondeo,diasFondeo/365);
-  const carryNeto=valorFondeo-costoFondeo;
+  const cashInvertido=vGiro*Math.pow(1+tasaFondeo,diasFondeo/365);
+  // Largo: compras hoy (costas vGiro), bono vale valorFondeo en Xd → carry = valorFondeo - costo financiamiento
+  // Corto: vendes hoy (recibes vGiro), inviertes ese cash, recompras en Xd (pagas valorFondeo) → carry = cash invertido - valorFondeo
+  const carryNeto=isShort?(cashInvertido-valorFondeo):(valorFondeo-cashInvertido);
   const engorde=carryNeto/dv01;
   const engordeDia=engorde/diasFondeo;
   const pos=carryNeto>=0;
@@ -879,12 +882,12 @@ function calcularFondeo(){
   card.className='card';
   card.style.borderColor=pos?'var(--amber)':'var(--red)';
   card.innerHTML=`
-    <div class="c-hdr" style="border-color:${pos?'var(--amber)':'var(--red)'}">Fondeo y Carry Trade <span style="font-size:9px;font-weight:400;color:var(--txt3)">${diasFondeo} días · ${fmt(tasaFondeo*100,2)}% EA</span></div>
+    <div class="c-hdr" style="border-color:${pos?'var(--amber)':'var(--red)'}">Fondeo y Carry Trade · ${isShort?'▼ Corto':'▲ Largo'} <span style="font-size:9px;font-weight:400;color:var(--txt3)">${diasFondeo} días · ${fmt(tasaFondeo*100,2)}% EA</span></div>
     <div class="c-body">
       <div class="mg4" style="margin-bottom:8px">
-        <div class="m"><div class="m-lbl">Valor giro hoy</div><div class="m-val" style="font-size:14px;color:var(--amber3)">${fmtM(vGiro)}</div><div class="m-unit">${fmtDate(liq)}</div></div>
-        <div class="m"><div class="m-lbl">Costo fondeo</div><div class="m-val" style="font-size:14px">${fmtM(costoFondeo)}</div><div class="m-unit">${fmtDate(liqFondeo)}</div></div>
-        <div class="m"><div class="m-lbl">Valor bono en ${diasFondeo}d</div><div class="m-val green" style="font-size:14px">${fmtM(valorFondeo)}</div><div class="m-unit">al ${fmt(ytm*100,4)}% · misma TIR</div></div>
+        <div class="m"><div class="m-lbl">${isShort?'Ingreso venta corta':'Valor giro hoy'}</div><div class="m-val" style="font-size:14px;color:var(--amber3)">${fmtM(vGiro)}</div><div class="m-unit">${fmtDate(liq)}</div></div>
+        <div class="m"><div class="m-lbl">${isShort?'Cash reinvertido':'Costo fondeo'}</div><div class="m-val" style="font-size:14px">${fmtM(cashInvertido)}</div><div class="m-unit">${fmtDate(liqFondeo)}</div></div>
+        <div class="m"><div class="m-lbl">${isShort?'Costo recompra':'Valor bono en '+diasFondeo+'d'}</div><div class="m-val" style="font-size:14px;color:var(--${isShort?'red3':'green3'})">${fmtM(valorFondeo)}</div><div class="m-unit">al ${fmt(ytm*100,4)}% · misma TIR</div></div>
         <div class="m ${pos?'green':'red'}"><div class="m-lbl">Carry Neto</div><div class="m-val ${pos?'green':'red'}" style="font-size:14px">${(pos?'+':'')+fmtM(carryNeto)}</div><div class="m-unit">${pos?'Engorde ▲':'Adelgaza ▼'}</div></div>
       </div>
       <div class="mg4">
