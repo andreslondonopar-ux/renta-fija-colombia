@@ -173,21 +173,22 @@ svg{display:block;width:100%}
     </div>
     <!-- Bloomberg Live -->
     <div>
-      <div style="display:flex;align-items:center;margin-bottom:6px">
-        <div class="sec-title" style="margin-bottom:0">Bloomberg Live</div>
-        <button onclick="openBloomberg()"
-          style="margin-left:auto;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--txt3);cursor:pointer;transition:all .15s;white-space:nowrap"
-          onmouseover="this.style.color='var(--amber3)';this.style.borderColor='var(--amber)'"
-          onmouseout="this.style.color='var(--txt3)';this.style.borderColor='var(--border2)'">
-          ↗ flotante
+      <div class="sec-title" style="margin-bottom:6px">Live TV</div>
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        <button id="live-btn-bl" onclick="switchLive('bloomberg')"
+          style="flex:1;padding:4px 0;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--amber);background:var(--amber2);color:var(--amber3);transition:all .15s">
+          Bloomberg
+        </button>
+        <button id="live-btn-yf" onclick="switchLive('yahoo')"
+          style="flex:1;padding:4px 0;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--txt3);transition:all .15s">
+          Yahoo Finance
         </button>
       </div>
-      <!-- Canal Bloomberg Television en YouTube. Si no carga verifica el ID del canal. -->
-      <div id="bloomberg-wrap" style="height:175px">
-        <iframe
-          src="https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg&autoplay=0&mute=0"
+      <div id="live-wrap" style="height:175px;border-radius:8px;overflow:hidden;background:#000">
+        <iframe id="live-iframe"
+          src="https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg&autoplay=0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
+          allowfullscreen style="display:block;width:100%;height:100%;border:0">
         </iframe>
       </div>
     </div>
@@ -1144,12 +1145,22 @@ setInterval(renderClocks,1000);
 
 // ── MAIN TABS
 
-function openBloomberg(){
-  const w=420, h=240;
-  const l=window.screen.width-w-20;
-  const t=window.screen.height-h-60;
-  window.open('bloomberg_live.html','bloomberg_live',
-    `width=${w},height=${h},left=${l},top=${t},resizable=yes,titlebar=no`);
+const LIVE_SOURCES={
+  bloomberg:'https://www.youtube.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg&autoplay=0',
+  yahoo:    'https://www.youtube.com/embed/live_stream?channel=UCEAZeUIeJs09qHSCViJGHaA&autoplay=0',
+};
+function switchLive(src){
+  const iframe=document.getElementById('live-iframe');
+  if(iframe) iframe.src=LIVE_SOURCES[src]||'';
+  const bl=document.getElementById('live-btn-bl');
+  const yf=document.getElementById('live-btn-yf');
+  if(src==='bloomberg'){
+    bl.style.cssText='flex:1;padding:4px 0;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--amber);background:var(--amber2);color:var(--amber3);transition:all .15s';
+    yf.style.cssText='flex:1;padding:4px 0;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--txt3);transition:all .15s';
+  } else {
+    yf.style.cssText='flex:1;padding:4px 0;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--purple);background:var(--purple2);color:var(--purple3);transition:all .15s';
+    bl.style.cssText='flex:1;padding:4px 0;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--txt3);transition:all .15s';
+  }
 }
 
 function switchMacroTab(id,el){
