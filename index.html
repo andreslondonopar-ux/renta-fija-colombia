@@ -38,7 +38,17 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .page{display:flex;gap:0;min-height:calc(100vh - 54px - 34px)}
 .left{width:270px;flex-shrink:0;border-right:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
 .right{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
-.sec-title{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.sec-title{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;border-left:2px solid var(--blue3);padding-left:8px}
+.macro-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:8px}
+.macro-tab{flex:1;padding:5px 0;font-size:11px;font-weight:700;color:var(--txt3);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all .15s}
+.macro-tab:hover{color:var(--txt)}
+.macro-tab.active{color:var(--amber3);border-bottom-color:var(--amber3)}
+.macro-panel{display:none}.macro-panel.active{display:block}
+.sec-toggle{display:flex;align-items:center;gap:5px;padding:5px 10px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none;transition:background .15s}
+.sec-toggle:hover{background:var(--bg3)}
+.sec-toggle .tog-arrow{font-size:11px;color:var(--txt3);transition:color .15s}
+.sec-toggle .tog-lbl{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em}
+.sec-toggle:hover .tog-arrow,.sec-toggle:hover .tog-lbl{color:var(--txt)}
 .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:12px 10px;text-decoration:none;display:flex;align-items:center;gap:8px;transition:all .18s}
 .card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
@@ -123,7 +133,7 @@ svg{display:block;width:100%}
 <div class="page">
   <div class="left">
     <div>
-      <div class="sec-title">// Calculadoras</div>
+      <div class="sec-title">Calculadoras</div>
       <div class="calc-grid">
         <a class="card tf" href="rf_tasa_fija.html"><div class="ci">TF</div><div class="ct"><h2>Tasa Fija</h2><p>TES · Bonos<br>365 · 30/360</p></div></a>
         <a class="card ipc" href="rf_ipc.html"><div class="ci">IPC</div><div class="ct"><h2>IPC</h2><p>Estimada · Real<br>Hist. 2026</p></div></a>
@@ -133,25 +143,30 @@ svg{display:block;width:100%}
       </div>
     </div>
     <div>
-      <div class="sec-title">// Macro Colombia</div>
-      <div class="macro-grid">
-        <div class="mi"><div class="mi-lbl">Tasa BanRep</div><div class="mi-val" id="mac-banrep" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-banrep-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">IPC Anual</div><div class="mi-val" id="mac-ipc" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipc-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">IPC Mensual</div><div class="mi-val" id="mac-ipcm" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipcm-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">PIB Anual</div><div class="mi-val" id="mac-gdp" style="color:var(--green3)">—</div><div class="mi-sub" id="mac-gdp-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-unem-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="mac-trade-sub">cargando...</div></div>
+      <div class="sec-title">Macro</div>
+      <div class="macro-tabs">
+        <div class="macro-tab active" onclick="switchMacroTab('col',this)">🇨🇴 Colombia</div>
+        <div class="macro-tab" onclick="switchMacroTab('usa',this)">🇺🇸 USA</div>
       </div>
-    </div>
-    <div>
-      <div class="sec-title">// Macro USA</div>
-      <div class="macro-grid">
-        <div class="mi"><div class="mi-lbl">Fed Rate</div><div class="mi-val" id="us-mac-rate" style="color:var(--amber3)">—</div><div class="mi-sub" id="us-mac-rate-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">CPI Anual</div><div class="mi-val" id="us-mac-cpi" style="color:var(--blue3)">—</div><div class="mi-sub" id="us-mac-cpi-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">CPI Mensual</div><div class="mi-val" id="us-mac-cpim" style="color:var(--blue3)">—</div><div class="mi-sub" id="us-mac-cpim-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">PIB Anual</div><div class="mi-val" id="us-mac-gdp" style="color:var(--green3)">—</div><div class="mi-sub" id="us-mac-gdp-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="us-mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="us-mac-unem-sub">cargando...</div></div>
-        <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="us-mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="us-mac-trade-sub">cargando...</div></div>
+      <div id="macro-panel-col" class="macro-panel active">
+        <div class="macro-grid">
+          <div class="mi"><div class="mi-lbl">Tasa BanRep</div><div class="mi-val" id="mac-banrep" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-banrep-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">IPC Anual</div><div class="mi-val" id="mac-ipc" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipc-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">IPC Mensual</div><div class="mi-val" id="mac-ipcm" style="color:var(--blue3)">—</div><div class="mi-sub" id="mac-ipcm-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">PIB Anual</div><div class="mi-val" id="mac-gdp" style="color:var(--green3)">—</div><div class="mi-sub" id="mac-gdp-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="mac-unem-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="mac-trade-sub">cargando...</div></div>
+        </div>
+      </div>
+      <div id="macro-panel-usa" class="macro-panel">
+        <div class="macro-grid">
+          <div class="mi"><div class="mi-lbl">Fed Rate</div><div class="mi-val" id="us-mac-rate" style="color:var(--amber3)">—</div><div class="mi-sub" id="us-mac-rate-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">CPI Anual</div><div class="mi-val" id="us-mac-cpi" style="color:var(--blue3)">—</div><div class="mi-sub" id="us-mac-cpi-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">CPI Mensual</div><div class="mi-val" id="us-mac-cpim" style="color:var(--blue3)">—</div><div class="mi-sub" id="us-mac-cpim-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">PIB Anual</div><div class="mi-val" id="us-mac-gdp" style="color:var(--green3)">—</div><div class="mi-sub" id="us-mac-gdp-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">Desempleo</div><div class="mi-val" id="us-mac-unem" style="color:var(--amber3)">—</div><div class="mi-sub" id="us-mac-unem-sub">cargando...</div></div>
+          <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="us-mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="us-mac-trade-sub">cargando...</div></div>
+        </div>
       </div>
     </div>
     <div style="font-size:11px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
@@ -182,11 +197,11 @@ svg{display:block;width:100%}
             </div>
             <span class="curve-status status-loading" id="col-status">&#x23F3; Cargando...</span>
           </div>
-          <svg id="svg-col" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
+          <svg id="svg-col" viewBox="0 0 700 235" style="width:100%;height:235px;flex-shrink:0"></svg>
           <div id="legend-svg-col" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:10px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
-          <div onclick="toggleRefTable('col')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="col-ref-arrow" style="font-size:11px;color:#4a5568">▸</span>
-            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias TES</span>
+          <div class="sec-toggle" onclick="toggleRefTable('col')">
+            <span id="col-ref-arrow" class="tog-arrow">▸</span>
+            <span class="tog-lbl">Referencias TES</span>
           </div>
           <div id="col-ref-wrap" style="overflow:hidden;max-height:0px">
             <table class="yt">
@@ -200,9 +215,9 @@ svg{display:block;width:100%}
           </div>
 
           <!-- EME BanRep -->
-          <div onclick="toggleEme()" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="eme-arrow" style="font-size:11px;color:#4a5568">▸</span>
-            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas analistas · EME BanRep</span>
+          <div class="sec-toggle" onclick="toggleEme()">
+            <span id="eme-arrow" class="tog-arrow">▸</span>
+            <span class="tog-lbl">Expectativas analistas · EME BanRep</span>
             <span id="eme-status" style="margin-left:auto;font-size:10px;color:var(--txt3)">cargando...</span>
           </div>
           <div id="eme-wrap" style="overflow:hidden;max-height:0px">
@@ -234,11 +249,11 @@ svg{display:block;width:100%}
             </div>
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
           </div>
-          <svg id="svg-us" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
+          <svg id="svg-us" viewBox="0 0 700 235" style="width:100%;height:235px;flex-shrink:0"></svg>
           <div id="legend-svg-us" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:10px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
-          <div onclick="toggleRefTable('us')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="us-ref-arrow" style="font-size:11px;color:#4a5568">▸</span>
-            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias UST</span>
+          <div class="sec-toggle" onclick="toggleRefTable('us')">
+            <span id="us-ref-arrow" class="tog-arrow">▸</span>
+            <span class="tog-lbl">Referencias UST</span>
           </div>
           <div id="us-ref-wrap" style="overflow:hidden;max-height:0px">
             <table class="yt">
@@ -251,9 +266,9 @@ svg{display:block;width:100%}
             </table>
           </div>
           <!-- FedWatch -->
-          <div onclick="toggleFedwatch()" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="fw-arrow" style="font-size:11px;color:#4a5568">▾</span>
-            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas Fed Funds · CME FedWatch</span>
+          <div class="sec-toggle" onclick="toggleFedwatch()">
+            <span id="fw-arrow" class="tog-arrow">▾</span>
+            <span class="tog-lbl">Expectativas Fed Funds · CME FedWatch</span>
             <span id="fw-status" style="margin-left:auto;font-size:10px;color:var(--txt3)">cargando...</span>
           </div>
           <div id="fw-wrap" style="padding:8px;flex-shrink:0">
@@ -683,7 +698,7 @@ function renderCol(){
     <td style="color:var(--txt2)">${r.venc||'—'}</td>
     <td style="font-weight:700;color:var(--amber3)">${r.tir.toFixed(2)}%</td>
   </tr>`).join('');
-  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.plazo<1?Math.round(r.plazo*12)+'M':(r.plazo<10?r.plazo.toFixed(1).replace('.0',''):Math.round(r.plazo))+'A'})),'#f59e0b',190,false,PREV_COL_PTS,PREV_COL_DATE);
+  drawCurve('svg-col',COL_DATA.map(r=>({x:r.plazo,y:r.tir,label:r.plazo<1?Math.round(r.plazo*12)+'M':(r.plazo<10?r.plazo.toFixed(1).replace('.0',''):Math.round(r.plazo))+'A'})),'#f59e0b',235,false,PREV_COL_PTS,PREV_COL_DATE);
   buildTickerFromCOL();
   }
 
@@ -817,7 +832,7 @@ function renderUS(){
     <td style="color:var(--txt2)">—</td>
     <td style="font-weight:700;color:var(--blue3)">${r.tir.toFixed(2)}%</td>
   </tr>`).join('');
-  drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6',190,false,PREV_US_PTS,PREV_US_DATE);
+  drawCurve('svg-us',US_DATA.map(r=>({x:r.years,y:r.tir,label:r.plazo})),'#3b82f6',235,false,PREV_US_PTS,PREV_US_DATE);
 }
 
 function interpolateCol(years){
@@ -1104,6 +1119,14 @@ renderClocks();
 setInterval(renderClocks,1000);
 
 // ── MAIN TABS
+function switchMacroTab(id,el){
+  document.querySelectorAll('.macro-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.macro-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const panel=document.getElementById('macro-panel-'+id);
+  if(panel) panel.classList.add('active');
+}
+
 function switchMainTab(id,el){
   document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.main-panel').forEach(p=>p.classList.remove('active'));
