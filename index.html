@@ -18,8 +18,8 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
   --red:#ef4444;--red2:#7f1d1d;--red3:#fca5a5;
   --purple:#7c3aed;--purple2:#4c1d95;--purple3:#a78bfa;
 }
-.ticker-wrap{background:#050810;border-bottom:1px solid var(--border);overflow:hidden;height:34px;display:flex;align-items:center;position:sticky;top:0;z-index:101}
-.topbar{display:flex;align-items:center;gap:14px;padding:0 24px;height:54px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:34px;z-index:100}
+.ticker-wrap{background:#050810;border-bottom:1px solid var(--border);overflow:hidden;height:34px;display:flex;align-items:center;position:fixed;top:0;left:0;right:0;z-index:101}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 24px;height:54px;background:var(--bg2);border-bottom:1px solid var(--border);position:fixed;top:34px;left:0;right:0;z-index:100}
 .logo{width:36px;height:36px;background:#1a2540;border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--blue3);flex-shrink:0}
 .brand{font-size:16px;font-weight:700}.brand-sub{font-size:11px;color:var(--txt3)}
 .ml{margin-left:auto}
@@ -34,7 +34,7 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .tick-dot.up{background:#22c55e}.tick-dot.dn{background:#ef4444}
 .tick-chg{font-size:11px;font-weight:600}.tick-chg.up{color:#22c55e}.tick-chg.dn{color:#ef4444}
 @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.page{display:flex;gap:0;min-height:calc(100vh - 88px)}
+.page{display:flex;gap:0;min-height:calc(100vh - 88px);margin-top:88px}
 .left{width:320px;flex-shrink:0;border-right:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
 #bloomberg-wrap{border-radius:8px;overflow:hidden;background:#000}
 #bloomberg-wrap iframe{display:block;width:100%;height:100%;border:0}
