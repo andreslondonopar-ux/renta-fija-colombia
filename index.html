@@ -211,8 +211,8 @@ svg{display:block;width:100%}
               <div id="eme-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
               <!-- Senda tasa de intervención -->
               <div id="eme-tasa-wrap" style="display:none">
-                <div style="font-size:8px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Senda esperada tasa BanRep</div>
-                <svg id="eme-tasa-svg" viewBox="0 0 520 80" style="width:100%;height:80px"></svg>
+                <div style="font-size:8px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Senda esperada tasa BanRep · <span style="font-weight:400;text-transform:none">media analistas (banda m&iacute;n–m&aacute;x)</span></div>
+                <div style="position:relative;height:160px"><canvas id="eme-tasa-canvas"></canvas></div>
               </div>
               <!-- Tabla IPC horizontes -->
               <div id="eme-ipc-wrap" style="display:none;margin-top:6px">
@@ -964,13 +964,12 @@ function renderEme(d){
     tasa.length?chip('Tasa BanRep '+tasa[tasa.length-1].fecha.slice(0,7)+'*',tasa[tasa.length-1].media.toFixed(2)+'%','#a78bfa'):'',
   ].join('');
 
-  // ── Senda tasa (mini SVG)
+  // ── Senda tasa (Chart.js)
   if(tasa.length){
     const wrap=document.getElementById('eme-tasa-wrap');
-    const svg=document.getElementById('eme-tasa-svg');
-    if(wrap&&svg){
+    if(wrap){
       wrap.style.display='block';
-      drawEmeTasa(svg,tasa);
+      drawEmeTasa(tasa);
     }
   }
 
@@ -989,38 +988,72 @@ function renderEme(d){
   }
 }
 
-function drawEmeTasa(svgEl,tasa){
-  // Limitar a primeras 12 reuniones para no saturar
-  const pts=tasa.slice(0,12);
-  const W=520,H=80,PL=6,PR=6,PT=8,PB=18;
-  const vals=pts.map(p=>p.media);
-  const minV=Math.min(...vals)-0.25, maxV=Math.max(...vals)+0.25;
-  const cx=i=>PL+i/(pts.length-1)*(W-PL-PR);
-  const cy=v=>PT+(1-(v-minV)/(maxV-minV))*(H-PT-PB);
+let emeTasaChart=null;
+function drawEmeTasa(tasa){
+  const canvas=document.getElementById('eme-tasa-canvas');
+  if(!canvas) return;
+  const pts=tasa.slice(0,25);
+  const labels=pts.map(p=>p.fecha.slice(0,7));
+  const media=pts.map(p=>+p.media.toFixed(4));
+  const vmax=pts.map(p=>p.max!=null?+p.max.toFixed(4):null);
+  const vmin=pts.map(p=>p.min!=null?+p.min.toFixed(4):null);
 
-  const path=pts.map((p,i)=>(i?'L':'M')+cx(i).toFixed(1)+' '+cy(p.media).toFixed(1)).join(' ');
-  const bandTop=pts.map((p,i)=>(i?'L':'M')+cx(i).toFixed(1)+' '+(p.min!=null?cy(p.max):cy(p.media)).toFixed(1)).join(' ');
-  const bandBot=[...pts].reverse().map((p,i,a)=>'L'+cx(a.length-1-i).toFixed(1)+' '+(p.min!=null?cy(p.min):cy(p.media)).toFixed(1)).join(' ');
+  try{if(emeTasaChart)emeTasaChart.destroy();}catch(e){}
 
-  // Tick labels (primeras, del medio, última)
-  const ticks=[0,Math.floor(pts.length/2),pts.length-1];
-  const tickSvg=ticks.map(i=>{
-    const f=pts[i].fecha.slice(0,7);
-    return`<text x="${cx(i).toFixed(1)}" y="${H-2}" text-anchor="middle" font-size="7" fill="#4a5568">${f}</text>`;
-  }).join('');
-
-  // Y labels (min, max)
-  const yLabels=[
-    `<text x="${PL}" y="${cy(maxV).toFixed(1)}" font-size="7" fill="#4a5568">${maxV.toFixed(2)}%</text>`,
-    `<text x="${PL}" y="${cy(minV).toFixed(1)}" font-size="7" fill="#4a5568" dominant-baseline="hanging">${minV.toFixed(2)}%</text>`,
-  ].join('');
-
-  svgEl.innerHTML=`
-    <path d="${bandTop} ${bandBot} Z" fill="rgba(52,211,153,0.1)" stroke="none"/>
-    <path d="${path}" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linejoin="round"/>
-    ${pts.map((p,i)=>`<circle cx="${cx(i).toFixed(1)}" cy="${cy(p.media).toFixed(1)}" r="2.5" fill="#34d399"/>`).join('')}
-    ${tickSvg}
-  `;
+  emeTasaChart=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        // Banda superior (max) — fill hacia dataset siguiente
+        {label:'Máximo',data:vmax,
+          borderColor:'transparent',borderWidth:0,
+          pointRadius:0,fill:'+1',
+          backgroundColor:'rgba(52,211,153,0.12)',
+          tension:.3,order:3},
+        // Banda inferior (min)
+        {label:'Mínimo',data:vmin,
+          borderColor:'transparent',borderWidth:0,
+          pointRadius:0,fill:false,
+          tension:.3,order:4},
+        // Línea media
+        {label:'Media analistas',data:media,
+          borderColor:'#34d399',borderWidth:2,
+          pointBackgroundColor:'#34d399',pointRadius:4,pointHoverRadius:6,
+          fill:false,tension:.3,order:1},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:300},
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            title:ctx=>pts[ctx[0]?.dataIndex]?.fecha||'',
+            label:ctx=>{
+              const i=ctx.dataIndex;
+              if(ctx.datasetIndex===2)
+                return `Media: ${media[i].toFixed(2)}%`;
+              if(ctx.datasetIndex===0&&vmax[i]!=null)
+                return `Máximo: ${vmax[i].toFixed(2)}%`;
+              if(ctx.datasetIndex===1&&vmin[i]!=null)
+                return `Mínimo: ${vmin[i].toFixed(2)}%`;
+              return null;
+            },
+            filter:item=>item.formattedValue!==null && item.parsed.y!==null,
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#4a5568',font:{size:8},maxRotation:45},
+           grid:{color:'rgba(255,255,255,.03)'}},
+        y:{grace:'15%',
+           ticks:{color:'#4a5568',font:{size:8},callback:v=>v.toFixed(2)+'%'},
+           grid:{color:'rgba(255,255,255,.04)'}}
+      }
+    }
+  });
 }
 
 async function loadEme(){
