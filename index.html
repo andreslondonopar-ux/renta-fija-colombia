@@ -219,7 +219,7 @@ svg{display:block;width:100%}
           style="display:none;width:100%;height:100%;border:0">
         </iframe>
         <!-- Botón nueva pestaña (siempre visible) -->
-        <a href="https://www.youtube.com/channel/UCIALMKvObZNtJ6AmdCLP7Lg/live"
+        <a href="https://youtu.be/iEpJwprxDdk"
            target="_blank" rel="noopener"
            style="position:absolute;bottom:7px;right:8px;font-size:10px;color:var(--txt3);text-decoration:none;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:4px;z-index:3;backdrop-filter:blur(4px)"
            title="Abrir en YouTube">&#8599; abrir en YouTube</a>
@@ -1880,32 +1880,10 @@ function loadEstIPC(i){_onUpload('ipcm',i);}
 function loadEstIPCAnual(i){_onUpload('ipca',i);}
 function loadEstFRA(i){_onUpload('fra',i);}
 
-async function bbgPlay(){
+function bbgPlay(){
   const poster=document.getElementById('bbg-poster');
   const frame=document.getElementById('bbg-frame');
-  const lbl=poster.querySelector('#bbg-lbl');
-  if(lbl) lbl.textContent='Cargando...';
-
-  const CH='UCIALMKvObZNtJ6AmdCLP7Lg';
-  let videoId=null;
-
-  // Intentar obtener el video ID del stream en vivo via proxy CORS
-  try{
-    const url='https://www.youtube.com/channel/'+CH+'/live';
-    const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(url);
-    const r=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
-    const d=await r.json();
-    const html=d.contents||'';
-    // YouTube incluye el videoId canónico en el HTML de la página
-    const m=html.match(/"videoId":"([\w-]{11})"/);
-    if(m) videoId=m[1];
-  }catch(e){}
-
-  const src=videoId
-    ?'https://www.youtube.com/embed/'+videoId+'?autoplay=1&rel=0'
-    :'https://www.youtube.com/embed/live_stream?channel='+CH+'&autoplay=1';
-
-  frame.src=src;
+  frame.src='https://www.youtube.com/embed/iEpJwprxDdk?autoplay=1&rel=0';
   frame.style.display='block';
   poster.style.display='none';
 }
