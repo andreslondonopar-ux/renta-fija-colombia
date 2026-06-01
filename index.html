@@ -20,31 +20,31 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 }
 .topbar{display:flex;align-items:center;gap:14px;padding:0 24px;height:54px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .logo{width:36px;height:36px;background:#1a2540;border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--blue3);flex-shrink:0}
-.brand{font-size:14px;font-weight:700}.brand-sub{font-size:9px;color:var(--txt3)}
+.brand{font-size:16px;font-weight:700}.brand-sub{font-size:11px;color:var(--txt3)}
 .ml{margin-left:auto}
-.clock{font-size:11px;color:var(--txt3);font-variant-numeric:tabular-nums}
+.clock{font-size:13px;color:var(--txt3);font-variant-numeric:tabular-nums}
 .ticker-wrap{background:var(--bg2);border-bottom:1px solid var(--border);overflow:hidden;height:34px;display:flex;align-items:center}
-.ticker-label{padding:0 12px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0}
+.ticker-label{padding:0 12px;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;flex-shrink:0}
 .ticker-scroll{flex:1;overflow:hidden}
 .ticker-inner{display:flex;animation:scroll 45s linear infinite;white-space:nowrap}
 .ticker-inner:hover{animation-play-state:paused}
-.ticker-item{display:inline-flex;align-items:center;gap:5px;padding:0 16px;border-right:1px solid var(--border2);font-size:11px;height:34px}
-.tn{color:var(--txt3);font-size:9px;font-weight:700}
+.ticker-item{display:inline-flex;align-items:center;gap:5px;padding:0 16px;border-right:1px solid var(--border2);font-size:13px;height:34px}
+.tn{color:var(--txt3);font-size:11px;font-weight:700}
 .tv{font-weight:700}
 .tick-dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
 .tick-dot.up{background:#22c55e}.tick-dot.dn{background:#ef4444}
-.tick-chg{font-size:9px;font-weight:600}.tick-chg.up{color:#22c55e}.tick-chg.dn{color:#ef4444}
+.tick-chg{font-size:11px;font-weight:600}.tick-chg.up{color:#22c55e}.tick-chg.dn{color:#ef4444}
 @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .page{display:flex;gap:0;min-height:calc(100vh - 54px - 34px)}
 .left{width:270px;flex-shrink:0;border-right:1px solid var(--border);padding:16px 14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
 .right{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
-.sec-title{font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.sec-title{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
 .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:12px 10px;text-decoration:none;display:flex;align-items:center;gap:8px;transition:all .18s}
 .card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
-.ci{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:1px solid}
-.ct h2{font-size:11px;font-weight:700;margin-bottom:1px}
-.ct p{font-size:9px;color:var(--txt3);line-height:1.3}
+.ci{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;border:1px solid}
+.ct h2{font-size:13px;font-weight:700;margin-bottom:1px}
+.ct p{font-size:11px;color:var(--txt3);line-height:1.3}
 .tf .ci{background:var(--amber2);border-color:var(--amber);color:var(--amber3)}.tf:hover{border-color:var(--amber)}.tf h2{color:var(--amber3)}
 .ipc .ci{background:var(--blue2);border-color:var(--blue);color:var(--blue3)}.ipc:hover{border-color:var(--blue)}.ipc h2{color:var(--blue3)}
 .uvr .ci{background:var(--green2);border-color:var(--green);color:var(--green3)}.uvr:hover{border-color:var(--green)}.uvr h2{color:var(--green3)}
@@ -53,54 +53,54 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .pf .ci{background:var(--purple2);border-color:var(--purple);color:var(--purple3)}
 .macro-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .mi{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 9px}
-.mi-lbl{font-size:8px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
-.mi-val{font-size:14px;font-weight:700}
-.mi-sub{font-size:8px;color:var(--txt3);margin-top:1px}
+.mi-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.mi-val{font-size:16px;font-weight:700}
+.mi-sub{font-size:10px;color:var(--txt3);margin-top:1px}
 .curve-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
 .curve-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.curve-title{font-size:12px;font-weight:700;flex:1}
-.curve-sub{font-size:9px;color:var(--txt3)}
-.curve-status{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700}
+.curve-title{font-size:14px;font-weight:700;flex:1}
+.curve-sub{font-size:11px;color:var(--txt3)}
+.curve-status{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700}
 .status-ok{background:var(--green2);color:var(--green3);border:1px solid var(--green)}
 .status-static{background:var(--bg3);color:var(--txt3);border:1px solid var(--border2)}
 .status-loading{background:var(--amber2);color:var(--amber3);border:1px solid var(--amber)}
 .svg-wrap{padding:4px 0 0}
 svg{display:block;width:100%}
-.yt{width:100%;border-collapse:collapse;font-size:11px}
-.yt th{padding:6px 10px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700}
+.yt{width:100%;border-collapse:collapse;font-size:13px}
+.yt th{padding:6px 10px;text-align:right;font-size:11px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700}
 .yt th:first-child{text-align:left}
 .yt td{padding:6px 10px;border-top:1px solid var(--border);text-align:right}
 .yt td:first-child{text-align:left;color:var(--txt2);font-weight:600}
 .yt tbody tr:hover{background:var(--bg3)}
-.btn-sm{padding:4px 10px;border-radius:var(--r);font-size:10px;font-weight:700;cursor:pointer;border:1px solid;background:var(--bg3);color:var(--txt3);border-color:var(--border2)}
+.btn-sm{padding:4px 10px;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;border:1px solid;background:var(--bg3);color:var(--txt3);border-color:var(--border2)}
 .spread-row{display:flex;gap:0;border-top:1px solid var(--border)}
 .spread-cell{flex:1;padding:8px 10px;border-right:1px solid var(--border);text-align:center}
 .spread-cell:last-child{border-right:none}
-.spread-cell .lbl{font-size:8px;color:var(--txt3);text-transform:uppercase;margin-bottom:3px}
-.spread-cell .val{font-size:13px;font-weight:700}
+.spread-cell .lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;margin-bottom:3px}
+.spread-cell .val{font-size:15px;font-weight:700}
 
 /* DATA TABS */
 .main-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
-.main-tab{padding:8px 18px;font-size:11px;font-weight:700;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;letter-spacing:.06em}
+.main-tab{padding:8px 18px;font-size:13px;font-weight:700;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;letter-spacing:.06em}
 .main-tab:hover{color:var(--txt);background:var(--bg3)}
 .main-tab.active{color:var(--amber3);border-bottom-color:var(--amber3)}
 .main-panel{display:none;flex:1;min-height:0;overflow:hidden}
 .main-panel.active{display:flex}
 .dtabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg3);flex-shrink:0}
-.dtab{padding:7px 14px;font-size:10px;font-weight:700;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.dtab{padding:7px 14px;font-size:12px;font-weight:700;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
 .dtab:hover{color:var(--txt)}
 .dtab.active{color:var(--blue3);border-bottom-color:var(--blue3)}
 .dpanel{display:none;padding:14px}
 .dpanel.active{display:block}
-.data-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700;background:var(--bg3);color:var(--txt3);border:1px solid var(--border2)}
+.data-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:var(--bg3);color:var(--txt3);border:1px solid var(--border2)}
 .data-badge.ok{background:var(--green2);color:var(--green3);border-color:var(--green)}
-.data-tbl{width:100%;border-collapse:collapse;font-size:11px}
-.data-tbl th{padding:5px 8px;text-align:right;font-size:9px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700;position:sticky;top:0;z-index:1}
+.data-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.data-tbl th{padding:5px 8px;text-align:right;font-size:11px;color:var(--txt3);text-transform:uppercase;background:var(--bg3);font-weight:700;position:sticky;top:0;z-index:1}
 .data-tbl th:first-child{text-align:left}
 .data-tbl td{padding:5px 8px;border-top:1px solid var(--border);text-align:right}
 .data-tbl td:first-child{text-align:left;color:var(--txt2);font-weight:600}
 .data-tbl tbody tr:hover{background:var(--bg3)}
-.est-drop{border:2px dashed var(--border2);border-radius:var(--r2);padding:18px;text-align:center;cursor:pointer;transition:all .2s;color:var(--txt3);font-size:11px;display:block}
+.est-drop{border:2px dashed var(--border2);border-radius:var(--r2);padding:18px;text-align:center;cursor:pointer;transition:all .2s;color:var(--txt3);font-size:13px;display:block}
 .est-drop:hover{border-color:var(--blue);color:var(--blue3)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
@@ -154,7 +154,7 @@ svg{display:block;width:100%}
         <div class="mi"><div class="mi-lbl">Bal. Comercial</div><div class="mi-val" id="us-mac-trade" style="color:var(--txt)">—</div><div class="mi-sub" id="us-mac-trade-sub">cargando...</div></div>
       </div>
     </div>
-    <div style="font-size:9px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
+    <div style="font-size:11px;color:var(--txt3);line-height:1.7;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)">
       Herramienta pedagógica · Curso Renta Fija Colombia 2026<br>
       <span style="color:var(--amber3)">🇨🇴 Colombia:</span> BanRep SEN · actualización diaria<br>
       <span style="color:var(--blue3)">🇺🇸 USA:</span> US Treasury · 1 día de retraso
@@ -183,10 +183,10 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="col-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-col" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div id="legend-svg-col" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:8px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
+          <div id="legend-svg-col" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:10px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
           <div onclick="toggleRefTable('col')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="col-ref-arrow" style="font-size:9px;color:#4a5568">▸</span>
-            <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias TES</span>
+            <span id="col-ref-arrow" style="font-size:11px;color:#4a5568">▸</span>
+            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias TES</span>
           </div>
           <div id="col-ref-wrap" style="overflow:hidden;max-height:0px">
             <table class="yt">
@@ -201,9 +201,9 @@ svg{display:block;width:100%}
 
           <!-- EME BanRep -->
           <div onclick="toggleEme()" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="eme-arrow" style="font-size:9px;color:#4a5568">▸</span>
-            <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas analistas · EME BanRep</span>
-            <span id="eme-status" style="margin-left:auto;font-size:8px;color:var(--txt3)">cargando...</span>
+            <span id="eme-arrow" style="font-size:11px;color:#4a5568">▸</span>
+            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas analistas · EME BanRep</span>
+            <span id="eme-status" style="margin-left:auto;font-size:10px;color:var(--txt3)">cargando...</span>
           </div>
           <div id="eme-wrap" style="overflow:hidden;max-height:0px">
             <div style="padding:8px 10px">
@@ -217,7 +217,7 @@ svg{display:block;width:100%}
               <!-- Tabla IPC horizontes -->
               <div id="eme-ipc-wrap" style="display:none;margin-top:6px">
                 <div class="curve-sub" style="margin-bottom:4px">Inflaci&oacute;n total esperada &middot; media (m&iacute;n&ndash;m&aacute;x)</div>
-                <table style="width:100%;border-collapse:collapse;font-size:9px">
+                <table style="width:100%;border-collapse:collapse;font-size:11px">
                   <tbody id="eme-ipc-tbody"></tbody>
                 </table>
               </div>
@@ -235,10 +235,10 @@ svg{display:block;width:100%}
             <span class="curve-status status-loading" id="us-status">&#x23F3; Cargando...</span>
           </div>
           <svg id="svg-us" viewBox="0 0 700 190" style="width:100%;height:190px;flex-shrink:0"></svg>
-          <div id="legend-svg-us" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:8px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
+          <div id="legend-svg-us" style="display:none;flex-direction:row;flex-wrap:nowrap;align-items:center;padding:3px 8px;font-size:10px;color:#8090a8;flex-shrink:0;border-top:1px solid var(--border);gap:12px;white-space:nowrap"></div>
           <div onclick="toggleRefTable('us')" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="us-ref-arrow" style="font-size:9px;color:#4a5568">▸</span>
-            <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias UST</span>
+            <span id="us-ref-arrow" style="font-size:11px;color:#4a5568">▸</span>
+            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Referencias UST</span>
           </div>
           <div id="us-ref-wrap" style="overflow:hidden;max-height:0px">
             <table class="yt">
@@ -252,9 +252,9 @@ svg{display:block;width:100%}
           </div>
           <!-- FedWatch -->
           <div onclick="toggleFedwatch()" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
-            <span id="fw-arrow" style="font-size:9px;color:#4a5568">▾</span>
-            <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas Fed Funds · CME FedWatch</span>
-            <span id="fw-status" style="margin-left:auto;font-size:8px;color:var(--txt3)">cargando...</span>
+            <span id="fw-arrow" style="font-size:11px;color:#4a5568">▾</span>
+            <span style="font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas Fed Funds · CME FedWatch</span>
+            <span id="fw-status" style="margin-left:auto;font-size:10px;color:var(--txt3)">cargando...</span>
           </div>
           <div id="fw-wrap" style="padding:8px;flex-shrink:0">
             <div id="fw-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px"></div>
@@ -281,12 +281,12 @@ svg{display:block;width:100%}
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
             <span style="font-size:12px;font-weight:700;color:var(--blue3)">IPC Anual &mdash; Colombia</span>
             <span class="data-badge" id="ipc-badge">cargando...</span>
-            <span style="margin-left:auto;font-size:9px;color:var(--txt3)">Fuente: DANE</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--txt3)">Fuente: DANE</span>
           </div>
           <div style="height:220px;margin-bottom:10px">
             <svg id="svg-ipc-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;font-size:9px;color:var(--txt3)">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;font-size:11px;color:var(--txt3)">
             <span><span style="font-family:monospace;font-weight:800;color:#93c5fd">X.X%</span> IPC anual</span>
             <span style="color:#3a4a62">·</span>
             <span style="color:#8892a4">fecha = pub. DANE</span>
@@ -301,7 +301,7 @@ svg{display:block;width:100%}
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
             <span style="font-size:12px;font-weight:700;color:var(--green3)">UVR Diario &mdash; Colombia</span>
             <span class="data-badge" id="uvr-badge">cargando...</span>
-            <span style="margin-left:auto;font-size:9px;color:var(--txt3)">Fuente: BanRep</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--txt3)">Fuente: BanRep</span>
           </div>
           <div style="height:220px;margin-bottom:10px">
             <svg id="svg-uvr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
@@ -316,12 +316,12 @@ svg{display:block;width:100%}
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
             <span style="font-size:12px;font-weight:700;color:var(--red3)">IBR 1 mes &mdash; Colombia</span>
             <span class="data-badge" id="ibr-badge">cargando...</span>
-            <span style="margin-left:auto;font-size:9px;color:var(--txt3)">Fuente: BanRep</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--txt3)">Fuente: BanRep</span>
           </div>
           <div style="height:220px;margin-bottom:10px">
             <svg id="svg-ibr-data" viewBox="0 0 800 220" style="width:100%;height:100%"></svg>
           </div>
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;font-size:9px;color:var(--txt3)">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;font-size:11px;color:var(--txt3)">
             <span><span style="font-family:monospace;color:#93c5fd">X.XX%</span> Publicado</span>
             <span><span style="font-family:monospace;font-weight:800;color:#fca5a5">X.XX%</span> Aplicado</span>
             <span><span style="font-family:monospace;font-weight:800;color:#fca5a5;opacity:.6">X.XX%</span> Festivo (solo aplicado)</span>
@@ -339,7 +339,7 @@ svg{display:block;width:100%}
           <!-- IPC Mensual -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">IPC Mensual Estimado</div>
-            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;0.52%</code> &nbsp;o&nbsp; <code style="color:var(--amber3)">DD/MM/YYYY;0,52%</code> · una fila por mes</div>
+            <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;0.52%</code> &nbsp;o&nbsp; <code style="color:var(--amber3)">DD/MM/YYYY;0,52%</code> · una fila por mes</div>
             <label class="est-drop" id="ipc-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstIPC(this)">
               Arrastrar CSV o hacer clic · IPC mensual estimado
@@ -355,7 +355,7 @@ svg{display:block;width:100%}
           <!-- IPC Anual -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">IPC Anual Estimado</div>
-            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;5.09%</code> · una fila por mes</div>
+            <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;5.09%</code> · una fila por mes</div>
             <label class="est-drop" id="ipc-anual-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstIPCAnual(this)">
               Arrastrar CSV o hacer clic · IPC anual estimado
@@ -371,7 +371,7 @@ svg{display:block;width:100%}
           <!-- FRA -->
           <div style="margin-bottom:18px">
             <div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:6px">Curva FRA Estimada (IBR)</div>
-            <div style="font-size:9px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;6.50%</code> · una fila por fecha</div>
+            <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Formato: <code style="color:var(--amber3)">YYYY-MM-DD;6.50%</code> · una fila por fecha</div>
             <label class="est-drop" id="fra-drop">
               <input type="file" accept=".csv,.txt" style="display:none" onchange="loadEstFRA(this)">
               Arrastrar CSV o hacer clic · curva FRA estimada
@@ -568,7 +568,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   for(let i=0;i<=4;i++){
     const yv=minY+rngY*i/4,yp=py(yv);
     grid+=`<line x1="${PL}" y1="${yp.toFixed(1)}" x2="${(W-PR).toFixed(1)}" y2="${yp.toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
-    grid+=`<text x="${PL-4}" y="${(yp+3.5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#8090a8">${yv.toFixed(1)}%</text>`;
+    grid+=`<text x="${PL-4}" y="${(yp+4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#8090a8">${yv.toFixed(1)}%</text>`;
   }
   const pathD=pts.map((p,i)=>`${i===0?'M':'L'}${px(p.x).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
   const areaD=`${pathD} L${px(maxX).toFixed(1)},${(PT+cH).toFixed(1)} L${px(minX).toFixed(1)},${(PT+cH).toFixed(1)} Z`;
@@ -603,7 +603,7 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
     const yrow=row===0?H-6:H-19;
     const xa=cx<PL+14?'start':cx>W-PR-14?'end':'middle';
     xlbls+=`<line x1="${cx.toFixed(1)}" y1="${(PT+cH).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3a55" stroke-width="1"/>`;
-    xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xa}" font-size="8" fill="#8090a8">${p.label||''}</text>`;
+    xlbls+=`<text x="${cx.toFixed(1)}" y="${yrow}" text-anchor="${xa}" font-size="10" fill="#8090a8">${p.label||''}</text>`;
   });
   const TW=92,TH=34;
   svg.innerHTML=`<defs><linearGradient id="g${svgId}" x1="0" y1="0" x2="0" y2="1">
@@ -617,8 +617,8 @@ function drawCurve(svgId,pts,color,H=190,showZero=false,prevPts=null,prevDate=''
   ${dots}${xlbls}
   <g id="tip-${svgId}" display="none" pointer-events="none">
     <rect id="tip-bg-${svgId}" width="${TW}" height="${TH}" rx="3" fill="#0d1628" stroke="#263554" stroke-width="1"/>
-    <text id="tip-a-${svgId}" x="7" y="13" font-size="9" fill="#9aaabf" font-family="'Segoe UI',monospace"></text>
-    <text id="tip-b-${svgId}" x="7" y="27" font-size="12" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
+    <text id="tip-a-${svgId}" x="7" y="14" font-size="11" fill="#9aaabf" font-family="'Segoe UI',monospace"></text>
+    <text id="tip-b-${svgId}" x="7" y="30" font-size="14" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
   </g>
   <rect id="ovl-${svgId}" x="${PL}" y="${PT}" width="${cW}" height="${cH}" fill="transparent" style="cursor:crosshair"/>`;
   // Hover interactivity
@@ -885,15 +885,15 @@ function renderFedwatch(data){
       const lbl=LABEL[key]||(p.bp>0?`+${p.bp}bp`:`${p.bp}bp`);
       const w=topProb>0?(p.prob/topProb*100).toFixed(1):0;
       return`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-        <div style="font-size:8px;color:${col};min-width:60px;white-space:nowrap">${lbl}</div>
+        <div style="font-size:10px;color:${col};min-width:60px;white-space:nowrap">${lbl}</div>
         <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
           <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .3s"></div>
         </div>
-        <div style="font-size:8px;font-weight:700;font-family:monospace;min-width:36px;text-align:right;color:${col}">${p.prob.toFixed(1)}%</div>
+        <div style="font-size:10px;font-weight:700;font-family:monospace;min-width:36px;text-align:right;color:${col}">${p.prob.toFixed(1)}%</div>
       </div>`;
     }).join('');
     return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px">
-      <div style="font-size:9px;font-weight:700;color:var(--txt2);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
+      <div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
         FOMC ${m.label} <span style="float:right;color:var(--txt3);font-weight:400">${m.date}</span>
       </div>
       ${bars}
@@ -951,7 +951,7 @@ function renderEme(d){
   const tasaNext=tasa.length>1?tasa[1]:null;
 
   function chip(label,val,color){
-    return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:8px">
+    return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:10px">
       <div style="color:var(--txt3);margin-bottom:1px">${label}</div>
       <div style="font-weight:700;font-family:monospace;color:${color}">${val}</div>
     </div>`;
@@ -982,7 +982,7 @@ function renderEme(d){
       tbody.innerHTML=ipc.map(e=>`<tr>
         <td style="padding:2px 0;color:var(--txt2);font-size:8.5px">${e.horizonte}</td>
         <td style="text-align:right;font-weight:700;color:#f59e0b;font-family:monospace;padding:2px 4px">${e.media.toFixed(2)}%</td>
-        <td style="text-align:right;color:var(--txt3);font-family:monospace;font-size:8px;padding:2px 0">${e.min.toFixed(2)}%–${e.max.toFixed(2)}%</td>
+        <td style="text-align:right;color:var(--txt3);font-family:monospace;font-size:10px;padding:2px 0">${e.min.toFixed(2)}%–${e.max.toFixed(2)}%</td>
       </tr>`).join('');
     }
   }
@@ -1046,10 +1046,10 @@ function drawEmeTasa(tasa){
         }
       },
       scales:{
-        x:{ticks:{color:'#8090a8',font:{size:9},maxRotation:45},
+        x:{ticks:{color:'#8090a8',font:{size:11},maxRotation:45},
            grid:{color:'rgba(255,255,255,.03)'}},
         y:{grace:'15%',
-           ticks:{color:'#8090a8',font:{size:9},callback:v=>v.toFixed(2)+'%'},
+           ticks:{color:'#8090a8',font:{size:11},callback:v=>v.toFixed(2)+'%'},
            grid:{color:'rgba(255,255,255,.04)'}}
       }
     }
@@ -1093,7 +1093,7 @@ function renderClocks(){
     const open=isMarketOpen(m,now);
     return`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0">
       <div style="font-size:10px;font-weight:700;font-family:monospace;color:var(--txt)">${t}</div>
-      <div style="font-size:8px;color:var(--txt3);display:flex;align-items:center;gap:3px;white-space:nowrap">
+      <div style="font-size:10px;color:var(--txt3);display:flex;align-items:center;gap:3px;white-space:nowrap">
         <span style="width:5px;height:5px;border-radius:50%;background:${open?'var(--green)':'var(--txt3)'};display:inline-block;flex-shrink:0"></span>
         ${m.flag} ${m.city}
       </div>
@@ -1149,7 +1149,7 @@ function renderIPCCalendar(data, pubDates){
   data.forEach(({y,m,v})=>{if(!byYear[y])byYear[y]={};byYear[y][m]={v,pub:(pubDates[`${y}-${String(m).padStart(2,'0')}`]||'').slice(0,10)};});
   const years=Object.keys(byYear).sort().reverse();
   const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const hdr=MN.map(n=>`<div style="text-align:center;font-size:9px;font-weight:700;color:#3a4a62;padding:3px 0">${n}</div>`).join('');
+  const hdr=MN.map(n=>`<div style="text-align:center;font-size:11px;font-weight:700;color:#3a4a62;padding:3px 0">${n}</div>`).join('');
   const rows=years.map(y=>{
     const cells=Array.from({length:12},(_,i)=>{
       const e=byYear[y][i+1];
@@ -1157,7 +1157,7 @@ function renderIPCCalendar(data, pubDates){
       const pubStr=e.pub?`${parseInt(e.pub.slice(8))} ${MPUB[parseInt(e.pub.slice(5,7))-1]}`:'';
       return `<div style="background:#141d35;border:1px solid #1a2540;border-radius:3px;padding:5px 2px;min-height:52px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
         <div style="font-size:13px;font-family:monospace;font-weight:800;color:#93c5fd;line-height:1.2">${(e.v*100).toFixed(2)}%</div>
-        ${pubStr?`<div style="font-size:9px;color:#8892a4;line-height:1.2">${pubStr}</div>`:''}
+        ${pubStr?`<div style="font-size:11px;color:#8892a4;line-height:1.2">${pubStr}</div>`:''}
       </div>`;
     }).join('');
     return `<div style="display:contents"><div style="font-size:10px;font-weight:700;color:#4a5568;display:flex;align-items:center;justify-content:flex-end;padding-right:5px">${y}</div>${cells}</div>`;
@@ -1180,7 +1180,7 @@ function renderUVRCalendar(data){
     const y=ref.getFullYear(),m=ref.getMonth();
     const days=new Date(y,m+1,0).getDate();
     let sdow=new Date(y,m,1).getDay(); sdow=sdow===0?6:sdow-1;
-    const hdrs=DN.map(d=>`<div style="text-align:center;font-size:8px;font-weight:700;color:#3a4a62;padding:2px 0">${d}</div>`).join('');
+    const hdrs=DN.map(d=>`<div style="text-align:center;font-size:10px;font-weight:700;color:#3a4a62;padding:2px 0">${d}</div>`).join('');
     let cells='';
     for(let i=0;i<sdow;i++) cells+='<div></div>';
     for(let day=1;day<=days;day++){
@@ -1195,8 +1195,8 @@ function renderUVRCalendar(data){
       const isToday=iso===today;
       const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
       cells+=`<div style="background:#141d35;border-radius:3px;padding:3px 2px;min-height:50px;${ring};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
-        <div style="font-size:9px;color:${isToday?'#93c5fd':'#3a4a62'};font-weight:700">${day}</div>
-        ${val!=null?`<div style="font-size:9px;font-family:monospace;color:#a3b8cc;font-weight:700;line-height:1.3;text-align:center">${val.toFixed(4)}</div>`:''}
+        <div style="font-size:11px;color:${isToday?'#93c5fd':'#3a4a62'};font-weight:700">${day}</div>
+        ${val!=null?`<div style="font-size:11px;font-family:monospace;color:#a3b8cc;font-weight:700;line-height:1.3;text-align:center">${val.toFixed(4)}</div>`:''}
       </div>`;
     }
     html+=`<div style="min-width:195px;flex:1">
@@ -1296,7 +1296,7 @@ function renderIBRCalendar(data){
     const y=ref.getFullYear(),m=ref.getMonth();
     const days=new Date(y,m+1,0).getDate();
     let sdow=new Date(y,m,1).getDay(); sdow=sdow===0?6:sdow-1;
-    const hdrs=DN.map(d=>`<div style="text-align:center;font-size:8px;font-weight:700;color:#3a4a62;padding:2px 0">${d}</div>`).join('');
+    const hdrs=DN.map(d=>`<div style="text-align:center;font-size:10px;font-weight:700;color:#3a4a62;padding:2px 0">${d}</div>`).join('');
     let cells='';
     for(let i=0;i<sdow;i++) cells+='<div></div>';
     for(let day=1;day<=days;day++){
@@ -1310,22 +1310,22 @@ function renderIBRCalendar(data){
       const isToday=iso===today;
       if(isWE){
         cells+=`<div style="background:#080c17;border-radius:3px;padding:3px 2px;min-height:50px">
-          <div style="font-size:8px;color:#1a2235;font-weight:700">${day}</div>
-          ${ap!=null?`<div style="font-size:8px;font-family:monospace;font-weight:800;color:${AP_C};opacity:.4;line-height:1.35;margin-top:4px">${(ap*100).toFixed(2)}%</div>`:''}
+          <div style="font-size:10px;color:#1a2235;font-weight:700">${day}</div>
+          ${ap!=null?`<div style="font-size:10px;font-family:monospace;font-weight:800;color:${AP_C};opacity:.4;line-height:1.35;margin-top:4px">${(ap*100).toFixed(2)}%</div>`:''}
         </div>`;
       } else if(isFest){
         const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
         cells+=`<div style="background:#0d1628;border-radius:3px;padding:3px 2px;min-height:50px;${ring}">
-          <div style="font-size:8px;color:#2a3855;font-weight:700;margin-bottom:1px">${day}</div>
+          <div style="font-size:10px;color:#2a3855;font-weight:700;margin-bottom:1px">${day}</div>
           <div style="font-size:6px;color:#2a3855;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">fest</div>
-          ${ap!=null?`<div style="font-size:8px;font-family:monospace;font-weight:800;color:${AP_C};opacity:.65;line-height:1.35">${(ap*100).toFixed(2)}%</div>`:''}
+          ${ap!=null?`<div style="font-size:10px;font-family:monospace;font-weight:800;color:${AP_C};opacity:.65;line-height:1.35">${(ap*100).toFixed(2)}%</div>`:''}
         </div>`;
       } else {
         const ring=isToday?'outline:2px solid #3b82f6;outline-offset:-2px;':'';
         cells+=`<div style="background:#141d35;border-radius:3px;padding:3px 2px;min-height:50px;${ring}">
-          <div style="font-size:8px;color:${isToday?'#93c5fd':'#3a4a62'};font-weight:700;margin-bottom:2px">${day}</div>
-          ${pub!=null?`<div style="font-size:8px;font-family:monospace;color:${PUB_C};line-height:1.35">${(pub*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#2a3550">—</div>'}
-          ${ap!=null?`<div style="font-size:8px;font-family:monospace;font-weight:800;color:${AP_C};line-height:1.35">${(ap*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#2a3550">—</div>'}
+          <div style="font-size:10px;color:${isToday?'#93c5fd':'#3a4a62'};font-weight:700;margin-bottom:2px">${day}</div>
+          ${pub!=null?`<div style="font-size:10px;font-family:monospace;color:${PUB_C};line-height:1.35">${(pub*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#2a3550">—</div>'}
+          ${ap!=null?`<div style="font-size:10px;font-family:monospace;font-weight:800;color:${AP_C};line-height:1.35">${(ap*100).toFixed(2)}%</div>`:'<div style="font-size:7px;color:#2a3550">—</div>'}
         </div>`;
       }
     }
@@ -1375,7 +1375,7 @@ function drawDataSparkline(svgId, vals, color, suffix, dates){
   for(let i=0;i<=3;i++){
     const yv=mn+rngY*i/3, yp=py(yv);
     grid+=`<line x1="${PL}" y1="${yp.toFixed(1)}" x2="${W-PR}" y2="${yp.toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
-    grid+=`<text x="${PL-3}" y="${(yp+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#8090a8">${yv.toFixed(suffix?1:2)}${suffix}</text>`;
+    grid+=`<text x="${PL-3}" y="${(yp+4).toFixed(1)}" text-anchor="end" font-size="10" fill="#8090a8">${yv.toFixed(suffix?1:2)}${suffix}</text>`;
   }
   let xAxis=`<line x1="${PL}" y1="${(PT+cH).toFixed(1)}" x2="${W-PR}" y2="${(PT+cH).toFixed(1)}" stroke="#1e2d4a" stroke-width="1"/>`;
   if(dates&&dates.length){
@@ -1388,7 +1388,7 @@ function drawDataSparkline(svgId, vals, color, suffix, dates){
       if(seen.has(lbl)) continue; seen.add(lbl);
       const xp=px(i).toFixed(1);
       xAxis+=`<line x1="${xp}" y1="${(PT+cH).toFixed(1)}" x2="${xp}" y2="${(PT+cH+4).toFixed(1)}" stroke="#2a3550" stroke-width="1"/>`;
-      xAxis+=`<text x="${xp}" y="${(PT+cH+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#8090a8">${lbl}</text>`;
+      xAxis+=`<text x="${xp}" y="${(PT+cH+14).toFixed(1)}" text-anchor="middle" font-size="10" fill="#8090a8">${lbl}</text>`;
     }
   }
   const pts=vals.map((v,i)=>({x:px(i),y:py(v)}));
@@ -1403,8 +1403,8 @@ function drawDataSparkline(svgId, vals, color, suffix, dates){
     <circle id="dot-${svgId}" cx="0" cy="0" r="3" fill="${color}" stroke="#0f1629" stroke-width="1.5" display="none" pointer-events="none"/>
     <g id="tip-${svgId}" display="none" pointer-events="none">
       <rect x="0" y="0" width="${TW}" height="${TH}" fill="#0a0e1a" stroke="#263554" rx="3" stroke-width="1"/>
-      <text id="tip-d-${svgId}" x="7" y="13" font-size="9" fill="#8090a8" font-family="'Segoe UI',sans-serif"></text>
-      <text id="tip-v-${svgId}" x="7" y="28" font-size="12" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
+      <text id="tip-d-${svgId}" x="7" y="14" font-size="11" fill="#8090a8" font-family="'Segoe UI',sans-serif"></text>
+      <text id="tip-v-${svgId}" x="7" y="30" font-size="14" font-weight="700" fill="#e8eaf0" font-family="monospace"></text>
     </g>
     <rect id="ovl-${svgId}" x="${PL}" y="${PT}" width="${cW}" height="${cH}" fill="transparent" style="cursor:crosshair"/>`;
   // Interactividad
@@ -1481,7 +1481,7 @@ function renderPresetList(t){
   const ps=getPresets(t),active=getActive(t),names=Object.keys(ps);
   const lbl={ipcm:'IPC mensual',ipca:'IPC anual',fra:'FRA'};
   if(!names.length){
-    listEl.innerHTML='<div style="font-size:9px;color:var(--txt3);padding:4px 0">Sin escenarios guardados</div>';
+    listEl.innerHTML='<div style="font-size:11px;color:var(--txt3);padding:4px 0">Sin escenarios guardados</div>';
     if(prevEl) prevEl.innerHTML=''; return;
   }
   listEl.innerHTML=names.map(n=>{
@@ -1492,10 +1492,10 @@ function renderPresetList(t){
       <span style="font-size:12px;color:${isAct?'var(--blue3)':'var(--txt3)'}">&#x25CF;</span>
       <div style="flex:1;min-width:0">
         <div style="font-size:10px;font-weight:${isAct?700:400};color:${isAct?'var(--txt)':'var(--txt2)'}">${n}</div>
-        <div style="font-size:8px;color:var(--txt3)">${cnt} reg &middot; ${rng}</div>
+        <div style="font-size:10px;color:var(--txt3)">${cnt} reg &middot; ${rng}</div>
       </div>
-      ${!isAct?`<button class="btn-sm" style="padding:2px 8px;font-size:9px" onclick="activatePreset('${t}','${ns}')">Activar</button>`:'<span style="font-size:9px;color:var(--blue3);padding:0 4px">Activo</span>'}
-      <button class="btn-sm" style="padding:2px 8px;font-size:9px;color:var(--red3);border-color:var(--red2)" onclick="deletePreset('${t}','${ns}')">&#x2715;</button>
+      ${!isAct?`<button class="btn-sm" style="padding:2px 8px;font-size:11px" onclick="activatePreset('${t}','${ns}')">Activar</button>`:'<span style="font-size:11px;color:var(--blue3);padding:0 4px">Activo</span>'}
+      <button class="btn-sm" style="padding:2px 8px;font-size:11px;color:var(--red3);border-color:var(--red2)" onclick="deletePreset('${t}','${ns}')">&#x2715;</button>
     </div>`;
   }).join('');
   if(active&&ps[active]&&prevEl) renderEstPreviewKV(ps[active].data,t+'-preset-preview',lbl[t]||t);
@@ -1535,7 +1535,7 @@ function renderEstPreviewKV(data, elId, label){
     <td style="padding:3px 8px;color:var(--txt2)">${k}</td>
     <td style="padding:3px 8px;text-align:right;font-family:monospace;color:var(--amber3)">${(data[k]*100).toFixed(3)}%</td>
   </tr>`).join('');
-  el.innerHTML=`<div style="font-size:9px;color:var(--txt3);margin-bottom:4px">✓ ${keys.length} filas · ${keys[0]} → ${keys[keys.length-1]}</div>
+  el.innerHTML=`<div style="font-size:11px;color:var(--txt3);margin-bottom:4px">✓ ${keys.length} filas · ${keys[0]} → ${keys[keys.length-1]}</div>
   <div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)">
     <table style="width:100%;border-collapse:collapse;font-size:10px">
       <thead style="position:sticky;top:0;background:var(--bg3)"><tr>
