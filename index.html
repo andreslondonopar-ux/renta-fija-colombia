@@ -139,10 +139,11 @@ svg{display:block;width:100%}
 </head>
 <body>
 
-<div class="ticker-wrap">
+<div class="ticker-wrap" style="position:relative">
   <div class="ticker-scroll">
     <div class="ticker-inner" id="ticker-inner"></div>
   </div>
+  <div id="ticker-status" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--txt3);background:#050810;padding:2px 6px;border-radius:3px;white-space:nowrap">—</div>
 </div>
 
 <div class="topbar">
@@ -545,9 +546,25 @@ async function _loadMarketTicker(){
       }).filter(Boolean)),
   ]);
   const items=[...(rRes.status==='fulfilled'?rRes.value:[]),...(cRes.status==='fulfilled'?cRes.value:[]),...(yRes.status==='fulfilled'?yRes.value:[])];
-  if(items.length>=2){_setTicker(items);try{localStorage.setItem('rf_ticker_cache',JSON.stringify(items));}catch(e){};}
+  const st=document.getElementById('ticker-status');
+  if(items.length>=2){
+    _setTicker(items);
+    try{localStorage.setItem('rf_ticker_cache',JSON.stringify(items));}catch(e){}
+    if(st){
+      const t=new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
+      st.textContent='↺ '+t;
+      st.style.color='var(--green3)';
+    }
+  } else {
+    if(st){st.textContent='sin conexión';st.style.color='var(--red3)';}
+  }
 }
-try{const c=JSON.parse(localStorage.getItem('rf_ticker_cache')||'null');if(c?.length>=2)_setTicker(c);else _setTicker(_MKT_FB);}catch(e){_setTicker(_MKT_FB);}
+try{
+  const c=JSON.parse(localStorage.getItem('rf_ticker_cache')||'null');
+  const st=document.getElementById('ticker-status');
+  if(c?.length>=2){_setTicker(c);if(st){st.textContent='cache';st.style.color='var(--txt3)';}}
+  else _setTicker(_MKT_FB);
+}catch(e){_setTicker(_MKT_FB);}
 _loadMarketTicker();
 setInterval(_loadMarketTicker,60000);
 function buildTickerFromCOL(){}
