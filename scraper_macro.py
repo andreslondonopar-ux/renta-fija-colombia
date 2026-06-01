@@ -18,7 +18,7 @@ FALLBACK_COL = {
 }
 
 FALLBACK_USA = {
-    "interest_rate": {"value": 4.00,   "source": "Trading Economics · fallback"},
+    "interest_rate": {"value": 3.75,   "source": "Trading Economics · fallback"},
     "inflation":     {"value": 3.8,    "source": "Trading Economics · fallback"},
     "inflation_mom": {"value": 0.6,    "source": "Trading Economics · fallback"},
     "gdp_annual":    {"value": 2.7,    "source": "Trading Economics · fallback"},
