@@ -114,18 +114,27 @@ svg{display:block;width:100%}
 .data-tbl tbody tr:hover{background:var(--bg3)}
 .est-drop{border:2px dashed var(--border2);border-radius:var(--r2);padding:18px;text-align:center;cursor:pointer;transition:all .2s;color:var(--txt3);font-size:13px;display:block}
 .est-drop:hover{border-color:var(--blue);color:var(--blue3)}
-.cal-month{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.12em;padding:6px 0 4px;margin-top:14px;border-bottom:1px solid var(--border)}
-.cal-month:first-child{margin-top:0}
-.cal-event{display:flex;align-items:flex-start;gap:10px;padding:7px 6px;border-radius:6px;transition:background .15s;cursor:default}
-.cal-event:hover{background:var(--bg3)}
-.cal-event.past{opacity:.45}
-.cal-event.today{background:var(--bg3);outline:1px solid var(--border2)}
-.cal-event.next{outline:1px solid var(--amber);border-radius:6px}
-.cal-date{min-width:38px;text-align:right;font-size:12px;font-weight:700;font-family:monospace;color:var(--txt2);padding-top:1px}
-.cal-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
-.cal-info{flex:1;min-width:0}
-.cal-title{font-size:12px;font-weight:700;color:var(--txt)}
-.cal-desc{font-size:11px;color:var(--txt3);margin-top:1px}
+.cal-nav-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--txt2);font-size:16px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding:0}
+.cal-nav-btn:hover{background:var(--bg4);color:var(--txt);border-color:var(--blue)}
+.cal-today-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--txt3);font-size:11px;font-weight:700;padding:3px 10px;cursor:pointer;transition:all .15s}
+.cal-today-btn:hover{color:var(--amber3);border-color:var(--amber)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:5px 2px;letter-spacing:.06em}
+.cal-cell{min-height:78px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:5px 5px 4px;cursor:pointer;transition:background .12s;overflow:hidden;display:flex;flex-direction:column}
+.cal-cell:hover{background:var(--bg3)}
+.cal-cell.othermonth{opacity:.28;pointer-events:none}
+.cal-cell.today{border-color:var(--amber);border-width:2px}
+.cal-cell.selected{background:var(--bg3);border-color:var(--blue3);border-width:2px}
+.cal-num{font-size:11px;font-weight:700;color:var(--txt2);line-height:1;margin-bottom:3px;flex-shrink:0}
+.cal-cell.today .cal-num{color:var(--amber3)}
+.cal-chip{font-size:9px;padding:1px 4px;border-radius:2px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;flex-shrink:0}
+.cal-more{font-size:9px;color:var(--txt3);margin-top:1px}
+.cal-detail-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.cal-detail-row:last-child{border-bottom:none}
+.cal-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0}
+.cal-detail-info{flex:1;min-width:0}
+.cal-detail-title{font-size:12px;font-weight:700;color:var(--txt)}
+.cal-detail-desc{font-size:11px;color:var(--txt3);margin-top:1px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
@@ -436,13 +445,21 @@ svg{display:block;width:100%}
 
     <!-- TAB: EVENTOS -->
     <div class="main-panel" id="panel-eventos" style="flex-direction:column;overflow:hidden">
-      <div style="flex:1;overflow-y:auto;padding:16px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-          <span style="font-size:13px;font-weight:700;color:var(--txt2)">Calendario de eventos</span>
-          <span style="font-size:11px;color:var(--txt3)">BanRep · FOMC · DANE · Vencimientos TES</span>
-          <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap" id="cal-legend"></div>
-        </div>
-        <div id="cal-timeline"></div>
+      <!-- Navegación -->
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap">
+        <button class="cal-nav-btn" onclick="calNav(-1)">&#8249;</button>
+        <span id="cal-hdr-title" style="font-size:14px;font-weight:700;color:var(--txt);min-width:150px;text-align:center"></span>
+        <button class="cal-nav-btn" onclick="calNav(1)">&#8250;</button>
+        <button class="cal-today-btn" onclick="calGoToday()">Hoy</button>
+        <div id="cal-legend" style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap"></div>
+      </div>
+      <!-- Grid -->
+      <div style="flex:1;overflow-y:auto;padding:12px 14px">
+        <div id="cal-grid"></div>
+      </div>
+      <!-- Detalle del día -->
+      <div id="cal-detail" style="border-top:1px solid var(--border);padding:10px 16px;flex-shrink:0;max-height:190px;overflow-y:auto">
+        <span style="font-size:11px;color:var(--txt3)">Clic en un d&iacute;a para ver los eventos</span>
       </div>
     </div>
 
@@ -1132,107 +1149,196 @@ const CAL_CFG={
   ise:    {label:'ISE',       icon:'📉', bg:'#164e63',        border:'#0891b2',      color:'#67e8f9'},
   laboral:{label:'Laboral',   icon:'👷', bg:'#3b1a05',        border:'#c2410c',      color:'#fdba74'},
   dane:   {label:'DANE',      icon:'📁', bg:'#1e293b',        border:'#475569',      color:'#94a3b8'},
-  eme:    {label:'EME',       icon:'📋', bg:'#0e4a5a',        border:'#0891b2',      color:'#67e8f9'},
+  eme:    {label:'EME',       icon:'📋', bg:'#0e4a5a',        border:'#0891b2',      color:'#a5f3fc'},
   tes:    {label:'TES vence', icon:'💼', bg:'var(--red2)',     border:'var(--red)',   color:'var(--red3)'},
 };
 const MESES_LARGO=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOW=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 
-let calLoaded=false;
+let CAL_ALL=[];
+let calEventsReady=false;
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth(); // 0-indexed
+let calSelectedDay=null;
+
 async function loadCalendar(){
-  if(calLoaded) return;
-  calLoaded=true;
-  const today=new Date(); today.setHours(0,0,0,0);
-  const todayStr=today.toISOString().slice(0,10);
+  if(!calEventsReady){
+    const today=new Date(); today.setHours(0,0,0,0);
+    let events=[];
 
-  let events=[];
+    try{
+      const r=await fetch('calendar_data.json?_='+Date.now());
+      if(r.ok){const d=await r.json();events.push(...(d.events||[]));}
+    }catch(e){}
 
-  // 1. Eventos estáticos
-  try{
-    const r=await fetch('calendar_data.json?_='+Date.now());
-    if(r.ok){ const d=await r.json(); events.push(...(d.events||[])); }
-  }catch(e){}
+    try{
+      const r=await fetch('fedwatch_data.json?_='+Date.now());
+      if(r.ok){
+        const d=await r.json();
+        (d.meetings||[]).forEach(m=>events.push({
+          date:m.date,type:'fomc',
+          title:`FOMC ${m.label}`,desc:'Decisión tasa Fed Funds'
+        }));
+      }
+    }catch(e){}
 
-  // 2. FOMC desde fedwatch_data.json
-  try{
-    const r=await fetch('fedwatch_data.json?_='+Date.now());
-    if(r.ok){
-      const d=await r.json();
-      (d.meetings||[]).forEach(m=>events.push({
-        date:m.date, type:'fomc',
-        title:`FOMC ${m.label}`, desc:'Decisión tasa Fed Funds'
-      }));
+    try{
+      const r=await fetch('datos_curva.json?_='+Date.now());
+      if(r.ok){
+        const d=await r.json();
+        const tes=d.tes||d||[];
+        const cutoff=new Date(today);cutoff.setFullYear(cutoff.getFullYear()+3);
+        (Array.isArray(tes)?tes:[]).forEach(t=>{
+          if(!t.vencimiento)return;
+          const dt=new Date(t.vencimiento);
+          if(dt>=today&&dt<=cutoff)
+            events.push({date:t.vencimiento,type:'tes',
+              title:`Vence ${t.name||t.codigo}`,
+              desc:`TIR actual: ${t.tir?.toFixed(2)}%`});
+        });
+      }
+    }catch(e){}
+
+    CAL_ALL=events.sort((a,b)=>a.date.localeCompare(b.date));
+    calEventsReady=true;
+
+    // Ir al mes del próximo evento
+    const todayStr=today.toISOString().slice(0,10);
+    const next=CAL_ALL.find(e=>e.date>=todayStr);
+    if(next){
+      const d=new Date(next.date);
+      calYear=d.getFullYear();
+      calMonth=d.getMonth();
     }
-  }catch(e){}
 
-  // 3. Vencimientos TES desde datos_curva.json (próximos 3 años)
-  try{
-    const r=await fetch('datos_curva.json?_='+Date.now());
-    if(r.ok){
-      const d=await r.json();
-      const tes=(d.tes||d||[]);
-      const cutoff=new Date(today); cutoff.setFullYear(cutoff.getFullYear()+3);
-      tes.forEach(t=>{
-        if(!t.vencimiento) return;
-        const dt=new Date(t.vencimiento);
-        if(dt>=today && dt<=cutoff)
-          events.push({date:t.vencimiento,type:'tes',
-            title:`Vence ${t.name||t.codigo}`,
-            desc:`TIR actual: ${t.tir?.toFixed(2)}%`});
-      });
-    }
-  }catch(e){}
+    // Leyenda
+    const leg=document.getElementById('cal-legend');
+    if(leg) leg.innerHTML=Object.entries(CAL_CFG).map(([,c])=>
+      `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 5px;border-radius:8px;background:${c.bg};border:1px solid ${c.border};color:${c.color}">${c.icon} ${c.label}</span>`
+    ).join('');
+  }
+  renderCalMonth();
+}
 
-  // Ordenar
-  events.sort((a,b)=>a.date.localeCompare(b.date));
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  calSelectedDay=null;
+  renderCalMonth();
+}
 
-  // Determinar próximo evento futuro
-  const nextEvt=events.find(e=>e.date>=todayStr);
+function calGoToday(){
+  const n=new Date();
+  calYear=n.getFullYear();
+  calMonth=n.getMonth();
+  calSelectedDay=null;
+  renderCalMonth();
+}
 
-  // Agrupar por mes
-  const byMonth={};
-  events.forEach(e=>{
-    const key=e.date.slice(0,7);
-    if(!byMonth[key]) byMonth[key]=[];
-    byMonth[key].push(e);
+function renderCalMonth(){
+  const grid=document.getElementById('cal-grid');
+  const hdr=document.getElementById('cal-hdr-title');
+  if(!grid) return;
+
+  if(hdr) hdr.textContent=`${MESES_LARGO[calMonth]} ${calYear}`;
+
+  const todayStr=new Date().toISOString().slice(0,10);
+  const ym=`${calYear}-${String(calMonth+1).padStart(2,'0')}`;
+
+  // Primer día del mes (0=Dom,1=Lun...)
+  const firstDay=new Date(calYear,calMonth,1);
+  // Convertir a lunes=0
+  let startDow=(firstDay.getDay()+6)%7;
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+
+  // Agrupar eventos por fecha
+  const evtByDay={};
+  CAL_ALL.forEach(e=>{
+    if(!evtByDay[e.date]) evtByDay[e.date]=[];
+    evtByDay[e.date].push(e);
   });
 
-  // Render
-  const tl=document.getElementById('cal-timeline');
-  if(!tl) return;
+  // Cabecera días semana
+  const dowHtml=DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');
 
-  tl.innerHTML=Object.entries(byMonth).map(([ym,evts])=>{
-    const [y,m]=ym.split('-');
-    const monthHdr=`<div class="cal-month">${MESES_LARGO[+m-1]} ${y}</div>`;
-    const rows=evts.map(e=>{
-      const cfg=CAL_CFG[e.type]||CAL_CFG.tes;
-      const isPast=e.date<todayStr;
-      const isToday=e.date===todayStr;
-      const isNext=e===nextEvt;
-      const day=e.date.slice(8);
-      const cls=['cal-event',isPast?'past':'',isToday?'today':'',isNext?'next':''].filter(Boolean).join(' ');
-      return`<div class="${cls}">
-        <div class="cal-date">${day}</div>
-        <div class="cal-badge" style="background:${cfg.bg};border:1px solid ${cfg.border};color:${cfg.color}">${cfg.icon} ${cfg.label}</div>
-        <div class="cal-info">
-          <div class="cal-title">${e.title}</div>
-          ${e.desc?`<div class="cal-desc">${e.desc}</div>`:''}
+  // Celdas
+  let cells='';
+  const totalCells=Math.ceil((startDow+daysInMonth)/7)*7;
+  for(let i=0;i<totalCells;i++){
+    let day, dateStr, cls='cal-cell';
+    if(i<startDow){
+      day=daysInPrev-startDow+i+1;
+      const prevM=calMonth===0?12:calMonth;
+      const prevY=calMonth===0?calYear-1:calYear;
+      dateStr=`${prevY}-${String(prevM).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      cls+=' othermonth';
+    } else if(i<startDow+daysInMonth){
+      day=i-startDow+1;
+      dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    } else {
+      day=i-startDow-daysInMonth+1;
+      const nextM=calMonth===11?1:calMonth+2;
+      const nextY=calMonth===11?calYear+1:calYear;
+      dateStr=`${nextY}-${String(nextM).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      cls+=' othermonth';
+    }
+    if(dateStr===todayStr) cls+=' today';
+    if(dateStr===calSelectedDay) cls+=' selected';
+
+    const dayEvts=evtByDay[dateStr]||[];
+    const isPast=dateStr<todayStr;
+
+    // Chips (máx 3, luego "+N")
+    const shown=dayEvts.slice(0,3);
+    const extra=dayEvts.length-shown.length;
+    const chipsHtml=shown.map(e=>{
+      const c=CAL_CFG[e.type]||CAL_CFG.tes;
+      return`<span class="cal-chip" style="background:${c.bg};color:${c.color};border:1px solid ${c.border};opacity:${isPast?.6:1}">${c.icon} ${e.title}</span>`;
+    }).join('');
+    const moreHtml=extra>0?`<span class="cal-more">+${extra} más</span>`:'';
+
+    const clickHandler=dayEvts.length?`onclick="calSelectDay('${dateStr}')"`:'' ;
+    cells+=`<div class="${cls}" ${clickHandler} style="${dayEvts.length?'':'cursor:default'}">
+      <div class="cal-num">${day}</div>
+      ${chipsHtml}${moreHtml}
+    </div>`;
+  }
+
+  grid.innerHTML=`<div class="cal-grid">${dowHtml}${cells}</div>`;
+
+  // Mostrar detalle si hay día seleccionado
+  if(calSelectedDay) calShowDetail(calSelectedDay);
+  else{
+    const det=document.getElementById('cal-detail');
+    if(det) det.innerHTML='<span style="font-size:11px;color:var(--txt3)">Clic en un día para ver los eventos</span>';
+  }
+}
+
+function calSelectDay(dateStr){
+  calSelectedDay=calSelectedDay===dateStr?null:dateStr;
+  renderCalMonth();
+}
+
+function calShowDetail(dateStr){
+  const det=document.getElementById('cal-detail');
+  if(!det) return;
+  const evts=CAL_ALL.filter(e=>e.date===dateStr);
+  if(!evts.length){det.innerHTML='<span style="font-size:11px;color:var(--txt3)">Sin eventos este día</span>';return;}
+  const d=new Date(dateStr+'T12:00:00');
+  const titulo=`${d.getDate()} de ${MESES_LARGO[d.getMonth()]} ${d.getFullYear()}`;
+  det.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:6px">${titulo}</div>`+
+    evts.map(e=>{
+      const c=CAL_CFG[e.type]||CAL_CFG.tes;
+      return`<div class="cal-detail-row">
+        <span class="cal-badge" style="background:${c.bg};border:1px solid ${c.border};color:${c.color}">${c.icon} ${c.label}</span>
+        <div class="cal-detail-info">
+          <div class="cal-detail-title">${e.title}</div>
+          ${e.desc?`<div class="cal-detail-desc">${e.desc}</div>`:''}
         </div>
       </div>`;
     }).join('');
-    return monthHdr+rows;
-  }).join('');
-
-  // Leyenda
-  const leg=document.getElementById('cal-legend');
-  if(leg) leg.innerHTML=Object.entries(CAL_CFG).map(([,c])=>
-    `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 6px;border-radius:10px;background:${c.bg};border:1px solid ${c.border};color:${c.color}">${c.icon} ${c.label}</span>`
-  ).join('');
-
-  // Scroll al primer evento futuro
-  requestAnimationFrame(()=>{
-    const nextEl=tl.querySelector('.cal-event:not(.past)');
-    if(nextEl) nextEl.scrollIntoView({block:'center',behavior:'smooth'});
-  });
 }
 
 // ── WORLD CLOCKS (topbar) ─────────────────────────────────────
