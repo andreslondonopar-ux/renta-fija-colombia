@@ -1,0 +1,43 @@
+name: Actualizar EME BanRep
+
+on:
+  schedule:
+    # Primero de cada mes a las 10am Colombia (15:00 UTC) — BanRep publica a inicio de mes
+    - cron: '0 15 1-5 * *'
+    # También lunes a viernes a las 9am Colombia como respaldo
+    - cron: '0 14 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  update-eme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install requests openpyxl
+
+      - name: Correr scraper EME
+        run: python scraper_eme.py
+
+      - name: Mostrar resultado
+        run: |
+          echo "=== eme_data.json ==="
+          cat eme_data.json
+
+      - name: Commit y push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add eme_data.json
+          git diff --staged --quiet || git commit -m "auto: eme_data $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
