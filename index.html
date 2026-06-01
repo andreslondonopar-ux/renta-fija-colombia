@@ -231,9 +231,8 @@ svg{display:block;width:100%}
             <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas Fed Funds · CME FedWatch</span>
             <span id="fw-status" style="margin-left:auto;font-size:8px;color:var(--txt3)">cargando...</span>
           </div>
-          <div id="fw-wrap" style="padding:8px 10px;flex-shrink:0">
-            <div style="position:relative;height:160px"><canvas id="fw-canvas"></canvas></div>
-            <div id="fw-legend" style="display:flex;gap:12px;justify-content:center;margin-top:4px;font-size:7.5px;color:#8090a8;flex-wrap:wrap"></div>
+          <div id="fw-wrap" style="padding:8px;flex-shrink:0">
+            <div id="fw-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px"></div>
           </div>
         </div>
 
@@ -835,102 +834,45 @@ loadFedwatch();
 window.addEventListener('resize',()=>{if(COL_DATA.length)renderCol();if(US_DATA.length)renderUS();});
 
 // ── FEDWATCH ──────────────────────────────────────────────────
-let fwOpen=true, fwChart=null;
+let fwOpen=true;
 function toggleFedwatch(){
   fwOpen=!fwOpen;
   document.getElementById('fw-wrap').style.display=fwOpen?'':'none';
   document.getElementById('fw-arrow').textContent=fwOpen?'▾':'▸';
 }
 
-function rateVal(label){
-  // Usa el límite superior del rango (convención CME: 4.25-4.50 → 4.50)
-  const n=(label||'').replace('%','').split(/[-–]/);
-  return n.length>=2?parseFloat(n[1]):parseFloat(n[0]);
-}
-
 function renderFedwatch(data){
+  const grid=document.getElementById('fw-grid');
   const st=document.getElementById('fw-status');
-  const canvas=document.getElementById('fw-canvas');
-  const legend=document.getElementById('fw-legend');
-  if(!canvas) return;
+  if(!grid) return;
   if(st) st.textContent=data.source||'';
 
-  const meetings=data.meetings||[];
-  const labels=meetings.map(m=>m.label);
+  const COLOR={'-100':'#ef4444','-75':'#f97316','-50':'#f59e0b','-25':'#facc15','0':'#8892a4','25':'#6ee7b7','50':'#34d399'};
+  const LABEL={'-100':'-100bp','-75':'-75bp','-50':'-50bp','-25':'-25bp','0':'Sin cambio','+25':'+25bp'};
 
-  // Senda 1: outcome más probable por reunión
-  // Senda 2: segundo más probable
-  const path1=[], path2=[], prob1=[], prob2=[];
-  meetings.forEach(m=>{
-    const sorted=[...m.probs].sort((a,b)=>b.prob-a.prob);
-    const p1=sorted[0], p2=sorted[1];
-    path1.push(p1?+rateVal(p1.label).toFixed(4):null);
-    path2.push(p2?+rateVal(p2.label).toFixed(4):null);
-    prob1.push(p1?p1.prob:0);
-    prob2.push(p2?p2.prob:0);
-  });
-
-  const curRate=data.current_rate?rateVal(data.current_rate):null;
-
-  try{if(fwChart)fwChart.destroy();}catch(e){}
-
-  fwChart=new Chart(canvas,{
-    type:'line',
-    data:{
-      labels,
-      datasets:[
-        // Senda más probable
-        {label:'Senda más probable',data:path1,
-          borderColor:'#60a5fa',borderWidth:2.5,
-          pointBackgroundColor:'#60a5fa',pointRadius:5,pointHoverRadius:7,
-          fill:false,tension:.3,order:1},
-        // Segunda senda
-        {label:'2ª senda',data:path2,
-          borderColor:'rgba(96,165,250,0.35)',borderWidth:1.5,
-          borderDash:[4,3],
-          pointBackgroundColor:'rgba(96,165,250,0.4)',pointRadius:3,pointHoverRadius:5,
-          fill:false,tension:.3,order:2},
-        // Tasa actual
-        ...(curRate!=null?[{
-          label:'Tasa actual',
-          data:labels.map(()=>curRate),
-          borderColor:'rgba(245,158,11,0.55)',borderWidth:1.2,
-          borderDash:[5,4],pointRadius:0,fill:false,order:3
-        }]:[]),
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,animation:{duration:300},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          callbacks:{
-            title:ctx=>meetings[ctx[0]?.dataIndex]?.label+' · '+meetings[ctx[0]?.dataIndex]?.date,
-            label:ctx=>{
-              const i=ctx.dataIndex;
-              if(ctx.datasetIndex===0) return `Más probable: ${ctx.parsed.y.toFixed(2)}%  (${prob1[i].toFixed(1)}%)`;
-              if(ctx.datasetIndex===1) return `2ª senda: ${ctx.parsed.y.toFixed(2)}%  (${prob2[i].toFixed(1)}%)`;
-              return `Tasa actual: ${ctx.parsed.y.toFixed(2)}%`;
-            }
-          }
-        }
-      },
-      scales:{
-        x:{ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'}},
-        y:{
-          grace:'30%',
-          ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(2)+'%'},
-          grid:{color:'rgba(255,255,255,.03)'}
-        }
-      }
-    }
-  });
-
-  if(legend) legend.innerHTML=`
-    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#60a5fa" stroke-width="2.5"/></svg>Senda más probable</span>
-    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="rgba(96,165,250,0.45)" stroke-width="1.5" stroke-dasharray="4,3"/></svg>2ª senda</span>
-    ${curRate!=null?`<span style="display:inline-flex;align-items:center;gap:4px"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="rgba(245,158,11,0.6)" stroke-width="1.2" stroke-dasharray="5,4"/></svg>Tasa actual</span>`:''}
-  `;
+  grid.innerHTML=(data.meetings||[]).map(m=>{
+    const sorted=[...m.probs].sort((a,b)=>b.prob-a.prob).slice(0,4);
+    const topProb=sorted[0]?.prob||0;
+    const bars=sorted.map(p=>{
+      const key=String(p.bp);
+      const col=COLOR[key]||'#8892a4';
+      const lbl=LABEL[key]||(p.bp>0?`+${p.bp}bp`:`${p.bp}bp`);
+      const w=topProb>0?(p.prob/topProb*100).toFixed(1):0;
+      return`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+        <div style="font-size:8px;color:${col};min-width:60px;white-space:nowrap">${lbl}</div>
+        <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:8px;font-weight:700;font-family:monospace;min-width:36px;text-align:right;color:${col}">${p.prob.toFixed(1)}%</div>
+      </div>`;
+    }).join('');
+    return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px">
+      <div style="font-size:9px;font-weight:700;color:var(--txt2);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
+        FOMC ${m.label} <span style="float:right;color:var(--txt3);font-weight:400">${m.date}</span>
+      </div>
+      ${bars}
+    </div>`;
+  }).join('');
 }
 
 async function loadFedwatch(){
