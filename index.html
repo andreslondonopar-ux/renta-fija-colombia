@@ -173,7 +173,15 @@ svg{display:block;width:100%}
     </div>
     <!-- Bloomberg Live -->
     <div>
-      <div class="sec-title" style="margin-bottom:6px">Bloomberg Live</div>
+      <div style="display:flex;align-items:center;margin-bottom:6px">
+        <div class="sec-title" style="margin-bottom:0">Bloomberg Live</div>
+        <button onclick="openBloomberg()"
+          style="margin-left:auto;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--txt3);cursor:pointer;transition:all .15s;white-space:nowrap"
+          onmouseover="this.style.color='var(--amber3)';this.style.borderColor='var(--amber)'"
+          onmouseout="this.style.color='var(--txt3)';this.style.borderColor='var(--border2)'">
+          ↗ flotante
+        </button>
+      </div>
       <!-- Canal Bloomberg Television en YouTube. Si no carga verifica el ID del canal. -->
       <div id="bloomberg-wrap" style="height:175px">
         <iframe
@@ -1135,6 +1143,14 @@ renderClocks();
 setInterval(renderClocks,1000);
 
 // ── MAIN TABS
+
+function openBloomberg(){
+  const w=420, h=240;
+  const l=window.screen.width-w-20;
+  const t=window.screen.height-h-60;
+  window.open('bloomberg_live.html','bloomberg_live',
+    `width=${w},height=${h},left=${l},top=${t},resizable=yes,titlebar=no`);
+}
 
 function switchMacroTab(id,el){
   document.querySelectorAll('.macro-tab').forEach(t=>t.classList.remove('active'));
