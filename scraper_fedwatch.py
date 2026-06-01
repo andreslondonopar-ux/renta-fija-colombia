@@ -156,7 +156,7 @@ def scrape_fedwatch():
             # El rango más alto de tasa = tasa actual implícita
             def rate_mid(r):
                 nums = re.findall(r'\d+\.\d+', r)
-                return (float(nums[0]) + float(nums[1])) / 2 if len(nums) >= 2 else 0
+                return float(nums[1]) if len(nums) >= 2 else (float(nums[0]) if nums else 0)
             max_rate = max(rate_mid(r) for r in rates)
             for p in m["probs"]:
                 diff = round((rate_mid(p["label"]) - max_rate) * 100)
