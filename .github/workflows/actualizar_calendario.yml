@@ -1,0 +1,43 @@
+name: Actualizar Calendario JDBR
+
+on:
+  schedule:
+    # Primer lunes de cada mes a las 8am Colombia (13:00 UTC)
+    - cron: '0 13 1-7 * 1'
+    # También el 1ro de cada mes por si el lunes no coincide
+    - cron: '0 13 1 * *'
+  workflow_dispatch:
+
+jobs:
+  update-calendar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install requests
+
+      - name: Correr scraper calendario
+        run: python scraper_calendario.py
+
+      - name: Mostrar resultado
+        run: |
+          echo "=== calendar_data.json (primeras 30 lineas) ==="
+          head -30 calendar_data.json
+
+      - name: Commit y push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add calendar_data.json
+          git diff --staged --quiet || git commit -m "auto: calendario JDBR $(date -u '+%Y-%m-%d')"
+          git push
