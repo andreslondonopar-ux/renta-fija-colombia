@@ -847,8 +847,8 @@ function renderFedwatch(data){
   if(!grid) return;
   if(st) st.textContent=data.source||'';
 
-  const COLOR={'-100':'#ef4444','-75':'#f97316','-50':'#f59e0b','-25':'#facc15','0':'#8892a4','25':'#6ee7b7','50':'#34d399'};
-  const LABEL={'-100':'-100bp','-75':'-75bp','-50':'-50bp','-25':'-25bp','0':'Sin cambio','+25':'+25bp'};
+  const COLOR={'-100':'#ef4444','-75':'#f97316','-50':'#f59e0b','-25':'#facc15','0':'#8892a4','25':'#f97316','50':'#ef4444'};
+  const LABEL={'-100':'-100bp','-75':'-75bp','-50':'-50bp','-25':'-25bp','0':'Sin cambio','25':'+25bp','50':'+50bp'};
 
   grid.innerHTML=(data.meetings||[]).map(m=>{
     const sorted=[...m.probs].sort((a,b)=>b.prob-a.prob).slice(0,4);
@@ -885,15 +885,15 @@ async function loadFedwatch(){
   }catch(e){
     // Mostrar fallback hardcoded
     renderFedwatch({
-      source:'CME FedWatch · ref. may 2026',
-      current_rate:'3.75-4.00',
+      source:'CME FedWatch · ref. jun 2026',
+      current_rate:'3.50-3.75',
       meetings:[
-        {date:'2026-06-17',label:"Jun '26",probs:[{label:'3.50-3.75',bp:-25,prob:99.3},{label:'3.75-4.00',bp:0,prob:0.7}]},
-        {date:'2026-07-29',label:"Jul '26",probs:[{label:'3.50-3.75',bp:-25,prob:94.0},{label:'3.75-4.00',bp:0,prob:5.9}]},
-        {date:'2026-09-16',label:"Sep '26",probs:[{label:'3.50-3.75',bp:-25,prob:80.6},{label:'3.75-4.00',bp:0,prob:18.5},{label:'3.25-3.50',bp:-50,prob:0.9}]},
-        {date:'2026-10-28',label:"Oct '26",probs:[{label:'3.50-3.75',bp:-25,prob:66.3},{label:'3.75-4.00',bp:0,prob:29.5},{label:'3.25-3.50',bp:-50,prob:4.0},{label:'3.00-3.25',bp:-75,prob:0.2}]},
-        {date:'2026-12-09',label:"Dic '26",probs:[{label:'3.50-3.75',bp:-25,prob:51.8},{label:'3.75-4.00',bp:0,prob:37.6},{label:'3.25-3.50',bp:-50,prob:9.6},{label:'3.00-3.25',bp:-75,prob:1.0}]},
-        {date:'2027-01-27',label:"Ene '27",probs:[{label:'3.50-3.75',bp:-25,prob:47.6},{label:'3.75-4.00',bp:0,prob:38.7},{label:'3.25-3.50',bp:-50,prob:11.9},{label:'3.00-3.25',bp:-75,prob:1.7},{label:'2.75-3.00',bp:-100,prob:0.1}]},
+        {date:'2026-06-17',label:"Jun '26",probs:[{label:'3.50-3.75',bp:0,prob:99.3},{label:'3.75-4.00',bp:25,prob:0.7}]},
+        {date:'2026-07-29',label:"Jul '26",probs:[{label:'3.50-3.75',bp:0,prob:94.0},{label:'3.75-4.00',bp:25,prob:5.9}]},
+        {date:'2026-09-16',label:"Sep '26",probs:[{label:'3.50-3.75',bp:0,prob:80.6},{label:'3.75-4.00',bp:25,prob:18.5},{label:'3.25-3.50',bp:-25,prob:0.9}]},
+        {date:'2026-10-28',label:"Oct '26",probs:[{label:'3.50-3.75',bp:0,prob:66.3},{label:'3.75-4.00',bp:25,prob:29.5},{label:'3.25-3.50',bp:-25,prob:4.0},{label:'3.00-3.25',bp:-50,prob:0.2}]},
+        {date:'2026-12-09',label:"Dic '26",probs:[{label:'3.50-3.75',bp:0,prob:51.8},{label:'3.75-4.00',bp:25,prob:37.6},{label:'3.25-3.50',bp:-25,prob:9.6},{label:'3.00-3.25',bp:-50,prob:1.0}]},
+        {date:'2027-01-27',label:"Ene '27",probs:[{label:'3.50-3.75',bp:0,prob:47.6},{label:'3.75-4.00',bp:25,prob:38.7},{label:'3.25-3.50',bp:-25,prob:11.9},{label:'3.00-3.25',bp:-50,prob:1.7},{label:'2.75-3.00',bp:-75,prob:0.1}]},
       ]
     });
   }

@@ -1,63 +1,129 @@
 """
-scraper_fedwatch.py — Probabilidades FOMC via CME FedWatch Tool
-Playwright extrae las probabilidades de cada reunión del año.
+scraper_fedwatch.py — Probabilidades FOMC via CME FedWatch
+Usa la API interna de CME que alimenta el FedWatch Tool.
 Guarda fedwatch_data.json.
 """
-import json, re, datetime
+import json, re, datetime, requests
 from pathlib import Path
 
 TODAY = datetime.date.today().isoformat()
 NOW   = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-# Fallback con datos aproximados (se actualiza con scraping)
-FALLBACK = {
-    "updated": TODAY,
-    "source": "CME FedWatch · ref. may 2026",
-    "current_rate": "3.75-4.00",
-    "meetings": [
-        {"date": "2026-06-17", "label": "Jun '26", "probs": [
-            {"label": "3.50-3.75", "bp": -25, "prob": 99.3},
-            {"label": "3.75-4.00", "bp":   0, "prob":  0.7},
-        ]},
-        {"date": "2026-07-29", "label": "Jul '26", "probs": [
-            {"label": "3.50-3.75", "bp": -25, "prob": 94.0},
-            {"label": "3.75-4.00", "bp":   0, "prob":  5.9},
-        ]},
-        {"date": "2026-09-16", "label": "Sep '26", "probs": [
-            {"label": "3.50-3.75", "bp": -25, "prob": 80.6},
-            {"label": "3.75-4.00", "bp":   0, "prob": 18.5},
-            {"label": "3.25-3.50", "bp": -50, "prob":  0.9},
-        ]},
-        {"date": "2026-10-28", "label": "Oct '26", "probs": [
-            {"label": "3.50-3.75", "bp": -25, "prob": 66.3},
-            {"label": "3.75-4.00", "bp":   0, "prob": 29.5},
-            {"label": "3.25-3.50", "bp": -50, "prob":  4.0},
-            {"label": "3.00-3.25", "bp": -75, "prob":  0.2},
-        ]},
-        {"date": "2026-12-09", "label": "Dic '26", "probs": [
-            {"label": "3.50-3.75", "bp": -25, "prob": 51.8},
-            {"label": "3.75-4.00", "bp":   0, "prob": 37.6},
-            {"label": "3.25-3.50", "bp": -50, "prob":  9.6},
-            {"label": "3.00-3.25", "bp": -75, "prob":  1.0},
-        ]},
-        {"date": "2027-01-27", "label": "Ene '27", "probs": [
-            {"label": "3.50-3.75", "bp": -25, "prob": 47.6},
-            {"label": "3.75-4.00", "bp":   0, "prob": 38.7},
-            {"label": "3.25-3.50", "bp": -50, "prob": 11.9},
-            {"label": "3.00-3.25", "bp": -75, "prob":  1.7},
-            {"label": "2.75-3.00", "bp":-100, "prob":  0.1},
-        ]},
-    ]
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Referer": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html",
+    "Origin": "https://www.cmegroup.com",
 }
 
+# Columnas de rango de tasa que muestra CME (en puntos base → porcentaje)
+RATE_COLS = [
+    "275-300", "300-325", "325-350", "350-375",
+    "375-400", "400-425", "425-450", "450-475", "475-500",
+]
 
-def parse_rate_range(text):
-    """Extrae rango de tasa como '4.25-4.50' del texto."""
-    m = re.search(r'(\d+\.\d+)\s*[-–]\s*(\d+\.\d+)', text)
-    return f"{m.group(1)}-{m.group(2)}" if m else text.strip()
+def bp_to_label(col):
+    """'350-375' → '3.50-3.75'"""
+    lo, hi = col.split("-")
+    return f"{int(lo)/100:.2f}-{int(hi)/100:.2f}"
 
 
-def scrape_fedwatch():
+def rate_upper(label):
+    """'3.50-3.75' → 3.75"""
+    parts = re.findall(r'\d+\.\d+', label)
+    return float(parts[1]) if len(parts) >= 2 else float(parts[0])
+
+
+def try_cme_api():
+    """
+    Intenta obtener datos via el endpoint interno de CME FedWatch.
+    Retorna lista de meetings o None si falla.
+    """
+    # Endpoint 1: getFedwatchProbabilities (devuelve tabla completa)
+    url1 = "https://www.cmegroup.com/CmeWS/mvc/Probabilities/getFedwatchProbabilities"
+    try:
+        r = requests.get(url1, headers=HEADERS, timeout=15)
+        print(f"  API1 status: {r.status_code}")
+        if r.status_code == 200:
+            data = r.json()
+            print(f"  API1 keys: {list(data.keys()) if isinstance(data, dict) else type(data)}")
+            meetings = parse_cme_response(data)
+            if meetings:
+                return meetings
+    except Exception as e:
+        print(f"  API1 error: {e}")
+
+    # Endpoint 2: formato alternativo
+    url2 = "https://www.cmegroup.com/CmeWS/mvc/Probabilities/ConvertedProbabilities/"
+    try:
+        r = requests.get(url2, headers=HEADERS, timeout=15)
+        print(f"  API2 status: {r.status_code}")
+        if r.status_code == 200:
+            data = r.json()
+            meetings = parse_cme_response(data)
+            if meetings:
+                return meetings
+    except Exception as e:
+        print(f"  API2 error: {e}")
+
+    return None
+
+
+def parse_cme_response(data):
+    """Parsea la respuesta JSON de CME en formato estándar."""
+    meetings = []
+
+    # Formato 1: lista de reuniones con probs por rango
+    if isinstance(data, list):
+        for item in data:
+            date_str = item.get("meetingDate") or item.get("date") or item.get("eventDate", "")
+            if not date_str:
+                continue
+            # Normalizar fecha
+            try:
+                if len(date_str) == 8:  # YYYYMMDD
+                    dt = datetime.datetime.strptime(date_str, "%Y%m%d")
+                else:
+                    dt = datetime.datetime.strptime(date_str[:10], "%Y-%m-%d")
+            except:
+                continue
+            if dt.date() < datetime.date.today():
+                continue
+
+            probs_raw = item.get("probs") or item.get("probabilities") or item.get("rates") or {}
+            probs = []
+
+            if isinstance(probs_raw, dict):
+                for col in RATE_COLS:
+                    val = probs_raw.get(col, 0)
+                    if val and float(val) > 0.05:
+                        label = bp_to_label(col)
+                        probs.append({"label": label, "bp": 0, "prob": float(val)})
+            elif isinstance(probs_raw, list):
+                for p in probs_raw:
+                    label = p.get("label") or bp_to_label(p.get("range", ""))
+                    prob = float(p.get("probability") or p.get("prob") or 0)
+                    if prob > 0.05:
+                        probs.append({"label": label, "bp": 0, "prob": prob})
+
+            if probs:
+                meetings.append({
+                    "date": dt.strftime("%Y-%m-%d"),
+                    "label": dt.strftime("%b '%y"),
+                    "probs": sorted(probs, key=lambda x: -x["prob"])
+                })
+
+    # Formato 2: dict con lista de meetings
+    elif isinstance(data, dict):
+        for key in ["meetings", "data", "probabilities", "events"]:
+            if key in data and isinstance(data[key], list):
+                return parse_cme_response(data[key])
+
+    return meetings
+
+
+def try_playwright():
+    """Scrape via Playwright como fallback al API."""
     from playwright.sync_api import sync_playwright
 
     url = "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
@@ -69,152 +135,167 @@ def scrape_fedwatch():
             '--disable-dev-shm-usage', '--disable-gpu',
         ])
         ctx = browser.new_context(
-            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            user_agent=HEADERS["User-Agent"],
             viewport={"width": 1440, "height": 900},
         )
-        page = ctx.new_page()
 
-        print(f"Abriendo {url}...")
-        page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        # Interceptar llamadas XHR para capturar los datos
+        api_data = []
+        def handle_response(response):
+            if "Probabilities" in response.url or "fedwatch" in response.url.lower():
+                try:
+                    body = response.json()
+                    api_data.append(body)
+                    print(f"  XHR capturado: {response.url}")
+                except:
+                    pass
+
+        page = ctx.new_page()
+        page.on("response", handle_response)
+
+        print(f"  Abriendo {url}...")
+        page.goto(url, wait_until="networkidle", timeout=60000)
         page.wait_for_timeout(5000)
 
-        # Cerrar popups
-        for sel in [
-            "button:has-text('Accept')", "button:has-text('I Accept')",
-            "#onetrust-accept-btn-handler", "[class*='consent'] button",
-        ]:
+        # Intentar parsear XHR capturados
+        for body in api_data:
+            parsed = parse_cme_response(body)
+            if parsed:
+                meetings = parsed
+                print(f"  ✓ {len(meetings)} reuniones via XHR")
+                break
+
+        if not meetings:
+            # Leer tabla del DOM
+            print("  Intentando leer tabla del DOM...")
             try:
-                btn = page.locator(sel).first
-                if btn.is_visible(timeout=800):
-                    btn.click()
-                    page.wait_for_timeout(500)
-                    break
-            except: pass
+                # Esperar la tabla de probabilidades
+                page.wait_for_selector("table", timeout=15000)
+                rows = page.locator("table tr").all()
+                print(f"  Filas encontradas: {len(rows)}")
 
-        page.wait_for_timeout(4000)
+                # Buscar cabecera con rangos de tasa
+                header_cols = []
+                date_pattern = re.compile(
+                    r'(\d{1,2}/\d{1,2}/\d{4})', re.I
+                )
+                pct_pattern = re.compile(r'^(\d+\.?\d*)%$')
 
-        # Intentar obtener datos de la API interna que usa la página
-        # CME FedWatch carga datos via XHR — interceptar o leer del DOM
-        text = page.inner_text("body")
-        print(f"  Texto: {len(text)} chars")
+                current_meeting = None
+                for row in rows:
+                    rt = row.inner_text().strip()
+                    cells = [c.strip() for c in rt.split('\t') if c.strip()]
+                    if not cells:
+                        cells = [c.strip() for c in rt.split('\n') if c.strip()]
 
-        # Buscar patrones de probabilidades en el texto extraído
-        # El tool muestra porcentajes junto a rangos de tasa
-        # Estrategia: leer tabla de probabilidades por reunión
+                    # Detectar fila de cabecera con rangos (275-300, etc.)
+                    if any(re.match(r'^\d{3}-\d{3}$', c) for c in cells):
+                        header_cols = cells
+                        print(f"  Cabecera: {header_cols}")
+                        continue
 
-        # Intentar con locator de la tabla principal
-        try:
-            # Buscar celdas con porcentajes y rangos de tasa
-            rows = page.locator("table tr, [class*='probability'] [class*='row'], [class*='meeting']").all()
-            print(f"  Elementos encontrados: {len(rows)}")
-            for row in rows[:50]:
-                try:
-                    rt = row.inner_text()
-                    if '%' in rt and ('25' in rt or '50' in rt or '75' in rt):
-                        print(f"  Row: {rt[:120]}")
-                except: continue
-        except Exception as e:
-            print(f"  Error locator: {e}")
+                    # Detectar fila de fecha de reunión
+                    dm = date_pattern.search(cells[0]) if cells else None
+                    if dm and header_cols:
+                        try:
+                            dt = datetime.datetime.strptime(dm.group(1), "%m/%d/%Y")
+                            if dt.date() >= datetime.date.today():
+                                current_meeting = {
+                                    "date": dt.strftime("%Y-%m-%d"),
+                                    "label": dt.strftime("%b '%y"),
+                                    "probs": []
+                                }
+                                # Parsear probabilidades de la misma fila
+                                pct_vals = []
+                                for c in cells[1:]:
+                                    c2 = c.replace('%', '').strip()
+                                    try:
+                                        pct_vals.append(float(c2))
+                                    except:
+                                        pct_vals.append(0.0)
 
-        # Parsear desde el texto completo — buscar bloques de reuniones
-        # Formato típico: "Jun 18, 2026\n4.25-4.50%\n35.0%\n4.00-4.25%\n58.0%..."
-        lines = [l.strip() for l in text.split('\n') if l.strip()]
+                                for j, col in enumerate(header_cols):
+                                    if j < len(pct_vals) and pct_vals[j] > 0.05:
+                                        label = bp_to_label(col)
+                                        current_meeting["probs"].append({
+                                            "label": label, "bp": 0, "prob": pct_vals[j]
+                                        })
 
-        # Buscar fechas de reunión y probabilidades asociadas
-        date_pattern = re.compile(
-            r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},?\s+\d{4}', re.I
-        )
-        pct_pattern  = re.compile(r'^(\d+\.?\d*)%$')
-        rate_pattern = re.compile(r'^\d+\.\d+\s*[-–]\s*\d+\.\d+%?$')
-
-        current_meeting = None
-        for i, line in enumerate(lines):
-            dm = date_pattern.search(line)
-            if dm:
-                # Nueva reunión detectada
-                try:
-                    dt = datetime.datetime.strptime(
-                        re.sub(r',', '', dm.group()), "%b %d %Y"
-                    )
-                    current_meeting = {
-                        "date": dt.strftime("%Y-%m-%d"),
-                        "label": dt.strftime("%b '%y"),
-                        "probs": []
-                    }
-                    meetings.append(current_meeting)
-                except: pass
-                continue
-
-            if current_meeting and rate_pattern.match(line):
-                # Siguiente línea debería ser el porcentaje
-                rate_str = parse_rate_range(line)
-                if i + 1 < len(lines):
-                    pm = pct_pattern.match(lines[i + 1])
-                    if pm:
-                        current_meeting["probs"].append({
-                            "label": rate_str,
-                            "bp": 0,
-                            "prob": float(pm.group(1))
-                        })
+                                if current_meeting["probs"]:
+                                    current_meeting["probs"].sort(key=lambda x: -x["prob"])
+                                    meetings.append(current_meeting)
+                        except Exception as e:
+                            print(f"  Error fila: {e}")
+            except Exception as e:
+                print(f"  Error DOM: {e}")
 
         browser.close()
-
-    # Calcular bp relativo para cada reunión (respecto al rango más alto = sin cambio)
-    for m in meetings:
-        if m["probs"]:
-            rates = [p["label"] for p in m["probs"]]
-            # El rango más alto de tasa = tasa actual implícita
-            def rate_mid(r):
-                nums = re.findall(r'\d+\.\d+', r)
-                return float(nums[1]) if len(nums) >= 2 else (float(nums[0]) if nums else 0)
-            max_rate = max(rate_mid(r) for r in rates)
-            for p in m["probs"]:
-                diff = round((rate_mid(p["label"]) - max_rate) * 100)
-                # Redondear a múltiplos de 25bp
-                p["bp"] = round(diff / 25) * 25
 
     return meetings
 
 
-def main():
-    print(f"=== FedWatch · {TODAY} ===\n")
+def current_rate_from_meetings(meetings):
+    """
+    Infiere la tasa actual: la más probable en el primer meeting ES donde está el Fed hoy.
+    (No la más alta — el Fed no está necesariamente en el rango superior del espectro.)
+    """
+    if not meetings:
+        return "3.50-3.75"
+    first = meetings[0]["probs"]
+    return max(first, key=lambda p: p["prob"])["label"]
 
-    result = dict(FALLBACK)
+
+def main():
+    print(f"=== CME FedWatch · {TODAY} ===\n")
+
     meetings = []
 
-    try:
-        meetings = scrape_fedwatch()
-        if meetings and len(meetings) >= 2:
-            # Filtrar solo reuniones futuras con probabilidades
-            future = [
-                m for m in meetings
-                if m["date"] >= TODAY and m["probs"]
-            ]
-            if future:
-                result["meetings"] = future[:5]
-                result["source"]   = f"CME FedWatch · {TODAY}"
-                result["updated"]  = NOW
-                # Tasa actual = rango más alto de la primera reunión
-                first_probs = future[0]["probs"]
-                rates = [p["label"] for p in first_probs]
-                def rate_mid(r):
-                    nums = re.findall(r'\d+\.\d+', r)
-                    return (float(nums[0]) + float(nums[1])) / 2 if len(nums) >= 2 else 0
-                result["current_rate"] = max(rates, key=rate_mid)
-                print(f"✓ {len(future)} reuniones scraped")
-                for m in future[:3]:
-                    print(f"  {m['label']} · {m['date']} → {[(p['label'], p['prob']) for p in m['probs'][:3]]}")
-            else:
-                print("✗ Sin reuniones futuras con datos")
-        else:
-            print(f"✗ Solo {len(meetings)} reuniones — usando fallback")
-    except Exception as e:
-        print(f"✗ Error: {e}")
+    # 1. Intentar API directa
+    print("Intentando API CME directa...")
+    meetings = try_cme_api() or []
+
+    # 2. Fallback: Playwright
+    if not meetings:
+        print("\nAPI no disponible. Usando Playwright...")
+        try:
+            meetings = try_playwright() or []
+        except Exception as e:
+            print(f"Playwright error: {e}")
+
+    if not meetings:
+        print("\n✗ No se obtuvieron datos de CME FedWatch.")
+        # Si ya existe fedwatch_data.json, no lo sobreescribir
+        if Path("fedwatch_data.json").exists():
+            print("  Manteniendo fedwatch_data.json existente.")
+            return
+        print("  No hay datos previos — no se generará archivo.")
+        return
+
+    # Filtrar solo reuniones futuras
+    meetings = [m for m in meetings if m["date"] >= TODAY and m["probs"]][:8]
+
+    current_rate = current_rate_from_meetings(meetings)
+    cur_upper = rate_upper(current_rate)
+
+    # Calcular bp de cada outcome relativo a la tasa actual
+    for m in meetings:
+        for p in m["probs"]:
+            p["bp"] = round((rate_upper(p["label"]) - cur_upper) * 100)
+
+    result = {
+        "updated": NOW,
+        "source": f"CME FedWatch · {TODAY}",
+        "current_rate": current_rate,
+        "meetings": meetings,
+    }
 
     Path("fedwatch_data.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2)
     )
-    print(f"\n✓ fedwatch_data.json guardado · {result['source']}")
+    print(f"\n✓ fedwatch_data.json guardado · {len(meetings)} reuniones")
+    for m in meetings[:4]:
+        top = m["probs"][0]
+        print(f"  {m['label']} · {m['date']} → {top['label']} ({top['prob']:.1f}%)")
 
 
 if __name__ == "__main__":
