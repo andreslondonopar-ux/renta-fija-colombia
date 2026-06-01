@@ -224,6 +224,15 @@ svg{display:block;width:100%}
               <tbody id="us-tbody"></tbody>
             </table>
           </div>
+          <!-- FedWatch -->
+          <div onclick="toggleFedwatch()" style="display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:pointer;border-top:1px solid var(--border);flex-shrink:0;user-select:none">
+            <span id="fw-arrow" style="font-size:9px;color:#4a5568">▾</span>
+            <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas Fed Funds · CME FedWatch</span>
+            <span id="fw-status" style="margin-left:auto;font-size:8px;color:var(--txt3)">cargando...</span>
+          </div>
+          <div id="fw-wrap" style="padding:8px;flex-shrink:0">
+            <div id="fw-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px"></div>
+          </div>
         </div>
 
       </div>
@@ -820,7 +829,72 @@ buildTickerFromCOL();
 loadColJSON();
 loadUSTreasury();
 loadMacro();
+loadFedwatch();
 window.addEventListener('resize',()=>{if(COL_DATA.length)renderCol();if(US_DATA.length)renderUS();});
+
+// ── FEDWATCH ──────────────────────────────────────────────────
+let fwOpen=true;
+function toggleFedwatch(){
+  fwOpen=!fwOpen;
+  document.getElementById('fw-wrap').style.display=fwOpen?'':'none';
+  document.getElementById('fw-arrow').textContent=fwOpen?'▾':'▸';
+}
+
+function renderFedwatch(data){
+  const grid=document.getElementById('fw-grid');
+  const st=document.getElementById('fw-status');
+  if(!grid) return;
+  if(st) st.textContent=data.source||'';
+
+  const COLOR={'-100':'#ef4444','-75':'#f97316','-50':'#f59e0b','-25':'#facc15','0':'#8892a4','25':'#6ee7b7','50':'#34d399'};
+  const LABEL={'-100':'-100bp','-75':'-75bp','-50':'-50bp','-25':'-25bp','0':'Sin cambio','+25':'+25bp'};
+
+  grid.innerHTML=(data.meetings||[]).map(m=>{
+    // Ordenar por probabilidad desc, mostrar top 4
+    const sorted=[...m.probs].sort((a,b)=>b.prob-a.prob).slice(0,4);
+    const topProb=sorted[0]?.prob||0;
+    const bars=sorted.map(p=>{
+      const key=String(p.bp);
+      const col=COLOR[key]||'#8892a4';
+      const lbl=LABEL[key]||(p.bp>0?`+${p.bp}bp`:`${p.bp}bp`);
+      const w=topProb>0?(p.prob/topProb*100).toFixed(1):0;
+      return`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+        <div style="font-size:8px;color:${col};min-width:60px;white-space:nowrap">${lbl}</div>
+        <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:8px;font-weight:700;font-family:monospace;min-width:36px;text-align:right;color:${col}">${p.prob.toFixed(1)}%</div>
+      </div>`;
+    }).join('');
+    return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px">
+      <div style="font-size:9px;font-weight:700;color:var(--txt2);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
+        FOMC ${m.label} <span style="float:right;color:var(--txt3);font-weight:400">${m.date}</span>
+      </div>
+      ${bars}
+    </div>`;
+  }).join('');
+}
+
+async function loadFedwatch(){
+  // Fallback inmediato
+  try{
+    const r=await fetch('fedwatch_data.json?_='+Date.now());
+    if(!r.ok) throw new Error('no file');
+    const d=await r.json();
+    if(d.meetings?.length) renderFedwatch(d);
+  }catch(e){
+    // Mostrar fallback hardcoded
+    renderFedwatch({
+      source:'CME FedWatch · ref.',
+      meetings:[
+        {date:'2026-06-18',label:"Jun '26",probs:[{label:'4.00-4.25',bp:-25,prob:58.0},{label:'4.25-4.50',bp:0,prob:35.0},{label:'3.75-4.00',bp:-50,prob:7.0}]},
+        {date:'2026-07-29',label:"Jul '26",probs:[{label:'3.75-4.00',bp:-50,prob:42.0},{label:'4.00-4.25',bp:-25,prob:40.0},{label:'4.25-4.50',bp:0,prob:18.0}]},
+        {date:'2026-09-16',label:"Sep '26",probs:[{label:'3.75-4.00',bp:-50,prob:38.0},{label:'3.50-3.75',bp:-75,prob:30.0},{label:'4.00-4.25',bp:-25,prob:22.0},{label:'4.25-4.50',bp:0,prob:10.0}]},
+        {date:'2026-11-04',label:"Nov '26",probs:[{label:'3.50-3.75',bp:-75,prob:35.0},{label:'3.75-4.00',bp:-50,prob:32.0},{label:'3.25-3.50',bp:-100,prob:20.0},{label:'4.00-4.25',bp:-25,prob:13.0}]},
+      ]
+    });
+  }
+}
 
 // ── WORLD CLOCKS (topbar) ─────────────────────────────────────
 const MARKETS=[
