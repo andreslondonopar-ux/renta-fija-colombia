@@ -251,11 +251,11 @@ svg{display:block;width:100%}
 
           <!-- EME BanRep -->
           <div class="sec-toggle" onclick="toggleEme()">
-            <span id="eme-arrow" class="tog-arrow">▸</span>
+            <span id="eme-arrow" class="tog-arrow">▾</span>
             <span class="tog-lbl">Expectativas analistas · EME BanRep</span>
             <span id="eme-status" style="margin-left:auto;font-size:10px;color:var(--txt3)">cargando...</span>
           </div>
-          <div id="eme-wrap" style="overflow:hidden;max-height:0px">
+          <div id="eme-wrap" style="overflow-y:auto;max-height:600px">
             <div style="padding:8px 10px">
               <!-- Chips de indicadores clave -->
               <div id="eme-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
@@ -1006,7 +1006,7 @@ async function loadFedwatch(){
 }
 
 // ── EME BANREP ────────────────────────────────────────────────
-let emeOpen=false;
+let emeOpen=true;
 function toggleEme(){
   emeOpen=!emeOpen;
   const w=document.getElementById('eme-wrap');
@@ -1015,7 +1015,7 @@ function toggleEme(){
   document.getElementById('eme-arrow').textContent=emeOpen?'▾':'▸';
 }
 
-function renderEme(d){
+function renderEme(d, prev=null){
   const st=document.getElementById('eme-status');
   if(st) st.textContent=d.source||'';
 
@@ -1049,7 +1049,7 @@ function renderEme(d){
     const wrap=document.getElementById('eme-tasa-wrap');
     if(wrap){
       wrap.style.display='block';
-      drawEmeTasa(tasa);
+      drawEmeTasa(tasa, prev?.tasa_intervencion||null, d.source, prev?.source||null);
     }
   }
 
@@ -1069,68 +1069,63 @@ function renderEme(d){
 }
 
 let emeTasaChart=null;
-function drawEmeTasa(tasa){
+function drawEmeTasa(tasa, tasaPrev=null, srcCur='', srcPrev=''){
   const canvas=document.getElementById('eme-tasa-canvas');
   if(!canvas) return;
-  const pts=tasa.slice(0,25);
-  const labels=pts.map(p=>p.fecha.slice(0,7));
-  const media=pts.map(p=>+p.media.toFixed(4));
-  const vmax=pts.map(p=>p.max!=null?+p.max.toFixed(4):null);
-  const vmin=pts.map(p=>p.min!=null?+p.min.toFixed(4):null);
+
+  // Alinear ambas series por fecha (unión de fechas, null donde no hay dato)
+  const curMap={}, prevMap={};
+  (tasa||[]).slice(0,25).forEach(p=>{ curMap[p.fecha]={media:+p.media.toFixed(4),max:p.max!=null?+p.max.toFixed(4):null,min:p.min!=null?+p.min.toFixed(4):null}; });
+  (tasaPrev||[]).slice(0,25).forEach(p=>{ prevMap[p.fecha]={media:+p.media.toFixed(4)}; });
+
+  const allDates=[...new Set([...Object.keys(curMap),...Object.keys(prevMap)])].sort();
+  const labels=allDates.map(d=>d.slice(0,7));
+  const media   =allDates.map(d=>curMap[d]?.media??null);
+  const vmax    =allDates.map(d=>curMap[d]?.max??null);
+  const vmin    =allDates.map(d=>curMap[d]?.min??null);
+  const mediaPrev=tasaPrev?allDates.map(d=>prevMap[d]?.media??null):null;
 
   try{if(emeTasaChart)emeTasaChart.destroy();}catch(e){}
 
+  const datasets=[
+    {label:'Máx',data:vmax,borderColor:'transparent',borderWidth:0,pointRadius:0,fill:'+1',backgroundColor:'rgba(52,211,153,0.1)',tension:.3,order:4},
+    {label:'Mín',data:vmin,borderColor:'transparent',borderWidth:0,pointRadius:0,fill:false,tension:.3,order:5},
+    {label:srcCur||'Mes actual',data:media,borderColor:'#34d399',borderWidth:2,pointBackgroundColor:'#34d399',pointRadius:3,pointHoverRadius:5,fill:false,tension:.3,order:1},
+    ...(mediaPrev?[{label:srcPrev||'Mes anterior',data:mediaPrev,borderColor:'#f59e0b',borderWidth:1.8,borderDash:[5,4],pointBackgroundColor:'#f59e0b',pointRadius:2,pointHoverRadius:4,fill:false,tension:.3,order:2}]:[]),
+  ];
+
   emeTasaChart=new Chart(canvas,{
     type:'line',
-    data:{
-      labels,
-      datasets:[
-        // Banda superior (max) — fill hacia dataset siguiente
-        {label:'Máximo',data:vmax,
-          borderColor:'transparent',borderWidth:0,
-          pointRadius:0,fill:'+1',
-          backgroundColor:'rgba(52,211,153,0.12)',
-          tension:.3,order:3},
-        // Banda inferior (min)
-        {label:'Mínimo',data:vmin,
-          borderColor:'transparent',borderWidth:0,
-          pointRadius:0,fill:false,
-          tension:.3,order:4},
-        // Línea media
-        {label:'Media analistas',data:media,
-          borderColor:'#34d399',borderWidth:2,
-          pointBackgroundColor:'#34d399',pointRadius:4,pointHoverRadius:6,
-          fill:false,tension:.3,order:1},
-      ]
-    },
+    data:{labels,datasets},
     options:{
       responsive:true,maintainAspectRatio:false,animation:{duration:300},
       interaction:{mode:'index',intersect:false},
       plugins:{
-        legend:{display:false},
+        legend:{
+          display:!!mediaPrev,
+          position:'top',
+          labels:{color:'#8090a8',font:{size:10},boxWidth:24,
+            filter:item=>item.datasetIndex>=2}
+        },
         tooltip:{
           callbacks:{
-            title:ctx=>pts[ctx[0]?.dataIndex]?.fecha||'',
+            title:ctx=>allDates[ctx[0]?.dataIndex]||'',
             label:ctx=>{
-              const i=ctx.dataIndex;
-              if(ctx.datasetIndex===2)
-                return `Media: ${media[i].toFixed(2)}%`;
-              if(ctx.datasetIndex===0&&vmax[i]!=null)
-                return `Máximo: ${vmax[i].toFixed(2)}%`;
-              if(ctx.datasetIndex===1&&vmin[i]!=null)
-                return `Mínimo: ${vmin[i].toFixed(2)}%`;
+              const v=ctx.parsed.y;
+              if(v==null) return null;
+              if(ctx.datasetIndex===2) return `Actual: ${v.toFixed(2)}%`;
+              if(ctx.datasetIndex===3) return `Anterior: ${v.toFixed(2)}%`;
+              if(ctx.datasetIndex===0) return `Máx: ${v.toFixed(2)}%`;
+              if(ctx.datasetIndex===1) return `Mín: ${v.toFixed(2)}%`;
               return null;
             },
-            filter:item=>item.formattedValue!==null && item.parsed.y!==null,
+            filter:item=>item.parsed.y!=null,
           }
         }
       },
       scales:{
-        x:{ticks:{color:'#8090a8',font:{size:11},maxRotation:45},
-           grid:{color:'rgba(255,255,255,.03)'}},
-        y:{grace:'15%',
-           ticks:{color:'#8090a8',font:{size:11},callback:v=>v.toFixed(2)+'%'},
-           grid:{color:'rgba(255,255,255,.04)'}}
+        x:{ticks:{color:'#8090a8',font:{size:11},maxRotation:45},grid:{color:'rgba(255,255,255,.03)'}},
+        y:{grace:'15%',ticks:{color:'#8090a8',font:{size:11},callback:v=>v.toFixed(2)+'%'},grid:{color:'rgba(255,255,255,.04)'}}
       }
     }
   });
@@ -1138,10 +1133,14 @@ function drawEmeTasa(tasa){
 
 async function loadEme(){
   try{
-    const r=await fetch('eme_data.json?_='+Date.now());
-    if(!r.ok) throw new Error('no file');
-    const d=await r.json();
-    if(d.inflacion_total?.length) renderEme(d);
+    const [rCur, rPrev]=await Promise.allSettled([
+      fetch('eme_data.json?_='+Date.now()).then(r=>r.ok?r.json():null),
+      fetch('eme_data_prev.json?_='+Date.now()).then(r=>r.ok?r.json():null),
+    ]);
+    const cur =rCur.status==='fulfilled'?rCur.value:null;
+    const prev=rPrev.status==='fulfilled'?rPrev.value:null;
+    if(cur?.inflacion_total?.length) renderEme(cur, prev);
+    else throw new Error('sin datos');
   }catch(e){
     const st=document.getElementById('eme-status');
     if(st) st.textContent='sin datos';

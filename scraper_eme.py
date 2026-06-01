@@ -213,13 +213,63 @@ def parse_tasa_interv(ws):
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────
 
+def prev_month_url(filename):
+    """Retorna (url, filename) del mes anterior al archivo dado."""
+    m = re.search(r'res_inf_([a-z]+)(\d{4})\.xlsx', filename)
+    if not m:
+        return None, None
+    mes_str, year = m.group(1), int(m.group(2))
+    if mes_str not in MESES_ES:
+        return None, None
+    idx = MESES_ES.index(mes_str)
+    prev_mes = MESES_ES[idx - 1] if idx > 0 else MESES_ES[11]
+    prev_year = year if idx > 0 else year - 1
+    fn = f"res_inf_{prev_mes}{prev_year}.xlsx"
+    url = f"{BASE_URL}/sites/default/files/{fn}"
+    try:
+        r = requests.head(url, headers=HEADERS, timeout=10, allow_redirects=True)
+        if r.status_code == 200:
+            return url, fn
+    except Exception:
+        pass
+    return None, None
+
+
+def parse_and_save(url, filename, out_path, full=True):
+    """Descarga, parsea y guarda un archivo EME. full=True incluye IPC/TRM."""
+    r = requests.get(url, headers=HEADERS, timeout=30)
+    r.raise_for_status()
+    wb = openpyxl.load_workbook(io.BytesIO(r.content), data_only=True)
+    sheets = wb.sheetnames
+    m = re.search(r'res_inf_([a-z]+)(\d{4})\.xlsx', filename)
+    mes_label = (m.group(1) + " " + m.group(2)) if m else filename
+    fecha_encuesta = parse_fecha(wb[sheets[0]])
+    inflacion_total, inflacion_sin, trm = [], [], []
+    if full and "RESUMEN" in sheets:
+        inflacion_total, inflacion_sin, trm = parse_resumen(wb["RESUMEN"])
+    tasa_path = []
+    if "TASA_INTERV" in sheets:
+        tasa_path = parse_tasa_interv(wb["TASA_INTERV"])
+    result = {
+        "updated":                 NOW,
+        "source":                  f"BanRep EME · {mes_label}",
+        "fecha_encuesta":          fecha_encuesta,
+        "inflacion_total":         inflacion_total,
+        "inflacion_sin_alimentos": inflacion_sin,
+        "trm":                     trm,
+        "tasa_intervencion":       tasa_path,
+    }
+    Path(out_path).write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"OK {out_path} guardado ({len(tasa_path)} reuniones en senda)")
+    return result
+
+
 def main():
     print(f"=== EME BanRep · {TODAY} ===\n")
 
-    # 1. Localizar archivo
+    # 1. Localizar mes actual
     print("Buscando último archivo EME en página BanRep...")
     url, filename = find_url_from_page()
-
     if not url:
         print("Intentando por mes en reversa...")
         url, filename = guess_url_by_month()
@@ -230,63 +280,31 @@ def main():
             print("  Manteniendo eme_data.json existente.")
         return
 
-    # Extraer etiqueta mes/año
-    m = re.search(r'res_inf_([a-z]+)(\d{4})\.xlsx', filename)
-    mes_label = (m.group(1) + " " + m.group(2)) if m else filename
-
-    # 2. Descargar
+    # 2. Descargar y guardar mes actual (completo)
     print(f"\nDescargando {filename}...")
     try:
-        r = requests.get(url, headers=HEADERS, timeout=30)
-        r.raise_for_status()
-        content = r.content
-        print(f"  {len(content):,} bytes descargados")
+        result = parse_and_save(url, filename, "eme_data.json", full=True)
+        if result["inflacion_total"]:
+            print(f"  IPC total ({len(result['inflacion_total'])} horizontes):")
+            for e in result["inflacion_total"][:3]:
+                print(f"    {e['horizonte']}: {e['media']:.2f}%")
+        if result["trm"]:
+            print(f"  TRM: {result['trm'][0]['media']:,.0f}")
     except Exception as e:
-        print(f"✗ Error descargando: {e}")
+        print(f"✗ Error mes actual: {e}")
         return
 
-    # 3. Parsear
-    wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
-    sheets = wb.sheetnames
-    print(f"  Sheets: {sheets}")
-
-    fecha_encuesta = parse_fecha(wb[sheets[0]])
-
-    inflacion_total, inflacion_sin, trm = [], [], []
-    if "RESUMEN" in sheets:
-        inflacion_total, inflacion_sin, trm = parse_resumen(wb["RESUMEN"])
-
-    tasa_path = []
-    if "TASA_INTERV" in sheets:
-        tasa_path = parse_tasa_interv(wb["TASA_INTERV"])
-
-    result = {
-        "updated":                NOW,
-        "source":                 f"BanRep EME · {mes_label}",
-        "fecha_encuesta":         fecha_encuesta,
-        "inflacion_total":        inflacion_total,
-        "inflacion_sin_alimentos": inflacion_sin,
-        "trm":                    trm,
-        "tasa_intervencion":      tasa_path,
-    }
-
-    Path("eme_data.json").write_text(
-        json.dumps(result, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-    print("\nOK eme_data.json guardado")
-    print(f"  Encuesta: {fecha_encuesta}")
-    if inflacion_total:
-        print(f"  IPC total ({len(inflacion_total)} horizontes):")
-        for e in inflacion_total[:3]:
-            print(f"    {e['horizonte']}: {e['media']:.2f}%")
-    if tasa_path:
-        print(f"  Tasa intervencion ({len(tasa_path)} reuniones):")
-        for t in tasa_path[:4]:
-            print(f"    {t['fecha']}: {t['media']:.4f}%")
-    if trm:
-        print(f"  TRM ({len(trm)} horizontes): {trm[0]['media']:,.0f}")
+    # 3. Descargar mes anterior (solo senda de tasa para comparación)
+    print(f"\nBuscando mes anterior a {filename}...")
+    url_prev, filename_prev = prev_month_url(filename)
+    if url_prev:
+        print(f"Descargando {filename_prev}...")
+        try:
+            parse_and_save(url_prev, filename_prev, "eme_data_prev.json", full=False)
+        except Exception as e:
+            print(f"  Error mes anterior: {e}")
+    else:
+        print("  No se encontró mes anterior.")
 
 
 if __name__ == "__main__":
