@@ -230,8 +230,9 @@ svg{display:block;width:100%}
             <span style="font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em">Expectativas Fed Funds · CME FedWatch</span>
             <span id="fw-status" style="margin-left:auto;font-size:8px;color:var(--txt3)">cargando...</span>
           </div>
-          <div id="fw-wrap" style="padding:8px;flex-shrink:0">
-            <div id="fw-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px"></div>
+          <div id="fw-wrap" style="padding:8px 10px;flex-shrink:0">
+            <div style="position:relative;height:160px"><canvas id="fw-canvas"></canvas></div>
+            <div id="fw-legend" style="display:flex;gap:12px;justify-content:center;margin-top:4px;font-size:7.5px;color:#8090a8;flex-wrap:wrap"></div>
           </div>
         </div>
 
@@ -833,46 +834,103 @@ loadFedwatch();
 window.addEventListener('resize',()=>{if(COL_DATA.length)renderCol();if(US_DATA.length)renderUS();});
 
 // ── FEDWATCH ──────────────────────────────────────────────────
-let fwOpen=true;
+let fwOpen=true, fwChart=null;
 function toggleFedwatch(){
   fwOpen=!fwOpen;
   document.getElementById('fw-wrap').style.display=fwOpen?'':'none';
   document.getElementById('fw-arrow').textContent=fwOpen?'▾':'▸';
 }
 
+function rateMid(label){
+  const n=label.replace('%','').split(/[-–]/);
+  return n.length>=2?(parseFloat(n[0])+parseFloat(n[1]))/2:parseFloat(n[0]);
+}
+
 function renderFedwatch(data){
-  const grid=document.getElementById('fw-grid');
   const st=document.getElementById('fw-status');
-  if(!grid) return;
+  const canvas=document.getElementById('fw-canvas');
+  const legend=document.getElementById('fw-legend');
+  if(!canvas) return;
   if(st) st.textContent=data.source||'';
 
-  const COLOR={'-100':'#ef4444','-75':'#f97316','-50':'#f59e0b','-25':'#facc15','0':'#8892a4','25':'#6ee7b7','50':'#34d399'};
-  const LABEL={'-100':'-100bp','-75':'-75bp','-50':'-50bp','-25':'-25bp','0':'Sin cambio','+25':'+25bp'};
+  const meetings=data.meetings||[];
+  const labels=meetings.map(m=>m.label);
 
-  grid.innerHTML=(data.meetings||[]).map(m=>{
-    // Ordenar por probabilidad desc, mostrar top 4
-    const sorted=[...m.probs].sort((a,b)=>b.prob-a.prob).slice(0,4);
-    const topProb=sorted[0]?.prob||0;
-    const bars=sorted.map(p=>{
-      const key=String(p.bp);
-      const col=COLOR[key]||'#8892a4';
-      const lbl=LABEL[key]||(p.bp>0?`+${p.bp}bp`:`${p.bp}bp`);
-      const w=topProb>0?(p.prob/topProb*100).toFixed(1):0;
-      return`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-        <div style="font-size:8px;color:${col};min-width:60px;white-space:nowrap">${lbl}</div>
-        <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
-          <div style="height:100%;width:${w}%;background:${col};border-radius:3px;transition:width .3s"></div>
-        </div>
-        <div style="font-size:8px;font-weight:700;font-family:monospace;min-width:36px;text-align:right;color:${col}">${p.prob.toFixed(1)}%</div>
-      </div>`;
-    }).join('');
-    return`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px">
-      <div style="font-size:9px;font-weight:700;color:var(--txt2);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
-        FOMC ${m.label} <span style="float:right;color:var(--txt3);font-weight:400">${m.date}</span>
-      </div>
-      ${bars}
-    </div>`;
-  }).join('');
+  // Calcular tasa esperada ponderada y banda ±1σ por reunión
+  const expected=[], upper=[], lower=[];
+  meetings.forEach(m=>{
+    const probs=m.probs;
+    const total=probs.reduce((s,p)=>s+p.prob,0)||1;
+    const mu=probs.reduce((s,p)=>s+rateMid(p.label)*(p.prob/total),0);
+    const sigma=Math.sqrt(probs.reduce((s,p)=>s+(p.prob/total)*Math.pow(rateMid(p.label)-mu,2),0));
+    expected.push(+mu.toFixed(4));
+    upper.push(+(mu+sigma).toFixed(4));
+    lower.push(+(mu-sigma).toFixed(4));
+  });
+
+  // Tasa actual (línea de referencia)
+  const curRate=data.current_rate?rateMid(data.current_rate):null;
+
+  try{if(fwChart)fwChart.destroy();}catch(e){}
+
+  fwChart=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        // Banda superior (fill hasta inferior)
+        {label:'_upper',data:upper,borderColor:'transparent',backgroundColor:'rgba(96,165,250,0.15)',fill:'+1',pointRadius:0,tension:.35,order:3},
+        // Banda inferior
+        {label:'_lower',data:lower,borderColor:'transparent',backgroundColor:'transparent',fill:false,pointRadius:0,tension:.35,order:4},
+        // Línea tasa esperada
+        {label:'Tasa implícita esperada',data:expected,borderColor:'#60a5fa',borderWidth:2,
+          pointBackgroundColor:'#60a5fa',pointRadius:4,pointHoverRadius:6,
+          fill:false,tension:.35,order:1},
+        // Línea tasa actual
+        ...(curRate!=null?[{
+          label:`Tasa actual ${data.current_rate}%`,
+          data:labels.map(()=>curRate),
+          borderColor:'rgba(245,158,11,0.6)',borderWidth:1.5,
+          borderDash:[5,4],pointRadius:0,fill:false,order:2
+        }]:[]),
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:300},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:ctx=>{
+              if(ctx.dataset.label.startsWith('_')) return null;
+              if(ctx.dataset.label.startsWith('Tasa actual')) return `Actual: ${ctx.parsed.y.toFixed(2)}%`;
+              const i=ctx.dataIndex;
+              return[
+                `Esperada: ${ctx.parsed.y.toFixed(2)}%`,
+                `Banda: ${lower[i].toFixed(2)}% – ${upper[i].toFixed(2)}%`,
+              ];
+            },
+            filter:item=>!item.dataset.label.startsWith('_')
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'}},
+        y:{
+          ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(2)+'%'},
+          grid:{color:'rgba(255,255,255,.03)'},
+          title:{display:true,text:'Fed Funds Rate (%)',color:'#4a5568',font:{size:9}}
+        }
+      }
+    }
+  });
+
+  // Leyenda manual
+  if(legend) legend.innerHTML=`
+    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#60a5fa" stroke-width="2"/></svg>Tasa implícita esperada</span>
+    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="16" height="8"><rect x="0" y="1" width="16" height="6" fill="rgba(96,165,250,0.2)"/></svg>Banda ±1σ</span>
+    ${curRate!=null?`<span style="display:inline-flex;align-items:center;gap:4px"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="rgba(245,158,11,0.7)" stroke-width="1.5" stroke-dasharray="4,2"/></svg>Tasa actual</span>`:''}
+  `;
 }
 
 async function loadFedwatch(){
