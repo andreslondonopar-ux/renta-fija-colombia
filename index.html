@@ -474,7 +474,7 @@ async function loadMacro(){
   set('mac-unem',  '8.80%', 'DANE · mar 2026');
   set('mac-trade', '—',     'Trading Economics');
   // Fallback USA
-  set('us-mac-rate', '3.75%',       'Trading Economics · abr 2026');
+  set('us-mac-rate', '4.00%',       'Trading Economics · abr 2026');
   set('us-mac-cpi',  '3.80%',       'Trading Economics · abr 2026');
   set('us-mac-cpim', '0.60%',       'Trading Economics · abr 2026');
   set('us-mac-gdp',  '2.70%',       'Trading Economics · mar 2026');
@@ -943,12 +943,15 @@ async function loadFedwatch(){
   }catch(e){
     // Mostrar fallback hardcoded
     renderFedwatch({
-      source:'CME FedWatch · ref.',
+      source:'CME FedWatch · ref. may 2026',
+      current_rate:'3.75-4.00',
       meetings:[
-        {date:'2026-06-18',label:"Jun '26",probs:[{label:'4.00-4.25',bp:-25,prob:58.0},{label:'4.25-4.50',bp:0,prob:35.0},{label:'3.75-4.00',bp:-50,prob:7.0}]},
-        {date:'2026-07-29',label:"Jul '26",probs:[{label:'3.75-4.00',bp:-50,prob:42.0},{label:'4.00-4.25',bp:-25,prob:40.0},{label:'4.25-4.50',bp:0,prob:18.0}]},
-        {date:'2026-09-16',label:"Sep '26",probs:[{label:'3.75-4.00',bp:-50,prob:38.0},{label:'3.50-3.75',bp:-75,prob:30.0},{label:'4.00-4.25',bp:-25,prob:22.0},{label:'4.25-4.50',bp:0,prob:10.0}]},
-        {date:'2026-11-04',label:"Nov '26",probs:[{label:'3.50-3.75',bp:-75,prob:35.0},{label:'3.75-4.00',bp:-50,prob:32.0},{label:'3.25-3.50',bp:-100,prob:20.0},{label:'4.00-4.25',bp:-25,prob:13.0}]},
+        {date:'2026-06-17',label:"Jun '26",probs:[{label:'3.50-3.75',bp:-25,prob:99.3},{label:'3.75-4.00',bp:0,prob:0.7}]},
+        {date:'2026-07-29',label:"Jul '26",probs:[{label:'3.50-3.75',bp:-25,prob:94.0},{label:'3.75-4.00',bp:0,prob:5.9}]},
+        {date:'2026-09-16',label:"Sep '26",probs:[{label:'3.50-3.75',bp:-25,prob:80.6},{label:'3.75-4.00',bp:0,prob:18.5},{label:'3.25-3.50',bp:-50,prob:0.9}]},
+        {date:'2026-10-28',label:"Oct '26",probs:[{label:'3.50-3.75',bp:-25,prob:66.3},{label:'3.75-4.00',bp:0,prob:29.5},{label:'3.25-3.50',bp:-50,prob:4.0},{label:'3.00-3.25',bp:-75,prob:0.2}]},
+        {date:'2026-12-09',label:"Dic '26",probs:[{label:'3.50-3.75',bp:-25,prob:51.8},{label:'3.75-4.00',bp:0,prob:37.6},{label:'3.25-3.50',bp:-50,prob:9.6},{label:'3.00-3.25',bp:-75,prob:1.0}]},
+        {date:'2027-01-27',label:"Ene '27",probs:[{label:'3.50-3.75',bp:-25,prob:47.6},{label:'3.75-4.00',bp:0,prob:38.7},{label:'3.25-3.50',bp:-50,prob:11.9},{label:'3.00-3.25',bp:-75,prob:1.7},{label:'2.75-3.00',bp:-100,prob:0.1}]},
       ]
     });
   }
