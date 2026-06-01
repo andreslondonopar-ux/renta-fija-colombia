@@ -211,12 +211,12 @@ svg{display:block;width:100%}
               <div id="eme-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
               <!-- Senda tasa de intervención -->
               <div id="eme-tasa-wrap" style="display:none">
-                <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Senda esperada tasa BanRep · <span style="font-weight:400;text-transform:none">media analistas (banda m&iacute;n–m&aacute;x)</span></div>
+                <div class="curve-sub" style="margin-bottom:4px">Senda esperada tasa BanRep &middot; media analistas (banda m&iacute;n&ndash;m&aacute;x)</div>
                 <div style="position:relative;height:260px"><canvas id="eme-tasa-canvas"></canvas></div>
               </div>
               <!-- Tabla IPC horizontes -->
               <div id="eme-ipc-wrap" style="display:none;margin-top:6px">
-                <div style="font-size:8px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Inflaci&oacute;n total esperada (media · m&iacute;n · m&aacute;x)</div>
+                <div class="curve-sub" style="margin-bottom:4px">Inflaci&oacute;n total esperada &middot; media (m&iacute;n&ndash;m&aacute;x)</div>
                 <table style="width:100%;border-collapse:collapse;font-size:9px">
                   <tbody id="eme-ipc-tbody"></tbody>
                 </table>
@@ -1046,10 +1046,10 @@ function drawEmeTasa(tasa){
         }
       },
       scales:{
-        x:{ticks:{color:'#8090a8',font:{size:12},maxRotation:45},
+        x:{ticks:{color:'#8090a8',font:{size:9},maxRotation:45},
            grid:{color:'rgba(255,255,255,.03)'}},
         y:{grace:'15%',
-           ticks:{color:'#8090a8',font:{size:12},callback:v=>v.toFixed(2)+'%'},
+           ticks:{color:'#8090a8',font:{size:9},callback:v=>v.toFixed(2)+'%'},
            grid:{color:'rgba(255,255,255,.04)'}}
       }
     }
