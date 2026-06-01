@@ -247,6 +247,7 @@ def main():
             print(f"macro_data.json error: {e}")
 
     # Cargar historial del archivo anterior (máx 5 snapshots = 5 días hábiles)
+    ust_path = Path("ust_data.json")
     ust_history = []
     try:
         if ust_path.exists():
