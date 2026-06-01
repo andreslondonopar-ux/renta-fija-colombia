@@ -1,0 +1,46 @@
+{
+  "updated": "2026-05-31",
+  "events": [
+    {"date":"2026-06-08","type":"ipc",    "title":"IPC mayo · DANE",          "desc":"Publicación inflación mensual"},
+    {"date":"2026-06-11","type":"eme",    "title":"EME junio · BanRep",        "desc":"Encuesta mensual de expectativas"},
+    {"date":"2026-06-30","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2026-07-07","type":"ipc",    "title":"IPC junio · DANE",          "desc":"Publicación inflación mensual"},
+    {"date":"2026-07-09","type":"eme",    "title":"EME julio · BanRep",        "desc":"Encuesta mensual de expectativas"},
+    {"date":"2026-07-31","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2026-08-07","type":"ipc",    "title":"IPC julio · DANE",          "desc":"Publicación inflación mensual"},
+    {"date":"2026-08-13","type":"eme",    "title":"EME agosto · BanRep",       "desc":"Encuesta mensual de expectativas"},
+    {"date":"2026-08-14","type":"pib",    "title":"PIB Q2 2026 · DANE",        "desc":"Publicación crecimiento económico"},
+    {"date":"2026-08-31","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2026-09-08","type":"ipc",    "title":"IPC agosto · DANE",         "desc":"Publicación inflación mensual"},
+    {"date":"2026-09-10","type":"eme",    "title":"EME septiembre · BanRep",   "desc":"Encuesta mensual de expectativas"},
+    {"date":"2026-09-30","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2026-10-07","type":"ipc",    "title":"IPC septiembre · DANE",     "desc":"Publicación inflación mensual"},
+    {"date":"2026-10-08","type":"eme",    "title":"EME octubre · BanRep",      "desc":"Encuesta mensual de expectativas"},
+    {"date":"2026-10-16","type":"pib",    "title":"PIB Q3 2026 · DANE",        "desc":"Publicación crecimiento económico"},
+    {"date":"2026-10-31","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2026-11-06","type":"ipc",    "title":"IPC octubre · DANE",        "desc":"Publicación inflación mensual"},
+    {"date":"2026-11-12","type":"eme",    "title":"EME noviembre · BanRep",    "desc":"Encuesta mensual de expectativas"},
+    {"date":"2026-11-30","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2026-12-08","type":"ipc",    "title":"IPC noviembre · DANE",      "desc":"Publicación inflación mensual"},
+    {"date":"2026-12-10","type":"eme",    "title":"EME diciembre · BanRep",    "desc":"Encuesta mensual de expectativas"},
+    {"date":"2026-12-31","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2027-01-08","type":"ipc",    "title":"IPC diciembre 2026 · DANE", "desc":"Publicación inflación mensual"},
+    {"date":"2027-01-14","type":"eme",    "title":"EME enero · BanRep",        "desc":"Encuesta mensual de expectativas"},
+    {"date":"2027-01-31","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2027-02-12","type":"pib",    "title":"PIB Q4 2026 · DANE",        "desc":"Publicación crecimiento económico"},
+    {"date":"2027-02-28","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+
+    {"date":"2027-03-31","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+    {"date":"2027-04-30","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"},
+    {"date":"2027-05-14","type":"pib",    "title":"PIB Q1 2027 · DANE",        "desc":"Publicación crecimiento económico"},
+    {"date":"2027-05-31","type":"banrep", "title":"JDBR · BanRep",             "desc":"Decisión tasa de intervención"}
+  ]
+}
