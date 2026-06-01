@@ -857,19 +857,18 @@ function renderFedwatch(data){
   const meetings=data.meetings||[];
   const labels=meetings.map(m=>m.label);
 
-  // Calcular tasa esperada ponderada y banda ±1σ por reunión
-  const expected=[], upper=[], lower=[];
+  // Senda 1: outcome más probable por reunión
+  // Senda 2: segundo más probable
+  const path1=[], path2=[], prob1=[], prob2=[];
   meetings.forEach(m=>{
-    const probs=m.probs;
-    const total=probs.reduce((s,p)=>s+p.prob,0)||1;
-    const mu=probs.reduce((s,p)=>s+rateMid(p.label)*(p.prob/total),0);
-    const sigma=Math.sqrt(probs.reduce((s,p)=>s+(p.prob/total)*Math.pow(rateMid(p.label)-mu,2),0));
-    expected.push(+mu.toFixed(4));
-    upper.push(+(mu+sigma).toFixed(4));
-    lower.push(+(mu-sigma).toFixed(4));
+    const sorted=[...m.probs].sort((a,b)=>b.prob-a.prob);
+    const p1=sorted[0], p2=sorted[1];
+    path1.push(p1?+rateMid(p1.label).toFixed(4):null);
+    path2.push(p2?+rateMid(p2.label).toFixed(4):null);
+    prob1.push(p1?p1.prob:0);
+    prob2.push(p2?p2.prob:0);
   });
 
-  // Tasa actual (línea de referencia)
   const curRate=data.current_rate?rateMid(data.current_rate):null;
 
   try{if(fwChart)fwChart.destroy();}catch(e){}
@@ -879,20 +878,23 @@ function renderFedwatch(data){
     data:{
       labels,
       datasets:[
-        // Banda superior (fill hasta inferior)
-        {label:'_upper',data:upper,borderColor:'transparent',backgroundColor:'rgba(96,165,250,0.15)',fill:'+1',pointRadius:0,tension:.35,order:3},
-        // Banda inferior
-        {label:'_lower',data:lower,borderColor:'transparent',backgroundColor:'transparent',fill:false,pointRadius:0,tension:.35,order:4},
-        // Línea tasa esperada
-        {label:'Tasa implícita esperada',data:expected,borderColor:'#60a5fa',borderWidth:2,
-          pointBackgroundColor:'#60a5fa',pointRadius:4,pointHoverRadius:6,
-          fill:false,tension:.35,order:1},
-        // Línea tasa actual
+        // Senda más probable
+        {label:'Senda más probable',data:path1,
+          borderColor:'#60a5fa',borderWidth:2.5,
+          pointBackgroundColor:'#60a5fa',pointRadius:5,pointHoverRadius:7,
+          fill:false,tension:.3,order:1},
+        // Segunda senda
+        {label:'2ª senda',data:path2,
+          borderColor:'rgba(96,165,250,0.35)',borderWidth:1.5,
+          borderDash:[4,3],
+          pointBackgroundColor:'rgba(96,165,250,0.4)',pointRadius:3,pointHoverRadius:5,
+          fill:false,tension:.3,order:2},
+        // Tasa actual
         ...(curRate!=null?[{
-          label:`Tasa actual ${data.current_rate}%`,
+          label:'Tasa actual',
           data:labels.map(()=>curRate),
-          borderColor:'rgba(245,158,11,0.6)',borderWidth:1.5,
-          borderDash:[5,4],pointRadius:0,fill:false,order:2
+          borderColor:'rgba(245,158,11,0.55)',borderWidth:1.2,
+          borderDash:[5,4],pointRadius:0,fill:false,order:3
         }]:[]),
       ]
     },
@@ -902,16 +904,13 @@ function renderFedwatch(data){
         legend:{display:false},
         tooltip:{
           callbacks:{
+            title:ctx=>meetings[ctx[0]?.dataIndex]?.label+' · '+meetings[ctx[0]?.dataIndex]?.date,
             label:ctx=>{
-              if(ctx.dataset.label.startsWith('_')) return null;
-              if(ctx.dataset.label.startsWith('Tasa actual')) return `Actual: ${ctx.parsed.y.toFixed(2)}%`;
               const i=ctx.dataIndex;
-              return[
-                `Esperada: ${ctx.parsed.y.toFixed(2)}%`,
-                `Banda: ${lower[i].toFixed(2)}% – ${upper[i].toFixed(2)}%`,
-              ];
-            },
-            filter:item=>!item.dataset.label.startsWith('_')
+              if(ctx.datasetIndex===0) return `Más probable: ${ctx.parsed.y.toFixed(2)}%  (${prob1[i].toFixed(1)}%)`;
+              if(ctx.datasetIndex===1) return `2ª senda: ${ctx.parsed.y.toFixed(2)}%  (${prob2[i].toFixed(1)}%)`;
+              return `Tasa actual: ${ctx.parsed.y.toFixed(2)}%`;
+            }
           }
         }
       },
@@ -926,11 +925,10 @@ function renderFedwatch(data){
     }
   });
 
-  // Leyenda manual
   if(legend) legend.innerHTML=`
-    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#60a5fa" stroke-width="2"/></svg>Tasa implícita esperada</span>
-    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="16" height="8"><rect x="0" y="1" width="16" height="6" fill="rgba(96,165,250,0.2)"/></svg>Banda ±1σ</span>
-    ${curRate!=null?`<span style="display:inline-flex;align-items:center;gap:4px"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="rgba(245,158,11,0.7)" stroke-width="1.5" stroke-dasharray="4,2"/></svg>Tasa actual</span>`:''}
+    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#60a5fa" stroke-width="2.5"/></svg>Senda más probable</span>
+    <span style="display:inline-flex;align-items:center;gap:4px"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="rgba(96,165,250,0.45)" stroke-width="1.5" stroke-dasharray="4,3"/></svg>2ª senda</span>
+    ${curRate!=null?`<span style="display:inline-flex;align-items:center;gap:4px"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="rgba(245,158,11,0.6)" stroke-width="1.2" stroke-dasharray="5,4"/></svg>Tasa actual</span>`:''}
   `;
 }
 
