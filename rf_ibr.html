@@ -233,11 +233,17 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         </div>
       </div>
 
-      <!-- FRA upload (Estimada mode) -->
+      <!-- FRA compra: selector de presets guardados en Estimados -->
       <div id="fra-section">
         <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px">
-          <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Curva FRA</div>
-          <div style="font-size:10px;color:var(--txt3)" id="fra-status">Cargando desde Estimados...</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">FRA Compra</div>
+            <button onclick="reloadFRASelects()" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:13px;padding:0;line-height:1" title="Recargar presets">↺</button>
+          </div>
+          <select id="fra-compra-sel" onchange="selectFRACompra(this.value)" style="width:100%;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg3);font-family:inherit;margin-bottom:4px">
+            <option value="">-- Sin curva --</option>
+          </select>
+          <div style="font-size:10px;color:var(--txt3)" id="fra-status"></div>
         </div>
       </div>
 
@@ -283,13 +289,14 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         <div class="field"><label>Spread TIR venta (%)</label>
           <input type="number" id="st_venta" value="2.20" step="0.01" min="0">
         </div>
-        <!-- Curva FRA venta: visible solo en modo estimada -->
+        <!-- FRA venta: selector de presets, visible solo en modo estimada -->
         <div id="fra-venta-section" style="display:none">
           <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;margin-bottom:9px">
-            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Curva FRA · fecha de venta</div>
-            <label style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 9px;border:1px dashed var(--border2);border-radius:var(--r);font-size:11px;color:var(--txt2);cursor:pointer" for="fra-venta-file">📂 CSV curva FRA venta</label>
-            <input type="file" id="fra-venta-file" accept=".csv" style="display:none" onchange="loadFRAVenta(this)">
-            <div style="font-size:10px;color:var(--txt3);margin-top:4px" id="fra-venta-status">Sin curva · usará FRA compra</div>
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">FRA Venta</div>
+            <select id="fra-venta-sel" onchange="selectFRAVenta(this.value)" style="width:100%;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg3);font-family:inherit;margin-bottom:4px">
+              <option value="">-- Misma que compra --</option>
+            </select>
+            <div style="font-size:10px;color:var(--txt3)" id="fra-venta-status">Sin curva · usará FRA compra</div>
           </div>
         </div>
         <button class="btn btn-green" onclick="despacharVenta()">▶ Calcular TIR Tenencia</button>
@@ -996,44 +1003,57 @@ function calcular(showTIR=false){
 }
 
 
-// ── CARGA FRA VENTA ───────────────────────────────────────────────────
-function loadFRAVenta(input){
-  const file=input.files[0];
-  if(!file) return;
-  const stat=$('fra-venta-status');
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const lines=e.target.result.split('\n');
-    const data={};
-    let count=0;
-    for(const line of lines){
-      const parts=line.trim().split(';');
-      if(parts.length<2) continue;
-      const rawDate=parts[0].trim(), rawRate=parts[1].trim();
-      if(!rawDate||!rawRate||rawDate==='Fecha') continue;
-      const dp=rawDate.split('/');
-      if(dp.length!==3) continue;
-      const [d,m,y]=dp;
-      const iso=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-      const rate=parseFloat(rawRate.replace('%','').replace(',','.').trim())/100;
-      if(isNaN(rate)||rate>0.5) continue;
-      data[iso]=rate;
-      count++;
-    }
-    FRA_VENTA_DATA=data;
-    fraVentaLoaded=count>0;
-    if(stat){
-      if(fraVentaLoaded){
-        const dates=Object.keys(data).sort();
-        stat.textContent=`✓ ${count} reg. (${dates[0]} → ${dates[dates.length-1]})`;
-        stat.style.color='var(--green3)';
-      } else {
-        stat.textContent='✗ Sin datos · usará FRA compra';
-        stat.style.color='var(--amber3)';
-      }
-    }
-  };
-  reader.readAsText(file);
+// ── GESTIÓN DE PRESETS FRA ────────────────────────────────────────────
+function getFRAPresets(){
+  try{return JSON.parse(localStorage.getItem('rf_fra_presets_v1')||'{}');}catch(e){return{};}
+}
+function populateFRASelects(){
+  const presets=getFRAPresets();
+  const names=Object.keys(presets);
+  const makeOpts=(placeholder)=>'<option value="">'+placeholder+'</option>'+names.map(n=>{
+    const p=presets[n],dates=Object.keys(p.data).sort();
+    const rng=dates.length?dates[0].slice(5)+' → '+dates[dates.length-1].slice(5):'';
+    return`<option value="${n.replace(/"/g,'&quot;')}">${n} (${rng})</option>`;
+  }).join('');
+  const selC=$('fra-compra-sel'),selV=$('fra-venta-sel');
+  if(selC){const pv=selC.value;selC.innerHTML=makeOpts('-- Sin curva --');if(pv&&names.includes(pv))selC.value=pv;}
+  if(selV){const pv=selV.value;selV.innerHTML=makeOpts('-- Misma que compra --');if(pv&&names.includes(pv))selV.value=pv;}
+}
+function reloadFRASelects(){
+  populateFRASelects();
+  const selC=$('fra-compra-sel');
+  if(selC) selectFRACompra(selC.value);
+  const selV=$('fra-venta-sel');
+  if(selV) selectFRAVenta(selV.value);
+}
+function selectFRACompra(name){
+  if(!name){FRA_DATA={};fraLoaded=false;updateFRAStatus();renderIBRTable();return;}
+  const p=getFRAPresets()[name];
+  if(!p){FRA_DATA={};fraLoaded=false;updateFRAStatus();return;}
+  FRA_DATA=p.data;fraLoaded=true;updateFRAStatus();renderIBRTable();
+}
+function selectFRAVenta(name){
+  if(!name){FRA_VENTA_DATA={};fraVentaLoaded=false;updateFRAVentaStatus();return;}
+  const p=getFRAPresets()[name];
+  if(!p){FRA_VENTA_DATA={};fraVentaLoaded=false;updateFRAVentaStatus();return;}
+  FRA_VENTA_DATA=p.data;fraVentaLoaded=true;updateFRAVentaStatus();
+}
+function updateFRAStatus(){
+  const stat=$('fra-status');if(!stat)return;
+  if(!fraLoaded){
+    stat.innerHTML='Sin curva · <a href="index.html" style="color:var(--green3);text-decoration:none">carga en Estimados</a>';
+    stat.style.color='var(--txt3)';return;
+  }
+  const dates=Object.keys(FRA_DATA).sort();
+  stat.textContent=`✓ ${Object.keys(FRA_DATA).length} reg (${dates[0]} → ${dates[dates.length-1]})`;
+  stat.style.color='var(--green3)';
+}
+function updateFRAVentaStatus(){
+  const stat=$('fra-venta-status');if(!stat)return;
+  if(!fraVentaLoaded){stat.textContent='Sin curva · usará FRA compra';stat.style.color='var(--txt3)';return;}
+  const dates=Object.keys(FRA_VENTA_DATA).sort();
+  stat.textContent=`✓ ${Object.keys(FRA_VENTA_DATA).length} reg (${dates[0]} → ${dates[dates.length-1]})`;
+  stat.style.color='var(--green3)';
 }
 
 function despacharVenta(){
@@ -1597,25 +1617,30 @@ loadIBRData();
 
 <script>
 function autoLoadFRAFromLS(){
-  const stat=$('fra-status');
+  populateFRASelects();
+  const presets=getFRAPresets();
+  const names=Object.keys(presets);
+  const selC=$('fra-compra-sel');
+  // 1. Intentar con el preset activo guardado
+  const active=localStorage.getItem('rf_fra_active_v1');
+  if(active&&presets[active]){
+    if(selC) selC.value=active;
+    selectFRACompra(active);
+    return;
+  }
+  // 2. Fallback: último preset disponible
+  if(names.length){
+    const last=names[names.length-1];
+    if(selC) selC.value=last;
+    selectFRACompra(last);
+    return;
+  }
+  // 3. Fallback legacy: compat key rf_fra_est_v1
   try{
     const raw=localStorage.getItem('rf_fra_est_v1');
-    if(!raw){
-      if(stat) stat.innerHTML='⚠ Sin FRA · <a href="index.html" style="color:var(--green3);text-decoration:none">carga en Inicio → Estimados</a>';
-      return;
-    }
-    const data=JSON.parse(raw);
-    const n=Object.keys(data).length;
-    if(!n){if(stat)stat.innerHTML='⚠ Sin datos · <a href="index.html" style="color:var(--green3);text-decoration:none">Estimados</a>';return;}
-    FRA_DATA=data;
-    fraLoaded=true;
-    const dates=Object.keys(data).sort();
-    if(stat){
-      stat.innerHTML='✓ '+n+' registros ('+dates[0]+' → '+dates[dates.length-1]+') · <a href="index.html" style="color:var(--green3);font-size:9px;text-decoration:none">actualizar</a>';
-      stat.style.color='var(--green3)';
-    }
-    renderIBRTable();
-  }catch(e){if(stat)stat.textContent='Error cargando estimados';}
+    if(raw){const d=JSON.parse(raw);if(Object.keys(d).length){FRA_DATA=d;fraLoaded=true;updateFRAStatus();renderIBRTable();return;}}
+  }catch(e){}
+  updateFRAStatus();
 }
 autoLoadFRAFromLS();
 </script>
