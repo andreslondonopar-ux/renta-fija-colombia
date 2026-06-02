@@ -313,6 +313,24 @@ def main():
         print("\n-- Sin datos disponibles.")
         if Path("fedwatch_data.json").exists():
             print("  Manteniendo fedwatch_data.json existente.")
+            # Actualizar timestamp para que el workflow no falle
+            try:
+                existing = json.loads(Path("fedwatch_data.json").read_text())
+                existing["updated"] = NOW
+                existing["source"] = f"CME FedWatch - {TODAY} (sin actualización)"
+                Path("fedwatch_data.json").write_text(json.dumps(existing, ensure_ascii=False, indent=2))
+            except Exception:
+                pass
+        else:
+            # Crear archivo mínimo para que el workflow no falle en el cat
+            fallback = {
+                "updated": NOW,
+                "source": f"CME FedWatch - {TODAY} (sin datos)",
+                "current_rate": CURRENT_RATE,
+                "meetings": [],
+            }
+            Path("fedwatch_data.json").write_text(json.dumps(fallback, ensure_ascii=False, indent=2))
+            print("  fedwatch_data.json mínimo creado (sin reuniones).")
         return
 
     today = datetime.date.today().isoformat()

@@ -23,10 +23,11 @@ jobs:
           python-version: '3.11'
 
       - name: Instalar dependencias
-        run: |
-          pip install requests playwright
-          playwright install chromium
-          playwright install-deps chromium
+        run: pip install requests playwright
+
+      - name: Instalar Chromium (para fallback Playwright)
+        run: playwright install --with-deps chromium
+        continue-on-error: true
 
       - name: Correr scraper FedWatch
         run: python scraper_fedwatch.py
@@ -34,7 +35,7 @@ jobs:
       - name: Mostrar resultado
         run: |
           echo "=== fedwatch_data.json ==="
-          cat fedwatch_data.json
+          cat fedwatch_data.json || echo "(archivo no encontrado)"
 
       - name: Commit y push
         run: |
