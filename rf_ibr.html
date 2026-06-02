@@ -652,6 +652,7 @@ function onModeChange(){
   // Limpiar resultados de tenencia al cambiar modo
   const oldCard=$('ibr-tir-real-card'); if(oldCard) oldCard.remove();
   const oldH=$('ten-horizons-card'); if(oldH) oldH.remove();
+  const oldS=$('ten-sensi-card'); if(oldS) oldS.remove();
   autoCA();
 }
 
@@ -1092,15 +1093,32 @@ function renderTIRHorizons(){
     const xCFs=[-vGiro,...cupsRec.map(f=>f.cpPer/100*nom),vGiroV];
     const xDates=[liq,...cupsRec.map(f=>f.fecha),sellDate];
     const tir=xirr(xCFs,xDates,liq)*100;
-    rows.push({h,tir,dias:daysReal(liq,sellDate),sellDate,priceV:rV.priceRnd});
+    rows.push({h,tir,dias:daysReal(liq,sellDate),sellDate,priceV:rV.priceRnd,cups:cupsRec});
   }
+  // Tabla de sensibilidad: TIR por horizonte × Δspread
+  const bpScen=[-100,-75,-50,-25,0,25,50,75,100];
+  const sensi=bpScen.map(bp=>{
+    const stS=st+bp/10000;
+    const tirRow=rows.map(r=>{
+      const rS=calcBondIBR(ant,r.sellDate,venc,mp,sc,stS,nom,mode);
+      if(!rS) return null;
+      const xCFs=[-vGiro,...r.cups.map(f=>f.cpPer/100*nom),(rS.priceRnd/100)*nom];
+      const xDates=[liq,...r.cups.map(f=>f.fecha),r.sellDate];
+      return xirr(xCFs,xDates,liq)*100;
+    });
+    return{bp,tirRow};
+  });
+
   const old=$('ten-horizons-card'); if(old) old.remove();
+  const oldS=$('ten-sensi-card'); if(oldS) oldS.remove();
+  const tirVenc=TIR_EA*100;
+
+  // Card 1: Horizontes
   const card=document.createElement('div');
   card.className='card'; card.id='ten-horizons-card';
-  const tirVenc=TIR_EA*100;
   card.innerHTML=`
     <div class="c-hdr">TIR Estimada de Tenencia · Horizontes
-      <span style="font-size:9px;font-weight:400;color:var(--txt3)">mismo spread · ${mode==='estimada'?'FRA compra':'IBR real T-1'}</span>
+      <span style="font-size:9px;font-weight:400;color:var(--txt3)">mismo spread · FRA compra</span>
     </div>
     <div class="c-body">
       <div style="display:grid;grid-template-columns:repeat(${rows.length+1},1fr);gap:8px;margin-bottom:10px">
@@ -1120,8 +1138,37 @@ function renderTIRHorizons(){
       </div>
       <div class="info-box">Spread compra <strong style="color:var(--blue3)">${fmt(st*100,2)}%</strong> · precio compra <strong style="color:var(--blue3)">${fmt(priceRnd,4)}%</strong> · valor giro <strong style="color:var(--blue3)">${fmtM(vGiro)}</strong></div>
     </div>`;
-  const old2=$('ten-horizons-card'); if(old2) old2.remove();
   $('main').appendChild(card);
+
+  // Card 2: Variación tasa de mercado
+  const cardS=document.createElement('div');
+  cardS.className='card'; cardS.id='ten-sensi-card';
+  cardS.innerHTML=`
+    <div class="c-hdr">Variación Tasa de Mercado IBR
+      <span style="font-size:9px;font-weight:400;color:var(--txt3)">TIR tenencia estimada por Δspread</span>
+    </div>
+    <div class="c-body"><div class="tscroll"><table class="st">
+      <thead><tr>
+        <th style="text-align:left">Δ Spread</th>
+        ${rows.map(r=>`<th>TIR ${r.h}M</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        ${sensi.map(s=>{
+          const isBase=s.bp===0;
+          const rowCls=isBase?'cur':'';
+          const label=isBase?'★ 0 pb':s.bp>0?'+'+s.bp+' pb':s.bp+' pb';
+          const cells=s.tirRow.map((t,i)=>{
+            if(t===null) return`<td>—</td>`;
+            const base=sensi.find(x=>x.bp===0).tirRow[i];
+            const diff=base!==null?t-base:0;
+            const c=isBase?'':diff>0?'color:var(--green3)':'color:var(--red3)';
+            return`<td style="${c}">${fmt(t,4)}%</td>`;
+          }).join('');
+          return`<tr class="${rowCls}"><td style="text-align:left${isBase?';font-weight:700':''}">${label}</td>${cells}</tr>`;
+        }).join('')}
+      </tbody>
+    </table></div></div>`;
+  $('main').appendChild(cardS);
 }
 
 function calcularTenencia(){
