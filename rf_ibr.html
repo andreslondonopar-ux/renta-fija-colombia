@@ -667,12 +667,6 @@ function onModeChange(){
   // Clear stale tenencia results on mode switch
   const oldCard=$('ibr-tir-real-card'); if(oldCard) oldCard.remove();
   const oldH=$('ten-horizons-card'); if(oldH) oldH.remove();
-  // Update defaults
-  if(mode==='estimada'){
-    $('liq').value='2025-07-22'; $('venc').value='2027-07-10';
-  } else {
-    $('liq').value='2025-03-19'; $('venc').value='2026-03-05';
-  }
   autoCA();
   updateTenBondInfo();
 }
