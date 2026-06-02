@@ -274,16 +274,25 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         </div>
         <button class="btn btn-amber" onclick="calcular(false)">▶ Calcular con caja</button>
       </div>
-      <div id="venta-hr" class="hr" style="display:none"></div>
-      <div id="venta-section" style="display:none">
-        <div class="s-lbl">// Escenario de venta · solo modo Real</div>
+      <div id="venta-hr" class="hr"></div>
+      <div id="venta-section">
+        <div id="venta-section-lbl" class="s-lbl">// Escenario de venta</div>
         <div class="field"><label>Fecha de venta</label>
           <input type="date" id="f_venta" value="2026-07-10">
         </div>
         <div class="field"><label>Spread TIR venta (%)</label>
           <input type="number" id="st_venta" value="2.20" step="0.01" min="0">
         </div>
-        <button class="btn btn-green" onclick="calcularVenta()">▶ Calcular TIR</button>
+        <!-- Curva FRA venta: visible solo en modo estimada -->
+        <div id="fra-venta-section" style="display:none">
+          <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;margin-bottom:9px">
+            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Curva FRA · fecha de venta</div>
+            <label style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 9px;border:1px dashed var(--border2);border-radius:var(--r);font-size:11px;color:var(--txt2);cursor:pointer" for="fra-venta-file">📂 CSV curva FRA venta</label>
+            <input type="file" id="fra-venta-file" accept=".csv" style="display:none" onchange="loadFRAVenta(this)">
+            <div style="font-size:10px;color:var(--txt3);margin-top:4px" id="fra-venta-status">Sin curva · usará FRA compra</div>
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="despacharVenta()">▶ Calcular TIR Tenencia</button>
       </div>
       <div class="hr"></div>
       <div class="toggle-row" onclick="toggleFondeo()">
@@ -518,6 +527,8 @@ let IBR_REAL_DATA={"2020-01-03":0.04114,"2020-01-04":0.04114,"2020-01-05":0.0411
 // ── FRA CURVE (loaded by user) ────────────────────────────────────────
 let FRA_DATA = {};  // {iso: rate_decimal}
 let fraLoaded = false;
+let FRA_VENTA_DATA = {};  // curva FRA en fecha de venta
+let fraVentaLoaded = false;
 
 function loadFRA(input){
   const file = input.files[0];
@@ -582,7 +593,7 @@ function ibrReal(iso){
 }
 
 function ibrFRA(iso){
-  // Look up from loaded FRA curve, fallback ±3 days
+  // Look up from loaded FRA curve, fallback ±3 days, then nearest date
   if(FRA_DATA[iso]!==undefined) return FRA_DATA[iso];
   for(let d=1;d<=3;d++){
     const dt=new Date(iso+'T12:00:00');
@@ -592,7 +603,14 @@ function ibrFRA(iso){
       if(FRA_DATA[tiso]!==undefined) return FRA_DATA[tiso];
     }
   }
-  return null;
+  // Extended fallback: nearest available date (handles misaligned FRA start/end)
+  const dates=Object.keys(FRA_DATA).sort();
+  if(!dates.length) return null;
+  if(iso<=dates[0]) return FRA_DATA[dates[0]];
+  if(iso>=dates[dates.length-1]) return FRA_DATA[dates[dates.length-1]];
+  let lo=0,hi=dates.length-1;
+  while(lo<hi-1){const mid=(lo+hi)>>1;dates[mid]<=iso?lo=mid:hi=mid;}
+  return FRA_DATA[dates[lo]];
 }
 
 function getIBR(iso, mode){
@@ -605,10 +623,12 @@ function onModeChange(){
   $('fra-section').style.display = mode==='estimada'?'block':'none';
   $('ibr-real-display').style.display = mode==='real'?'block':'none';
   if(mode==='real') lookupIBRDisplay($('liq').value);
-  // Show venta section only in real mode
-  const vs=$('venta-section'),vh=$('venta-hr');
-  if(vs) vs.style.display=mode==='real'?'block':'none';
-  if(vh) vh.style.display=mode==='real'?'block':'none';
+  // FRA venta upload: solo en modo estimada
+  const fraVS=$('fra-venta-section');
+  if(fraVS) fraVS.style.display=mode==='estimada'?'block':'none';
+  // Etiqueta de la sección de venta
+  const sLbl=$('venta-section-lbl');
+  if(sLbl) sLbl.textContent=mode==='real'?'// Escenario de venta · IBR Real':'// Tenencia · doble curva FRA';
   // Clear stale TIR real card on mode switch
   const oldCard=$('ibr-tir-real-card'); if(oldCard) oldCard.remove();
   // Update defaults
@@ -976,6 +996,188 @@ function calcular(showTIR=false){
 }
 
 
+// ── CARGA FRA VENTA ───────────────────────────────────────────────────
+function loadFRAVenta(input){
+  const file=input.files[0];
+  if(!file) return;
+  const stat=$('fra-venta-status');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split('\n');
+    const data={};
+    let count=0;
+    for(const line of lines){
+      const parts=line.trim().split(';');
+      if(parts.length<2) continue;
+      const rawDate=parts[0].trim(), rawRate=parts[1].trim();
+      if(!rawDate||!rawRate||rawDate==='Fecha') continue;
+      const dp=rawDate.split('/');
+      if(dp.length!==3) continue;
+      const [d,m,y]=dp;
+      const iso=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+      const rate=parseFloat(rawRate.replace('%','').replace(',','.').trim())/100;
+      if(isNaN(rate)||rate>0.5) continue;
+      data[iso]=rate;
+      count++;
+    }
+    FRA_VENTA_DATA=data;
+    fraVentaLoaded=count>0;
+    if(stat){
+      if(fraVentaLoaded){
+        const dates=Object.keys(data).sort();
+        stat.textContent=`✓ ${count} reg. (${dates[0]} → ${dates[dates.length-1]})`;
+        stat.style.color='var(--green3)';
+      } else {
+        stat.textContent='✗ Sin datos · usará FRA compra';
+        stat.style.color='var(--amber3)';
+      }
+    }
+  };
+  reader.readAsText(file);
+}
+
+function despacharVenta(){
+  const mode=$('ibr-mode').value;
+  if(mode==='real') calcularVenta();
+  else calcularTenenciaFRA();
+}
+
+// ── TIR TENENCIA · DOBLE CURVA FRA ────────────────────────────────────
+function calcularTenenciaFRA(){
+  calcular(false);
+  const liq=$('liq').value, venc=$('venc').value;
+  if(!liq||!venc) return;
+  if(!$('c_ant_iso').value) autoCA();
+  const ant=$('c_ant_iso').value;
+  const freq=parseInt($('freq').value);
+  const mp=Math.round(12/freq);
+  const sc=parseFloat($('sc').value)/100;
+  const st=parseFloat($('st').value)/100;
+  const nom=parseFloat($('nom_val').value)||0;
+  const fV=$('f_venta').value;
+  const stV=parseFloat($('st_venta').value)/100;
+
+  if(!fV||isNaN(stV)||fV<=liq){alert('Ingrese una fecha de venta válida (posterior a la liquidación)');return;}
+  if(fV>=venc){alert('La fecha de venta debe ser anterior al vencimiento');return;}
+  if(!fraLoaded){alert('Cargue la curva FRA de compra primero');return;}
+
+  // 1. Valoración en fecha de compra (FRA compra)
+  const res=calcBondIBR(ant,liq,venc,mp,sc,st,nom,'estimada');
+  if(!res){alert('Error valorando el bono en compra');return;}
+  const{flows,priceRnd,vGiro,TIR_EA}=res;
+
+  // 2. Cupones recibidos entre liq y fV
+  const cupsRec=flows.filter(f=>f.fecha>liq&&f.fecha<=fV);
+
+  // 3. Precio en fecha de venta usando FRA venta (swap temporal si está cargada)
+  const savedFRA=FRA_DATA;
+  if(fraVentaLoaded) FRA_DATA=FRA_VENTA_DATA;
+  const rV=calcBondIBR(ant,fV,venc,mp,sc,stV,nom,'estimada');
+  FRA_DATA=savedFRA;
+  if(!rV){alert('Error valorando el bono en fecha de venta');return;}
+  const vGiroV=(rV.priceRnd/100)*nom;
+  const fraLabelVenta=fraVentaLoaded?`FRA venta (${Object.keys(FRA_VENTA_DATA).sort()[0]||'—'})`:'misma FRA compra';
+  const fraLabelCompra=`FRA compra (${Object.keys(FRA_DATA).sort()[0]||'—'})`;
+
+  // 4. XIRR
+  const xCFs=[-vGiro];
+  const xDates=[liq];
+  cupsRec.forEach(f=>{xCFs.push(f.cpPer/100*nom);xDates.push(f.fecha);});
+  xCFs.push(vGiroV);
+  xDates.push(fV);
+  const diasInv=daysReal(liq,fV);
+  const tirTenencia=xirr(xCFs,xDates,liq)*100;
+  const totCups=cupsRec.reduce((s,f)=>s+f.cpPer/100*nom,0);
+  const ganPrecio=(rV.priceRnd-priceRnd)/100*nom;
+  const ganTotal=totCups+vGiroV-vGiro;
+
+  const old=$('ibr-tir-real-card');
+  if(old) old.remove();
+  const card=document.createElement('div');
+  card.className='card';
+  card.id='ibr-tir-real-card';
+  card.style.borderColor='var(--green)';
+  card.innerHTML=`
+    <div class="c-hdr" style="border-color:var(--green)">TIR de Tenencia · FRA Compra + FRA Venta
+      <span style="font-size:9px;font-weight:400;color:${fraVentaLoaded?'var(--green3)':'var(--amber3)'}">${fraVentaLoaded?'✓ curva venta cargada':'⚠ usando misma FRA para venta'}</span>
+    </div>
+    <div class="c-body">
+      <div class="mg4" style="margin-bottom:12px">
+        <div class="m green">
+          <div class="m-lbl">TIR Tenencia EA</div>
+          <div class="m-val green" style="font-size:22px">${fmt(tirTenencia,4)}%</div>
+          <div class="m-unit">${diasInv} días · XIRR</div>
+        </div>
+        <div class="m blue">
+          <div class="m-lbl">Valor giro compra</div>
+          <div class="m-val blue" style="font-size:14px">${fmtM(vGiro)}</div>
+          <div class="m-unit">${fmtDate(liq)} · spread ${fmt(st*100,2)}%</div>
+        </div>
+        <div class="m green">
+          <div class="m-lbl">Valor giro venta</div>
+          <div class="m-val green" style="font-size:14px">${fmtM(vGiroV)}</div>
+          <div class="m-unit">${fmtDate(fV)} · spread ${fmt(stV*100,2)}%</div>
+        </div>
+        <div class="m ${ganPrecio>=0?'green':'red'}">
+          <div class="m-lbl">Gan/Pérd precio</div>
+          <div class="m-val ${ganPrecio>=0?'green':'red'}" style="font-size:14px">${(ganPrecio>=0?'+':'')+fmtM(ganPrecio)}</div>
+          <div class="m-unit">Cupones rec.: ${fmtM(totCups)}</div>
+        </div>
+      </div>
+      <div class="mg3" style="margin-bottom:12px">
+        <div class="m blue">
+          <div class="m-lbl">TIR estimada al vencimiento</div>
+          <div class="m-val" style="font-size:15px">${fmt(TIR_EA*100,4)}%</div>
+          <div class="m-unit">${fraLabelCompra}</div>
+        </div>
+        <div class="m amber">
+          <div class="m-lbl">TIR residual en venta</div>
+          <div class="m-val" style="font-size:15px">${fmt(rV.TIR_EA*100,4)}%</div>
+          <div class="m-unit">${fraLabelVenta} · spread ${fmt(stV*100,2)}%</div>
+        </div>
+        <div class="m ${ganTotal>=0?'green':'red'}">
+          <div class="m-lbl">Ganancia total</div>
+          <div class="m-val" style="font-size:15px">${(ganTotal>=0?'+':'')+fmtM(ganTotal)}</div>
+          <div class="m-unit">cupones + precio</div>
+        </div>
+      </div>
+      <div class="tscroll"><table class="ft">
+        <thead><tr>
+          <th>#</th><th style="text-align:left">Concepto</th>
+          <th style="text-align:left">Fecha</th>
+          <th style="text-align:right">IBR (FRA)</th>
+          <th style="text-align:right">Flujo ($)</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>0</td><td style="text-align:left">Compra</td>
+            <td style="text-align:left">${fmtDate(liq)}</td><td>—</td>
+            <td style="color:var(--red3);text-align:right">-${fmtP(vGiro)}</td></tr>
+          ${cupsRec.map((f,i)=>`<tr>
+            <td>${i+1}</td><td style="text-align:left">Cupón ${i+1}</td>
+            <td style="text-align:left">${fmtDate(f.fecha)}</td>
+            <td style="text-align:right"><span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(34,197,94,.12);color:var(--green3)">${fmt(f.ibr*100,4)}%</span></td>
+            <td style="color:var(--green3);text-align:right">${fmtP(f.cpPer/100*nom)}</td>
+          </tr>`).join('')}
+          <tr><td>${cupsRec.length+1}</td><td style="text-align:left">Venta</td>
+            <td style="text-align:left">${fmtDate(fV)}</td>
+            <td style="text-align:right;font-size:9px;color:var(--txt3)">${fraLabelVenta}</td>
+            <td style="color:var(--blue3);text-align:right">${fmtP(vGiroV)}</td></tr>
+        </tbody>
+        <tfoot><tr>
+          <td colspan="4" style="text-align:right;font-weight:700">Total recibido</td>
+          <td style="color:var(--green3);font-weight:700;text-align:right">${fmtP(totCups+vGiroV)}</td>
+        </tr></tfoot>
+      </table></div>
+      <div class="info-box" style="margin-top:10px">
+        <strong style="color:var(--green3)">${fraLabelCompra}</strong> → estima IBR de los ${cupsRec.length} cupón(es) recibidos
+        &nbsp;|&nbsp;
+        <strong style="color:var(--amber3)">${fraLabelVenta}</strong> → precio en venta (spread ${fmt(stV*100,2)}% · precio ${fmt(rV.priceRnd,4)}%)
+      </div>
+    </div>`;
+  $('main').appendChild(card);
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 // ── TIR REAL IBR ──────────────────────────────────────────────────────
 function calcularVenta(){
   // First run normal calcular to ensure base results exist
@@ -1185,6 +1387,9 @@ function calcularInverso(){
 // ── INIT ──────────────────────────────────────────────────────────────
 $('ibr-real-display').style.display='none';
 $('fra-section').style.display='block';
+// Default mode = estimada → mostrar fra-venta-section
+if($('fra-venta-section')) $('fra-venta-section').style.display='block';
+if($('venta-section-lbl')) $('venta-section-lbl').textContent='// Tenencia · doble curva FRA';
 (function(){
   const NS='rfc_ibr',IDS=['liq','venc','freq','sc','st','nom_val','nom_display','f_venta','st_venta','fondeo_tasa','fondeo_dias'];
   try{const s=JSON.parse(localStorage.getItem(NS)||'{}');IDS.forEach(id=>{const el=$(id);if(el&&s[id]!==undefined)el.value=s[id];});}catch(e){}
