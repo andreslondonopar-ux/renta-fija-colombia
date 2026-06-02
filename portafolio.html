@@ -18,6 +18,16 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
   --purple:#7c3aed;--purple2:#4c1d95;--purple3:#a78bfa;
   --border:#1e2d4a;--border2:#263554;--r:6px;--r2:10px;
 }
+.ticker-bar{background:#050810;border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;white-space:nowrap;position:relative}
+.ticker-track{display:inline-flex;animation:tickscroll 80s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+.tick-item{display:inline-flex;align-items:center;gap:5px;padding:0 22px;font-size:11px;border-right:1px solid var(--border2)}
+.tick-name{color:var(--txt2);font-weight:700}.tick-val{color:var(--txt);font-weight:700}
+.tick-chg.up{color:var(--green3)}.tick-chg.dn{color:var(--red3)}
+.tick-dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
+.tick-dot.up{background:var(--green)}.tick-dot.dn{background:var(--red)}.tick-dot.nt{background:var(--txt3)}
+@keyframes tickscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-status{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--txt3);background:var(--bg);padding:2px 6px;border-radius:3px}
 .topbar{display:flex;align-items:center;gap:10px;padding:0 20px;height:50px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
 .back{display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:600;text-decoration:none}
 .back:hover{color:var(--txt)}
@@ -97,6 +107,13 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
+
+<div class="ticker-bar">
+  <div class="ticker-track" id="tickerTrack">
+    <span class="tick-item"><span class="tick-dot nt"></span><span class="tick-name" style="color:var(--txt3)">Cargando mercado...</span></span>
+  </div>
+  <div class="ticker-status" id="tickerStatus"></div>
+</div>
 
 <div class="topbar">
   <a href="index.html" class="back">&#8592; Inicio</a>
@@ -818,6 +835,61 @@ function resetEstrategia(){
 // ── INIT ──────────────────────────────────────────────────────
 renderSidebar();
 window.addEventListener('storage',e=>{if(e.key==='rf_portfolio')renderSidebar();});
+
+// ── TICKER ────────────────────────────────────────────────────────────
+const $t=id=>document.getElementById(id);
+const FALLBACK_T=[
+  {n:'USD/COP',v:'4.218',up:true,c:'+12'},{n:'EUR/USD',v:'1.0832',up:false,c:'-0.2%'},
+  {n:'WTI',v:'67.42',up:false,c:'-0.8%'},{n:'Brent',v:'71.18',up:false,c:'-0.7%'},
+  {n:'Oro',v:'3.285',up:true,c:'+0.3%'},{n:'S&P 500',v:'5.631',up:true,c:'+0.2%'},
+  {n:'Nasdaq',v:'17.842',up:true,c:'+0.4%'},{n:'VIX',v:'18.4',up:false,c:'-1.1%'},
+  {n:'BTC',v:'96.420',up:true,c:'+1.4%'},{n:'DXY',v:'104.2',up:true,c:'+0.1%'},
+  {n:'UST 10Y',v:'4.21%',up:true,c:'+2bp'},{n:'Col CDS 5Y',v:'180bp',up:false,c:'-3bp'},
+];
+function buildTickerHTML_pf(items){
+  let arr=[...items]; while(arr.length<16) arr=[...arr,...items];
+  return arr.map(i=>`<span class="tick-item"><span class="tick-dot ${i.up?'up':'dn'}"></span><span class="tick-name">${i.n}</span>&nbsp;<span class="tick-val">${i.v}</span>&nbsp;<span class="tick-chg ${i.up?'up':'dn'}">${i.c}</span></span>`).join('');
+}
+function setTickerPF(items){
+  const el=$t('tickerTrack'); if(!el||!items?.length) return;
+  const h=buildTickerHTML_pf(items); el.innerHTML=h+h;
+  el.style.animation='none'; requestAnimationFrame(()=>{el.style.animation='';});
+}
+setTickerPF(FALLBACK_T); $t('tickerStatus').textContent='ref.';
+const YAHOO_PF=[
+  {sym:'USDCOP=X',n:'USD/COP',dec:0},{sym:'EURUSD=X',n:'EUR/USD',dec:4},
+  {sym:'CL=F',n:'WTI',dec:2,suf:' USD'},{sym:'BZ=F',n:'Brent',dec:2,suf:' USD'},
+  {sym:'GC=F',n:'Oro',dec:0,suf:' USD'},{sym:'^GSPC',n:'S&P 500',dec:0},
+  {sym:'^IXIC',n:'Nasdaq',dec:0},{sym:'^VIX',n:'VIX',dec:2},
+  {sym:'BTC-USD',n:'BTC',dec:0,suf:' USD'},{sym:'DX-Y.NYB',n:'DXY',dec:2},
+  {sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
+];
+async function fetchOnePF(sym){
+  for(const base of['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']){
+    try{
+      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(base+'/v8/finance/chart/'+sym+'?interval=1d&range=1d')}`);
+      if(!r.ok) continue;
+      const meta=((await r.json())?.chart?.result?.[0]?.meta);
+      if(!meta?.regularMarketPrice) continue;
+      const price=meta.regularMarketPrice,prev=meta.regularMarketPreviousClose||price,chg=price-prev;
+      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
+    }catch{continue;}
+  }
+  return null;
+}
+async function loadTickerPF(){
+  const results=await Promise.allSettled(YAHOO_PF.map(s=>fetchOnePF(s.sym)));
+  const items=[];
+  results.forEach((r,i)=>{
+    const cfg=YAHOO_PF[i];
+    if(r.status==='fulfilled'&&r.value){
+      const{price,chg,chgPct}=r.value; const up=chg>=0;
+      items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
+    }
+  });
+  if(items.length>=4){setTickerPF(items);$t('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});$t('tickerStatus').style.color='var(--green3)';}
+}
+loadTickerPF(); setInterval(loadTickerPF,60000);
 </script>
 </body>
 </html>
