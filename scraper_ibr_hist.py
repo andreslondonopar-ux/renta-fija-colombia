@@ -29,9 +29,9 @@ def last_date_in_data(data_dict):
 
 def try_suameca_api():
     """
-    Descarga IBR overnight via API REST de BanRep SUAMECA.
+    Descarga IBR 1 mes nominal via API REST de BanRep SUAMECA.
     Serie ID=242: 'Indicador Bancario de Referencia (IBR) a 1 mes, nominal'
-    La API devuelve valores en % (ej: 10.581) → almacenar como decimal (0.10581).
+    La API devuelve valores en % (ej: 10.59) → almacenar como decimal (0.1059).
     Retorna dict {iso_date: ibr_decimal} o {} si falla.
     """
     import requests
@@ -40,7 +40,7 @@ def try_suameca_api():
     url = (
         "https://suameca.banrep.gov.co/estadisticas-economicas-back/rest/"
         "estadisticaEconomicaRestService/consultaInformacionSerieXTipoDatoXFechaDesde"
-        "?idSerie=242&tipoDato=1&cantDatos=10&frecuenciaDatos=year"
+        "?idSerie=242&tipoDato=1&cantDatos=2000&frecuenciaDatos=year"
     )
     try:
         r = requests.get(url, timeout=60, headers={
@@ -290,18 +290,17 @@ def main():
 
     new_entries = {}
 
-    # --- Estrategia 1: API SUAMECA BanRep ---
+    # --- Estrategia 1: API SUAMECA BanRep (IBR 1M nominal, ID=242) ---
+    # Reemplaza TODO el histórico con datos correctos IBR 1M (no solo entradas nuevas)
     try:
         api_data = try_suameca_api()
-        for d, v in api_data.items():
-            if last_d is None or d > last_d:
-                new_entries[d] = v
-        if new_entries:
-            print("[IBR] suameca: %d entradas nuevas" % len(new_entries))
+        if api_data:
+            new_entries = api_data  # reemplaza completo con IBR 1M
+            print("[IBR] suameca: %d entradas IBR 1M" % len(new_entries))
     except Exception as e:
         print("[IBR] suameca excepcion: %s" % e)
 
-    # --- Estrategia 2: Excel directo ---
+    # --- Estrategia 2: Excel directo (fallback, solo añade entradas nuevas) ---
     if not new_entries:
         content = None
         try:
@@ -317,7 +316,7 @@ def main():
                         new_entries[d] = v
                 print("Excel directo: %d entradas nuevas" % len(new_entries))
 
-    # --- Estrategia 3: Playwright ---
+    # --- Estrategia 3: Playwright (fallback, solo añade entradas nuevas) ---
     if not new_entries:
         try:
             pw_data = try_banrep_playwright()
@@ -330,8 +329,13 @@ def main():
             print("Playwright: %s" % e)
 
     if new_entries:
-        data_dict.update(new_entries)
-        print("Total nuevas entradas: %d" % len(new_entries))
+        # Si API SUAMECA devolvió datos, fusionar: IBR 1M reemplaza overnight histórico
+        if len(new_entries) > 100:  # vino de API (histórico completo)
+            data_dict = new_entries
+            print("Histórico IBR reemplazado con IBR 1M: %d entradas" % len(data_dict))
+        else:
+            data_dict.update(new_entries)
+            print("Total nuevas entradas: %d" % len(new_entries))
     else:
         print("Sin nuevas entradas encontradas.")
 

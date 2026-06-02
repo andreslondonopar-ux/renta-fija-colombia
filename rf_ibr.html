@@ -536,7 +536,6 @@ let FRA_DATA = {};  // {iso: rate_decimal}
 let fraLoaded = false;
 let FRA_VENTA_DATA = {};  // curva FRA en fecha de venta
 let fraVentaLoaded = false;
-let _tenenciaState = null;  // estado para recalcTenencia()
 
 function loadFRA(input){
   const file = input.files[0];
@@ -587,7 +586,7 @@ function loadFRA(input){
 
 // ── IBR LOOKUP ────────────────────────────────────────────────────────
 function ibrReal(iso){
-  // Look up IBR from historical data, fallback ±3 days
+  // Lookup IBR publicado en la fecha exacta (fallback ±3 días)
   if(IBR_REAL_DATA[iso]) return IBR_REAL_DATA[iso];
   for(let d=1;d<=3;d++){
     const dt=new Date(iso+'T12:00:00');
@@ -595,6 +594,20 @@ function ibrReal(iso){
       const td=new Date(dt); td.setDate(td.getDate()+delta);
       const tiso=td.toISOString().split('T')[0];
       if(IBR_REAL_DATA[tiso]) return IBR_REAL_DATA[tiso];
+    }
+  }
+  return null;
+}
+
+function ibrBondReset(iso){
+  // Convención bonos IBR: tasa publicada el día hábil anterior (T-1) a la fecha de reset nominal
+  let d=new Date(iso+'T12:00:00');
+  for(let i=0;i<10;i++){
+    d.setDate(d.getDate()-1);
+    const s=d.toISOString().slice(0,10);
+    if(d.getDay()!==0&&d.getDay()!==6&&!CO_HOLIDAYS.has(s)){
+      const v=IBR_REAL_DATA[s];
+      if(v!==undefined) return v;
     }
   }
   return null;
@@ -622,7 +635,7 @@ function ibrFRA(iso){
 }
 
 function getIBR(iso, mode){
-  return mode==='real' ? ibrReal(iso) : ibrFRA(iso);
+  return mode==='real' ? ibrBondReset(iso) : ibrFRA(iso);
 }
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
@@ -1090,9 +1103,9 @@ function calcularTenenciaFRA(){
   // 2. Cupones recibidos entre liq y fV
   const cupsRec=flows.filter(f=>f.fecha>liq&&f.fecha<=fV);
 
-  // 2b. Cupones ya realizados → reemplazar IBR estimado (FRA) por IBR real publicado
+  // 2b. Cupones ya realizados → IBR real usando convención T-1 (día hábil anterior al reset)
   cupsRec.forEach(f=>{
-    const realIBR=ibrReal(f.cur);  // f.cur = fecha de reset del período
+    const realIBR=ibrBondReset(f.cur);
     if(realIBR!==null){
       f.ibr=realIBR;
       f.cpPer=(realIBR+sc)/12*100;
@@ -1123,9 +1136,6 @@ function calcularTenenciaFRA(){
   const ganPrecio=(rV.priceRnd-priceRnd)/100*nom;
   const ganTotal=totCups+vGiroV-vGiro;
 
-  // Guardar estado para recalcTenencia()
-  _tenenciaState={liq,fV,vGiro,vGiroV,sc,nom,cupsRec:cupsRec.map(f=>({...f}))};
-
   const old=$('ibr-tir-real-card');
   if(old) old.remove();
   const card=document.createElement('div');
@@ -1140,7 +1150,7 @@ function calcularTenenciaFRA(){
       <div class="mg4" style="margin-bottom:12px">
         <div class="m green">
           <div class="m-lbl">TIR Tenencia EA</div>
-          <div class="m-val green" id="ten-tir-val" style="font-size:22px">${fmt(tirTenencia,4)}%</div>
+          <div class="m-val green" style="font-size:22px">${fmt(tirTenencia,4)}%</div>
           <div class="m-unit">${diasInv} días · XIRR</div>
         </div>
         <div class="m blue">
@@ -1155,8 +1165,8 @@ function calcularTenenciaFRA(){
         </div>
         <div class="m ${ganPrecio>=0?'green':'red'}">
           <div class="m-lbl">Gan/Pérd precio</div>
-          <div class="m-val ${ganPrecio>=0?'green':'red'}" id="ten-gan-precio" style="font-size:14px">${(ganPrecio>=0?'+':'')+fmtM(ganPrecio)}</div>
-          <div class="m-unit">Cupones: <span id="ten-cups-total">${fmtM(totCups)}</span></div>
+          <div class="m-val ${ganPrecio>=0?'green':'red'}" style="font-size:14px">${(ganPrecio>=0?'+':'')+fmtM(ganPrecio)}</div>
+          <div class="m-unit">Cupones rec.: ${fmtM(totCups)}</div>
         </div>
       </div>
       <div class="mg3" style="margin-bottom:12px">
@@ -1172,15 +1182,15 @@ function calcularTenenciaFRA(){
         </div>
         <div class="m ${ganTotal>=0?'green':'red'}">
           <div class="m-lbl">Ganancia total</div>
-          <div class="m-val" id="ten-gan-total" style="font-size:15px">${(ganTotal>=0?'+':'')+fmtM(ganTotal)}</div>
+          <div class="m-val" style="font-size:15px">${(ganTotal>=0?'+':'')+fmtM(ganTotal)}</div>
           <div class="m-unit">cupones + precio</div>
         </div>
       </div>
       <div class="tscroll"><table class="ft">
         <thead><tr>
           <th>#</th><th style="text-align:left">Concepto</th>
-          <th style="text-align:left">Reset</th>
-          <th style="text-align:right">IBR <span style="font-weight:400;color:var(--txt3);font-size:9px">— editable</span></th>
+          <th style="text-align:left">Reset (T-1)</th>
+          <th style="text-align:right">IBR 1M</th>
           <th style="text-align:right">Flujo ($)</th>
         </tr></thead>
         <tbody>
@@ -1191,13 +1201,10 @@ function calcularTenenciaFRA(){
             <td>${i+1}</td>
             <td style="text-align:left;font-size:11px">Cupón ${i+1} · paga ${fmtDate(f.fecha)}</td>
             <td style="text-align:left;color:var(--txt3);font-size:11px">${fmtDate(f.cur)}</td>
-            <td style="text-align:right;white-space:nowrap">
-              <input type="number" id="cup-ibr-${i}" value="${(f.ibr*100).toFixed(4)}" step="0.0001" min="0" max="30"
-                style="width:72px;padding:2px 5px;background:var(--bg4);border:1px solid ${f.usedReal?'rgba(16,185,129,.5)':'rgba(245,158,11,.5)'};border-radius:4px;color:${f.usedReal?'var(--green3)':'var(--amber3)'};font-family:monospace;font-size:11px;text-align:right"
-                oninput="recalcTenencia()">
-              <span style="font-size:9px;color:${f.usedReal?'var(--green3)':'var(--amber3)'};margin-left:2px">${f.usedReal?'★':'~'}</span>
+            <td style="text-align:right">
+              <span style="font-size:9px;padding:1px 5px;border-radius:8px;background:${f.usedReal?'rgba(34,197,94,.15)':'rgba(245,158,11,.15)'};color:${f.usedReal?'var(--green3)':'var(--amber3)'};border:1px solid ${f.usedReal?'rgba(16,185,129,.3)':'rgba(245,158,11,.3)'}">${fmt(f.ibr*100,4)}%${f.usedReal?' ★':' ~'}</span>
             </td>
-            <td style="color:var(--green3);text-align:right" id="cup-flujo-${i}">${fmtP(f.cpPer/100*nom)}</td>
+            <td style="color:var(--green3);text-align:right">${fmtP(f.cpPer/100*nom)}</td>
           </tr>`).join('')}
           <tr><td>${cupsRec.length+1}</td><td style="text-align:left">Venta</td>
             <td style="text-align:left;color:var(--txt3)">${fmtDate(fV)}</td>
@@ -1206,50 +1213,18 @@ function calcularTenenciaFRA(){
         </tbody>
         <tfoot><tr>
           <td colspan="4" style="text-align:right;font-weight:700">Total recibido</td>
-          <td id="ten-total-rec" style="color:var(--green3);font-weight:700;text-align:right">${fmtP(totCups+vGiroV)}</td>
+          <td style="color:var(--green3);font-weight:700;text-align:right">${fmtP(totCups+vGiroV)}</td>
         </tr></tfoot>
       </table></div>
       <div class="info-box" style="margin-top:10px">
-        <strong style="color:var(--green3)">★ IBR histórico ON</strong> (datos_ibr.json) ·
-        <strong style="color:var(--amber3)">~ IBR estimado</strong> (FRA compra) ·
-        <strong style="color:var(--txt2)">edita los IBR ↑ para ingresar el IBR 1M real</strong>
+        <strong style="color:var(--green3)">★ IBR real T-1</strong> (tasa publicada el día hábil anterior al reset) ·
+        <strong style="color:var(--amber3)">~ FRA estimada</strong> (sin datos históricos para esa fecha)
         &nbsp;|&nbsp;
         <strong style="color:var(--amber3)">${fraLabelVenta}</strong> → precio venta ${fmt(rV.priceRnd,4)}%
       </div>
     </div>`;
   $('main').appendChild(card);
   card.scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-// ── RECALC TENENCIA CON IBR EDITADOS ────────────────────────────────
-function recalcTenencia(){
-  if(!_tenenciaState) return;
-  const{liq,fV,vGiro,vGiroV,sc,nom,cupsRec}=_tenenciaState;
-  const xCFs=[-vGiro], xDates=[liq];
-  let totCups=0;
-  cupsRec.forEach((f,i)=>{
-    const el=document.getElementById('cup-ibr-'+i);
-    const ibr=el?parseFloat(el.value)/100:f.ibr;
-    if(isNaN(ibr)) return;
-    const cpPer=(ibr+sc)/12*100;
-    const flujo=cpPer/100*nom;
-    totCups+=flujo;
-    const fEl=document.getElementById('cup-flujo-'+i);
-    if(fEl) fEl.textContent=fmtP(flujo);
-    xCFs.push(flujo); xDates.push(f.fecha);
-  });
-  xCFs.push(vGiroV); xDates.push(fV);
-  const tir=xirr(xCFs,xDates,liq)*100;
-  const ganPrecio=(vGiroV-vGiro-(totCups));  // price gain only
-  const ganTotal=totCups+vGiroV-vGiro;
-  const t=document.getElementById('ten-tir-val');
-  if(t) t.textContent=fmt(tir,4)+'%';
-  const g=document.getElementById('ten-gan-total');
-  if(g){g.textContent=(ganTotal>=0?'+':'')+fmtM(ganTotal);g.style.color=ganTotal>=0?'var(--green3)':'var(--red3)';}
-  const c=document.getElementById('ten-cups-total');
-  if(c) c.textContent=fmtM(totCups);
-  const r=document.getElementById('ten-total-rec');
-  if(r) r.textContent=fmtP(totCups+vGiroV);
 }
 
 // ── TIR REAL IBR ──────────────────────────────────────────────────────
