@@ -279,6 +279,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         </div>
         <button class="btn btn-amber" onclick="calcular(false)">▶ Calcular con caja</button>
       </div>
+      <div id="tenencia-section">
       <div class="hr"></div>
       <div class="s-lbl">// Tenencia · doble curva FRA</div>
       <div class="field"><label>Fecha de venta</label>
@@ -300,7 +301,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         </div>
       </div>
       <button class="btn btn-green" onclick="calcularTenencia()">▶ Calcular TIR Tenencia</button>
-      <div id="ten-horizons-card-anchor"></div>
+      </div><!-- /tenencia-section -->
       <div class="hr"></div>
       <div class="toggle-row" onclick="toggleFondeo()">
         <span class="toggle-label">⛽ Fondeo</span>
@@ -645,7 +646,10 @@ function onModeChange(){
   $('fra-section').style.display = mode==='estimada'?'block':'none';
   $('ibr-real-display').style.display = mode==='real'?'block':'none';
   if(mode==='real') lookupIBRDisplay($('liq').value);
-  // Clear stale tenencia results on mode switch
+  // Tenencia solo visible en modo estimada (usa curvas FRA)
+  const ts=$('tenencia-section');
+  if(ts) ts.style.display=mode==='estimada'?'block':'none';
+  // Limpiar resultados de tenencia al cambiar modo
   const oldCard=$('ibr-tir-real-card'); if(oldCard) oldCard.remove();
   const oldH=$('ten-horizons-card'); if(oldH) oldH.remove();
   autoCA();
