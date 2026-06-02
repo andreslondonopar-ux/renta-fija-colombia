@@ -1088,8 +1088,7 @@ function renderTIRHorizons(){
     const rV=calcBondIBR(ant,sellDate,venc,mp,sc,st,nom,mode);
     if(!rV) continue;
     const vGiroV=(rV.priceRnd/100)*nom;
-    const cupsRec=flows.filter(f=>f.fecha>liq&&f.fecha<=sellDate).map(f=>({...f}));
-    cupsRec.forEach(f=>{const r=ibrBondReset(f.cur);if(r!==null){f.ibr=r;f.cpPer=(r+sc)/12*100;}});
+    const cupsRec=flows.filter(f=>f.fecha>liq&&f.fecha<=sellDate);
     const xCFs=[-vGiro,...cupsRec.map(f=>f.cpPer/100*nom),vGiroV];
     const xDates=[liq,...cupsRec.map(f=>f.fecha),sellDate];
     const tir=xirr(xCFs,xDates,liq)*100;
