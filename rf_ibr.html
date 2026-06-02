@@ -173,11 +173,11 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab('calc')">◈ Calculadora</div>
-  
+  <div class="tab active" onclick="showTab('calc')">◈ Valoración</div>
+  <div class="tab" onclick="showTab('ten')">📈 Tenencia</div>
 </div>
 
-<!-- TAB 1: CALCULADORA -->
+<!-- TAB 1: VALORACIÓN -->
 <div class="page active" id="page-calc">
   <div class="sidebar">
     <div class="s-hdr">// Parámetros del bono IBR</div>
@@ -280,27 +280,6 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         </div>
         <button class="btn btn-amber" onclick="calcular(false)">▶ Calcular con caja</button>
       </div>
-      <div id="venta-hr" class="hr"></div>
-      <div id="venta-section">
-        <div id="venta-section-lbl" class="s-lbl">// Escenario de venta</div>
-        <div class="field"><label>Fecha de venta</label>
-          <input type="date" id="f_venta" value="2026-07-10">
-        </div>
-        <div class="field"><label>Spread TIR venta (%)</label>
-          <input type="number" id="st_venta" value="2.20" step="0.01" min="0">
-        </div>
-        <!-- FRA venta: selector de presets, visible solo en modo estimada -->
-        <div id="fra-venta-section" style="display:none">
-          <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;margin-bottom:9px">
-            <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">FRA Venta</div>
-            <select id="fra-venta-sel" onchange="selectFRAVenta(this.value)" style="width:100%;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg3);font-family:inherit;margin-bottom:4px">
-              <option value="">-- Misma que compra --</option>
-            </select>
-            <div style="font-size:10px;color:var(--txt3)" id="fra-venta-status">Sin curva · usará FRA compra</div>
-          </div>
-        </div>
-        <button class="btn btn-green" onclick="despacharVenta()">▶ Calcular TIR Tenencia</button>
-      </div>
       <div class="hr"></div>
       <div class="toggle-row" onclick="toggleFondeo()">
         <span class="toggle-label">⛽ Fondeo</span>
@@ -372,6 +351,46 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 
 </div>
 
+<!-- TAB 2: TENENCIA -->
+<div class="page" id="page-ten">
+  <div class="sidebar">
+    <div class="s-hdr">// Tenencia IBR</div>
+    <div class="s-body">
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;margin-bottom:2px">
+        <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Bono · desde tab Valoración</div>
+        <div id="ten-bond-info" style="font-size:11px;color:var(--txt2);line-height:1.7">Configure el bono en Valoración</div>
+      </div>
+      <div class="hr"></div>
+      <div class="s-lbl">// FRA Venta</div>
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;margin-bottom:9px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">FRA Venta</div>
+          <button onclick="reloadFRASelects()" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:13px;padding:0;line-height:1" title="Recargar presets">↺</button>
+        </div>
+        <select id="fra-venta-sel" onchange="selectFRAVenta(this.value)" style="width:100%;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--txt);background:var(--bg3);font-family:inherit;margin-bottom:4px">
+          <option value="">-- Misma que compra --</option>
+        </select>
+        <div style="font-size:10px;color:var(--txt3)" id="fra-venta-status">Sin curva · usará FRA compra</div>
+      </div>
+      <div class="hr"></div>
+      <div class="s-lbl">// Parámetros de venta</div>
+      <div class="field"><label>Fecha de venta</label>
+        <input type="date" id="f_venta" value="2026-07-10">
+      </div>
+      <div class="field"><label>Spread TIR venta (%)</label>
+        <input type="number" id="st_venta" value="2.20" step="0.01" min="0">
+      </div>
+      <button class="btn btn-green" onclick="calcularTenencia()">▶ Calcular Tenencia</button>
+    </div>
+  </div>
+  <div class="main" id="main-ten">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--txt3)">
+      <div style="font-size:40px;margin-bottom:12px;opacity:.25">📈</div>
+      <div>// Configure el bono en <strong style="color:var(--blue3)">◈ Valoración</strong> y presione <strong style="color:var(--green3)">▶ Calcular Tenencia</strong></div>
+    </div>
+  </div>
+</div>
+
 </body>
 
 <script>
@@ -390,9 +409,10 @@ function updateClock(){$('clock').textContent=new Date().toLocaleTimeString('es-
 setInterval(updateClock,1000);updateClock();
 
 function showTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calc','pf'][i]===t));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calc','ten'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $('page-'+t).classList.add('active');
+  if(t==='ten') updateTenBondInfo();
 }
 
 let cajaOpen=false;
@@ -644,14 +664,9 @@ function onModeChange(){
   $('fra-section').style.display = mode==='estimada'?'block':'none';
   $('ibr-real-display').style.display = mode==='real'?'block':'none';
   if(mode==='real') lookupIBRDisplay($('liq').value);
-  // FRA venta upload: solo en modo estimada
-  const fraVS=$('fra-venta-section');
-  if(fraVS) fraVS.style.display=mode==='estimada'?'block':'none';
-  // Etiqueta de la sección de venta
-  const sLbl=$('venta-section-lbl');
-  if(sLbl) sLbl.textContent=mode==='real'?'// Escenario de venta · IBR Real':'// Tenencia · doble curva FRA';
-  // Clear stale TIR real card on mode switch
+  // Clear stale tenencia results on mode switch
   const oldCard=$('ibr-tir-real-card'); if(oldCard) oldCard.remove();
+  const oldH=$('ten-horizons-card'); if(oldH) oldH.remove();
   // Update defaults
   if(mode==='estimada'){
     $('liq').value='2025-07-22'; $('venc').value='2027-07-10';
@@ -659,6 +674,7 @@ function onModeChange(){
     $('liq').value='2025-03-19'; $('venc').value='2026-03-05';
   }
   autoCA();
+  updateTenBondInfo();
 }
 
 function lookupIBRDisplay(iso){
@@ -1070,15 +1086,84 @@ function updateFRAVentaStatus(){
   stat.style.color='var(--green3)';
 }
 
-function despacharVenta(){
+function despacharVenta(){ calcularTenencia(); }
+
+// ── TAB TENENCIA ──────────────────────────────────────────────────────
+function updateTenBondInfo(){
+  const el=$('ten-bond-info'); if(!el) return;
+  const liq=$('liq').value, venc=$('venc').value;
+  const sc=$('sc').value, st=$('st').value;
   const mode=$('ibr-mode').value;
-  if(mode==='real') calcularVenta();
-  else calcularTenenciaFRA();
+  if(!liq||!venc){el.textContent='Configure el bono en Valoración';return;}
+  el.innerHTML=`Vcto: <strong>${fmtDate(venc)}</strong><br>Liq: ${fmtDate(liq)}<br>Spread cupón: ${sc}% · TIR: ${st}%<br>Modo: ${mode==='estimada'?'IBR Estimada (FRA)':'IBR Real'}`;
+}
+
+function renderTIRHorizons(){
+  if(!$('c_ant_iso').value) autoCA();
+  const liq=$('liq').value, venc=$('venc').value, ant=$('c_ant_iso').value;
+  const freq=parseInt($('freq').value), mp=Math.round(12/freq);
+  const sc=parseFloat($('sc').value)/100, st=parseFloat($('st').value)/100;
+  const nom=parseFloat($('nom_val').value)||0;
+  const mode=$('ibr-mode').value;
+  if(!liq||!venc||!ant||nom<=0) return;
+  if(mode==='estimada'&&!fraLoaded) return;
+  const res=calcBondIBR(ant,liq,venc,mp,sc,st,nom,mode);
+  if(!res) return;
+  const{flows,priceRnd,vGiro,TIR_EA}=res;
+  const horizons=[3,6,9,12];
+  const rows=[];
+  for(const h of horizons){
+    const sellDate=addMonths(liq,h);
+    if(sellDate>=venc) break;
+    const rV=calcBondIBR(ant,sellDate,venc,mp,sc,st,nom,mode);
+    if(!rV) continue;
+    const vGiroV=(rV.priceRnd/100)*nom;
+    const cupsRec=flows.filter(f=>f.fecha>liq&&f.fecha<=sellDate).map(f=>({...f}));
+    cupsRec.forEach(f=>{const r=ibrBondReset(f.cur);if(r!==null){f.ibr=r;f.cpPer=(r+sc)/12*100;}});
+    const xCFs=[-vGiro,...cupsRec.map(f=>f.cpPer/100*nom),vGiroV];
+    const xDates=[liq,...cupsRec.map(f=>f.fecha),sellDate];
+    const tir=xirr(xCFs,xDates,liq)*100;
+    rows.push({h,tir,dias:daysReal(liq,sellDate),sellDate,priceV:rV.priceRnd});
+  }
+  const old=$('ten-horizons-card'); if(old) old.remove();
+  const card=document.createElement('div');
+  card.className='card'; card.id='ten-horizons-card';
+  const tirVenc=TIR_EA*100;
+  card.innerHTML=`
+    <div class="c-hdr">TIR Estimada de Tenencia · Horizontes
+      <span style="font-size:9px;font-weight:400;color:var(--txt3)">mismo spread · ${mode==='estimada'?'FRA compra':'IBR real T-1'}</span>
+    </div>
+    <div class="c-body">
+      <div style="display:grid;grid-template-columns:repeat(${rows.length+1},1fr);gap:8px;margin-bottom:10px">
+        ${rows.map(r=>{
+          const cls=r.tir>=tirVenc?'green':'amber';
+          return`<div class="m ${cls}">
+            <div class="m-lbl">${r.h} meses</div>
+            <div class="m-val" style="font-size:17px">${fmt(r.tir,4)}%</div>
+            <div class="m-unit">${r.dias}d · precio ${fmt(r.priceV,3)}%</div>
+          </div>`;
+        }).join('')}
+        <div class="m blue">
+          <div class="m-lbl">Al vencimiento</div>
+          <div class="m-val" style="font-size:17px">${fmt(tirVenc,4)}%</div>
+          <div class="m-unit">${daysReal(liq,venc)}d · ${fmtDate(venc)}</div>
+        </div>
+      </div>
+      <div class="info-box">Spread compra <strong style="color:var(--blue3)">${fmt(st*100,2)}%</strong> · precio compra <strong style="color:var(--blue3)">${fmt(priceRnd,4)}%</strong> · valor giro <strong style="color:var(--blue3)">${fmtM(vGiro)}</strong></div>
+    </div>`;
+  const mt=$('main-ten');
+  mt.innerHTML='';
+  mt.appendChild(card);
+}
+
+function calcularTenencia(){
+  updateTenBondInfo();
+  renderTIRHorizons();
+  calcularTenenciaFRA();
 }
 
 // ── TIR TENENCIA · DOBLE CURVA FRA ────────────────────────────────────
 function calcularTenenciaFRA(){
-  calcular(false);
   const liq=$('liq').value, venc=$('venc').value;
   if(!liq||!venc) return;
   if(!$('c_ant_iso').value) autoCA();
@@ -1223,7 +1308,8 @@ function calcularTenenciaFRA(){
         <strong style="color:var(--amber3)">${fraLabelVenta}</strong> → precio venta ${fmt(rV.priceRnd,4)}%
       </div>
     </div>`;
-  $('main').appendChild(card);
+  const mt=$('main-ten');
+  mt.appendChild(card);
   card.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -1436,9 +1522,6 @@ function calcularInverso(){
 // ── INIT ──────────────────────────────────────────────────────────────
 $('ibr-real-display').style.display='none';
 $('fra-section').style.display='block';
-// Default mode = estimada → mostrar fra-venta-section
-if($('fra-venta-section')) $('fra-venta-section').style.display='block';
-if($('venta-section-lbl')) $('venta-section-lbl').textContent='// Tenencia · doble curva FRA';
 (function(){
   const NS='rfc_ibr',IDS=['liq','venc','freq','sc','st','nom_val','nom_display','f_venta','st_venta','fondeo_tasa','fondeo_dias'];
   try{const s=JSON.parse(localStorage.getItem(NS)||'{}');IDS.forEach(id=>{const el=$(id);if(el&&s[id]!==undefined)el.value=s[id];});}catch(e){}
