@@ -270,7 +270,7 @@ def main():
         except Exception as e:
             print(f"macro_data.json error: {e}")
 
-    # Cargar historial del archivo anterior (máx 5 snapshots = 5 días hábiles)
+    # Cargar historial del archivo anterior — deduplicado por fecha, máx 40 entradas
     ust_path = Path("ust_data.json")
     ust_history = []
     try:
@@ -282,14 +282,17 @@ def main():
                     'rates': [{'plazo': r['plazo'], 'years': r['years'], 'tir': r['tir']}
                               for r in old_ust['rates']]
                 }
-                ust_history = [snap] + old_ust.get('history', [])
+                prev_hist = old_ust.get('history', [])
+                # Deduplicar: prepend snapshot del día actual, quitar entradas del mismo día
+                combined = [snap] + [h for h in prev_hist if h['date'] != snap['date']]
+                ust_history = combined
     except Exception as e:
         print(f"Aviso historial UST: {e}")
-    result['history'] = ust_history[:30]
+    result['history'] = ust_history[:40]
 
-    # Curva de referencia (~30 días atrás) buscada en el mismo XML descargado
-    ref_target = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
-    print(f"\nCurva de referencia (~30d atras: {ref_target}):")
+    # Curva de referencia: ~5 días atrás (alineada con la referencia de Colombia TES)
+    ref_target = (datetime.date.today() - datetime.timedelta(days=5)).isoformat()
+    print(f"\nCurva de referencia (~5d atras: {ref_target}):")
     ref = None
     if all_entries:
         ref = find_reference_in_entries(all_entries, ref_target)
