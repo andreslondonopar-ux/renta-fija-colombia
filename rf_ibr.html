@@ -1757,9 +1757,9 @@ function renderIBRChart(){
     type:'line',
     data:{labels, datasets:[
       {label:'IBR Histórico',data:histVals,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',
-       borderWidth:1.5,pointRadius:0,tension:.2,fill:true,spanGaps:false},
+       borderWidth:1.5,pointRadius:0,tension:.2,fill:true,spanGaps:true},
       {label:'IBR FRA Est.',data:fraVals,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',
-       borderWidth:1.5,pointRadius:0,tension:.2,fill:true,borderDash:[5,3],spanGaps:false},
+       borderWidth:1.5,pointRadius:0,tension:.2,fill:true,borderDash:[5,3],spanGaps:true},
       {label:'_bridge',data:bridgeVals,borderColor:'#f59e0b',borderWidth:1.5,
        pointRadius:0,tension:.2,fill:false,spanGaps:true},
     ]},
