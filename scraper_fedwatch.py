@@ -234,7 +234,118 @@ def try_cme_api():
     return None
 
 
-# ── FUENTE 3: Playwright ───────────────────────────────────────────────────────
+# ── FUENTE 3: Investing.com Fed Rate Monitor (usa datos CME) ───────────────────
+
+def parse_investing_meetings(page, today_str):
+    """Parsea el DOM de investing.com/central-banks/fed-rate-monitor."""
+    import re
+    meetings = []
+    try:
+        # Esperar tabla de reuniones
+        page.wait_for_selector('[class*="rateTable"], table[class*="fed"], .fedTable, table', timeout=15000)
+        page.wait_for_timeout(2000)
+
+        # Obtener todas las filas que puedan ser reuniones FOMC
+        rows = page.evaluate("""() => {
+            const results = [];
+            // Buscar celdas con fechas tipo "Jun 17, 2026" y sus probabilidades adyacentes
+            document.querySelectorAll('tr, [class*="tableRow"], [class*="row"]').forEach(row => {
+                const text = row.innerText || '';
+                // Buscar filas con fecha + porcentajes
+                const dateMatch = text.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(\\d{1,2}),?\\s+(\\d{4})/i);
+                const pcts = [...text.matchAll(/(\\d{1,3}(?:\\.\\d)?)\s*%/g)].map(m => parseFloat(m[1]));
+                if (dateMatch && pcts.length >= 2) {
+                    results.push({ dateStr: dateMatch[0], pcts, fullText: text.trim().slice(0, 200) });
+                }
+            });
+            return results;
+        }""")
+
+        MONTHS = {'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12}
+        for row in (rows or []):
+            try:
+                dm = re.search(r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2}),?\s+(\d{4})', row['dateStr'], re.I)
+                if not dm: continue
+                mo = MONTHS[dm.group(1).lower()]
+                day = int(dm.group(2))
+                yr = int(dm.group(3))
+                date_iso = f"{yr}-{mo:02d}-{day:02d}"
+                if date_iso < today_str: continue
+                label = f"{dm.group(1)[:3]} '{str(yr)[2:]}"
+                pcts = row['pcts']
+                # Los porcentajes suman ~100%; los mayores son los más probables
+                total = sum(pcts)
+                if total < 50: continue
+                # Asumir que el primero es el escenario más común (cut/hold/hike)
+                # Necesitamos labels — sin info de bp usamos solo probabilidades
+                probs = [{"label": f"escenario_{i+1}", "bp": 0, "prob": p}
+                         for i, p in enumerate(pcts) if p > 1]
+                if probs:
+                    meetings.append({"date": date_iso, "label": label, "probs": probs})
+            except Exception:
+                continue
+    except Exception as e:
+        print(f"  DOM parse error: {e}")
+    return meetings
+
+
+def try_investing_com():
+    from playwright.sync_api import sync_playwright
+    url = "https://www.investing.com/central-banks/fed-rate-monitor"
+    meetings = []
+    api_responses = []
+    today_str = TODAY
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True, args=[
+            "--no-sandbox", "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage", "--disable-gpu",
+        ])
+        ctx = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            viewport={"width": 1440, "height": 900}
+        )
+
+        def handle_response(response):
+            url_l = response.url.lower()
+            if any(k in url_l for k in ['fed', 'rate-monitor', 'central-bank', 'fomc', 'probabilit', 'fedwatch']):
+                try:
+                    data = response.json()
+                    api_responses.append({'url': response.url, 'data': data})
+                    print(f"  XHR: {response.url[:90]}")
+                except Exception:
+                    pass
+
+        page = ctx.new_page()
+        page.on("response", handle_response)
+        print(f"  Loading {url}...")
+        try:
+            page.goto(url, wait_until="networkidle", timeout=60000)
+            page.wait_for_timeout(5000)
+        except Exception as e:
+            print(f"  Load error: {e}")
+
+        # 1) Intentar parsear XHR como CME
+        for item in api_responses:
+            parsed = parse_cme_response(item['data'])
+            if parsed:
+                meetings = parsed
+                print(f"  XHR parseable como CME: {len(meetings)} reuniones")
+                break
+
+        # 2) DOM fallback
+        if not meetings:
+            print("  Intentando DOM...")
+            meetings = parse_investing_meetings(page, today_str)
+
+        browser.close()
+
+    if meetings:
+        print(f"  OK {len(meetings)} reuniones via Investing.com")
+    return meetings
+
+
+# ── FUENTE 4: Playwright CME directo ──────────────────────────────────────────
 
 def try_playwright():
     from playwright.sync_api import sync_playwright
@@ -259,7 +370,7 @@ def try_playwright():
 
         page = ctx.new_page()
         page.on("response", handle_response)
-        print(f"  Cargando {url}...")
+        print(f"  Loading {url}...")
         page.goto(url, wait_until="networkidle", timeout=60000)
         page.wait_for_timeout(5000)
 
@@ -272,7 +383,7 @@ def try_playwright():
         browser.close()
 
     if meetings:
-        print(f"  OK {len(meetings)} reuniones via Playwright")
+        print(f"  OK {len(meetings)} reuniones via Playwright CME")
     return meetings
 
 
@@ -297,11 +408,21 @@ def main():
     # Fuente exclusiva: CME (API directa o Playwright). Yahoo eliminado.
     meetings = []
 
-    print("Intentando CME API directa...")
-    meetings = try_cme_api() or []
+    # Fuente 1: Investing.com (usa datos CME, más accesible)
+    print("Fuente 1: Investing.com Fed Rate Monitor...")
+    try:
+        meetings = try_investing_com() or []
+    except Exception as e:
+        print(f"  Investing.com error: {e}")
 
+    # Fuente 2: CME API directa
     if not meetings:
-        print("\nFallback a Playwright (CME FedWatch)...")
+        print("\nFuente 2: CME API directa...")
+        meetings = try_cme_api() or []
+
+    # Fuente 3: Playwright CME directo
+    if not meetings:
+        print("\nFuente 3: Playwright (CME FedWatch)...")
         try:
             meetings = try_playwright() or []
         except Exception as e:
