@@ -502,6 +502,9 @@ function renderCompare(pf){
   const bestIC=bestIdx(b=>b.ic||0,true);
   const bestCpPct=bestIdx(b=>b.cpPct||0,true);
   const bestTIR=bestIdx(b=>b.tirAvg||0,true);
+  const today=new Date(); today.setHours(0,0,0,0);
+  function plazoAnios(iso){if(!iso)return 0;const d=new Date(iso+'T12:00:00');return Math.max(0,(d-today)/(365.25*24*3600*1000));}
+  const bestPlazo=bestIdx(b=>plazoAnios(b.venc),true);
 
   function cls(i,bestI,higherIsBetter=true){
     if(bonds.length<2)return'neutral';
@@ -521,6 +524,7 @@ function renderCompare(pf){
       {l:'Dirección',v:`<span style="color:${isShort?'var(--red3)':'var(--green3)'}">${isShort?'▼ Corto':'▲ Largo'}</span>`},
       {l:'Liquidación',v:fmtDate(b.liq)},
       {l:'Vencimiento',v:fmtDate(b.venc)},
+      {l:'Plazo (años)',v:plazoAnios(b.venc).toFixed(2),color:i===bestPlazo?'var(--amber3)':'var(--txt)'},
       {l:'Próx. cupón',v:fmtDate(b.nextCupon)},
       {l:'Cupones rest.',v:b.cupsRem||'—',color:i===bestCups?'var(--green3)':'var(--txt)'},
       {sep:'// Precio y Cupón'},
@@ -570,34 +574,6 @@ function renderCompare(pf){
       <div class="c-hdr">⚖️ ${pf.name} · Comparativa de bonos (${bonds.length})</div>
       <div class="c-body" style="padding:10px">
         <div class="compare-grid">${cards}</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="c-hdr">🏆 Destacados por métrica</div>
-      <div class="c-body" style="padding:0">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
-          <table class="ft" style="border-right:1px solid var(--border)">
-            <thead><tr><th style="text-align:left">Métrica</th><th style="text-align:left">Mayor</th></tr></thead>
-            <tbody>
-              <tr><td style="color:var(--txt3)">D. Modificada</td><td>${bLabel(bestDmod)}</td></tr>
-              <tr><td style="color:var(--txt3)">Convexidad</td><td>${bLabel(bestConv)}</td></tr>
-              <tr><td style="color:var(--txt3)">DV01 bruto</td><td>${bLabel(bestDV01)}</td></tr>
-              <tr><td style="color:var(--txt3)">Precio sucio</td><td>${bLabel(bestPrice)}</td></tr>
-              <tr><td style="color:var(--txt3)">Tasa cupón</td><td>${bLabel(bestCpPct)}</td></tr>
-              <tr><td style="color:var(--txt3)">Interés corrido</td><td>${bLabel(bestIC)}</td></tr>
-              <tr><td style="color:var(--txt3)">Más cupones rest.</td><td>${bLabel(bestCups)}</td></tr>
-            </tbody>
-          </table>
-          <table class="ft">
-            <thead><tr><th style="text-align:left">Métrica</th><th style="text-align:left">Menor</th></tr></thead>
-            <tbody>
-              <tr><td style="color:var(--txt3)">D. Modificada</td><td>${bLabel(worstDmod)}</td></tr>
-              <tr><td style="color:var(--txt3)">Convexidad</td><td>${bLabel(worstConv)}</td></tr>
-              <tr><td style="color:var(--txt3)">Precio sucio más bajo</td><td>${bLabel(worstPrice)}</td></tr>
-              <tr><td style="color:var(--txt3)">Menos cupones</td><td>${bLabel(bestIdx(b=>b.cupsRem||999,false))}</td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>`;
 }
