@@ -156,7 +156,14 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 </head>
 <body>
 
-<div id="tk-bar" style="background:#050810;border-bottom:1px solid var(--border);height:26px;overflow:hidden;white-space:nowrap"><div id="tickerTrack" style="display:inline-flex;height:26px;align-items:center;animation:tkscroll 70s linear infinite;will-change:transform"><span style="padding:0 14px;font-size:10px;color:var(--txt3)">···</span></div></div><style>@keyframes tkscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}#tk-bar:hover #tickerTrack{animation-play-state:paused}</style>
+<div style="height:36px;overflow:hidden;border-bottom:1px solid var(--border)">
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+  {"symbols":[{"proName":"FX_IDC:USDCOP","title":"USD/COP"},{"proName":"FX:EURUSD","title":"EUR/USD"},{"proName":"FX_IDC:USDBRL","title":"USD/BRL"},{"proName":"FX_IDC:USDMXN","title":"USD/MXN"},{"proName":"TVC:DXY","title":"DXY"},{"proName":"TVC:USOIL","title":"WTI"},{"proName":"TVC:UKOIL","title":"Brent"},{"proName":"TVC:GOLD","title":"Oro"},{"proName":"TVC:COPPER","title":"Cobre"},{"proName":"TVC:SPX","title":"S&P 500"},{"proName":"TVC:NDX","title":"Nasdaq"},{"proName":"TVC:DJI","title":"DOW"},{"proName":"TVC:VIX","title":"VIX"},{"proName":"TVC:US10Y","title":"UST 10Y"},{"proName":"TVC:US30Y","title":"UST 30Y"},{"proName":"BITSTAMP:BTCUSD","title":"BTC"}],"showSymbolLogo":false,"colorTheme":"dark","isTransparent":true,"displayMode":"compact","locale":"es"}
+  </script>
+</div>
+</div>
 
 <div class="topbar">
   <a href="index.html" style="display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:600;text-decoration:none;flex-shrink:0" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'">&#8592; Inicio</a>
