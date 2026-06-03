@@ -28,7 +28,9 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 .tick-dot.up{background:var(--green)}.tick-dot.dn{background:var(--red)}.tick-dot.nt{background:var(--txt3)}
 @keyframes tickscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ticker-status{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--txt3);background:var(--bg);padding:2px 6px;border-radius:3px}
-.topbar{display:flex;align-items:center;gap:10px;padding:0 20px;height:50px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 24px;height:54px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{width:36px;height:36px;background:#1a2540;border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--blue3);flex-shrink:0}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.01em}
 .back{display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:600;text-decoration:none}
 .back:hover{color:var(--txt)}
 .ml{margin-left:auto}
@@ -117,17 +119,11 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 
 <div class="topbar">
   <a href="index.html" class="back">&#8592; Inicio</a>
-  <div style="display:flex;align-items:center;gap:10px">
-    <div style="width:32px;height:32px;background:var(--purple2);border:1px solid var(--purple);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px">📊</div>
-    <div>
-      <div style="font-size:13px;font-weight:700;color:var(--purple3)">Análisis de Portafolio</div>
-      <div style="font-size:10px;color:var(--txt3)">Multi-bono · Estadísticas completas · Renta Fija Colombia</div>
-    </div>
-  </div>
-  <div class="ml" style="display:flex;gap:8px;align-items:center">
-    <span id="total-count" style="font-size:11px;color:var(--txt3)">0 bonos</span>
-    <button class="btn btn-ghost" onclick="clearAll()">🗑 Limpiar todo</button>
-  </div>
+  <div class="logo">RF</div>
+  <div><div class="brand">Renta Fija Colombia</div></div>
+  <div class="ml" id="world-clocks" style="display:flex;align-items:center;gap:14px;overflow:hidden"></div>
+  <span id="total-count" style="font-size:11px;color:var(--txt3);flex-shrink:0">0 bonos</span>
+  <button class="btn btn-ghost" onclick="clearAll()" style="flex-shrink:0">🗑 Limpiar todo</button>
 </div>
 
 <div class="mode-tabs">
@@ -890,6 +886,37 @@ async function loadTickerPF(){
   if(items.length>=4){setTickerPF(items);$t('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});$t('tickerStatus').style.color='var(--green3)';}
 }
 loadTickerPF(); setInterval(loadTickerPF,60000);
+const MARKETS=[
+  {city:'Bogotá',    flag:'🇨🇴', tz:'America/Bogota',   open:[9,0],  close:[15,30], days:[1,2,3,4,5]},
+  {city:'New York',  flag:'🇺🇸', tz:'America/New_York', open:[9,30], close:[16,0],  days:[1,2,3,4,5]},
+  {city:'Londres',   flag:'🇬🇧', tz:'Europe/London',    open:[8,0],  close:[16,30], days:[1,2,3,4,5]},
+  {city:'Frankfurt', flag:'🇩🇪', tz:'Europe/Berlin',    open:[9,0],  close:[17,30], days:[1,2,3,4,5]},
+  {city:'Tokio',     flag:'🇯🇵', tz:'Asia/Tokyo',       open:[9,0],  close:[15,30], days:[1,2,3,4,5]},
+  {city:'Hong Kong', flag:'🇭🇰', tz:'Asia/Hong_Kong',   open:[9,30], close:[16,0],  days:[1,2,3,4,5]},
+];
+function isMarketOpen(m,now){
+  const l=new Date(now.toLocaleString('en-US',{timeZone:m.tz}));
+  if(!m.days.includes(l.getDay())) return false;
+  const mins=l.getHours()*60+l.getMinutes();
+  return mins>=m.open[0]*60+m.open[1] && mins<m.close[0]*60+m.close[1];
+}
+function renderClocks(){
+  const now=new Date(), wrap=document.getElementById('world-clocks');
+  if(!wrap) return;
+  wrap.innerHTML=MARKETS.map(m=>{
+    const t=now.toLocaleTimeString('es-CO',{timeZone:m.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    const open=isMarketOpen(m,now);
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0">
+      <div style="font-size:10px;font-weight:700;font-family:monospace;color:var(--txt)">${t}</div>
+      <div style="font-size:10px;color:var(--txt3);display:flex;align-items:center;gap:3px;white-space:nowrap">
+        <span style="width:5px;height:5px;border-radius:50%;background:${open?'var(--green)':'var(--txt3)'};display:inline-block;flex-shrink:0"></span>
+        ${m.flag} ${m.city}
+      </div>
+    </div>`;
+  }).join(`<div style="width:1px;height:28px;background:var(--border);flex-shrink:0"></div>`);
+}
+renderClocks();
+setInterval(renderClocks,1000);
 </script>
 </body>
 </html>

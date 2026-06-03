@@ -33,13 +33,10 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 @keyframes tickscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ticker-status{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--txt3);background:var(--bg);padding:2px 6px;border-radius:3px}
 
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-logo{width:32px;height:32px;background:var(--blue2);border:1px solid var(--blue);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--blue3)}
-.brand-name{font-size:14px;font-weight:700;color:var(--txt)}
-.brand-sub{font-size:10px;color:var(--txt2);text-transform:uppercase;letter-spacing:.08em}
-.topbar-right{display:flex;align-items:center;gap:14px}
-.clock-val{color:var(--green3);font-weight:700;font-size:12px}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.logo{width:36px;height:36px;background:#1a2540;border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--blue3);flex-shrink:0}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.ml{margin-left:auto}
 .mod-pill{background:var(--bg4);border:1px solid var(--border2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--blue3);text-transform:uppercase;font-weight:600;letter-spacing:.04em}
 .tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 20px}
 .tab{padding:10px 18px;font-size:12px;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;font-weight:600;letter-spacing:.03em;transition:all .15s}
@@ -149,6 +146,12 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .bdir-btn{padding:3px 8px;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid var(--border2);font-family:inherit;background:var(--bg3);color:var(--txt3);transition:all .12s;white-space:nowrap}
 .bdir-l-on{background:var(--green2)!important;color:var(--green3)!important;border-color:var(--green)!important}
 .bdir-s-on{background:var(--red2)!important;color:var(--red3)!important;border-color:var(--red)!important}
+/* ── TOOLTIPS DE AYUDA ── */
+.hlp{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--txt3);font-size:8px;font-weight:800;cursor:help;position:relative;vertical-align:middle;margin-left:3px;flex-shrink:0;font-style:normal;line-height:1;outline:none;user-select:none}
+.hlp-tip{display:none;position:absolute;z-index:300;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0c1525;border:1px solid var(--border2);border-radius:7px;padding:9px 11px;font-size:11px;font-weight:400;color:var(--txt2);width:230px;white-space:normal;line-height:1.5;text-transform:none;letter-spacing:0;box-shadow:0 8px 24px rgba(0,0,0,.7);pointer-events:none}
+.hlp-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#0c1525}
+.hlp:hover .hlp-tip,.hlp:focus .hlp-tip{display:block}
+.m-lbl .hlp{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.35)}
 </style>
 </head>
 <body>
@@ -161,18 +164,11 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 </div>
 
 <div class="topbar">
-  <a href="index.html" style="display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:600;text-decoration:none;margin-right:8px;flex-shrink:0" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'">&#8592; Inicio</a>
-  <div class="brand">
-    <div class="brand-logo">RF</div>
-    <div>
-      <div class="brand-name">Renta Fija Colombia</div>
-      <div class="brand-sub">Valoración · Riesgo · Escenarios · Portafolio</div>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <span style="font-size:11px;color:var(--txt2)">COL &nbsp;<span class="clock-val" id="clock">--:--:--</span></span>
-    <div class="mod-pill">Tasa Fija</div>
-  </div>
+  <a href="index.html" style="display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:600;text-decoration:none;flex-shrink:0" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'">&#8592; Inicio</a>
+  <div class="logo">RF</div>
+  <div><div class="brand">Renta Fija Colombia</div></div>
+  <div class="ml" id="world-clocks" style="display:flex;align-items:center;gap:14px;overflow:hidden"></div>
+  <div class="mod-pill">Tasa Fija</div>
 </div>
 
 <div class="tabs">
@@ -186,45 +182,45 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
     <div class="s-hdr">// Parámetros del bono</div>
     <div class="s-body">
       <div class="field-2">
-        <div class="field"><label>Periodicidad</label>
+        <div class="field"><label>Periodicidad <span class="hlp" tabindex="-1">?<span class="hlp-tip">Frecuencia de pago de cupones al año. Trimestral=4, Semestral=2, Anual=1, Mensual=12.</span></span></label>
           <select id="freq" onchange="autoCA()">
             <option value="4">Trimestral</option><option value="2">Semestral</option>
             <option value="1">Anual</option><option value="12">Mensual</option>
           </select>
         </div>
-        <div class="field"><label>Base</label>
+        <div class="field"><label>Base <span class="hlp" tabindex="-1">?<span class="hlp-tip">Convención de conteo de días. 365/365 usa días reales; 30/360 asume meses de 30 días (estándar EE.UU.).</span></span></label>
           <select id="base"><option value="365">365/365</option><option value="360">30/360</option></select>
         </div>
       </div>
-      <div class="field"><label>Tasa cupón (%)</label>
+      <div class="field"><label>Tasa cupón (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa de interés nominal anual que promete pagar el bono sobre su valor par.</span></span></label>
         <input type="number" id="coupon" value="10.489" step="0.001" min="0">
       </div>
-      <div class="field"><label>Tipo tasa cupón</label>
+      <div class="field"><label>Tipo tasa cupón <span class="hlp" tabindex="-1">?<span class="hlp-tip">EA (Efectiva Anual): se usa directamente. NA (Nominal Anual): se divide entre períodos para obtener la tasa periódica.</span></span></label>
         <select id="tipo">
           <option value="EA">Efectiva Anual (EA)</option>
           <option value="NA">Nominal Anual (NA)</option>
         </select>
       </div>
-      <div class="field"><label>Tasa negociación / YTM (%)</label>
+      <div class="field"><label>Tasa negociación / YTM (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa de descuento del mercado (Yield to Maturity). A esta tasa se descuentan los flujos futuros para obtener el precio del bono.</span></span></label>
         <input type="number" id="ytm" value="14.20" step="0.01" min="0">
       </div>
       <div class="hr"></div>
       <div class="s-lbl">// Fechas</div>
       <div class="field">
-        <label>Liquidación <span style="font-size:9px;color:var(--txt3);text-transform:none">(negociación)</span></label>
+        <label>Liquidación <span style="font-size:9px;color:var(--txt3);text-transform:none">(negociación)</span> <span class="hlp" tabindex="-1">?<span class="hlp-tip">Fecha en que se liquida la operación. El interés corrido se mide desde el último cupón hasta esta fecha.</span></span></label>
         <input type="date" id="liq" value="2026-02-24" onchange="autoCA()">
       </div>
-      <div class="field"><label>Vencimiento</label>
+      <div class="field"><label>Vencimiento <span class="hlp" tabindex="-1">?<span class="hlp-tip">Fecha en que vence el bono: se paga el último cupón y se devuelve el 100% del valor par.</span></span></label>
         <input type="date" id="venc" value="2028-03-12" onchange="autoCA()">
       </div>
       <div class="field">
-        <label>Cupón anterior <span class="auto-badge">// AUTO</span></label>
+        <label>Cupón anterior <span class="auto-badge">// AUTO</span> <span class="hlp" tabindex="-1">?<span class="hlp-tip">Último pago de cupón antes de la liquidación. Se calcula automáticamente del calendario de pagos según periodicidad.</span></span></label>
         <input id="c_ant_display" readonly placeholder="Auto...">
         <input type="hidden" id="c_ant_iso">
       </div>
       <div class="hr"></div>
       <div class="s-lbl">// Posición</div>
-      <div class="field"><label>Nominal ($)</label>
+      <div class="field"><label>Nominal ($) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Valor de cara (par) del bono que deseas valorar. El precio se expresa como % de este valor.</span></span></label>
         <input type="text" id="nom_display" value="1.000.000.000" oninput="fmtNom(this)" onchange="fmtNom(this)" onpaste="setTimeout(()=>fmtNom(this),10)" inputmode="numeric">
         <input type="hidden" id="nom_val" value="1000000000">
       </div>
@@ -248,17 +244,17 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
           <input type="text" id="caja_display" value="12.000.000.000" oninput="fmtCaja(this)" inputmode="numeric">
           <input type="hidden" id="caja_val" value="12000000000">
         </div>
-        <div class="field"><label>Movimiento esperado (bp)</label>
+        <div class="field"><label>Movimiento esperado (bp) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Cambio esperado en la tasa en puntos base (bp). 1bp = 0.01%. Se usa para estimar la ganancia o pérdida potencial de la posición.</span></span></label>
           <input type="number" id="caja_bp" value="-50" step="1">
         </div>
         <button class="btn btn-amber" onclick="calcular(false)">▶ Calcular con caja</button>
       </div>
       <div class="hr"></div>
       <div class="s-lbl">// Escenario de venta</div>
-      <div class="field"><label>Fecha de venta</label>
+      <div class="field"><label>Fecha de venta <span class="hlp" tabindex="-1">?<span class="hlp-tip">Fecha futura en que planeas vender el bono. Se calcula el precio de venta y la TIR real de tenencia incluyendo cupones recibidos.</span></span></label>
         <input type="date" id="f_venta" value="2026-03-24">
       </div>
-      <div class="field"><label>Tasa de venta (%)</label>
+      <div class="field"><label>Tasa de venta (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa a la que venderías el bono en la fecha de venta. Si baja respecto a la compra, el precio sube y hay ganancia en precio.</span></span></label>
         <input type="number" id="ytm_venta" value="13.70" step="0.01" min="0">
       </div>
       <button class="btn btn-green" onclick="calcular(true)">▶ Calcular TIR</button>
@@ -269,10 +265,10 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       </div>
       <div class="caja-panel" id="fondeoPanel">
         <div class="field-2">
-          <div class="field"><label>Tasa fondeo (% EA)</label>
+          <div class="field"><label>Tasa fondeo (% EA) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Costo anual EA del financiamiento (repo, crédito) para comprar el bono. Si es mayor que la TIR del bono, el carry es negativo.</span></span></label>
             <input type="number" id="fondeo_tasa" value="11.25" step="0.01" min="0">
           </div>
-          <div class="field"><label>Días fondeo</label>
+          <div class="field"><label>Días fondeo <span class="hlp" tabindex="-1">?<span class="hlp-tip">Número de días que mantienes el bono financiado. Determina el período de carry (engorde o adelgazamiento de puntos).</span></span></label>
             <input type="number" id="fondeo_dias" value="30" step="1" min="1">
           </div>
         </div>
@@ -349,6 +345,35 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 <script>
 const $=id=>document.getElementById(id);
 const fmt=(n,d=4)=>typeof n==='number'?n.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+// ── TOOLTIPS ──────────────────────────────────────────────────
+const T={
+  periodicidad:'Frecuencia de pago de cupones al año. Trimestral=4, Semestral=2, Anual=1, Mensual=12.',
+  base:'Convención de días. 365/365 usa días reales; 30/360 asume meses de 30 días (convención EE.UU.).',
+  cupon:'Tasa de interés nominal anual que promete pagar el bono sobre su valor par.',
+  tipo_cupon:'EA (Efectiva Anual): se usa directamente. NA (Nominal Anual): se divide entre períodos para obtener la tasa periódica.',
+  ytm:'Tasa de descuento del mercado (Yield to Maturity). A esta tasa se descuentan los flujos futuros para obtener el precio.',
+  liq:'Fecha en que se liquida la operación (T+0, T+1 o T+2 según la convención del mercado). El interés corrido se mide hasta aquí.',
+  venc:'Fecha de vencimiento del bono: cuando se paga el último cupón y se devuelve el 100% del valor par.',
+  cant:'Último pago de cupón antes de la fecha de liquidación. Se calcula automáticamente del calendario de pagos.',
+  nom:'Valor de cara (par) del bono que deseas valorar. El precio se expresa como % de este valor.',
+  precio_sucio:'Precio de mercado incluido el interés corrido. Es el desembolso real al comprar. Precio sucio = Precio limpio + Interés corrido.',
+  precio_limpio:'Precio sin interés corrido. Es el precio que cotiza en pantalla (BanRep SEN). No refleja el costo real de la operación.',
+  ic:'Interés acumulado desde el último cupón hasta la fecha de liquidación. Se paga al vendedor además del precio limpio.',
+  vgiro:'Desembolso total en pesos = Precio sucio × Nominal / 100. Lo que efectivamente sale de caja.',
+  pagos:'Número de veces al año que se paga cupón, según la periodicidad seleccionada.',
+  cups:'Número de flujos de cupón que quedan por recibir entre hoy y el vencimiento.',
+  dmac:'Duración de Macaulay: promedio ponderado (por VP) de los plazos de cada flujo. Mide cuándo "en promedio" recuperas el dinero. En años.',
+  dmod:'Duración Modificada: sensibilidad del precio ante un cambio de 1% en la tasa. Ej: D*=5 → si la tasa sube 1%, el precio cae ≈5%.',
+  conv:'Convexidad: mide la curvatura del precio respecto a la tasa. Corrige el error de la aproximación lineal de la D. Modificada. Siempre es positiva.',
+  dv01:'Dollar Value of 1bp: cambio en pesos del valor de mercado ante un movimiento de 0.01% (1 punto base) en la tasa.',
+  caja_bp:'Movimiento esperado en tasas expresado en puntos base (bp). 1bp = 0.01%. Se usa para estimar ganancia/pérdida potencial.',
+  f_venta:'Fecha futura en que planeas vender el bono. Se calcula el precio de venta y la TIR de tenencia.',
+  ytm_venta:'Tasa de descuento a la que venderías el bono en la fecha de venta. Puede ser diferente a la tasa de compra.',
+  fondeo_tasa:'Costo anual EA del financiamiento (repo, crédito) usado para comprar el bono. Si es mayor que el cupón, el carry es negativo.',
+  fondeo_dias:'Número de días durante los cuales mantienes el bono financiado. Determina el período de carry.',
+  inv_obj:'Qué quieres calcular inversamente: el nominal que produce un DV01, valor de giro o ganancia objetivo, o la tasa que genera un precio objetivo.',
+};
+const h=k=>`<span class="hlp" tabindex="-1">?<span class="hlp-tip">${T[k]||''}</span></span>`;
 const fmtP=n=>'$'+Math.round(n).toLocaleString('es-CO');
 const fmtM=n=>{const a=Math.abs(n),s=n<0?'-':'';return a>=1e9?s+'$'+fmt(a/1e9,3)+' Bn':a>=1e6?s+'$'+fmt(a/1e6,2)+' MM':(n<0?'-':'')+fmtP(Math.abs(n));};
 function fmtDate(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
@@ -623,8 +648,37 @@ function recalcEspec(){
 // Init display
 document.addEventListener('DOMContentLoaded',()=>{const el=$('pf_caja_display');if(el)el.value=(10000000000).toLocaleString('es-CO',{maximumFractionDigits:0});});
 
-function updateClock(){$('clock').textContent=new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});}
-setInterval(updateClock,1000);updateClock();
+const MARKETS=[
+  {city:'Bogotá',    flag:'🇨🇴', tz:'America/Bogota',   open:[9,0],  close:[15,30], days:[1,2,3,4,5]},
+  {city:'New York',  flag:'🇺🇸', tz:'America/New_York', open:[9,30], close:[16,0],  days:[1,2,3,4,5]},
+  {city:'Londres',   flag:'🇬🇧', tz:'Europe/London',    open:[8,0],  close:[16,30], days:[1,2,3,4,5]},
+  {city:'Frankfurt', flag:'🇩🇪', tz:'Europe/Berlin',    open:[9,0],  close:[17,30], days:[1,2,3,4,5]},
+  {city:'Tokio',     flag:'🇯🇵', tz:'Asia/Tokyo',       open:[9,0],  close:[15,30], days:[1,2,3,4,5]},
+  {city:'Hong Kong', flag:'🇭🇰', tz:'Asia/Hong_Kong',   open:[9,30], close:[16,0],  days:[1,2,3,4,5]},
+];
+function isMarketOpen(m,now){
+  const l=new Date(now.toLocaleString('en-US',{timeZone:m.tz}));
+  if(!m.days.includes(l.getDay())) return false;
+  const mins=l.getHours()*60+l.getMinutes();
+  return mins>=m.open[0]*60+m.open[1] && mins<m.close[0]*60+m.close[1];
+}
+function renderClocks(){
+  const now=new Date(), wrap=document.getElementById('world-clocks');
+  if(!wrap) return;
+  wrap.innerHTML=MARKETS.map(m=>{
+    const t=now.toLocaleTimeString('es-CO',{timeZone:m.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    const open=isMarketOpen(m,now);
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0">
+      <div style="font-size:10px;font-weight:700;font-family:monospace;color:var(--txt)">${t}</div>
+      <div style="font-size:10px;color:var(--txt3);display:flex;align-items:center;gap:3px;white-space:nowrap">
+        <span style="width:5px;height:5px;border-radius:50%;background:${open?'var(--green)':'var(--txt3)'};display:inline-block;flex-shrink:0"></span>
+        ${m.flag} ${m.city}
+      </div>
+    </div>`;
+  }).join(`<div style="width:1px;height:28px;background:var(--border);flex-shrink:0"></div>`);
+}
+renderClocks();
+setInterval(renderClocks,1000);
 
 function showTab(t){
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calc','pf'][i]===t));
@@ -1027,14 +1081,14 @@ function calcular(showTIR){
     <div class="c-hdr">Resultados principales <span class="badge ${bCls}">${estado}</span></div>
     <div class="c-body">
       <div class="mg4" style="margin-bottom:10px">
-        <div class="m blue"><div class="m-lbl">Precio sucio</div><div class="m-val">${fmt(price,4)}%</div><div class="m-unit">% del par</div></div>
-        <div class="m"><div class="m-lbl">Precio limpio</div><div class="m-val">${fmt(pl,4)}%</div><div class="m-unit">% del par</div></div>
-        <div class="m"><div class="m-lbl">Interés corrido</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${base===360?days360(ant,liq):daysReal(ant,liq)} días causados</div></div>
-        <div class="m ${mCls}"><div class="m-lbl">Valor giro compra</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
+        <div class="m blue"><div class="m-lbl">Precio sucio ${h('precio_sucio')}</div><div class="m-val">${fmt(price,4)}%</div><div class="m-unit">% del par</div></div>
+        <div class="m"><div class="m-lbl">Precio limpio ${h('precio_limpio')}</div><div class="m-val">${fmt(pl,4)}%</div><div class="m-unit">% del par</div></div>
+        <div class="m"><div class="m-lbl">Interés corrido ${h('ic')}</div><div class="m-val">${fmt(ic,4)}%</div><div class="m-unit">${base===360?days360(ant,liq):daysReal(ant,liq)} días causados</div></div>
+        <div class="m ${mCls}"><div class="m-lbl">Valor giro compra ${h('vgiro')}</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
       <div class="mg2">
-        <div class="m"><div class="m-lbl">Pagos / año</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} meses</div></div>
-        <div class="m"><div class="m-lbl">Cupones restantes</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">hasta vencimiento</div></div>
+        <div class="m"><div class="m-lbl">Pagos / año ${h('pagos')}</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} meses</div></div>
+        <div class="m"><div class="m-lbl">Cupones restantes ${h('cups')}</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">hasta vencimiento</div></div>
       </div>
     </div>
   </div>
@@ -1042,10 +1096,10 @@ function calcular(showTIR){
     <div class="c-hdr">Medidas de riesgo</div>
     <div class="c-body">
       <div class="mg4">
-        <div class="m blue"><div class="m-lbl">D. Macaulay</div><div class="m-val">${fmt(dmac,4)}</div><div class="m-unit">años</div></div>
-        <div class="m blue"><div class="m-lbl">D. Modificada</div><div class="m-val">${fmt(dmod,4)}</div><div class="m-unit">% / 1% Δtasa</div></div>
-        <div class="m blue"><div class="m-lbl">Convexidad</div><div class="m-val">${fmt(conv,4)}</div><div class="m-unit">—</div></div>
-        <div class="m blue"><div class="m-lbl">DV01</div><div class="m-val" style="font-size:14px">${fmtP(dv01)}</div><div class="m-unit">$ por 1bp de Δtasa</div></div>
+        <div class="m blue"><div class="m-lbl">D. Macaulay ${h('dmac')}</div><div class="m-val">${fmt(dmac,4)}</div><div class="m-unit">años</div></div>
+        <div class="m blue"><div class="m-lbl">D. Modificada ${h('dmod')}</div><div class="m-val">${fmt(dmod,4)}</div><div class="m-unit">% / 1% Δtasa</div></div>
+        <div class="m blue"><div class="m-lbl">Convexidad ${h('conv')}</div><div class="m-val">${fmt(conv,4)}</div><div class="m-unit">—</div></div>
+        <div class="m blue"><div class="m-lbl">DV01 ${h('dv01')}</div><div class="m-val" style="font-size:14px">${fmtP(dv01)}</div><div class="m-unit">$ por 1bp de Δtasa</div></div>
       </div>
       <div class="info-box">
         +50bp → <span style="color:var(--red3)">−${fmtM(dv01*50)}</span> &nbsp;|&nbsp;

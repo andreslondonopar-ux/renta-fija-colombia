@@ -936,22 +936,24 @@ function interpolateUSat(years){
 
 
 
-// ── US TREASURY: curva anterior (30 días) para comparación
+// ── US TREASURY: curva anterior en la MISMA fecha que Colombia
 async function loadUSTPrevMonth(){
   try{
-    const prev=new Date();
-    prev.setDate(prev.getDate()-30);
-    const yyyymm=`${prev.getFullYear()}${String(prev.getMonth()+1).padStart(2,'0')}`;
+    // Usar la misma fecha de referencia que la curva de Colombia
+    const targetDate=PREV_COL_DATE||(()=>{const d=new Date();d.setDate(d.getDate()-30);return d.toISOString().split('T')[0];})();
+    const yyyymm=targetDate.slice(0,7).replace('-','');
     const url=`https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${yyyymm}`;
     const resp=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
     if(!resp.ok) return;
     const xml=new DOMParser().parseFromString(await resp.text(),'text/xml');
     const entries=[...xml.querySelectorAll('entry')];
     if(!entries.length) return;
-    const last=entries[entries.length-1];
-    const dateStr=(last.querySelector('NEW_DATE')?.textContent||'').split('T')[0];
+    // Buscar la entrada más cercana a targetDate (≤ targetDate)
+    const candidates=entries.filter(e=>(e.querySelector('NEW_DATE')?.textContent||'').split('T')[0]<=targetDate);
+    const entry=candidates.length?candidates[candidates.length-1]:entries[entries.length-1];
+    const dateStr=(entry.querySelector('NEW_DATE')?.textContent||'').split('T')[0];
     const pts=US_SERIES.map(s=>{
-      const el=last.querySelector(s.field);
+      const el=entry.querySelector(s.field);
       const tir=el?parseFloat(el.textContent):null;
       return(tir&&!isNaN(tir))?{x:s.years,y:tir}:null;
     }).filter(Boolean);
@@ -965,8 +967,8 @@ async function loadUSTPrevMonth(){
 
 // ── INIT
 buildTickerFromCOL();
-loadColJSON();
-loadUSTreasury().then(loadUSTPrevMonth);
+// Esperar ambas cargas antes de buscar curva histórica UST (necesita PREV_COL_DATE)
+Promise.all([loadColJSON(), loadUSTreasury()]).then(loadUSTPrevMonth);
 loadMacro();
 loadFedwatch();
 loadEme();
