@@ -1544,15 +1544,19 @@ function renderIPCChart(){
   const canvas = document.getElementById('ipc-chart-canvas');
   if(!canvas) return;
   const hasEst = typeof IPC_CURVE_DATA !== 'undefined' && Object.keys(IPC_CURVE_DATA).length > 0;
-  const histData = IPC_TABLE.map(r => ({
+  // Histórico: últimos 36 meses para que sea legible
+  const histData = IPC_TABLE.slice(-36).map(r => ({
     label: String(r.m).padStart(2,'0')+'/'+String(r.y).slice(2),
     val: +(r.v*100).toFixed(2), sort: r.y*100+r.m
   }));
   const lastHistSort = histData.length ? histData[histData.length-1].sort : 0;
+  // Estimados: máximo 24 meses desde hoy, sin valores negativos ni > 30%
+  const now = new Date();
+  const cutSort = (now.getFullYear()+2)*100 + (now.getMonth()+1);
   const estData = hasEst
     ? Object.entries(IPC_CURVE_DATA)
         .map(([k,v]) => { const [y,m]=k.split('-'); return {label:m+'/'+y.slice(2),val:+(v*100).toFixed(2),sort:parseInt(y)*100+parseInt(m),key:k}; })
-        .filter(r => r.sort > lastHistSort)
+        .filter(r => r.sort > lastHistSort && r.sort <= cutSort && r.val >= 0 && r.val <= 30)
         .sort((a,b)=>a.sort-b.sort)
     : [];
   const allData = [...histData, ...estData];
