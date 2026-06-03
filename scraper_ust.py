@@ -261,7 +261,7 @@ def main():
                 ust_history = [snap] + old_ust.get('history', [])
     except Exception as e:
         print(f"Aviso historial UST: {e}")
-    result['history'] = ust_history[:5]
+    result['history'] = ust_history[:30]
 
     Path("ust_data.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n✓ ust_data.json: {len(result['rates'])} plazos · {result['date']} · {result['source']}")

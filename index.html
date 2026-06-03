@@ -839,6 +839,8 @@ async function loadUSTreasury(){
           US_DATA=ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
           if(US_DATA.length>=5){
             const uh=(dj.rates?dj:dj.ust)?.history||[];
+            // Guardar historial completo para que loadUSTPrevMonth lo use
+            window._ustHistory=[...uh].sort((a,b)=>a.date<b.date?-1:1);
             if(uh.length){
               const usnap=uh[Math.min(4,uh.length-1)];
               PREV_US_DATE=usnap.date;
@@ -939,8 +941,26 @@ function interpolateUSat(years){
 // ── US TREASURY: curva anterior en la MISMA fecha que Colombia
 async function loadUSTPrevMonth(){
   try{
-    // Usar la misma fecha de referencia que la curva de Colombia
     const targetDate=PREV_COL_DATE||(()=>{const d=new Date();d.setDate(d.getDate()-30);return d.toISOString().split('T')[0];})();
+
+    // 1) Buscar en historial local de ust_data.json (sin proxy, confiable)
+    const hist=window._ustHistory||[];
+    if(hist.length){
+      // Entradas con fecha <= targetDate, ordenadas asc → tomar la más reciente
+      const local=hist.filter(h=>h.date<=targetDate);
+      if(local.length){
+        const snap=local[local.length-1];
+        const pts=snap.rates.map(r=>({x:r.years,y:r.tir})).filter(r=>r.tir>0);
+        if(pts.length>=5){
+          PREV_US_PTS=pts;
+          PREV_US_DATE=snap.date;
+          if(US_DATA.length) renderUS();
+          return; // historial local suficiente
+        }
+      }
+    }
+
+    // 2) Fallback: Treasury API a través de proxy (solo si historial local no tiene el dato)
     const yyyymm=targetDate.slice(0,7).replace('-','');
     const url=`https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${yyyymm}`;
     const resp=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
@@ -948,7 +968,6 @@ async function loadUSTPrevMonth(){
     const xml=new DOMParser().parseFromString(await resp.text(),'text/xml');
     const entries=[...xml.querySelectorAll('entry')];
     if(!entries.length) return;
-    // Buscar la entrada más cercana a targetDate (≤ targetDate)
     const candidates=entries.filter(e=>(e.querySelector('NEW_DATE')?.textContent||'').split('T')[0]<=targetDate);
     const entry=candidates.length?candidates[candidates.length-1]:entries[entries.length-1];
     const dateStr=(entry.querySelector('NEW_DATE')?.textContent||'').split('T')[0];

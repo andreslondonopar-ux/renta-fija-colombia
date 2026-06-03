@@ -294,16 +294,14 @@ def add_bp_deltas(meetings, current_rate):
 
 def main():
     print(f"=== CME FedWatch - {TODAY} ===\n")
+    # Fuente exclusiva: CME (API directa o Playwright). Yahoo eliminado.
     meetings = []
 
-    meetings = try_yahoo_finance() or []
+    print("Intentando CME API directa...")
+    meetings = try_cme_api() or []
 
     if not meetings:
-        print()
-        meetings = try_cme_api() or []
-
-    if not meetings:
-        print("\nFallback a Playwright...")
+        print("\nFallback a Playwright (CME FedWatch)...")
         try:
             meetings = try_playwright() or []
         except Exception as e:
