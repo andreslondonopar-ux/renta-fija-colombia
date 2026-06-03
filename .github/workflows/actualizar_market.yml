@@ -2,10 +2,8 @@ name: Actualizar Market Data
 
 on:
   schedule:
-    # Cada 30 min de 8am a 5pm Colombia (UTC-5 = 13:00-22:00 UTC), lunes a viernes
-    - cron: '0,30 13-21 * * 1-5'
-    # Apertura mercados colombianos (9am COT)
-    - cron: '0 14 * * 1-5'
+    # Cada 5 minutos lunes a viernes (mínimo posible en GitHub Actions)
+    - cron: '*/5 * * * 1-5'
   workflow_dispatch:
 
 jobs:
