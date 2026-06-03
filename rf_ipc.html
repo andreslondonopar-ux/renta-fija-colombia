@@ -593,15 +593,24 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode,base=365){
     let ipcRec;
     let ipcVal;
     if(mode==='inicio_curva'){
-      // Use IPC from uploaded curve at period start
+      // IPC al inicio del período desde curva; si no hay dato (fecha anterior a la curva)
+      // usar IPC histórico real en esa fecha, no el de liquidación
       const v = ipcFromCurve(cur);
-      ipcVal = v !== null ? v : (ipcLiq ? ipcLiq.v : 0);
-      ipcRec = null;  // no standard record, raw value used
+      if(v !== null){
+        ipcVal = v; ipcRec = null;
+      } else {
+        ipcRec = ipcVigente(cur);
+        ipcVal = ipcRec ? ipcRec.v : (ipcLiq ? ipcLiq.v : 0);
+      }
     } else if(mode==='final_curva'){
-      // Use IPC from uploaded curve at period end
+      // IPC al final del período desde curva; fallback a ipcVigente(nxt)
       const v = ipcFromCurve(nxt);
-      ipcVal = v !== null ? v : (ipcLiq ? ipcLiq.v : 0);
-      ipcRec = null;
+      if(v !== null){
+        ipcVal = v; ipcRec = null;
+      } else {
+        ipcRec = ipcVigente(nxt);
+        ipcVal = ipcRec ? ipcRec.v : (ipcLiq ? ipcLiq.v : 0);
+      }
     } else {
       if(mode==='inicio_est')       ipcRec=firstPending?ipcVigente(cur):ipcLiq;
       else if(mode==='final_est')   ipcRec=ipcLiq;
