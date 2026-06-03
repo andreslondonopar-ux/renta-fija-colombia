@@ -1,7 +1,21 @@
 {
-  "updated": "2026-06-03T19:11:25Z",
+  "updated": "2026-06-03T19:26:57Z",
   "date": "2026-06-03",
   "articles": [
+    {
+      "title": "Día del padre en Colombia cambia de fecha: Fenalco confirma cuando se llevará a cabo la celebración",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/dia-del-padre-en-colombia-cambia-de-fecha-fenalco-confirma-cuando-se-llevara-a-cabo-la-celebracion/",
+      "published": "2026-06-03T19:20:00Z",
+      "summary": "El día del padre cambiará de fecha debido a los comicios electorales del 20 de junio."
+    },
+    {
+      "title": "Superindustria estudia integración empresarial entre Ecopetrol y Parex",
+      "source": "La República",
+      "url": "https://www.larepublica.co/economia/superindustria-estudia-una-integracion-empresarial-entre-ecopetrol-y-parex-4407226",
+      "published": "2026-06-03T19:12:09Z",
+      "summary": "Se estudia acuerdo de colaboración empresarial del cual, Parex podría disponer de producción de ciertos campos"
+    },
     {
       "title": "Marco Fiscal de Mediano Plazo podría ser determinante en las elecciones a la presidencia de Colombia 2026",
       "source": "Portafolio",
@@ -50,27 +64,6 @@
       "url": "https://www.portafolio.co/economia/el-que-no-negocio-su-oficina-a-tiempo-ahora-enfrenta-arriendos-hasta-50-mas-caros-en-el-pais-advierte-colliers-495411",
       "published": "2026-06-03T18:00:00Z",
       "summary": "El rebote económico tras la pandemia disparó la ocupación antes de que los desarrolladores pudieran responder."
-    },
-    {
-      "title": "José Manuel Restrepo niega recortes a subsidios y promete aumentarlos si gana Abelardo De la Espriella",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/jose-manuel-restrepo-niega-recortes-a-subsidios-y-promete-aumentarlos-si-gana-abelardo-de-la-espriella/",
-      "published": "2026-06-03T18:00:00Z",
-      "summary": "Las declaraciones de Restrepo cobran relevancia porque se producen mientras la campaña defiende la necesidad de un fuerte ajuste en las finanzas públicas."
-    },
-    {
-      "title": "Nuevo informe OCDE alerta por desaceleración económica en Colombia y repunte de inflación; advierte debilidad fiscal",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/nuevo-informe-ocde-alerta-por-desaceleracion-economica-en-colombia-y-repunte-de-inflacion-advierte-debilidad-fiscal/",
-      "published": "2026-06-03T18:00:00Z",
-      "summary": "El informe de la OCDE advierte que el crecimiento global se ralentizará al 2,8 % en 2026, frente al 3,4 % de 2025."
-    },
-    {
-      "title": "Fórmula de Claudia López apoyará campaña de De La Espriella, mientras que la exalcaldesa aún no revela su decisión",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/gobierno/formula-de-claudia-lopez-apoyara-campana-de-de-la-espriella-mientras-que-la-candidata-aun-no-revela-su-decision-495420",
-      "published": "2026-06-03T17:50:23Z",
-      "summary": "La exalcaldesa de Bogotá aún no ha tomado una decisión sobre a quién apoyar."
     }
   ]
 }

@@ -119,7 +119,7 @@ def main():
 
     # Ordenar por fecha desc
     all_arts.sort(key=lambda a: a["published"], reverse=True)
-    articles = dedup(all_arts)[:10]
+    articles = dedup(all_arts)[:9]
 
     result = {
         "updated":  NOW,

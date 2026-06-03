@@ -1,6 +1,6 @@
 {
-  "updated": "2026-06-03T18:01:16Z",
-  "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial",
+  "updated": "2026-06-03T19:26:23Z",
+  "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
       "date": "2026-06-03",
@@ -9,16 +9,100 @@
       "desc": "Estadísticas de comercio exterior"
     },
     {
+      "date": "2026-06-03",
+      "type": "empleo_us",
+      "title": "ADP Nonfarm Employment Change — May",
+      "desc": "Act: 122 · Prev: 118 · Ant: 105",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-03",
+      "type": "cpi_us",
+      "title": "ISM Non-Manufacturing Prices — May",
+      "desc": "Act: 71.3 · Prev: 72.3 · Ant: 70.7",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-04",
+      "type": "empleo_us",
+      "title": "Initial Jobless Claims",
+      "desc": "Prev: 211 · Ant: 215",
+      "pais": "us"
+    },
+    {
       "date": "2026-06-05",
       "type": "ipc",
       "title": "IPC mayo · DANE",
       "desc": "Índice de Precios al Consumidor"
     },
     {
+      "date": "2026-06-05",
+      "type": "empleo_us",
+      "title": "Average Hourly Earnings (MoM) — May",
+      "desc": "Prev: 0.3 · Ant: 0.2",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-05",
+      "type": "empleo_us",
+      "title": "Nonfarm Payrolls — May",
+      "desc": "Prev: 95 · Ant: 115",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-05",
+      "type": "empleo_us",
+      "title": "Unemployment Rate — May",
+      "desc": "Prev: 4.3 · Ant: 4.3",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-10",
+      "type": "cpi_us",
+      "title": "CPI (MoM) — May",
+      "desc": "Ant: 0.6",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-10",
+      "type": "cpi_us",
+      "title": "Core CPI (MoM) — May",
+      "desc": "Ant: 0.4",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-10",
+      "type": "cpi_us",
+      "title": "CPI (YoY) — May",
+      "desc": "Ant: 3.8",
+      "pais": "us"
+    },
+    {
       "date": "2026-06-11",
       "type": "eme",
       "title": "EME junio · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-06-11",
+      "type": "cpi_us",
+      "title": "PPI (MoM) — May",
+      "desc": "Ant: 1.4",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-11",
+      "type": "empleo_us",
+      "title": "Initial Jobless Claims",
+      "desc": "",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-17",
+      "type": "fomc",
+      "title": "Fed Interest Rate Decision",
+      "desc": "Ant: 3.75",
+      "pais": "us"
     },
     {
       "date": "2026-06-18",
@@ -73,6 +157,13 @@
       "type": "dane",
       "title": "Importaciones · DANE",
       "desc": "Estadísticas de comercio exterior"
+    },
+    {
+      "date": "2026-07-29",
+      "type": "fomc",
+      "title": "Fed Interest Rate Decision",
+      "desc": "",
+      "pais": "us"
     },
     {
       "date": "2026-07-31",

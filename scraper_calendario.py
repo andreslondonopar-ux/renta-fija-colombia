@@ -72,6 +72,110 @@ def fetch_tasa_dates(year, month):
         return []
 
 
+INVESTING_CAL = (
+    "https://endpoints.investing.com/pd-instruments/v1/calendars/"
+    "economic/events/occurrences"
+)
+# Categoría investing.com → type en calendar_data
+US_CAT_MAP = {
+    "inflation":       "cpi_us",
+    "employment":      "empleo_us",
+    "gdp":             "pib_us",
+    "central_banks":   "fomc",
+}
+# Emojis/etiquetas para las fuentes
+US_TYPE_LABEL = {
+    "cpi_us":   "CPI EE.UU.",
+    "empleo_us":"Empleo EE.UU.",
+    "pib_us":   "PIB EE.UU.",
+    "fomc":     "FOMC",
+}
+
+
+def fetch_us_events(days_ahead=90):
+    """Obtiene eventos económicos de EE.UU. de alta importancia desde Investing.com."""
+    today = TODAY
+    end   = today + datetime.timedelta(days=days_ahead)
+    params = {
+        "domain_id":   1,
+        "limit":       500,
+        "start_date":  f"{today}T00:00:00.000-05:00",
+        "end_date":    f"{end}T23:59:59.999-05:00",
+        "country_ids": "5",   # US = 5 en Investing.com
+    }
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0 Safari/537.36",
+        "Referer":    "https://www.investing.com/economic-calendar/",
+        "Origin":     "https://www.investing.com",
+    }
+    try:
+        r = requests.get(INVESTING_CAL, params=params, headers=headers, timeout=20)
+        if r.status_code != 200:
+            print(f"  Investing.com calendario: HTTP {r.status_code}")
+            return []
+        data = r.json()
+    except Exception as e:
+        print(f"  Investing.com calendario: {e}")
+        return []
+
+    events_meta = {e["event_id"]: e for e in data.get("events", [])}
+    occurrences  = data.get("occurrences", [])
+
+    results = []
+    seen = set()  # (date, event_id) para deduplicar
+
+    for occ in occurrences:
+        eid  = occ.get("event_id")
+        meta = events_meta.get(eid)
+        if not meta:
+            continue
+        if meta.get("importance") != "high":
+            continue
+        if meta.get("country_id") != 5:
+            continue
+
+        category = meta.get("category", "")
+        evt_type = US_CAT_MAP.get(category)
+        if not evt_type:
+            continue
+
+        # Fecha en hora Colombia (UTC-5)
+        occ_time = occ.get("occurrence_time", "")
+        try:
+            dt = datetime.datetime.fromisoformat(occ_time.replace("Z", "+00:00"))
+            date_str = (dt - datetime.timedelta(hours=5)).strftime("%Y-%m-%d")
+        except Exception:
+            continue
+
+        if date_str < str(today):
+            continue
+        if (date_str, eid) in seen:
+            continue
+        seen.add((date_str, eid))
+
+        name   = (meta.get("event_translated") or meta.get("short_name") or "").strip()
+        period = occ.get("reference_period", "")
+        title  = f"{name}{' — ' + period if period else ''}"
+
+        # Descripción con valores
+        parts = []
+        for key, lbl in [("actual","Act"),("forecast","Prev"),("previous","Ant")]:
+            val = occ.get(key)
+            if val is not None:
+                parts.append(f"{lbl}: {val}")
+        desc = " · ".join(parts) if parts else ""
+
+        results.append({
+            "date":  date_str,
+            "type":  evt_type,
+            "title": title,
+            "desc":  desc,
+            "pais":  "us",
+        })
+
+    return results
+
+
 def main():
     print(f"=== Calendario JDBR BanRep - {TODAY} ===\n")
 
@@ -120,22 +224,26 @@ def main():
     if cal_path.exists():
         existing = json.loads(cal_path.read_text(encoding="utf-8"))
         other_events = [e for e in existing.get("events", [])
-                        if e.get("type") != "banrep"]
+                        if e.get("type") not in ("banrep", "cpi_us", "empleo_us", "pib_us", "fomc")]
     else:
         other_events = []
 
-    all_events = sorted(other_events + banrep_events, key=lambda e: e["date"])
+    # 5. Eventos económicos EE.UU. desde Investing.com
+    us_events = fetch_us_events()
+    print(f"\n  {len(us_events)} eventos EE.UU. de alta importancia")
+
+    all_events = sorted(other_events + banrep_events + us_events, key=lambda e: e["date"])
 
     result = {
         "updated": NOW,
-        "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial",
+        "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
         "events":  all_events,
     }
     cal_path.write_text(json.dumps(result, ensure_ascii=False, indent=2),
                         encoding="utf-8")
 
     print(f"\nOK calendar_data.json actualizado")
-    print(f"  {len(banrep_events)} reuniones JDBR + {len(other_events)} eventos DANE/EME")
+    print(f"  {len(banrep_events)} JDBR + {len(us_events)} EE.UU. + {len(other_events)} otros")
 
 
 if __name__ == "__main__":
