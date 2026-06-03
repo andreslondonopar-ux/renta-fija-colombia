@@ -499,54 +499,19 @@ function setTicker(items){
 }
 setTicker(FALLBACK);
 $('tickerStatus').textContent='ref.';
-const YAHOO=[
-  {sym:'USDCOP=X',n:'USD/COP',dec:0},{sym:'EURUSD=X',n:'EUR/USD',dec:4},
-  {sym:'CL=F',n:'WTI',dec:2,suf:' USD'},{sym:'BZ=F',n:'Brent',dec:2,suf:' USD'},
-  {sym:'GC=F',n:'Oro',dec:0,suf:' USD'},{sym:'SI=F',n:'Plata',dec:2,suf:' USD'},
-  {sym:'^GSPC',n:'S&P 500',dec:0},{sym:'^DJI',n:'DOW',dec:0},
-  {sym:'^IXIC',n:'Nasdaq',dec:0},{sym:'^VIX',n:'VIX',dec:2},
-  {sym:'BTC-USD',n:'BTC',dec:0,suf:' USD'},{sym:'ETH-USD',n:'ETH',dec:0,suf:' USD'},
-  {sym:'DX-Y.NYB',n:'DXY',dec:2},{sym:'^TNX',n:'UST 10Y',dec:2,suf:'%'},
-];
-async function fetchOne(sym){
-  const bases=[
-    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
-  ];
-  for(const url of bases){
-    try{
-      const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-      if(!r.ok) continue;
-      const d=await r.json();
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(!meta?.regularMarketPrice) continue;
-      const price=meta.regularMarketPrice;
-      const prev=meta.regularMarketPreviousClose||meta.chartPreviousClose||meta.previousClose||price;
-      const chg=price-prev;
-      return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
-    }catch{continue;}
-  }
-  return null;
-}
 async function loadTicker(){
-  const results=await Promise.allSettled(YAHOO.map(s=>fetchOne(s.sym)));
-  const items=[];
-  results.forEach((r,i)=>{
-    const cfg=YAHOO[i];
-    if(r.status==='fulfilled'&&r.value){
-      const{price,chg,chgPct}=r.value;
-      const up=chg>=0;
-      items.push({n:cfg.n,v:price.toLocaleString('es-CO',{minimumFractionDigits:cfg.dec,maximumFractionDigits:cfg.dec})+(cfg.suf||''),up,c:(up?'+':'')+chgPct.toFixed(2)+'%'});
+  try{
+    const r=await fetch('market_data.json?_='+Date.now());
+    if(!r.ok) throw new Error('no file');
+    const d=await r.json();
+    if(d.items?.length>=4){
+      setTicker(d.items);
+      $('tickerStatus').textContent='↺ '+(d.updated?.slice(11,16)||'');
+      $('tickerStatus').style.color='var(--green3)';
     }
-  });
-  if(items.length>=5){
-    setTicker(items);
-    $('tickerStatus').textContent='↺ '+new Date().toLocaleTimeString('es-CO',{timeZone:'America/Bogota',hour12:false});
-    $('tickerStatus').style.color='var(--green3)';
-  }
+  }catch(e){}
 }
-loadTicker();
-setInterval(loadTicker,60000);
+loadTicker(); setInterval(loadTicker,300000);
 
 // BOND MATH — verified against Excel including leap year handling
 // Key rules (from reverse-engineering Excel formulas):
