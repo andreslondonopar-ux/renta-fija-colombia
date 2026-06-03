@@ -1146,7 +1146,7 @@ function calcular(showTIR){
         <div class="m amber"><div class="m-lbl">Valor giro compra ${h('vgiro')}</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
       <div class="mg4">
-        <div class="m blue"><div class="m-lbl">TIR negociación real EA ${h('ytm')}</div><div class="m-val">${fmt(ytm*100,4)}%</div><div class="m-unit">tasa de descuento · real</div></div>
+        <div class="m blue"><div class="m-lbl">TIR negociación real EA ${h('ytm')}</div><div class="m-val">${fmt(ytm*100,4)}%</div><div class="m-unit">tasa de negociación</div></div>
         <div class="m blue"><div class="m-lbl">Nominal en pesos</div><div class="m-val" style="font-size:13px">${fmtM(nom*uvrVal)}</div><div class="m-unit">${fmt(nom,0)} UVRs × $${fmt(uvrVal,4)}</div></div>
         <div class="m"><div class="m-lbl">UVR del día ${h('uvr_hoy')}</div><div class="m-val" style="font-size:16px">$${fmt(uvrVal,4)}</div><div class="m-unit">valor de referencia</div></div>
         <div class="m"><div class="m-lbl">Cupones restantes</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">pagos de ${fmt(cpRaw*100,4)}% EA real c/u</div></div>
@@ -1177,7 +1177,7 @@ function calcular(showTIR){
       </tr></thead><tbody>
         ${scen.map(s=>{
           const cls=s.bp===0?'cur':s.bp<0?'dn':'up';
-          const g=(s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan))*(typeof _posDir!=='undefined'&&_posDir==='short'?-1:1);
+          const g=s.bp===0?'—':(s.gan>=0?'+':'')+fmtM(s.gan);
           const gc=s.bp===0?'':s.gan>=0?'color:var(--green3)':'color:var(--red3)';
           return`<tr class="${cls}"><td>${s.bp===0?'★ Actual':s.bp>0?'+'+s.bp+'bp':s.bp+'bp'}</td><td>${fmt(s.yS*100,2)}%</td><td>${fmt(s.pS,4)}%</td><td>${fmt(s.plS,4)}%</td><td>${fmt(s.dmS,4)}</td><td>${fmtP(s.dv01S)}</td><td style="${gc}">${g}</td></tr>`;
         }).join('')}
