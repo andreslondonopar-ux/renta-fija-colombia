@@ -620,7 +620,10 @@ function buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode,base=365){
     }
     const cuponIPC=(1+ipcVal)*(1+sc)-1;
     const cpPer=trunc6((Math.pow(1+cuponIPC,F/base)-1)*100);
-    const tirI=(1+ipcVal)*(1+st)-1;
+    // TIR de descuento: usa siempre el IPC vigente actual (no el proyectado por flujo)
+    // Convención de mercado colombiano: TIR única = (1+IPC_vigente)*(1+spread_TIR)-1
+    const ipcDes=ipcLiq?ipcLiq.v:ipcVal;
+    const tirI=(1+ipcDes)*(1+st)-1;
     const tY=G/365;
     const cf=cpPer+(last?100:0);
     const pv=cf/Math.pow(1+tirI,tY);
