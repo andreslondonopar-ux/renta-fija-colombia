@@ -208,8 +208,13 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <div class="field"><label>Spread cupón EA (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa de interés real anual que paga el bono sobre el valor par actualizado por IPC.</span></span></label>
         <input type="number" id="sc" value="3.65" step="0.01" min="0">
       </div>
-      <div class="field"><label>Spread TIR EA (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa real a la que el mercado descuenta los flujos. La TIR real excluye el efecto inflación.</span></span></label>
+      <div class="field">
+        <label style="display:flex;align-items:center;justify-content:space-between">
+          <span>Spread TIR EA (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa real a la que el mercado descuenta los flujos. La TIR real excluye el efecto inflación.</span></span></span>
+          <button onclick="calcularALaPar()" title="Encuentra el spread TIR que hace precio sucio = 100" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,.15);border:1px solid var(--amber);color:var(--amber3);cursor:pointer;white-space:nowrap;letter-spacing:.03em">📌 A la par</button>
+        </label>
         <input type="number" id="st" value="5.50" step="0.01" min="0">
+        <div id="par-info" style="display:none;margin-top:5px;padding:5px 9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);border-radius:5px;font-size:10px;color:var(--amber3)"></div>
       </div>
 
       <div class="hr"></div>
@@ -260,6 +265,14 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         <div id="dir-info" style="font-size:9px;color:var(--green3)">▲ Compra al offer · gana si tasas bajan</div>
       </div>
       <button class="btn btn-blue" onclick="calcular(false)">▶ Calcular</button>
+      <!-- PRECIO FIJO -->
+      <div style="display:flex;align-items:center;gap:8px;margin:6px 0 0;padding:7px 10px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:6px">
+        <input type="checkbox" id="precio-fijo-check" onchange="togglePrecioFijo(this)" style="accent-color:var(--amber);width:13px;height:13px;cursor:pointer;flex-shrink:0">
+        <label for="precio-fijo-check" style="font-size:11px;font-weight:700;color:var(--txt2);cursor:pointer;flex:1">🔒 Precio fijo</label>
+        <input type="number" id="precio-fijo-val" value="100" step="0.001" min="0" disabled style="width:72px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--bg4);color:var(--txt3);font-size:11px;font-family:monospace;text-align:right">
+        <span style="font-size:10px;color:var(--txt3)">%</span>
+      </div>
+      <div id="precio-fijo-tip" style="display:none;font-size:10px;color:var(--amber3);padding:4px 2px 0">⚠ D.Mod y DV01 se calculan con este precio. El spread TIR no cambia.</div>
       <div class="hr"></div>
       <div class="toggle-row" onclick="toggleCaja()">
         <span class="toggle-label">💼 Restricción de caja</span>
@@ -711,12 +724,14 @@ function _irrBisect(cfs,days){
   for(let i=0;i<300;i++){const mid=(lo+hi)/2;if(hi-lo<1e-10)break;npv(mid)>0?(lo=mid):(hi=mid);}
   return(lo+hi)/2;
 }
-function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode,base=365){
+function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode,base=365,priceOverride=null){
   const flows=buildFlowsIPC(antISO,liqISO,vencISO,mp,sc,st,mode,base);
   if(!flows.length)return null;
 
   // PRICE: individual TIRs per flow — correct economic value
-  const price=flows.reduce((s,f)=>s+f.pv,0);
+  const priceCalc=flows.reduce((s,f)=>s+f.pv,0);
+  // priceOverride: usa precio fijo del profe (mismo spread TIR, precio impuesto)
+  const price=priceOverride!==null?priceOverride:priceCalc;
 
   // Interés corrido
   const nxt1=addMonths(antISO,mp);
@@ -726,39 +741,38 @@ function calcBondIPC(antISO,liqISO,vencISO,mp,sc,st,nom,mode,base=365){
   const dCaus=base===360?days360(antISO,liqISO):daysReal(antISO,liqISO)-M_ic;
   const ic=flows[0].cpPer*(dCaus/F_ic);
   const pl=price-ic;
-  const priceRnd=Math.floor(price*1000)/1000;
+  const priceRnd=priceOverride!==null?parseFloat(priceOverride.toFixed(3)):Math.floor(priceCalc*1000)/1000;
   const vGiro=(priceRnd/100)*nom;
 
   // RISK METRICS: differ by mode
   let dmac,dmod,conv,dv01,tirRef,dmN;
   if(mode==='inicio_curva'||mode==='final_curva'){
-    // Curve modes: single TIR_ref = (1+IPC_liq)*(1+st)-1
-    // Re-discount ALL flows at TIR_ref for duration/convexity/DV01
     const ipcLiqCurva=ipcFromCurve(liqISO);
     const ipcLiqFallback=(()=>{const r=ipcVigente(liqISO);return r?r.v:0;})();
     const ipcLiq=ipcLiqCurva!==null?ipcLiqCurva:ipcLiqFallback;
     tirRef=(1+ipcLiq)*(1+st)-1;
-    // Re-discount with single TIR_ref
     const pvRef=flows.map(f=>f.cf/Math.pow(1+tirRef,f.tY));
-    const priceRef=pvRef.reduce((s,v)=>s+v,0);
+    // Si hay precio fijo, usarlo como denominador de D.Mac (igual que el profe)
+    const priceForDmac=priceOverride!==null?priceOverride:pvRef.reduce((s,v)=>s+v,0);
     dmN=flows.reduce((s,f,i)=>s+f.tY*pvRef[i],0);
-    dmac=dmN/priceRef;
+    dmac=dmN/priceForDmac;
     dmod=dmac/(1+tirRef);
     const cvN=flows.reduce((s,f,i)=>s+pvRef[i]*f.tY*(f.tY+1)/Math.pow(1+tirRef,2),0);
-    conv=cvN/priceRef;
-    dv01=dmod*(priceRnd/100)*nom/10000;  // DV01 on actual display price
+    conv=cvN/priceForDmac;
+    dv01=dmod*(priceRnd/100)*nom/10000;
   } else {
-    // Other modes: weighted average of individual TIRs (existing behavior)
-    tirRef=flows.reduce((s,f)=>s+f.tirI*f.pv,0)/price;
+    tirRef=flows.reduce((s,f)=>s+f.tirI*f.pv,0)/priceCalc;
     dmN=flows.reduce((s,f)=>s+f.tY*f.pv,0);
-    dmac=dmN/price;
+    // Si hay precio fijo, usarlo como denominador de D.Mac
+    const priceForDmac=priceOverride!==null?priceOverride:priceCalc;
+    dmac=dmN/priceForDmac;
     dmod=dmac/(1+tirRef);
     const cvN=flows.reduce((s,f)=>s+f.pv*f.tY*(f.tY+1)/Math.pow(1+f.tirI,2),0);
-    conv=cvN/price;
+    conv=cvN/priceForDmac;
     dv01=dmod*(priceRnd/100)*nom/10000;
   }
 
-  return{flows,price,priceRnd,ic,pl,vGiro,dCaus,F_ic,dmac,dmod,conv,dv01,tirAvg:tirRef,nom,dmN};
+  return{flows,price,priceRnd,priceCalc,ic,pl,vGiro,dCaus,F_ic,dmac,dmod,conv,dv01,tirAvg:tirRef,nom,dmN,priceOverrideActive:priceOverride!==null};
 }
 
 // ── UI STATE ──────────────────────────────────────────────────────────
@@ -934,10 +948,13 @@ function calcular(showTIR=false){
   const base=parseInt($('base').value)||365;
   if(!liq||!venc||!ant||isNaN(sc)||isNaN(st)||nom<=0){alert('Complete todos los parámetros');return;}
   if(mode.includes('curva')&&!ipcCurveLoaded){alert('Cargue la curva de inflación estimada primero');return;}
-  const res=calcBondIPC(ant,liq,venc,mp,sc,st,nom,mode,base);
+  // Precio fijo: override del precio para replicar ejercicio del profe
+  const pfCheck=$('precio-fijo-check');
+  const priceOverride=(pfCheck&&pfCheck.checked)?parseFloat($('precio-fijo-val').value)||null:null;
+  const res=calcBondIPC(ant,liq,venc,mp,sc,st,nom,mode,base,priceOverride);
   if(!res||isNaN(res.price)){alert('Error en el cálculo');return;}
   lastRes=res;
-  const{flows,price,priceRnd,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,tirAvg,dmN}=res;
+  const{flows,price,priceRnd,priceCalc,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,tirAvg,dmN,priceOverrideActive}=res;
   const freq=Math.round(12/mp);
   const ipcLiqRec=ipcVigente(liq);
   const ipcLiqVal=ipcLiqRec?ipcLiqRec.v:0;
@@ -1167,6 +1184,10 @@ function calcular(showTIR=false){
 
   // ── RENDER — exact same structure/classes as tasa fija ────────────
   $('main').innerHTML=`
+  ${priceOverrideActive?`<div style="padding:9px 14px;background:rgba(245,158,11,.1);border:1px solid var(--amber);border-radius:8px;margin-bottom:10px;font-size:11px;color:var(--amber3)">
+    🔒 <strong>Precio fijo = ${fmt(priceRnd,3)}%</strong> &nbsp;·&nbsp; Spread TIR = ${fmt(st*100,4)}% (sin cambios) &nbsp;·&nbsp; Precio calculado real = <span style="color:var(--txt2)">${fmt(priceCalc,4)}%</span>
+    &nbsp;·&nbsp; D.Mod y DV01 escalados al precio fijo (ejercicio del profe)
+  </div>`:''}
   <div class="card">
     <div class="c-hdr">Resultados principales
       <span class="badge ${bCls}">${estado}</span>
@@ -1300,6 +1321,55 @@ function calcular(showTIR=false){
   mostrarBtnGuardar('IPC','#3b82f6','#1d4ed8','#93c5fd',lastRes||null);
 }
 
+// ── PRECIO FIJO / A LA PAR ────────────────────────────────────────────
+function togglePrecioFijo(cb){
+  const on=cb.checked;
+  $('precio-fijo-val').disabled=!on;
+  $('precio-fijo-val').style.borderColor=on?'var(--amber)':'var(--border2)';
+  $('precio-fijo-val').style.color=on?'var(--amber3)':'var(--txt3)';
+  $('precio-fijo-tip').style.display=on?'block':'none';
+}
+
+// Encuentra spread TIR para precio sucio = 100 (sin tocar precio fijo ni otros params)
+function calcularALaPar(){
+  if(!$('c_ant_iso').value) autoCA();
+  const ant=$('c_ant_iso').value;
+  const liq=$('liq').value, venc=$('venc').value;
+  if(!liq||!venc||!ant){ alert('Completa las fechas primero'); return; }
+  const mp=parseInt($('freq').value);
+  const sc=parseFloat($('sc').value)/100;
+  const mode=$('ipc-mode').value;
+  const base=parseInt($('base').value)||365;
+
+  let lo=0.0001, hi=2.0, mid=sc, iter=0;
+  while(iter++<150){
+    mid=(lo+hi)/2;
+    const r=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode,base);
+    if(!r) break;
+    if(r.priceCalc>100) lo=mid; else hi=mid;
+    if(Math.abs(r.priceCalc-100)<5e-8) break;
+  }
+
+  const stPct=parseFloat((mid*100).toFixed(6));
+  const delta=Math.round((mid-sc)*10000);
+  $('st').value=stPct;
+  $('st').dispatchEvent(new Event('input'));
+  $('st').dispatchEvent(new Event('change'));
+
+  const info=$('par-info');
+  info.style.display='block';
+  info.innerHTML=`📌 Spread TIR = <strong>${stPct.toFixed(4)}%</strong> &nbsp;·&nbsp; precio sucio = 100 &nbsp;·&nbsp; Δ vs spread cupón: <strong>${delta>0?'+':''}${delta} bp</strong>`;
+  calcular(false);
+}
+
+// Aplica spread TIR resuelto por la inversa
+function aplicarSpreadTIR(stVal){
+  $('st').value=parseFloat((stVal*100).toFixed(6));
+  $('st').dispatchEvent(new Event('input'));
+  $('st').dispatchEvent(new Event('change'));
+  calcular(false);
+}
+
 // ── INVERSE ───────────────────────────────────────────────────────────
 function calcularInverso(){
   const liq=$('liq').value,venc=$('venc').value;
@@ -1320,9 +1390,11 @@ function calcularInverso(){
     let lo=0.0001,hi=2.0,mid,iter=0;
     while(iter++<120){mid=(lo+hi)/2;const r=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode,base);if(!r)break;if(r.price>target)lo=mid;else hi=mid;if(Math.abs(r.price-target)<1e-7)break;}
     const rC=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode,base);
+    const stMid=mid;
     items=[{l:'Precio objetivo',v:fmt(target,4)+'%'},
       {l:'Spread TIR',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmt(mid*100,4)}%</span>`},
-      {l:'Precio resultante',v:fmt(rC?.priceRnd||0,4)+'%'},{l:'Precio limpio',v:fmt(rC?.pl||0,4)+'%'}];
+      {l:'Precio resultante',v:fmt(rC?.priceRnd||0,4)+'%'},{l:'Precio limpio',v:fmt(rC?.pl||0,4)+'%'},
+      {l:'',v:`<button onclick="aplicarSpreadTIR(${stMid})" style="margin-top:6px;width:100%;padding:7px;font-size:11px;font-weight:700;background:rgba(245,158,11,.15);border:1px solid var(--amber);color:var(--amber3);border-radius:6px;cursor:pointer;letter-spacing:.04em">▶ Aplicar spread y recalcular todo</button>`}];
   } else {
     const valorObj=parseFloat($('inv-valor-v').value)||0;
     if(valorObj<=0){alert('Ingresa valor objetivo');return;}

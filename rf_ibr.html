@@ -265,6 +265,14 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
         <div id="dir-info" style="font-size:9px;color:var(--green3)">▲ Compra al offer · gana si tasas bajan</div>
       </div>
       <button class="btn btn-blue" onclick="calcular(false)">▶ Calcular</button>
+      <!-- PRECIO FIJO -->
+      <div style="display:flex;align-items:center;gap:8px;margin:6px 0 0;padding:7px 10px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:6px">
+        <input type="checkbox" id="precio-fijo-check" onchange="togglePrecioFijo(this)" style="accent-color:var(--amber);width:13px;height:13px;cursor:pointer;flex-shrink:0">
+        <label for="precio-fijo-check" style="font-size:11px;font-weight:700;color:var(--txt2);cursor:pointer;flex:1">🔒 Precio fijo</label>
+        <input type="number" id="precio-fijo-val" value="100" step="0.001" min="0" disabled style="width:72px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--bg4);color:var(--txt3);font-size:11px;font-family:monospace;text-align:right">
+        <span style="font-size:10px;color:var(--txt3)">%</span>
+      </div>
+      <div id="precio-fijo-tip" style="display:none;font-size:10px;color:var(--amber3);padding:4px 2px 0">⚠ D.Mod y DV01 se calculan con este precio. El spread TIR no cambia.</div>
       <div class="hr"></div>
       <div class="toggle-row" onclick="toggleCaja()">
         <span class="toggle-label">💼 Restricción de caja</span>
@@ -813,39 +821,39 @@ function _irrBisect(cfs,days){
   for(let i=0;i<300;i++){const mid=(lo+hi)/2;if(hi-lo<1e-10)break;npv(mid)>0?(lo=mid):(hi=mid);}
   return(lo+hi)/2;
 }
-function calcBondIBR(antISO, liqISO, vencISO, mp, sc, st, nom, mode){
+function calcBondIBR(antISO, liqISO, vencISO, mp, sc, st, nom, mode, priceOverride=null){
   const {flows, ibrs} = buildFlowsIBR(antISO,liqISO,vencISO,mp,sc,st,mode);
   if(!flows.length) return null;
 
-  // TIR_EA = ((1 + (avg_IBR + st)/freq)^freq) - 1  where freq = 12/mp
   const avgIBR = ibrs.reduce((s,v)=>s+v,0)/ibrs.length;
   const freqP = Math.round(12/mp);
   const TIR_EA = Math.pow(1+(avgIBR+st)/freqP, freqP)-1;
 
-  // Discount each flow with TIR_EA and real days
   flows.forEach(f=>{
     f.tY = f.G/365;
     f.pv = f.cf / Math.pow(1+TIR_EA, f.tY);
   });
 
-  const price=flows.reduce((s,f)=>s+f.pv,0);
+  const priceCalc=flows.reduce((s,f)=>s+f.pv,0);
+  // priceOverride: precio fijo del profe — mantiene TIR_EA, cambia solo el precio de escala
+  const price=priceOverride!==null?priceOverride:priceCalc;
 
-  // Interés corrido: days360(ant,liq)/30 * cpPer_first
   const dCaus=days360(antISO,liqISO);
   const ic=flows[0].cpPer*(dCaus/30);
   const pl=price-ic;
-  const priceRnd=Math.floor(price*1000)/1000;
+  const priceRnd=priceOverride!==null?parseFloat(priceOverride.toFixed(3)):Math.floor(priceCalc*1000)/1000;
   const vGiro=(priceRnd/100)*nom;
 
-  // Risk metrics (using TIR_EA as the single rate)
+  // Risk metrics: si hay precio fijo, escalar D.Mac con él (exactamente como el profe)
   const dmN=flows.reduce((s,f)=>s+f.tY*f.pv,0);
-  const dmac=dmN/price;
+  const priceForDmac=priceOverride!==null?priceOverride:priceCalc;
+  const dmac=dmN/priceForDmac;
   const dmod=dmac/(1+TIR_EA);
   const cvN=flows.reduce((s,f)=>s+f.pv*f.tY*(f.tY+1)/Math.pow(1+TIR_EA,2),0);
-  const conv=cvN/price;
+  const conv=cvN/priceForDmac;
   const dv01=dmod*(priceRnd/100)*nom/10000;
 
-  return{flows,price,priceRnd,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,TIR_EA,avgIBR,nom,dmN,freqP};
+  return{flows,price,priceRnd,priceCalc,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,TIR_EA,avgIBR,nom,dmN,freqP,priceOverrideActive:priceOverride!==null};
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────
@@ -902,10 +910,12 @@ function calcular(showTIR=false){
   if(!liq||!venc||!ant||isNaN(sc)||isNaN(st)||nom<=0){alert('Complete todos los parámetros');return;}
   if(mode==='estimada'&&!fraLoaded){alert('Cargue la curva FRA primero');return;}
 
-  const res=calcBondIBR(ant,liq,venc,mp,sc,st,nom,mode);
+  const pfCheck=$('precio-fijo-check');
+  const priceOverride=(pfCheck&&pfCheck.checked)?parseFloat($('precio-fijo-val').value)||null:null;
+  const res=calcBondIBR(ant,liq,venc,mp,sc,st,nom,mode,priceOverride);
   if(!res||isNaN(res.price)){alert('Error: verifique los parámetros y la curva FRA');return;}
 
-  const{flows,price,priceRnd,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,TIR_EA,avgIBR,dmN,freqP}=res;
+  const{flows,price,priceRnd,priceCalc,ic,pl,vGiro,dCaus,dmac,dmod,conv,dv01,TIR_EA,avgIBR,dmN,freqP,priceOverrideActive}=res;
   const modeLabel=mode==='estimada'?'IBR Estimada (FRA)':'IBR Real (Histórico)';
   const estado=pl>100.01?'Con prima':pl<99.99?'Al descuento':'A la par';
   const bCls=estado==='Con prima'?'b-green':estado==='Al descuento'?'b-amber':'b-blue';
@@ -971,6 +981,10 @@ function calcular(showTIR=false){
 
   // RENDER
   $('main').innerHTML=`
+  ${priceOverrideActive?`<div style="padding:9px 14px;background:rgba(245,158,11,.1);border:1px solid var(--amber);border-radius:8px;margin-bottom:10px;font-size:11px;color:var(--amber3)">
+    🔒 <strong>Precio fijo = ${fmt(priceRnd,3)}%</strong> &nbsp;·&nbsp; Spread TIR = ${fmt(st*100,4)}% (sin cambios) &nbsp;·&nbsp; Precio calculado real = <span style="color:var(--txt2)">${fmt(priceCalc,4)}%</span>
+    &nbsp;·&nbsp; D.Mod y DV01 escalados al precio fijo (ejercicio del profe)
+  </div>`:''}
   <div class="card">
     <div class="c-hdr">Resultados principales
       <span class="badge ${mCls}">${estado}</span>
@@ -1532,6 +1546,15 @@ function calcularVenta(){
     </div>`;
   main.appendChild(card);
   card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── PRECIO FIJO ───────────────────────────────────────────────────────
+function togglePrecioFijo(cb){
+  const on=cb.checked;
+  $('precio-fijo-val').disabled=!on;
+  $('precio-fijo-val').style.borderColor=on?'var(--amber)':'var(--border2)';
+  $('precio-fijo-val').style.color=on?'var(--amber3)':'var(--txt3)';
+  $('precio-fijo-tip').style.display=on?'block':'none';
 }
 
 // ── A LA PAR ──────────────────────────────────────────────────────────
