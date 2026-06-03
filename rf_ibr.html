@@ -1671,7 +1671,8 @@ function guardarEnPortafolio() {
   if (!r) { alert('Primero calcule un bono'); return; }
   const venc = document.querySelector('[id="venc"]')?.value || '';
   const liq  = document.querySelector('[id="liq"]')?.value  || '';
-  const cpPct = parseFloat(document.querySelector('[id="cp"],[id="cp_raw"]')?.value)||0;
+  const cpPct  = parseFloat(document.getElementById('sc')?.value)||0; // spread cupón NAMV
+  const tirReal= parseFloat(document.getElementById('st')?.value)||0; // spread TIR NAMV sobre IBR
   const dir   = typeof _posDir !== 'undefined' ? _posDir : 'long';
   const sign  = dir==='long' ? 1 : -1;
   const flows = r.flows || [];
@@ -1680,7 +1681,7 @@ function guardarEnPortafolio() {
     id: Date.now(), tipo: _bondMeta.tipo,
     ac: _bondMeta.ac, ac2: _bondMeta.ac2, ac3: _bondMeta.ac3,
     dir, label: _bondMeta.tipo + ' · ' + venc,
-    liq, venc, cpPct,
+    liq, venc, cpPct, tirReal,
     nom:      r.nom      || 0,
     priceRnd: r.priceRnd || r.price || 100,
     pl:       r.pl       || 0,
