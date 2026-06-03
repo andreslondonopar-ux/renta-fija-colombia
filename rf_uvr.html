@@ -1146,10 +1146,10 @@ function calcular(showTIR){
         <div class="m amber"><div class="m-lbl">Valor giro compra ${h('vgiro')}</div><div class="m-val" style="font-size:14px">${fmtM(vGiro)}</div><div class="m-unit">${fmtP(vGiro)}</div></div>
       </div>
       <div class="mg4">
+        <div class="m blue"><div class="m-lbl">TIR negociación real EA ${h('ytm')}</div><div class="m-val">${fmt(ytm*100,4)}%</div><div class="m-unit">tasa de descuento · real</div></div>
         <div class="m blue"><div class="m-lbl">Nominal en pesos</div><div class="m-val" style="font-size:13px">${fmtM(nom*uvrVal)}</div><div class="m-unit">${fmt(nom,0)} UVRs × $${fmt(uvrVal,4)}</div></div>
         <div class="m"><div class="m-lbl">UVR del día ${h('uvr_hoy')}</div><div class="m-val" style="font-size:16px">$${fmt(uvrVal,4)}</div><div class="m-unit">valor de referencia</div></div>
-        <div class="m"><div class="m-lbl">Pagos / año</div><div class="m-val" style="font-size:16px">${freq}</div><div class="m-unit">cupones · cada ${mp} meses</div></div>
-        <div class="m"><div class="m-lbl">Cupones restantes</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">hasta vencimiento</div></div>
+        <div class="m"><div class="m-lbl">Cupones restantes</div><div class="m-val" style="font-size:16px">${flows.length}</div><div class="m-unit">pagos de ${fmt(cpRaw*100,4)}% EA real c/u</div></div>
       </div>
     </div>
   </div>

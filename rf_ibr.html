@@ -200,13 +200,8 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <div class="field"><label>Spread cupón NAMV (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Margen adicional sobre la tasa IBR que paga el bono. La tasa periódica = IBR + Spread.</span></span></label>
         <input type="number" id="sc" value="2.00" step="0.01" min="0">
       </div>
-      <div class="field">
-        <label style="display:flex;align-items:center;justify-content:space-between">
-          <span>Spread TIR NAMV (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa de descuento total (IBR + spread) a la que el mercado valora el bono.</span></span></span>
-          <button onclick="calcularALaPar()" title="Encuentra el spread TIR que hace precio sucio = 100" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,.15);border:1px solid var(--amber);color:var(--amber3);cursor:pointer;white-space:nowrap;letter-spacing:.03em">📌 A la par</button>
-        </label>
+      <div class="field"><label>Spread TIR NAMV (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa de descuento total (IBR + spread) a la que el mercado valora el bono.</span></span></label>
         <input type="number" id="st" value="1.80" step="0.01" min="0">
-        <div id="par-info" style="display:none;margin-top:5px;padding:5px 9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);border-radius:5px;font-size:10px;color:var(--amber3)"></div>
       </div>
 
       <div class="hr"></div>
@@ -1555,46 +1550,6 @@ function togglePrecioFijo(cb){
   $('precio-fijo-val').style.borderColor=on?'var(--amber)':'var(--border2)';
   $('precio-fijo-val').style.color=on?'var(--amber3)':'var(--txt3)';
   $('precio-fijo-tip').style.display=on?'block':'none';
-}
-
-// ── A LA PAR ──────────────────────────────────────────────────────────
-// Resuelve el spread TIR que produce precio sucio = 100 sin tocar los demás parámetros.
-// Equivale al ejercicio del profe: fijar precio = 100 con spread_cupón intacto.
-function calcularALaPar(){
-  if(!$('c_ant_iso').value) autoCA();
-  const ant=$('c_ant_iso').value;
-  const liq=$('liq').value, venc=$('venc').value;
-  if(!liq||!venc||!ant){ alert('Completa las fechas primero'); return; }
-  const freq=parseInt($('freq').value), mp=Math.round(12/freq);
-  const sc=parseFloat($('sc').value)/100;
-  const mode=$('ibr-mode').value;
-
-  // Búsqueda binaria: spread TIR que da precio sucio = 100
-  let lo=0.0001, hi=2.0, mid=sc, iter=0;
-  while(iter++<150){
-    mid=(lo+hi)/2;
-    const r=calcBondIBR(ant,liq,venc,mp,sc,mid,1,mode);
-    if(!r) break;
-    if(r.price>100) lo=mid; else hi=mid;
-    if(Math.abs(r.price-100)<5e-8) break;
-  }
-
-  const stSolved=mid;
-  const stPct=parseFloat((stSolved*100).toFixed(6));
-  const delta=Math.round((stSolved-sc)*10000); // diferencia en bp respecto al spread cupón
-
-  // Actualizar campo y persistencia
-  $('st').value=stPct;
-  $('st').dispatchEvent(new Event('input'));
-  $('st').dispatchEvent(new Event('change'));
-
-  // Info debajo del campo
-  const info=$('par-info');
-  info.style.display='block';
-  info.innerHTML=`📌 Spread TIR = <strong>${stPct.toFixed(4)}%</strong> &nbsp;·&nbsp; precio sucio = 100 &nbsp;·&nbsp; Δ vs spread cupón: <strong>${delta>0?'+':''}${delta} bp</strong>`;
-
-  // Lanzar cálculo completo con el spread resuelto
-  calcular(false);
 }
 
 // Aplica un spread TIR resuelto por la inversa y lanza calcular (botón en tarjeta inversa)

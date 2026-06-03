@@ -208,13 +208,8 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
       <div class="field"><label>Spread cupón EA (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa de interés real anual que paga el bono sobre el valor par actualizado por IPC.</span></span></label>
         <input type="number" id="sc" value="3.65" step="0.01" min="0">
       </div>
-      <div class="field">
-        <label style="display:flex;align-items:center;justify-content:space-between">
-          <span>Spread TIR EA (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa real a la que el mercado descuenta los flujos. La TIR real excluye el efecto inflación.</span></span></span>
-          <button onclick="calcularALaPar()" title="Encuentra el spread TIR que hace precio sucio = 100" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,.15);border:1px solid var(--amber);color:var(--amber3);cursor:pointer;white-space:nowrap;letter-spacing:.03em">📌 A la par</button>
-        </label>
+      <div class="field"><label>Spread TIR EA (%) <span class="hlp" tabindex="-1">?<span class="hlp-tip">Tasa real a la que el mercado descuenta los flujos. La TIR real excluye el efecto inflación.</span></span></label>
         <input type="number" id="st" value="5.50" step="0.01" min="0">
-        <div id="par-info" style="display:none;margin-top:5px;padding:5px 9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);border-radius:5px;font-size:10px;color:var(--amber3)"></div>
       </div>
 
       <div class="hr"></div>
@@ -1328,38 +1323,6 @@ function togglePrecioFijo(cb){
   $('precio-fijo-val').style.borderColor=on?'var(--amber)':'var(--border2)';
   $('precio-fijo-val').style.color=on?'var(--amber3)':'var(--txt3)';
   $('precio-fijo-tip').style.display=on?'block':'none';
-}
-
-// Encuentra spread TIR para precio sucio = 100 (sin tocar precio fijo ni otros params)
-function calcularALaPar(){
-  if(!$('c_ant_iso').value) autoCA();
-  const ant=$('c_ant_iso').value;
-  const liq=$('liq').value, venc=$('venc').value;
-  if(!liq||!venc||!ant){ alert('Completa las fechas primero'); return; }
-  const mp=parseInt($('freq').value);
-  const sc=parseFloat($('sc').value)/100;
-  const mode=$('ipc-mode').value;
-  const base=parseInt($('base').value)||365;
-
-  let lo=0.0001, hi=2.0, mid=sc, iter=0;
-  while(iter++<150){
-    mid=(lo+hi)/2;
-    const r=calcBondIPC(ant,liq,venc,mp,sc,mid,1,mode,base);
-    if(!r) break;
-    if(r.priceCalc>100) lo=mid; else hi=mid;
-    if(Math.abs(r.priceCalc-100)<5e-8) break;
-  }
-
-  const stPct=parseFloat((mid*100).toFixed(6));
-  const delta=Math.round((mid-sc)*10000);
-  $('st').value=stPct;
-  $('st').dispatchEvent(new Event('input'));
-  $('st').dispatchEvent(new Event('change'));
-
-  const info=$('par-info');
-  info.style.display='block';
-  info.innerHTML=`📌 Spread TIR = <strong>${stPct.toFixed(4)}%</strong> &nbsp;·&nbsp; precio sucio = 100 &nbsp;·&nbsp; Δ vs spread cupón: <strong>${delta>0?'+':''}${delta} bp</strong>`;
-  calcular(false);
 }
 
 // Aplica spread TIR resuelto por la inversa
