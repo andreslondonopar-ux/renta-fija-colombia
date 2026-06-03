@@ -1731,13 +1731,16 @@ function renderIBRChart(){
   const canvas = document.getElementById('ibr-chart-canvas');
   if(!canvas) return;
   const hasFRA = typeof FRA_DATA !== 'undefined' && Object.keys(FRA_DATA).length > 0;
-  const histSample = Object.keys(IBR_REAL_DATA).sort().slice(-60);
+  const histSample = Object.keys(IBR_REAL_DATA).sort().slice(-180); // ~9 meses
   const lastHistDate = histSample.length ? histSample[histSample.length-1] : '';
   const maxFRADate = lastHistDate
-    ? new Date(new Date(lastHistDate).getTime()+3*365*24*3600*1000).toISOString().slice(0,10)
+    ? new Date(new Date(lastHistDate).getTime()+365*24*3600*1000).toISOString().slice(0,10) // 1 año FRA
     : '';
   const fraSample = hasFRA
-    ? Object.keys(FRA_DATA).filter(d=>FRA_DATA[d]<=0.5&&(!maxFRADate||d<=maxFRADate)).sort()
+    ? Object.keys(FRA_DATA)
+        .filter(d=>FRA_DATA[d]<=0.5&&(!maxFRADate||d<=maxFRADate))
+        .sort()
+        .filter((_,i)=>i%5===0) // 1 de cada 5 días para reducir densidad
     : [];
   const allDatesChart = [...new Set([...histSample,...fraSample])].sort();
   const labels    = allDatesChart.map(d=>{ const[y,m,dd]=d.split('-'); return dd+'/'+m+'/'+String(y).slice(2); });
