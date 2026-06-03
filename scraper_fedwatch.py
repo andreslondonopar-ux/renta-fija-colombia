@@ -239,7 +239,7 @@ def main():
             }, ensure_ascii=False, indent=2))
         return
 
-    meetings = [m for m in meetings if m["date"] >= TODAY and m["probs"]][:8]
+    meetings = [m for m in meetings if m["date"] >= TODAY and m["probs"]][:9]
 
     result = {
         "updated":      NOW,
