@@ -243,7 +243,7 @@ svg{display:block;width:100%}
     </div>
 
     <!-- TAB: MERCADO -->
-    <div class="main-panel active" id="panel-mercado" style="flex-direction:column">
+    <div class="main-panel active" id="panel-mercado">
       <div style="display:flex;flex:1;min-height:0;overflow-y:auto;align-items:flex-start">
 
         <!-- COLOMBIA -->
@@ -334,18 +334,6 @@ svg{display:block;width:100%}
           </div>
         </div>
 
-      </div>
-
-      <!-- NOTICIAS -->
-      <div style="flex-shrink:0;border-top:1px solid var(--border)">
-        <div class="sec-toggle" onclick="toggleNews()">
-          <span id="news-arrow" class="tog-arrow">▾</span>
-          <span class="tog-lbl">Noticias</span>
-          <span id="news-status" style="margin-left:auto;font-size:10px;color:var(--txt3)"></span>
-        </div>
-        <div id="news-wrap" style="padding:8px;overflow-y:auto;max-height:260px">
-          <div id="news-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px"></div>
-        </div>
       </div>
     </div>
 
@@ -479,6 +467,19 @@ svg{display:block;width:100%}
 
     <!-- TAB: EVENTOS -->
     <div class="main-panel" id="panel-eventos" style="flex-direction:column;overflow:hidden">
+
+      <!-- NOTICIAS -->
+      <div style="flex-shrink:0;border-bottom:1px solid var(--border)">
+        <div class="sec-toggle" onclick="toggleNews()">
+          <span id="news-arrow" class="tog-arrow">▾</span>
+          <span class="tog-lbl">Noticias</span>
+          <span id="news-status" style="margin-left:auto;font-size:10px;color:var(--txt3)"></span>
+        </div>
+        <div id="news-wrap" style="padding:8px;overflow-y:auto;max-height:270px">
+          <div id="news-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px"></div>
+        </div>
+      </div>
+
       <!-- Navegación -->
       <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap">
         <button class="cal-nav-btn" onclick="calNav(-1)">&#8249;</button>
