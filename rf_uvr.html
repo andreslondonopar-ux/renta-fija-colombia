@@ -153,12 +153,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 </style>
 <body>
 
-<div class="tradingview-widget-container" style="overflow:hidden;border-bottom:1px solid var(--border)">
-  <div class="tradingview-widget-container__widget"></div>
-  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-  {"symbols":[{"proName":"FX_IDC:USDCOP","title":"USD/COP"},{"proName":"FX:EURUSD","title":"EUR/USD"},{"proName":"FX_IDC:USDBRL","title":"USD/BRL"},{"proName":"FX_IDC:USDMXN","title":"USD/MXN"},{"proName":"CAPITALCOM:DXY","title":"DXY"},{"proName":"TVC:USOIL","title":"WTI"},{"proName":"TVC:UKOIL","title":"Brent"},{"proName":"ICEUS:KC1!","title":"Café"},{"proName":"TVC:GOLD","title":"Oro"},{"proName":"COMEX:HG1!","title":"Cobre"},{"proName":"SP:SPX","title":"S&P 500"},{"proName":"NASDAQ:NDX","title":"Nasdaq"},{"proName":"DJ:DJI","title":"DOW"},{"proName":"CBOE:VIX","title":"VIX"},{"proName":"TVC:US03MY","title":"UST 3M"},{"proName":"TVC:US05Y","title":"UST 5Y"},{"proName":"TVC:US10Y","title":"UST 10Y"},{"proName":"TVC:US30Y","title":"UST 30Y"},{"proName":"BITSTAMP:BTCUSD","title":"BTC"}],"showSymbolLogo":false,"colorTheme":"dark","isTransparent":true,"displayMode":"compact","locale":"es"}
-  </script>
-</div>
+<div id="tk-bar" style="background:#050810;border-bottom:1px solid var(--border);height:26px;overflow:hidden;white-space:nowrap"><div id="tickerTrack" style="display:inline-flex;height:26px;align-items:center;animation:tkscroll 70s linear infinite;will-change:transform"><span style="padding:0 14px;font-size:10px;color:var(--txt3)">···</span></div></div><style>@keyframes tkscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}#tk-bar:hover #tickerTrack{animation-play-state:paused}</style>
 
 <div class="topbar">
   <a href="index.html" style="display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--txt3);font-size:11px;font-weight:600;text-decoration:none;flex-shrink:0" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'">&#8592; Inicio</a>
@@ -713,6 +708,22 @@ let inversoOpen=false;
 function toggleInverso(){inversoOpen=!inversoOpen;$('inversoToggle').classList.toggle('on',inversoOpen);$('inversoPanel').classList.toggle('open',inversoOpen);}
 
 // TICKER
+
+// ── TICKER ──────────────────────────────────────────────────────
+async function loadTicker(){
+  const el=document.getElementById('tickerTrack');
+  if(!el)return;
+  try{
+    const d=await fetch('market_data.json?_='+Date.now()).then(r=>r.json());
+    if(!d.items?.length)return;
+    const seg=d.items.map(i=>{
+      const c=i.up?'#6ee7b7':'#fca5a5';
+      return`<span style="padding:0 12px;border-right:1px solid #1e2d4a;font-size:10px;display:inline-flex;align-items:center;gap:4px;height:26px"><span style="color:#8892a4;font-weight:700">${i.n}</span><span style="color:${c};font-weight:700">${i.c}</span></span>`;
+    }).join('');
+    el.innerHTML=seg+seg;
+  }catch(e){}
+}
+loadTicker(); setInterval(loadTicker,300000);
 
 // BOND MATH — verified against Excel including leap year handling
 // Key rules (from reverse-engineering Excel formulas):
