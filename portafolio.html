@@ -850,7 +850,7 @@ async function fetchOnePF(sym){
       if(!r.ok) continue;
       const meta=((await r.json())?.chart?.result?.[0]?.meta);
       if(!meta?.regularMarketPrice) continue;
-      const price=meta.regularMarketPrice,prev=meta.regularMarketPreviousClose||price,chg=price-prev;
+      const price=meta.regularMarketPrice,prev=meta.regularMarketPreviousClose||meta.chartPreviousClose||price,chg=price-prev;
       return{price,chg,chgPct:prev>0?(chg/prev)*100:0};
     }catch{continue;}
   }
