@@ -60,7 +60,7 @@ def parse_xml_entry(entry_text):
 
 
 def fetch_xml_year(year):
-    """Fetch full year XML and return latest entry"""
+    """Fetch full year XML and return latest entry + all parsed entries for reference lookup."""
     url = (f"https://home.treasury.gov/resource-center/data-chart-center/"
            f"interest-rates/pages/xml"
            f"?data=daily_treasury_yield_curve&field_tdr_date_value={year}")
@@ -69,7 +69,7 @@ def fetch_xml_year(year):
         r = requests.get(url, headers=HDR, timeout=30)
         print(f"  HTTP {r.status_code}, size={len(r.text)}")
         if not r.ok:
-            return None
+            return None, []
 
         text = r.text
         # Find all entries — try both with and without namespace
@@ -78,7 +78,7 @@ def fetch_xml_year(year):
             entries = re.findall(r'<m:properties>(.*?)</m:properties>', text, re.DOTALL)
         if not entries:
             print(f"  No entries found. First 500 chars: {text[:500]}")
-            return None
+            return None, []
 
         print(f"  Found {len(entries)} entries")
         last = entries[-1]
@@ -90,10 +90,30 @@ def fetch_xml_year(year):
         rates = parse_xml_entry(last)
         print(f"  Parsed {len(rates)} rates for {date_str}")
         if len(rates) >= 7:
-            return {"date": date_str, "rates": rates, "source": "US Treasury XML"}
+            return {"date": date_str, "rates": rates, "source": "US Treasury XML"}, entries
     except Exception as e:
         print(f"  Exception: {e}")
-    return None
+    return None, []
+
+
+def find_reference_in_entries(entries, target_date_str):
+    """Busca en una lista de entries XML la más reciente con fecha <= target_date_str."""
+    candidates = []
+    for entry in entries:
+        dm = re.search(r'<(?:d:)?NEW_DATE[^>]*>(.*?)</(?:d:)?NEW_DATE>', entry)
+        if not dm:
+            continue
+        d = dm.group(1)[:10]
+        if d <= target_date_str:
+            rates = parse_xml_entry(entry)
+            if len(rates) >= 7:
+                candidates.append((d, rates))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda x: x[0])
+    best_date, best_rates = candidates[-1]
+    print(f"  Referencia encontrada: {best_date} ({len(best_rates)} plazos)")
+    return {"date": best_date, "rates": best_rates}
 
 
 def fetch_csv():
@@ -206,17 +226,21 @@ def fetch_fiscaldata():
     return None
 
 
+
 def main():
     print(f"=== Scraper UST · {TODAY} ===\n")
 
+    all_entries = []
+
     # Fuente 1: XML año actual
     print("Fuente 1: Treasury XML año actual")
-    result = fetch_xml_year(YEAR)
+    result, all_entries = fetch_xml_year(YEAR)
 
     # Fuente 2: XML año anterior (por si el actual aún no tiene datos)
     if not result:
         print(f"\nFuente 2: Treasury XML año {YEAR-1}")
-        result = fetch_xml_year(YEAR - 1)
+        result, prev_entries = fetch_xml_year(YEAR - 1)
+        all_entries = prev_entries
 
     # Fuente 3: CSV directo
     if not result:
@@ -262,6 +286,25 @@ def main():
     except Exception as e:
         print(f"Aviso historial UST: {e}")
     result['history'] = ust_history[:30]
+
+    # Curva de referencia (~30 días atrás) buscada en el mismo XML descargado
+    ref_target = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
+    print(f"\nCurva de referencia (~30d atras: {ref_target}):")
+    ref = None
+    if all_entries:
+        ref = find_reference_in_entries(all_entries, ref_target)
+    if ref:
+        result['reference'] = ref
+    else:
+        # Mantener referencia anterior si existe
+        try:
+            if ust_path.exists():
+                old = json.loads(ust_path.read_text())
+                if old.get('reference'):
+                    result['reference'] = old['reference']
+                    print(f"  Manteniendo referencia anterior: {old['reference']['date']}")
+        except Exception:
+            pass
 
     Path("ust_data.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"\n✓ ust_data.json: {len(result['rates'])} plazos · {result['date']} · {result['source']}")

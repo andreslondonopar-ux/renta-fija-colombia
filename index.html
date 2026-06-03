@@ -838,10 +838,16 @@ async function loadUSTreasury(){
         if(ust?.rates?.length>=5){
           US_DATA=ust.rates.map(r=>({plazo:r.plazo,years:r.years,tir:r.tir})).filter(r=>r.tir>0);
           if(US_DATA.length>=5){
+            // 1) Curva de referencia precalculada por el scraper (~30d atrás)
+            const ref=dj.reference||(dj.ust?.reference);
+            if(ref?.rates?.length>=5){
+              PREV_US_PTS=ref.rates.map(r=>({x:r.years,y:r.tir})).filter(r=>r.tir>0);
+              PREV_US_DATE=ref.date;
+            }
+            // 2) Historial completo para fallback de loadUSTPrevMonth
             const uh=(dj.rates?dj:dj.ust)?.history||[];
-            // Guardar historial completo para que loadUSTPrevMonth lo use
             window._ustHistory=[...uh].sort((a,b)=>a.date<b.date?-1:1);
-            if(uh.length){
+            if(!PREV_US_PTS&&uh.length){
               const usnap=uh[Math.min(4,uh.length-1)];
               PREV_US_DATE=usnap.date;
               PREV_US_PTS=usnap.rates.map(r=>({x:r.years,y:r.tir})).filter(r=>r.tir>0);
