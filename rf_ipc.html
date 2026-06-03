@@ -1544,29 +1544,37 @@ let _ipcChart = null;
 function renderIPCChart(){
   const canvas = document.getElementById('ipc-chart-canvas');
   if(!canvas) return;
+  const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const hasEst = typeof IPC_CURVE_DATA !== 'undefined' && Object.keys(IPC_CURVE_DATA).length > 0;
-  // Histórico: últimos 36 meses para que sea legible
-  const histData = IPC_TABLE.slice(-36).map(r => ({
-    label: String(r.m).padStart(2,'0')+'/'+String(r.y).slice(2),
+
+  // Histórico: toda la historia disponible (desde IPC_TABLE[0])
+  const histData = IPC_TABLE.map(r => ({
+    label: MES[r.m-1]+' '+String(r.y).slice(2),
     val: +(r.v*100).toFixed(2), sort: r.y*100+r.m
   }));
   const lastHistSort = histData.length ? histData[histData.length-1].sort : 0;
-  // Estimados: máximo 24 meses desde hoy, sin valores negativos ni > 30%
+
+  // Estimados: máximo 12 meses hacia adelante
   const now = new Date();
-  const cutSort = (now.getFullYear()+2)*100 + (now.getMonth()+1);
+  const cut = new Date(now.getFullYear(), now.getMonth()+12, 1);
+  const cutSort = cut.getFullYear()*100 + (cut.getMonth()+1);
   const estData = hasEst
     ? Object.entries(IPC_CURVE_DATA)
-        .map(([k,v]) => { const [y,m]=k.split('-'); return {label:m+'/'+y.slice(2),val:+(v*100).toFixed(2),sort:parseInt(y)*100+parseInt(m),key:k}; })
+        .map(([k,v]) => { const [y,m]=k.split('-'); return {label:MES[parseInt(m)-1]+' '+y.slice(2),val:+(v*100).toFixed(2),sort:parseInt(y)*100+parseInt(m),key:k}; })
         .filter(r => r.sort > lastHistSort && r.sort <= cutSort && r.val >= 0 && r.val <= 30)
         .sort((a,b)=>a.sort-b.sort)
     : [];
+
   const allData = [...histData, ...estData];
   if(!allData.length) return;
-  const step = Math.max(1, Math.floor(allData.length/14));
-  const labels = allData.map((r,i) => (i%step===0||i===allData.length-1)?r.label:'');
+
+  // Etiquetas cada 6 meses para eje X legible
+  const labels = allData.map((r,i) => i%6===0 ? r.label : '');
+
   const fi = histData.length;
   const histVals = allData.map((r,i) => i < fi ? r.val : null);
   const estVals  = allData.map((r,i) => i >= fi-1 ? r.val : null);
+
   if(_ipcChart){ try{_ipcChart.destroy();}catch(e){} _ipcChart=null; }
   _ipcChart = new Chart(canvas, {
     type:'line',
@@ -1581,8 +1589,8 @@ function renderIPCChart(){
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.parsed.y||0).toFixed(2)+'%'}}
       },
       scales:{
-        x:{ticks:{color:'#4a5568',font:{size:8},maxRotation:0},grid:{color:'rgba(255,255,255,.03)'}},
-        y:{ticks:{color:'#4a5568',font:{size:8},callback:v=>v.toFixed(0)+'%'},grid:{color:'rgba(255,255,255,.04)'}}
+        x:{ticks:{color:'#4a5568',font:{size:9},maxRotation:45,autoSkip:false},grid:{color:'rgba(255,255,255,.03)'}},
+        y:{ticks:{color:'#4a5568',font:{size:9},callback:v=>v.toFixed(0)+'%'},grid:{color:'rgba(255,255,255,.04)'}}
       }
     }
   });
