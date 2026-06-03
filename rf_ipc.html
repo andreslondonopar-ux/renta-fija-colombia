@@ -154,11 +154,11 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 </style>
 <body>
 
-<div class="ticker-bar">
-  <div class="ticker-track" id="tickerTrack">
-    <span class="tick-item"><span class="tick-dot nt"></span><span class="tick-name" style="color:var(--txt3)">Cargando mercado...</span></span>
-  </div>
-  <div class="ticker-status" id="tickerStatus"></div>
+<div class="tradingview-widget-container" style="overflow:hidden;border-bottom:1px solid var(--border)">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+  {"symbols":[{"proName":"FX_IDC:USDCOP","title":"USD/COP"},{"proName":"FX:EURUSD","title":"EUR/USD"},{"proName":"FX_IDC:USDBRL","title":"USD/BRL"},{"proName":"FX_IDC:USDMXN","title":"USD/MXN"},{"proName":"TVC:DXY","title":"DXY"},{"proName":"TVC:USOIL","title":"WTI"},{"proName":"TVC:UKOIL","title":"Brent"},{"proName":"ICEUS:KC1!","title":"Café"},{"proName":"TVC:GOLD","title":"Oro"},{"proName":"COMEX:HG1!","title":"Cobre"},{"proName":"SP:SPX","title":"S&P 500"},{"proName":"NASDAQ:NDX","title":"Nasdaq"},{"proName":"DJ:DJI","title":"DOW"},{"proName":"CBOE:VIX","title":"VIX"},{"proName":"TVC:US03MY","title":"UST 3M"},{"proName":"TVC:US05Y","title":"UST 5Y"},{"proName":"TVC:US10Y","title":"UST 10Y"},{"proName":"TVC:US30Y","title":"UST 30Y"},{"proName":"BITSTAMP:BTCUSD","title":"BTC"}],"showSymbolLogo":false,"colorTheme":"dark","isTransparent":true,"displayMode":"adaptive","locale":"es"}
+  </script>
 </div>
 
 <div class="topbar">
@@ -474,44 +474,6 @@ let inversoOpen=false;
 function toggleInverso(){inversoOpen=!inversoOpen;$('inversoToggle').classList.toggle('on',inversoOpen);$('inversoPanel').classList.toggle('open',inversoOpen);}
 
 // TICKER
-const FALLBACK=[
-  {n:'USD/COP',v:'4.218',up:true,c:'+12'},{n:'EUR/USD',v:'1.0832',up:false,c:'-0.2%'},
-  {n:'WTI',v:'67.42',up:false,c:'-0.8%'},{n:'Brent',v:'71.18',up:false,c:'-0.7%'},
-  {n:'Oro',v:'3.285',up:true,c:'+0.3%'},{n:'Plata',v:'32.14',up:true,c:'+0.5%'},
-  {n:'S&P 500',v:'5.631',up:true,c:'+0.2%'},{n:'DOW',v:'41.218',up:true,c:'+0.1%'},
-  {n:'Nasdaq',v:'17.842',up:true,c:'+0.4%'},{n:'VIX',v:'18.4',up:false,c:'-1.1%'},
-  {n:'BTC',v:'96.420',up:true,c:'+1.4%'},{n:'ETH',v:'2.641',up:true,c:'+0.9%'},
-  {n:'DXY',v:'104.2',up:true,c:'+0.1%'},{n:'UST 10Y',v:'4.21%',up:true,c:'+2bp'},
-  {n:'UST 2Y',v:'4.58%',up:true,c:'+3bp'},{n:'Col CDS 5Y',v:'180bp',up:false,c:'-3bp'},
-];
-function buildTickerHTML(items){
-  let arr=[...items];
-  while(arr.length<16) arr=[...arr,...items];
-  return arr.map(i=>`<span class="tick-item"><span class="tick-dot ${i.up?'up':'dn'}"></span><span class="tick-name">${i.n}</span>&nbsp;<span class="tick-val">${i.v}</span>&nbsp;<span class="tick-chg ${i.up?'up':'dn'}">${i.c}</span></span>`).join('');
-}
-function setTicker(items){
-  const el=$('tickerTrack');
-  if(!el||!items||!items.length) return;
-  const h=buildTickerHTML(items);
-  el.innerHTML=h+h;
-  el.style.animation='none';
-  requestAnimationFrame(()=>{ el.style.animation=''; });
-}
-setTicker(FALLBACK);
-$('tickerStatus').textContent='ref.';
-async function loadTicker(){
-  try{
-    const r=await fetch('market_data.json?_='+Date.now());
-    if(!r.ok) throw new Error('no file');
-    const d=await r.json();
-    if(d.items?.length>=4){
-      setTicker(d.items);
-      $('tickerStatus').textContent='↺ '+(d.updated?.slice(11,16)||'');
-      $('tickerStatus').style.color='var(--green3)';
-    }
-  }catch(e){}
-}
-loadTicker(); setInterval(loadTicker,300000);
 
 // BOND MATH — verified against Excel including leap year handling
 // Key rules (from reverse-engineering Excel formulas):
