@@ -149,7 +149,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .hlp{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--txt3);font-size:8px;font-weight:800;cursor:help;position:relative;vertical-align:middle;margin-left:3px;flex-shrink:0;font-style:normal;line-height:1;outline:none;user-select:none}
 .hlp-tip{display:none;position:absolute;z-index:300;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0c1525;border:1px solid var(--border2);border-radius:7px;padding:9px 11px;font-size:11px;font-weight:400;color:var(--txt2);width:230px;white-space:normal;line-height:1.5;text-transform:none;letter-spacing:0;box-shadow:0 8px 24px rgba(0,0,0,.7);pointer-events:none}
 .hlp-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#0c1525}
-.hlp:hover .hlp-tip,.hlp:focus .hlp-tip{display:block}
+/* tooltip shown via JS fixed-position box — not CSS hover */
 .m-lbl .hlp{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.35)}
 </style>
 <body>
@@ -365,7 +365,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 <script>
 
 const $=id=>document.getElementById(id);
-const h=k=>`<span class="hlp" tabindex="-1">?<span class="hlp-tip">${({
+const TIPS={
   periodicidad:'Frecuencia de pago de cupones al año. Trimestral=4, Semestral=2, Anual=1, Mensual=12.',
   base:'Convención de conteo de días. 365/365 usa días reales; 30/360 asume meses de 30 días.',
   ytm:'Tasa de descuento del mercado (YTM). A esta tasa se descuentan los flujos para obtener el precio.',
@@ -375,20 +375,20 @@ const h=k=>`<span class="hlp" tabindex="-1">?<span class="hlp-tip">${({
   precio_sucio:'Precio incluyendo interés corrido. Es el desembolso real al comprar. = Precio limpio + Interés corrido.',
   precio_limpio:'Precio sin interés corrido. Es el precio que cotiza en pantalla (BanRep SEN).',
   ic:'Interés acumulado desde el último cupón hasta la fecha de liquidación. Se paga al vendedor.',
-  vgiro:'Desembolso total en pesos = Precio sucio × Nominal / 100. Lo que efectivamente sale de caja.',
+  vgiro:'Desembolso total en pesos = Precio sucio x Nominal / 100. Lo que efectivamente sale de caja.',
   dmac:'Duración de Macaulay: promedio ponderado (por VP) de los plazos de cada flujo. En años.',
-  dmod:'Duración Modificada: sensibilidad del precio ante +1% en la tasa. Ej: D*=5 → precio cae ≈5% si tasa sube 1%.',
-  conv:'Convexidad: curvatura del precio respecto a la tasa. Siempre positiva; mejora la aproximación de D. Modificada.',
+  dmod:'Duración Modificada: sensibilidad del precio ante +1% en la tasa. Si D*=5, precio cae ~5% si tasa sube 1%.',
+  conv:'Convexidad: curvatura del precio respecto a la tasa. Siempre positiva; mejora la aproximación lineal.',
   dv01:'Cambio en pesos del valor de mercado ante un movimiento de 0.01% (1 punto base) en la tasa.',
-  ipc_vigente:'IPC (Índice de Precios al Consumidor) del mes más reciente disponible, base de actualización del bono.',
-  ipc_emision:'IPC del mes en que fue emitido el bono. Se usa para calcular el factor de actualización del valor par.',
-  factor_ipc:'Factor de actualización = IPC vigente / IPC emisión. Multiplica el valor par para obtener el valor real actual.',
-  uvr:'Unidad de Valor Real: unidad indexada a la inflación. El bono paga en UVR; se convierte a pesos con la UVR del día.',
+  ipc_vigente:'IPC del mes más reciente disponible. Base de actualización del valor par del bono.',
+  ipc_emision:'IPC del mes de emisión del bono. Se usa para calcular el factor de actualización.',
+  factor_ipc:'Factor = IPC vigente / IPC emisión. Multiplica el valor par para obtener el capital actualizado.',
   uvr_hoy:'Valor de la UVR para la fecha de liquidación, calculado por el Banco de la República.',
-  ibr:'Indicador Bancario de Referencia: tasa de interés de corto plazo determinada por el mercado overnight colombiano.',
-  spread:'Margen adicional sobre la tasa IBR que paga el bono. La tasa periódica = IBR + Spread.',
-  ibr_per:'Tasa IBR convertida al período del cupón. Para semestral: (1+IBR)^(180/360) − 1.',
-}[k]||''}</span></span>`;
+  ibr:'Indicador Bancario de Referencia: tasa de corto plazo del mercado overnight colombiano.',
+  spread:'Margen adicional sobre IBR que paga el bono. Tasa periódica = IBR + Spread.',
+  ibr_per:'Tasa IBR convertida al período del cupón. Para semestral: (1+IBR)^(180/360) - 1.',
+};
+const h=k=>TIPS[k]?`<span class="hlp" tabindex="-1">?<span class="hlp-tip">${TIPS[k]}</span></span>`:'';
 const fmt=(n,d=4)=>typeof n==='number'?n.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 const fmtP=n=>'$'+Math.round(n).toLocaleString('es-CO');
 const fmtM=n=>{const a=Math.abs(n),s=n<0?'-':'';return a>=1e9?s+'$'+fmt(a/1e9,3)+' Bn':a>=1e6?s+'$'+fmt(a/1e6,2)+' MM':(n<0?'-':'')+fmtP(Math.abs(n));};
@@ -429,6 +429,28 @@ function renderClocks(){
 }
 renderClocks();
 setInterval(renderClocks,1000);
+// ── TOOLTIP GLOBAL (position:fixed — no se tapa por overflow de contenedores) ──
+(function(){
+  const box=document.createElement('div');
+  box.style.cssText='display:none;position:fixed;z-index:9999;background:#0c1525;border:1px solid #1e2d4a;border-radius:7px;padding:9px 11px;font-size:11px;color:#b8c4d4;max-width:260px;white-space:normal;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.7);pointer-events:none';
+  document.body.appendChild(box);
+  document.addEventListener('mouseover',e=>{
+    const el=e.target.closest('.hlp');
+    if(!el) return;
+    const inner=el.querySelector('.hlp-tip');
+    const tip=(inner&&inner.textContent)||el.dataset.tip||'';
+    if(!tip) return;
+    box.textContent=tip;
+    box.style.display='block';
+    const r=el.getBoundingClientRect();
+    let top=r.top-box.offsetHeight-8;
+    let left=r.left+r.width/2-box.offsetWidth/2;
+    if(top<8) top=r.bottom+8;
+    left=Math.max(8,Math.min(left,window.innerWidth-box.offsetWidth-8));
+    box.style.top=top+'px';box.style.left=left+'px';
+  });
+  document.addEventListener('mouseout',e=>{if(e.target.closest('.hlp'))box.style.display='none';});
+})();
 
 function showTab(t){
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calc','pf'][i]===t));

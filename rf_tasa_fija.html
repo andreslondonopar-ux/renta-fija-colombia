@@ -150,7 +150,7 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg)
 .hlp{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);color:var(--txt3);font-size:8px;font-weight:800;cursor:help;position:relative;vertical-align:middle;margin-left:3px;flex-shrink:0;font-style:normal;line-height:1;outline:none;user-select:none}
 .hlp-tip{display:none;position:absolute;z-index:300;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0c1525;border:1px solid var(--border2);border-radius:7px;padding:9px 11px;font-size:11px;font-weight:400;color:var(--txt2);width:230px;white-space:normal;line-height:1.5;text-transform:none;letter-spacing:0;box-shadow:0 8px 24px rgba(0,0,0,.7);pointer-events:none}
 .hlp-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#0c1525}
-.hlp:hover .hlp-tip,.hlp:focus .hlp-tip{display:block}
+/* tooltip shown via JS fixed-position box — not CSS hover */
 .m-lbl .hlp{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.35)}
 </style>
 </head>
@@ -679,6 +679,28 @@ function renderClocks(){
 }
 renderClocks();
 setInterval(renderClocks,1000);
+// ── TOOLTIP GLOBAL (position:fixed — no se tapa por overflow de contenedores) ──
+(function(){
+  const box=document.createElement('div');
+  box.style.cssText='display:none;position:fixed;z-index:9999;background:#0c1525;border:1px solid #1e2d4a;border-radius:7px;padding:9px 11px;font-size:11px;color:#b8c4d4;max-width:260px;white-space:normal;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.7);pointer-events:none';
+  document.body.appendChild(box);
+  document.addEventListener('mouseover',e=>{
+    const el=e.target.closest('.hlp');
+    if(!el) return;
+    const inner=el.querySelector('.hlp-tip');
+    const tip=(inner&&inner.textContent)||el.dataset.tip||'';
+    if(!tip) return;
+    box.textContent=tip;
+    box.style.display='block';
+    const r=el.getBoundingClientRect();
+    let top=r.top-box.offsetHeight-8;
+    let left=r.left+r.width/2-box.offsetWidth/2;
+    if(top<8) top=r.bottom+8;
+    left=Math.max(8,Math.min(left,window.innerWidth-box.offsetWidth-8));
+    box.style.top=top+'px';box.style.left=left+'px';
+  });
+  document.addEventListener('mouseout',e=>{if(e.target.closest('.hlp'))box.style.display='none';});
+})();
 
 function showTab(t){
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calc','pf'][i]===t));
