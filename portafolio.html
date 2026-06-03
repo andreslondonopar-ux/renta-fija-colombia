@@ -18,13 +18,13 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
   --purple:#7c3aed;--purple2:#4c1d95;--purple3:#a78bfa;
   --border:#1e2d4a;--border2:#263554;--r:6px;--r2:10px;
 }
-.ticker-bar{background:#050810;border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;white-space:nowrap;position:relative}
+.ticker-bar{background:#050810;border-bottom:1px solid var(--border);padding:3px 0;overflow:hidden;white-space:nowrap;position:relative}
 .ticker-track{display:inline-flex;animation:tickscroll 80s linear infinite}
 .ticker-track:hover{animation-play-state:paused}
-.tick-item{display:inline-flex;align-items:center;gap:5px;padding:0 22px;font-size:11px;border-right:1px solid var(--border2)}
+.tick-item{display:inline-flex;align-items:center;gap:4px;padding:0 14px;font-size:9.5px;border-right:1px solid var(--border2)}
 .tick-name{color:var(--txt2);font-weight:700}.tick-val{color:var(--txt);font-weight:700}
 .tick-chg.up{color:var(--green3)}.tick-chg.dn{color:var(--red3)}
-.tick-dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
+.tick-dot{width:4px;height:4px;border-radius:50%;display:inline-block;flex-shrink:0}
 .tick-dot.up{background:var(--green)}.tick-dot.dn{background:var(--red)}.tick-dot.nt{background:var(--txt3)}
 @keyframes tickscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ticker-status{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--txt3);background:var(--bg);padding:2px 6px;border-radius:3px}
@@ -110,14 +110,8 @@ body{background:#0a0e1a;color:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;mi
 </head>
 <body>
 
-<div style="height:52px;overflow:hidden;border-bottom:1px solid var(--border)">
-<div class="tradingview-widget-container">
-  <div class="tradingview-widget-container__widget"></div>
-  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-  {"symbols":[{"proName":"FX_IDC:USDCOP","title":"USD/COP"},{"proName":"FX:EURUSD","title":"EUR/USD"},{"proName":"FX_IDC:USDBRL","title":"USD/BRL"},{"proName":"FX_IDC:USDMXN","title":"USD/MXN"},{"proName":"CAPITALCOM:DXY","title":"DXY"},{"proName":"TVC:USOIL","title":"WTI"},{"proName":"TVC:UKOIL","title":"Brent"},{"proName":"TVC:GOLD","title":"Oro"},{"proName":"CAPITALCOM:COPPER","title":"Cobre"},{"proName":"CAPITALCOM:US500","title":"S&P 500"},{"proName":"CAPITALCOM:US100","title":"Nasdaq"},{"proName":"CAPITALCOM:VIX","title":"VIX"},{"proName":"BITSTAMP:BTCUSD","title":"BTC"}],"showSymbolLogo":false,"colorTheme":"dark","isTransparent":true,"displayMode":"compact","locale":"es"}
-  </script>
-</div>
-</div>
+<script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js"></script>
+<tv-ticker-tape symbols="FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD" hide-chart item-size="compact"></tv-ticker-tape>
 
 <div class="topbar">
   <a href="index.html" class="back">&#8592; Inicio</a>
