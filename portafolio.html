@@ -505,8 +505,9 @@ function renderCompare(pf){
   const bestTIR=bestIdx(b=>b.tirAvg||0,true);
   const bestTIRReal=bestIdx(b=>b.tirReal||0,true);
   const today=new Date(); today.setHours(0,0,0,0);
-  function plazoAnios(iso){if(!iso)return 0;const d=new Date(iso+'T12:00:00');return Math.max(0,(d-today)/(365.25*24*3600*1000));}
-  const bestPlazo=bestIdx(b=>plazoAnios(b.venc),true);
+  function plazoAnios(iso){if(!iso)return null;const d=new Date(iso+'T12:00:00');return (d-today)/(365.25*24*3600*1000);}
+  function plazoFmt(iso){const p=plazoAnios(iso);if(p===null)return'—';if(p<0)return`<span style="color:var(--red3);font-weight:700">Vencido</span>`;return p.toFixed(2);}
+  const bestPlazo=bestIdx(b=>{const p=plazoAnios(b.venc);return p&&p>0?p:0;},true);
 
   function cls(i,bestI,higherIsBetter=true){
     if(bonds.length<2)return'neutral';
@@ -526,12 +527,12 @@ function renderCompare(pf){
       {l:'Dirección',v:`<span style="color:${isShort?'var(--red3)':'var(--green3)'}">${isShort?'▼ Corto':'▲ Largo'}</span>`},
       {l:'Liquidación',v:fmtDate(b.liq)},
       {l:'Vencimiento',v:fmtDate(b.venc)},
-      {l:'Plazo (años)',v:plazoAnios(b.venc).toFixed(2),color:i===bestPlazo?'var(--amber3)':'var(--txt)'},
+      {l:'Plazo (años)',v:plazoFmt(b.venc),color:plazoAnios(b.venc)>0&&i===bestPlazo?'var(--amber3)':''},
       {l:'Próx. cupón',v:fmtDate(b.nextCupon)},
       {l:'Cupones rest.',v:b.cupsRem||'—',color:i===bestCups?'var(--green3)':'var(--txt)'},
       {sep:'// Precio y Cupón'},
       {l:'TIR negociación',v:b.tirAvg>0?pct(b.tirAvg*100,4):'—',color:i===bestTIR?'var(--green3)':'var(--txt)'},
-      ...(b.tirReal>0?[{l:b.tipo==='IPC'||b.tipo==='UVR'?'TIR real (spread)':'Spread TIR',v:pct(b.tirReal,4),color:i===bestTIRReal?'var(--blue3)':'var(--txt)'}]:[]),
+      ...((b.tirReal>0&&(b.tipo==='IPC'||b.tipo==='UVR'))?[{l:'TIR real (spread)',v:pct(b.tirReal,4),color:i===bestTIRReal?'var(--blue3)':'var(--txt)'}]:[]),
       {l:b.tipo==='IBR'||b.tipo==='IPC'||b.tipo==='UVR'?'Spread cupón':'Tasa cupón',v:pct(b.cpPct||0,2),color:i===bestCpPct?'var(--amber3)':'var(--txt)'},
       {l:'Precio sucio',v:pct(b.priceRnd||0,4),color:i===bestPrice?'var(--green3)':i===worstPrice?'var(--amber3)':'var(--txt)'},
       {l:'Precio limpio',v:pct(b.pl||0,4)},
