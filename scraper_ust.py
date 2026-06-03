@@ -290,9 +290,9 @@ def main():
         print(f"Aviso historial UST: {e}")
     result['history'] = ust_history[:40]
 
-    # Curva de referencia: ~5 días atrás (alineada con la referencia de Colombia TES)
-    ref_target = (datetime.date.today() - datetime.timedelta(days=5)).isoformat()
-    print(f"\nCurva de referencia (~5d atras: {ref_target}):")
+    # Curva de referencia: ~6 días atrás (alineada con la referencia de Colombia TES)
+    ref_target = (datetime.date.today() - datetime.timedelta(days=6)).isoformat()
+    print(f"\nCurva de referencia (~6d atras: {ref_target}):")
     ref = None
     if all_entries:
         ref = find_reference_in_entries(all_entries, ref_target)
