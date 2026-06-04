@@ -1210,18 +1210,22 @@ async function loadEme(){
 
 // ── CALENDARIO DE EVENTOS ────────────────────────────────────
 const CAL_CFG={
-  banrep: {label:'BanRep',    icon:'🏛', bg:'var(--amber2)',   border:'var(--amber)',  color:'var(--amber3)'},
-  fomc:   {label:'FOMC',      icon:'🇺🇸', bg:'#1d3a6b',        border:'var(--blue)',   color:'var(--blue3)'},
-  cpi_us:   {label:'CPI EE.UU.',   icon:'🇺🇸', bg:'#14291a', border:'#16a34a', color:'#4ade80'},
-  empleo_us:{label:'Empleo EE.UU.',icon:'🇺🇸', bg:'#0d1f3c', border:'#3b82f6', color:'#93c5fd'},
-  pib_us:   {label:'PIB EE.UU.',   icon:'🇺🇸', bg:'#1e1033', border:'#7c3aed', color:'#c4b5fd'},
-  ipc:    {label:'IPC',       icon:'📊', bg:'#064e3b',        border:'var(--green)', color:'var(--green3)'},
-  pib:    {label:'PIB',       icon:'📈', bg:'var(--purple2)', border:'var(--purple)',color:'var(--purple3)'},
-  ise:    {label:'ISE',       icon:'📉', bg:'#164e63',        border:'#0891b2',      color:'#67e8f9'},
-  laboral:{label:'Laboral',   icon:'👷', bg:'#3b1a05',        border:'#c2410c',      color:'#fdba74'},
-  dane:   {label:'DANE',      icon:'📁', bg:'#1e293b',        border:'#475569',      color:'#94a3b8'},
-  eme:    {label:'EME',       icon:'📋', bg:'#0e4a5a',        border:'#0891b2',      color:'#a5f3fc'},
-  tes:    {label:'TES vence', icon:'💼', bg:'var(--red2)',     border:'var(--red)',   color:'var(--red3)'},
+  // ── Colombia — familia ámbar/dorado ──────────────────────────
+  banrep:    {label:'BanRep',        icon:'🏛', bg:'#1f1200', border:'#d97706', color:'#fbbf24'},
+  ipc:       {label:'IPC',           icon:'📊', bg:'#1a1000', border:'#b45309', color:'#fcd34d'},
+  pib:       {label:'PIB',           icon:'📈', bg:'#1a1000', border:'#854d0e', color:'#fde68a'},
+  ise:       {label:'ISE',           icon:'📉', bg:'#181000', border:'#78350f', color:'#fdba74'},
+  laboral:   {label:'Laboral',       icon:'👷', bg:'#180e00', border:'#92400e', color:'#fed7aa'},
+  dane:      {label:'DANE',          icon:'📁', bg:'#181410', border:'#57534e', color:'#a8a29e'},
+  eme:       {label:'EME',           icon:'📋', bg:'#1a1000', border:'#a16207', color:'#fde68a'},
+  tes:       {label:'TES vence',     icon:'💼', bg:'#1f0808', border:'#dc2626', color:'#fca5a5'},
+  // ── EE.UU. — familia azul ────────────────────────────────────
+  fomc:      {label:'FOMC',          icon:'🇺🇸', bg:'#0a1628', border:'#2563eb', color:'#93c5fd'},
+  cpi_us:    {label:'CPI EE.UU.',    icon:'🇺🇸', bg:'#091a1a', border:'#0d9488', color:'#99f6e4'},
+  empleo_us: {label:'Empleo EE.UU.', icon:'🇺🇸', bg:'#0a1628', border:'#1d4ed8', color:'#bfdbfe'},
+  pib_us:    {label:'PIB EE.UU.',    icon:'🇺🇸', bg:'#120a28', border:'#7c3aed', color:'#c4b5fd'},
+  ppi_us:    {label:'PPI EE.UU.',    icon:'🇺🇸', bg:'#091820', border:'#0891b2', color:'#a5f3fc'},
+  ventas_us: {label:'Ventas EE.UU.', icon:'🇺🇸', bg:'#0a1422', border:'#3b82f6', color:'#bfdbfe'},
 };
 const MESES_LARGO=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DOW=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
