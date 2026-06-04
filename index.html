@@ -1253,6 +1253,9 @@ async function loadCalendar(){
       }
     }catch(e){}
 
+    // Deduplicar por date+type (calendar_data tiene prioridad sobre fedwatch)
+    {const seen=new Map();events.forEach(e=>{const k=e.date+'|'+e.type;if(!seen.has(k))seen.set(k,e);});events=[...seen.values()];}
+
     try{
       const r=await fetch('datos_curva.json?_='+Date.now());
       if(r.ok){
