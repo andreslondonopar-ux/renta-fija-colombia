@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-04T21:41:29.124Z",
+  "updated": "2026-06-04T21:45:31.987Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -15,10 +15,38 @@
       "desc": "Índice de Precios al Consumidor"
     },
     {
+      "date": "2026-06-05",
+      "type": "empleo_us",
+      "title": "Empleo EE.UU. — mayo 2026",
+      "desc": "Nóminas no agrícolas (NFP)",
+      "pais": "us"
+    },
+    {
       "date": "2026-06-11",
       "type": "eme",
       "title": "EME junio · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-06-11",
+      "type": "cpi_us",
+      "title": "CPI EE.UU. — mayo 2026",
+      "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-12",
+      "type": "ppi_us",
+      "title": "PPI EE.UU. — mayo 2026",
+      "desc": "Índice de Precios al Productor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-06-16",
+      "type": "ventas_us",
+      "title": "Ventas al por menor — mayo 2026",
+      "desc": "Retail Sales (Census Bureau)",
+      "pais": "us"
     },
     {
       "date": "2026-06-17",
@@ -84,6 +112,20 @@
       "pais": "us"
     },
     {
+      "date": "2026-07-15",
+      "type": "ppi_us",
+      "title": "PPI EE.UU. — junio 2026",
+      "desc": "Índice de Precios al Productor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-07-16",
+      "type": "ventas_us",
+      "title": "Ventas al por menor — junio 2026",
+      "desc": "Retail Sales (Census Bureau)",
+      "pais": "us"
+    },
+    {
       "date": "2026-07-21",
       "type": "ise",
       "title": "ISE mayo · DANE",
@@ -100,6 +142,13 @@
       "type": "fomc",
       "title": "FOMC — Decisión de tasas",
       "desc": "Reunión Federal Reserve (FOMC)",
+      "pais": "us"
+    },
+    {
+      "date": "2026-07-30",
+      "type": "pib_us",
+      "title": "PIB EE.UU. Q2 2026 — Avance",
+      "desc": "GDP Advance Estimate (BEA)",
       "pais": "us"
     },
     {
@@ -145,6 +194,20 @@
       "type": "eme",
       "title": "EME agosto · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-08-13",
+      "type": "ppi_us",
+      "title": "PPI EE.UU. — julio 2026",
+      "desc": "Índice de Precios al Productor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-08-14",
+      "type": "ventas_us",
+      "title": "Ventas al por menor — julio 2026",
+      "desc": "Retail Sales (Census Bureau)",
+      "pais": "us"
     },
     {
       "date": "2026-08-18",
@@ -200,6 +263,20 @@
       "type": "cpi_us",
       "title": "CPI EE.UU. — agosto 2026",
       "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-09-11",
+      "type": "ppi_us",
+      "title": "PPI EE.UU. — agosto 2026",
+      "desc": "Índice de Precios al Productor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-09-12",
+      "type": "ventas_us",
+      "title": "Ventas al por menor — agosto 2026",
+      "desc": "Retail Sales (Census Bureau)",
       "pais": "us"
     },
     {
@@ -272,6 +349,20 @@
       "pais": "us"
     },
     {
+      "date": "2026-10-14",
+      "type": "ppi_us",
+      "title": "PPI EE.UU. — septiembre 2026",
+      "desc": "Índice de Precios al Productor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-10-15",
+      "type": "ventas_us",
+      "title": "Ventas al por menor — sep 2026",
+      "desc": "Retail Sales (Census Bureau)",
+      "pais": "us"
+    },
+    {
       "date": "2026-10-19",
       "type": "ise",
       "title": "ISE agosto · DANE",
@@ -282,6 +373,13 @@
       "type": "dane",
       "title": "Importaciones · DANE",
       "desc": "Estadísticas de comercio exterior"
+    },
+    {
+      "date": "2026-10-29",
+      "type": "pib_us",
+      "title": "PIB EE.UU. Q3 2026 — Avance",
+      "desc": "GDP Advance Estimate (BEA)",
+      "pais": "us"
     },
     {
       "date": "2026-10-30",
@@ -335,6 +433,13 @@
       "pais": "us"
     },
     {
+      "date": "2026-11-13",
+      "type": "ppi_us",
+      "title": "PPI EE.UU. — octubre 2026",
+      "desc": "Índice de Precios al Productor",
+      "pais": "us"
+    },
+    {
       "date": "2026-11-17",
       "type": "pib",
       "title": "PIB Q3 2026 · DANE",
@@ -345,6 +450,13 @@
       "type": "ise",
       "title": "ISE septiembre · DANE",
       "desc": "Indicador de Seguimiento a la Economía"
+    },
+    {
+      "date": "2026-11-17",
+      "type": "ventas_us",
+      "title": "Ventas al por menor — oct 2026",
+      "desc": "Retail Sales (Census Bureau)",
+      "pais": "us"
     },
     {
       "date": "2026-11-18",
@@ -391,10 +503,24 @@
       "pais": "us"
     },
     {
+      "date": "2026-12-11",
+      "type": "ppi_us",
+      "title": "PPI EE.UU. — noviembre 2026",
+      "desc": "Índice de Precios al Productor",
+      "pais": "us"
+    },
+    {
       "date": "2026-12-15",
       "type": "fomc",
       "title": "FOMC — Decisión de tasas",
       "desc": "Reunión Federal Reserve (FOMC)",
+      "pais": "us"
+    },
+    {
+      "date": "2026-12-15",
+      "type": "ventas_us",
+      "title": "Ventas al por menor — nov 2026",
+      "desc": "Retail Sales (Census Bureau)",
       "pais": "us"
     },
     {
