@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-04T16:21:17Z",
+  "updated": "2026-06-04T21:41:29.124Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -19,6 +19,13 @@
       "type": "eme",
       "title": "EME junio · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-06-17",
+      "type": "fomc",
+      "title": "FOMC — Decisión de tasas",
+      "desc": "Reunión Federal Reserve (FOMC)",
+      "pais": "us"
     },
     {
       "date": "2026-06-18",
@@ -45,6 +52,13 @@
       "desc": "Decision tasa de intervencion (efectiva 2026-07-01)"
     },
     {
+      "date": "2026-07-02",
+      "type": "empleo_us",
+      "title": "Empleo EE.UU. — junio 2026",
+      "desc": "Nóminas no agrícolas (NFP)",
+      "pais": "us"
+    },
+    {
       "date": "2026-07-07",
       "type": "ipc",
       "title": "IPC junio · DANE",
@@ -63,6 +77,13 @@
       "desc": "Encuesta mensual de expectativas"
     },
     {
+      "date": "2026-07-14",
+      "type": "cpi_us",
+      "title": "CPI EE.UU. — junio 2026",
+      "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
+    },
+    {
       "date": "2026-07-21",
       "type": "ise",
       "title": "ISE mayo · DANE",
@@ -73,6 +94,13 @@
       "type": "dane",
       "title": "Importaciones · DANE",
       "desc": "Estadísticas de comercio exterior"
+    },
+    {
+      "date": "2026-07-28",
+      "type": "fomc",
+      "title": "FOMC — Decisión de tasas",
+      "desc": "Reunión Federal Reserve (FOMC)",
+      "pais": "us"
     },
     {
       "date": "2026-07-31",
@@ -93,10 +121,24 @@
       "desc": "Estadísticas de comercio exterior"
     },
     {
+      "date": "2026-08-07",
+      "type": "empleo_us",
+      "title": "Empleo EE.UU. — julio 2026",
+      "desc": "Nóminas no agrícolas (NFP)",
+      "pais": "us"
+    },
+    {
       "date": "2026-08-10",
       "type": "ipc",
       "title": "IPC julio · DANE",
       "desc": "Índice de Precios al Consumidor"
+    },
+    {
+      "date": "2026-08-12",
+      "type": "cpi_us",
+      "title": "CPI EE.UU. — julio 2026",
+      "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
     },
     {
       "date": "2026-08-13",
@@ -135,6 +177,13 @@
       "desc": "Estadísticas de comercio exterior"
     },
     {
+      "date": "2026-09-04",
+      "type": "empleo_us",
+      "title": "Empleo EE.UU. — agosto 2026",
+      "desc": "Nóminas no agrícolas (NFP)",
+      "pais": "us"
+    },
+    {
       "date": "2026-09-07",
       "type": "ipc",
       "title": "IPC agosto · DANE",
@@ -145,6 +194,20 @@
       "type": "eme",
       "title": "EME septiembre · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-09-10",
+      "type": "cpi_us",
+      "title": "CPI EE.UU. — agosto 2026",
+      "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-09-15",
+      "type": "fomc",
+      "title": "FOMC — Decisión de tasas",
+      "desc": "Reunión Federal Reserve (FOMC)",
+      "pais": "us"
     },
     {
       "date": "2026-09-18",
@@ -177,6 +240,13 @@
       "desc": "Decision tasa de intervencion (efectiva 2026-10-01)"
     },
     {
+      "date": "2026-10-02",
+      "type": "empleo_us",
+      "title": "Empleo EE.UU. — septiembre 2026",
+      "desc": "Nóminas no agrícolas (NFP)",
+      "pais": "us"
+    },
+    {
       "date": "2026-10-05",
       "type": "dane",
       "title": "Exportaciones · DANE",
@@ -193,6 +263,13 @@
       "type": "eme",
       "title": "EME octubre · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-10-13",
+      "type": "cpi_us",
+      "title": "CPI EE.UU. — septiembre 2026",
+      "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
     },
     {
       "date": "2026-10-19",
@@ -225,6 +302,20 @@
       "desc": "Estadísticas de comercio exterior"
     },
     {
+      "date": "2026-11-04",
+      "type": "fomc",
+      "title": "FOMC — Decisión de tasas",
+      "desc": "Reunión Federal Reserve (FOMC)",
+      "pais": "us"
+    },
+    {
+      "date": "2026-11-06",
+      "type": "empleo_us",
+      "title": "Empleo EE.UU. — octubre 2026",
+      "desc": "Nóminas no agrícolas (NFP)",
+      "pais": "us"
+    },
+    {
       "date": "2026-11-09",
       "type": "ipc",
       "title": "IPC octubre · DANE",
@@ -235,6 +326,13 @@
       "type": "eme",
       "title": "EME noviembre · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-11-12",
+      "type": "cpi_us",
+      "title": "CPI EE.UU. — octubre 2026",
+      "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
     },
     {
       "date": "2026-11-17",
@@ -267,6 +365,13 @@
       "desc": "Estadísticas de comercio exterior"
     },
     {
+      "date": "2026-12-04",
+      "type": "empleo_us",
+      "title": "Empleo EE.UU. — noviembre 2026",
+      "desc": "Nóminas no agrícolas (NFP)",
+      "pais": "us"
+    },
+    {
       "date": "2026-12-07",
       "type": "ipc",
       "title": "IPC noviembre · DANE",
@@ -277,6 +382,20 @@
       "type": "eme",
       "title": "EME diciembre · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-12-10",
+      "type": "cpi_us",
+      "title": "CPI EE.UU. — noviembre 2026",
+      "desc": "Índice de Precios al Consumidor",
+      "pais": "us"
+    },
+    {
+      "date": "2026-12-15",
+      "type": "fomc",
+      "title": "FOMC — Decisión de tasas",
+      "desc": "Reunión Federal Reserve (FOMC)",
+      "pais": "us"
     },
     {
       "date": "2026-12-18",

@@ -221,16 +221,24 @@ def main():
 
     # 4. Cargar calendar_data.json y reemplazar solo eventos banrep
     cal_path = Path("calendar_data.json")
+    US_TYPES = {"cpi_us", "empleo_us", "pib_us", "fomc"}
     if cal_path.exists():
         existing = json.loads(cal_path.read_text(encoding="utf-8"))
-        other_events = [e for e in existing.get("events", [])
-                        if e.get("type") not in ("banrep", "cpi_us", "empleo_us", "pib_us", "fomc")]
+        other_events    = [e for e in existing.get("events", [])
+                           if e.get("type") not in {"banrep"} | US_TYPES]
+        existing_us     = [e for e in existing.get("events", [])
+                           if e.get("type") in US_TYPES]
     else:
-        other_events = []
+        other_events, existing_us = [], []
 
     # 5. Eventos económicos EE.UU. desde Investing.com
     us_events = fetch_us_events()
-    print(f"\n  {len(us_events)} eventos EE.UU. de alta importancia")
+    if us_events:
+        print(f"\n  {len(us_events)} eventos EE.UU. de alta importancia")
+    else:
+        existing_us_future = [e for e in existing_us if e.get("date","") >= str(TODAY)]
+        print(f"\n  Fetch EE.UU. falló — preservando {len(existing_us_future)} eventos futuros existentes")
+        us_events = existing_us_future
 
     all_events = sorted(other_events + banrep_events + us_events, key=lambda e: e["date"])
 
