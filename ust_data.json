@@ -1,5 +1,5 @@
 {
-  "date": "2026-06-03",
+  "date": "2026-06-04",
   "rates": [
     {
       "plazo": "1M",
@@ -9,7 +9,7 @@
     {
       "plazo": "2M",
       "years": 0.167,
-      "tir": 3.71
+      "tir": 3.7
     },
     {
       "plazo": "3M",
@@ -19,7 +19,7 @@
     {
       "plazo": "4M",
       "years": 0.333,
-      "tir": 3.77
+      "tir": 3.76
     },
     {
       "plazo": "6M",
@@ -29,47 +29,117 @@
     {
       "plazo": "1Y",
       "years": 1,
-      "tir": 3.84
+      "tir": 3.82
     },
     {
       "plazo": "2Y",
       "years": 2,
-      "tir": 4.08
+      "tir": 4.05
     },
     {
       "plazo": "3Y",
       "years": 3,
-      "tir": 4.14
+      "tir": 4.1
     },
     {
       "plazo": "5Y",
       "years": 5,
-      "tir": 4.21
+      "tir": 4.18
     },
     {
       "plazo": "7Y",
       "years": 7,
-      "tir": 4.34
+      "tir": 4.32
     },
     {
       "plazo": "10Y",
       "years": 10,
-      "tir": 4.49
+      "tir": 4.47
     },
     {
       "plazo": "20Y",
       "years": 20,
-      "tir": 5.0
+      "tir": 4.98
     },
     {
       "plazo": "30Y",
       "years": 30,
-      "tir": 4.99
+      "tir": 4.97
     }
   ],
   "source": "US Treasury XML",
-  "updated": "2026-06-03T23:43:37Z",
+  "updated": "2026-06-04T23:09:14Z",
   "history": [
+    {
+      "date": "2026-06-03",
+      "rates": [
+        {
+          "plazo": "1M",
+          "years": 0.083,
+          "tir": 3.71
+        },
+        {
+          "plazo": "2M",
+          "years": 0.167,
+          "tir": 3.71
+        },
+        {
+          "plazo": "3M",
+          "years": 0.25,
+          "tir": 3.78
+        },
+        {
+          "plazo": "4M",
+          "years": 0.333,
+          "tir": 3.77
+        },
+        {
+          "plazo": "6M",
+          "years": 0.5,
+          "tir": 3.78
+        },
+        {
+          "plazo": "1Y",
+          "years": 1,
+          "tir": 3.84
+        },
+        {
+          "plazo": "2Y",
+          "years": 2,
+          "tir": 4.08
+        },
+        {
+          "plazo": "3Y",
+          "years": 3,
+          "tir": 4.14
+        },
+        {
+          "plazo": "5Y",
+          "years": 5,
+          "tir": 4.21
+        },
+        {
+          "plazo": "7Y",
+          "years": 7,
+          "tir": 4.34
+        },
+        {
+          "plazo": "10Y",
+          "years": 10,
+          "tir": 4.49
+        },
+        {
+          "plazo": "20Y",
+          "years": 20,
+          "tir": 5.0
+        },
+        {
+          "plazo": "30Y",
+          "years": 30,
+          "tir": 4.99
+        }
+      ]
+    },
     {
       "date": "2026-06-02",
       "rates": [
@@ -282,7 +352,7 @@
     }
   ],
   "reference": {
-    "date": "2026-05-28",
+    "date": "2026-05-29",
     "rates": [
       {
         "plazo": "1M",
@@ -307,32 +377,32 @@
       {
         "plazo": "6M",
         "years": 0.5,
-        "tir": 3.79
+        "tir": 3.78
       },
       {
         "plazo": "1Y",
         "years": 1,
-        "tir": 3.8
+        "tir": 3.79
       },
       {
         "plazo": "2Y",
         "years": 2,
-        "tir": 3.99
+        "tir": 3.98
       },
       {
         "plazo": "3Y",
         "years": 3,
-        "tir": 4.07
+        "tir": 4.06
       },
       {
         "plazo": "5Y",
         "years": 5,
-        "tir": 4.15
+        "tir": 4.13
       },
       {
         "plazo": "7Y",
         "years": 7,
-        "tir": 4.29
+        "tir": 4.27
       },
       {
         "plazo": "10Y",
@@ -347,7 +417,7 @@
       {
         "plazo": "30Y",
         "years": 30,
-        "tir": 4.98
+        "tir": 4.99
       }
     ]
   }
