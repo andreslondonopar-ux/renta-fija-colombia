@@ -723,22 +723,6 @@ function toggleInverso(){inversoOpen=!inversoOpen;$('inversoToggle').classList.t
 
 // ── TICKER ROBUSTO ────────────────────────────────────────────
 
-// ── TICKER ──────────────────────────────────────────────────────
-async function loadTicker(){
-  const el=document.getElementById('tickerTrack');
-  if(!el)return;
-  try{
-    const d=await fetch('market_data.json?_='+Date.now()).then(r=>r.json());
-    if(!d.items?.length)return;
-    const seg=d.items.map(i=>{
-      const c=i.up?'#6ee7b7':'#fca5a5';
-      return`<span style="padding:0 12px;border-right:1px solid #1e2d4a;font-size:10px;display:inline-flex;align-items:center;gap:4px;height:26px"><span style="color:#8892a4;font-weight:700">${i.n}</span><span style="color:${c};font-weight:700">${i.c}</span></span>`;
-    }).join('');
-    el.innerHTML=seg+seg;
-  }catch(e){}
-}
-loadTicker(); setInterval(loadTicker,300000);
-
 // ── BOND MATH ─────────────────────────────────────────────────
 function addMonths(iso,m){
   const[y,mo,d]=(typeof iso==='string'?iso:iso.toISOString().split('T')[0]).split('-').map(Number);
