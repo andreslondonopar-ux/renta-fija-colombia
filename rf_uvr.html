@@ -1286,6 +1286,11 @@ function guardarEnPortafolio() {
     tirAvg:   r.tirAvg   || r.TIR_EA || 0,
     cupsRem:  flows.length,
     nextCupon: nxt.fecha || '',
+    freq:     parseInt(document.getElementById('freq')?.value)||2,
+    base:     parseInt(document.getElementById('base')?.value)||365,
+    couponRate: parseFloat(document.querySelector('[id="cp"],[id="cp_raw"],[id="coupon"]')?.value)||0,
+    uvrSnapshot: parseFloat(document.getElementById('uvr_val')?.value)||1,
+    flows:    (()=>{const uvr=parseFloat(document.getElementById('uvr_val')?.value)||1;return flows.map(f=>({fecha:f.fecha,cf:f.cf/100*(r.nom||0)*uvr}));})(),
   };
   try {
     const list = JSON.parse(localStorage.getItem('rf_portfolio')||'[]');

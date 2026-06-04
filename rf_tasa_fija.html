@@ -1483,6 +1483,10 @@ function guardarEnPortafolio(){
     dmac:r.dmac||0,dmod:r.dmod||0,conv:r.conv||0,
     dv01:Math.abs(r.dv01||0)*sign,
     tirAvg:parseFloat($('ytm')?.value)/100||0,cupsRem:flows.length,nextCupon:nxt.fecha||'',
+    freq:parseInt($('freq')?.value)||4,
+    base:parseInt($('base')?.value)||365,
+    couponType:$('tipo')?.value||'EA',
+    flows:flows.map(f=>({fecha:f.fecha,cf:f.cf})),
   };
   try{
     const list=JSON.parse(localStorage.getItem('rf_portfolio')||'[]');

@@ -1625,6 +1625,11 @@ function guardarEnPortafolio() {
     tirAvg:   r.tirAvg   || r.TIR_EA || 0,
     cupsRem:  flows.length,
     nextCupon: nxt.fecha || '',
+    freq:     parseInt(document.getElementById('freq')?.value)||12,
+    base:     360,
+    spreadCupon: parseFloat(document.getElementById('sc')?.value)||0,
+    spreadTir:   parseFloat(document.getElementById('st')?.value)||0,
+    flows:    flows.map(f=>({fecha:f.fecha,cf:f.cf/100*(r.nom||0)})),
   };
   try {
     const list = JSON.parse(localStorage.getItem('rf_portfolio')||'[]');
