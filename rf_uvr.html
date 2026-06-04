@@ -1194,16 +1194,16 @@ function calcularInverso(){
     if(tipo_inv==='dv01'){
       const nom=valorObj*10000/(dmod*(priceRnd/100)*uvrVal);
       items=[{l:'DV01 objetivo',v:fmtP(valorObj)},
-        {l:'Nominal (UVRs)',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmt(nom,0)} UVRs</span>`},
-        {l:'Nominal en pesos',v:fmtM(nom*uvrVal)},
-        {l:'Valor giro',v:fmtM((priceRnd/100)*nom*uvrVal)},
+        {l:'Nominal (UVRs)',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${Math.round(nom).toLocaleString('es-CO')} UVRs</span>`},
+        {l:'Nominal en pesos',v:fmtP(nom*uvrVal)},
+        {l:'Valor giro',v:fmtP((priceRnd/100)*nom*uvrVal)},
         {l:'DV01 resultante',v:fmtP(dmod*(priceRnd/100)*nom*uvrVal/10000)}];
     } else if(tipo_inv==='vgiro'){
       const nom=valorObj/((priceRnd/100)*uvrVal);
       const dv01r=dmod*(priceRnd/100)*nom*uvrVal/10000;
-      items=[{l:'Caja objetivo',v:fmtM(valorObj)},
-        {l:'Nominal (UVRs)',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmt(nom,0)} UVRs</span>`},
-        {l:'Nominal en pesos',v:fmtM(nom*uvrVal)},
+      items=[{l:'Caja objetivo',v:fmtP(valorObj)},
+        {l:'Nominal (UVRs)',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${Math.round(nom).toLocaleString('es-CO')} UVRs</span>`},
+        {l:'Nominal en pesos',v:fmtP(nom*uvrVal)},
         {l:'Precio sucio',v:fmt(priceRnd,4)+'%'},{l:'DV01',v:fmtP(dv01r)}];
     } else if(tipo_inv==='ganancia'){
       const bp=parseFloat($('inv-bp').value)||0;

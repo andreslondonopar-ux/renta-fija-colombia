@@ -1295,23 +1295,23 @@ function calcularInverso(){
     if(tipo==='dv01'){
       const nom=valorObj*10000/(dmod*(priceRnd/100));
       items=[{l:'DV01 objetivo',v:fmtP(valorObj)},
-        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Nominal exacto',v:fmtP(nom)},{l:'Valor giro',v:fmtM((priceRnd/100)*nom)},
+        {l:'Nominal requerido',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(nom)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(nom)}</span>`},
+        {l:'Valor giro',v:fmtP((priceRnd/100)*nom)},
         {l:'DV01 resultante',v:fmtP(dmod*(priceRnd/100)*nom/10000)},{l:'D. Modificada',v:fmt(dmod,4)}];
     } else if(tipo==='vgiro'){
       const nom=valorObj/(priceRnd/100);const dv01r=dmod*(priceRnd/100)*nom/10000;
-      items=[{l:'Caja objetivo',v:fmtM(valorObj)},
-        {l:'Nominal comprable',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Nominal exacto',v:fmtP(nom)},{l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
-        {l:'Precio limpio',v:fmt(pl,4)+'%'},{l:'DV01',v:fmtP(dv01r)},{l:'IC pagado',v:fmtM(ic/100*nom)}];
+      items=[{l:'Caja objetivo',v:fmtP(valorObj)},
+        {l:'Nominal comprable',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(nom)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(nom)}</span>`},
+        {l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
+        {l:'Precio limpio',v:fmt(pl,4)+'%'},{l:'DV01',v:fmtP(dv01r)},{l:'IC pagado',v:fmtP(ic/100*nom)}];
     } else if(tipo==='ganancia'){
       const bp=parseFloat($('inv-bp').value)||0;
       const fP=(-dmod*(bp/10000)+0.5*conv*(bp/10000)**2)*(priceRnd/100);
       if(Math.abs(fP)<1e-10){alert('Ganancia ~cero');return;}
       const nom=valorObj/fP;const dv01r=dmod*(priceRnd/100)*nom/10000;
-      items=[{l:`Ganancia (${bp>0?'+':''}${bp}bp)`,v:fmtM(valorObj)},
-        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Nominal exacto',v:fmtP(nom)},{l:'Valor giro',v:fmtM((priceRnd/100)*nom)},
+      items=[{l:`Ganancia (${bp>0?'+':''}${bp}bp)`,v:fmtP(valorObj)},
+        {l:'Nominal requerido',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(nom)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(nom)}</span>`},
+        {l:'Valor giro',v:fmtP((priceRnd/100)*nom)},
         {l:'DV01',v:fmtP(dv01r)},{l:'Ganancia D*+Cv',v:fmtM(fP*nom)}];
     }
   }

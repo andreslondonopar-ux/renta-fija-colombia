@@ -1537,23 +1537,23 @@ function calcularInverso(){
     if(tipo==='dv01'){
       const n=valorObj*10000/(dmod*(priceRnd/100));
       items=[{l:'DV01 objetivo',v:fmtP(valorObj)},
-        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(n)}</span>`},
-        {l:'Nominal exacto',v:fmtP(n)},{l:'Valor giro',v:fmtM((priceRnd/100)*n)},
+        {l:'Nominal requerido',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(n)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(n)}</span>`},
+        {l:'Valor giro',v:fmtP((priceRnd/100)*n)},
         {l:'DV01 resultante',v:fmtP(dmod*(priceRnd/100)*n/10000)},{l:'TIR EA',v:fmt(TIR_EA*100,4)+'%'}];
     } else if(tipo==='vgiro'){
       const n=valorObj/(priceRnd/100);
-      items=[{l:'Caja objetivo',v:fmtM(valorObj)},
-        {l:'Nominal comprable',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(n)}</span>`},
-        {l:'Nominal exacto',v:fmtP(n)},{l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
+      items=[{l:'Caja objetivo',v:fmtP(valorObj)},
+        {l:'Nominal comprable',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(n)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(n)}</span>`},
+        {l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
         {l:'Precio limpio',v:fmt(pl,4)+'%'},{l:'DV01',v:fmtP(dmod*(priceRnd/100)*n/10000)}];
     } else if(tipo==='ganancia'){
       const bp=parseFloat($('inv-bp').value)||0;
       const fP=(-dmod*(bp/10000)+0.5*conv*(bp/10000)**2)*(priceRnd/100);
       if(Math.abs(fP)<1e-10){alert('Ganancia ~cero');return;}
       const n=valorObj/fP;
-      items=[{l:`Ganancia (${bp>0?'+':''}${bp}bp)`,v:fmtM(valorObj)},
-        {l:'Nominal requerido',v:`<span style="font-size:18px;font-weight:800;color:var(--amber3)">${fmtM(n)}</span>`},
-        {l:'Nominal exacto',v:fmtP(n)},{l:'Valor giro',v:fmtM((priceRnd/100)*n)},
+      items=[{l:`Ganancia (${bp>0?'+':''}${bp}bp)`,v:fmtP(valorObj)},
+        {l:'Nominal requerido',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(n)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(n)}</span>`},
+        {l:'Valor giro',v:fmtP((priceRnd/100)*n)},
         {l:'DV01',v:fmtP(dmod*(priceRnd/100)*n/10000)}];
     }
   }

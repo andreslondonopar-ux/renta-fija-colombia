@@ -1213,16 +1213,16 @@ function calcularInverso(){
     if(tipo_inv==='dv01'){
       const nom=valorObj*10000/(dmod*(priceRnd/100));const vg=(priceRnd/100)*nom;
       resultado={titulo:'Nominal para DV01 objetivo',items:[
-        {l:'DV01 objetivo',v:'$'+Math.round(valorObj).toLocaleString('es-CO')},
-        {l:'Nominal requerido',v:`<span style="font-size:20px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Valor giro resultante',v:fmtM(vg)},
+        {l:'DV01 objetivo',v:fmtP(valorObj)},
+        {l:'Nominal requerido',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(nom)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(nom)}</span>`},
+        {l:'Valor giro resultante',v:fmtP(vg)},
         {l:'D. Modificada',v:fmt(dmod,4)},
       ]};
     }else if(tipo_inv==='vgiro'){
       const nom=valorObj/(priceRnd/100);const dv01=dmod*(priceRnd/100)*nom/10000;
       resultado={titulo:'Nominal para valor de giro objetivo',items:[
-        {l:'Caja / valor de giro objetivo',v:fmtM(valorObj)},
-        {l:'Nominal comprable',v:`<span style="font-size:20px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
+        {l:'Caja / valor de giro objetivo',v:fmtP(valorObj)},
+        {l:'Nominal comprable',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(nom)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(nom)}</span>`},
         {l:'Precio sucio',v:fmt(priceRnd,4)+'%'},
         {l:'DV01 con ese nominal',v:fmtP(dv01)},
       ]};
@@ -1232,9 +1232,9 @@ function calcularInverso(){
       if(Math.abs(factorPct)<1e-10){alert('Con ese movimiento la ganancia es ~cero.');return;}
       const nom=valorObj/factorPct;const dv01=dmod*(priceRnd/100)*nom/10000;
       resultado={titulo:`Nominal para ganancia objetivo (${bp>0?'+':''}${bp}bp)`,items:[
-        {l:`Ganancia objetivo`,v:fmtM(valorObj)},
-        {l:'Nominal requerido',v:`<span style="font-size:20px;font-weight:800;color:var(--amber3)">${fmtM(nom)}</span>`},
-        {l:'Valor de giro',v:fmtM((priceRnd/100)*nom)},
+        {l:`Ganancia objetivo`,v:fmtP(valorObj)},
+        {l:'Nominal requerido',v:`<span style="font-size:15px;font-weight:800;color:var(--amber3)">${fmtP(nom)}</span><br><span style="font-size:10px;color:var(--txt3)">${fmtM(nom)}</span>`},
+        {l:'Valor de giro',v:fmtP((priceRnd/100)*nom)},
         {l:'DV01',v:fmtP(dv01)},
       ]};
     }
