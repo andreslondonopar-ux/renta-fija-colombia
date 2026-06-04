@@ -489,7 +489,6 @@ svg{display:block;width:100%}
         <span id="cal-hdr-title" style="font-size:14px;font-weight:700;color:var(--txt);min-width:150px;text-align:center"></span>
         <button class="cal-nav-btn" onclick="calNav(1)">&#8250;</button>
         <button class="cal-today-btn" onclick="calGoToday()">Hoy</button>
-        <div id="cal-legend" style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap"></div>
       </div>
       <!-- Grid -->
       <div style="flex:1;overflow-y:auto;padding:12px 14px">
@@ -1289,11 +1288,6 @@ async function loadCalendar(){
       calMonth=d.getMonth();
     }
 
-    // Leyenda
-    const leg=document.getElementById('cal-legend');
-    if(leg) leg.innerHTML=Object.entries(CAL_CFG).map(([,c])=>
-      `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 5px;border-radius:8px;background:${c.bg};border:1px solid ${c.border};color:${c.color}">${c.icon} ${c.label}</span>`
-    ).join('');
   }
   renderCalMonth();
 }
