@@ -18,6 +18,59 @@ FEEDS = [
     {"source": "El Tiempo",       "url": "https://www.eltiempo.com/rss/economia.xml"},
 ]
 
+# Palabras que DEBEN aparecer en el título para aceptar la noticia
+INCLUDE_KW = {
+    # Macro & política monetaria
+    'economía','económico','económica','pib','inflación','deflación',
+    'tasa','tasas','banrep','banco de la república','fed','reserva federal',
+    'política monetaria','política fiscal','devaluación','revaluación',
+    # Mercados & instrumentos
+    'mercado','bolsa','acciones','acción','bono','bonos','tes',
+    'divisa','divisas','dólar','trm','eurodólar','yield','spread',
+    'renta fija','renta variable','portafolio','índice','índices',
+    # Sector financiero
+    'banco','bancos','financiero','financiera','finanzas','crédito',
+    'cartera','préstamo','deuda','déficit','superávit','presupuesto',
+    'fiscal','tributario','tributaria','impuesto','reforma tributaria',
+    # Empresas & corporativo
+    'empresa','empresas','empresarial','corporativo','compañía','industria',
+    'utilidades','ganancias','dividendo','fusión','adquisición','emisión',
+    'inversión','inversionistas','accionistas','cotización','oferta pública',
+    # Comercio & sector real
+    'exportación','importación','comercio','producción','manufactura',
+    'empleo','desempleo','salario','salarios','crecimiento','recesión',
+    'balanza','reservas internacionales',
+    # Energía & commodities (relevante para Colombia)
+    'petróleo','ecopetrol','oil','wti','brent','gas natural','minería',
+    'café','commodities','materias primas',
+    # Entidades clave
+    'superfinanciera','minhacienda','dane','banrep','ocde','fmi','bid',
+    'moody','fitch','s&p','calificadora',
+}
+
+# Palabras que DESCARTAN la noticia aunque aparezca algo financiero
+EXCLUDE_KW = {
+    'fútbol','futbol','deporte','deportes','selección colombia',
+    'farándula','entretenimiento','cine','película','música','artista',
+    'actor','actriz','novela','serie','reality','cantante',
+    'turismo','viaje','viajes','hotel','receta','gastronomía',
+    'salud','medicina','vacuna','pandemia','covid',
+    'política','elecciones','congreso','senado','presidente','alcalde',
+    'seguridad','crimen','delito','homicidio','violencia',
+    'derechos humanos','medio ambiente','clima','temperatura',
+}
+
+
+def is_economic(title: str) -> bool:
+    t = title.lower()
+    for kw in EXCLUDE_KW:
+        if kw in t:
+            return False
+    for kw in INCLUDE_KW:
+        if kw in t:
+            return True
+    return False
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
@@ -117,9 +170,15 @@ def main():
                 seen_urls.add(a["url"])
                 all_arts.append(a)
 
+    # Filtrar: solo noticias económicas/financieras/empresariales
+    filtered = [a for a in all_arts if is_economic(a["title"])]
+    skipped = len(all_arts) - len(filtered)
+    if skipped:
+        print(f"  Filtradas {skipped} noticias no económicas de {len(all_arts)} totales")
+
     # Ordenar por fecha desc
-    all_arts.sort(key=lambda a: a["published"], reverse=True)
-    articles = dedup(all_arts)[:9]
+    filtered.sort(key=lambda a: a["published"], reverse=True)
+    articles = dedup(filtered)[:9]
 
     result = {
         "updated":  NOW,
