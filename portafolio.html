@@ -408,31 +408,57 @@ function resetAggNom(){
 }
 
 // ── TIR REALIZADA ─────────────────────────────────────────────────────────
+function _rateInput(b,i){
+  const inp=(id,ph,color='var(--amber3)')=>`<input type="number" id="${id}" placeholder="${ph}" step="0.01" min="0" max="100"
+    style="width:88px;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:${color};font-size:11px;text-align:right">`;
+  const lbl=t=>`<span style="font-size:9px;color:var(--txt3);font-weight:700">${t}</span>`;
+  if(b.tipo==='IBR')
+    return`<div style="display:flex;align-items:center;gap:4px">${lbl('IBR %')}${inp('tv-a-'+i,'ej: 9.50','#6ee7b7')}${lbl('+ Spread %')}${inp('tv-b-'+i,'ej: 2.30')}</div>`;
+  if(b.tipo==='IPC')
+    return`<div style="display:flex;align-items:center;gap:4px">${lbl('IPC %')}${inp('tv-a-'+i,'ej: 5.68','#6ee7b7')}${lbl('+ Spread %')}${inp('tv-b-'+i,'ej: 7.10')}</div>`;
+  return inp('tv-a-'+i,'TIR EA, ej: 14.00');
+}
+
+function _resolveEA(b,i){
+  const a=parseFloat(document.getElementById('tv-a-'+i)?.value);
+  if(isNaN(a)) return null;
+  const bv=parseFloat(document.getElementById('tv-b-'+i)?.value);
+  if(b.tipo==='IPC'){
+    if(isNaN(bv)) return null;
+    return(1+a/100)*(1+bv/100)-1;           // (1+IPC)×(1+spread)−1
+  }
+  if(b.tipo==='IBR'){
+    if(isNaN(bv)) return null;
+    const freq=b.freq||12;
+    return Math.pow(1+(a/100+bv/100)/freq,freq)-1; // NAMV→EA
+  }
+  return a/100;                              // TF / UVR: ya es EA
+}
+
 function buildTIRRealizadaCard(pfId,bonds){
   const hasFlows=bonds.some(b=>(b.flows||[]).length>0);
   const warn=!hasFlows?`<div style="background:rgba(245,158,11,.1);border:1px solid var(--amber);border-radius:6px;padding:8px 12px;font-size:10px;color:var(--amber3);margin-bottom:10px">
-    ⚠️ Los bonos de este portafolio se guardaron antes de esta versión. Recalcula y vuelve a guardar cada bono en su calculadora para habilitar la proyección de flujos exacta.</div>`:'';
+    ⚠️ Los bonos se guardaron antes de esta versión. Recalcula y vuelve a guardar cada bono para habilitar la proyección exacta.</div>`:'';
   const rows=bonds.map((b,i)=>`<tr>
     <td><span class="tag" style="background:${b.ac2||'#1a2540'};color:${b.ac3||'#e8eaf0'};border-color:${b.ac||'#1e2d4a'}">${b.tipo||'RF'}</span></td>
-    <td style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.label||'—'}</td>
+    <td style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.label||'—'}</td>
     <td style="font-size:10px">${fmtDate(b.venc)}</td>
     <td><input type="date" id="tv-f-${i}" style="padding:3px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--txt);font-size:11px;width:130px"></td>
-    <td><input type="number" id="tv-t-${i}" placeholder="${b.tipo==='TF'||b.tipo==='UVR'?'ej: 14.00':'TIR equiv. EA, ej: 17.20'}" step="0.01" min="0" max="100"
-        style="width:150px;padding:3px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--amber3);font-size:11px;text-align:right"></td>
+    <td>${_rateInput(b,i)}</td>
   </tr>`).join('');
   return`<div class="card">
     <div class="c-hdr">💰 TIR Realizada — Rentabilidad obtenida</div>
     <div class="c-body">
       ${warn}
-      <div style="font-size:10px;color:var(--txt3);margin-bottom:10px;line-height:1.5">
-        Ingresa la <strong>fecha de venta</strong> y la <strong>TIR de mercado (% EA)</strong> de cada bono.
-        Para bonos IBR o IPC ingresa la <em>TIR equivalente EA</em> (IBR+spread o (1+IPC)(1+spread)−1).
-        Deja en blanco los bonos que se mantienen a vencimiento.
+      <div style="font-size:10px;color:var(--txt3);margin-bottom:10px;line-height:1.6">
+        Ingresa la <strong>fecha y tasa de venta</strong> de cada bono en su propio formato
+        (TF → TIR EA · IBR → IBR% + Spread% · IPC → IPC% + Spread%).
+        Deja en blanco los bonos mantenidos a vencimiento.
       </div>
       <div style="overflow-x:auto">
         <table class="ft" style="margin-bottom:12px">
           <thead><tr><th>Tipo</th><th style="text-align:left">Bono</th><th>Vencimiento</th>
-            <th>Fecha de venta</th><th>TIR de venta (% EA)</th></tr></thead>
+            <th>Fecha de venta</th><th>Tasa de venta</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -453,18 +479,15 @@ function calcTIRRealizada(pfId){
 
   bonds.forEach((b,i)=>{
     const fechaV=(document.getElementById('tv-f-'+i)?.value||'').trim();
-    const tirPct=parseFloat(document.getElementById('tv-t-'+i)?.value);
-    const tirEA=isNaN(tirPct)?null:tirPct/100;
+    const tirEA=_resolveEA(b,i);
     const flows=b.flows||[];
     if(!flows.length) sinFlujos=true;
 
-    // Desembolso (salida de caja) en fecha de compra
     allCF.push({date:b.liq||flows[0]?.fecha||'2020-01-01',amount:-Math.abs(b.vGiro)});
 
     let valorVenta=0,cuponesCobrados=0,nCup=0;
 
     if(fechaV&&tirEA!==null&&flows.length){
-      // Vendido antes del vencimiento
       flows.filter(f=>f.fecha<=fechaV).forEach(f=>{
         allCF.push({date:f.fecha,amount:f.cf});
         cuponesCobrados+=f.cf; nCup++;
@@ -472,14 +495,15 @@ function calcTIRRealizada(pfId){
       valorVenta=repriceBond(b,fechaV,tirEA);
       if(valorVenta>0) allCF.push({date:fechaV,amount:valorVenta});
     } else {
-      // Mantenido a vencimiento / sin venta
       flows.forEach(f=>{
         allCF.push({date:f.fecha,amount:f.cf});
         cuponesCobrados+=f.cf; nCup++;
       });
     }
     const pg=cuponesCobrados+valorVenta-Math.abs(b.vGiro);
-    detalles.push({b,fechaV:fechaV||b.venc,valorVenta,cuponesCobrados,nCup,pg});
+    // Mostrar tasa efectiva calculada
+    const tirShow=tirEA!==null?`<span style="font-size:9px;color:var(--txt3)"> = ${pct(tirEA*100,4)} EA</span>`:'';
+    detalles.push({b,fechaV:fechaV||b.venc,valorVenta,cuponesCobrados,nCup,pg,tirShow});
   });
 
   const out=document.getElementById('tir-r-out'); if(!out) return;
@@ -498,10 +522,10 @@ function calcTIRRealizada(pfId){
   const detRows=detalles.map(d=>`<tr>
     <td><span class="tag" style="background:${d.b.ac2||'#1a2540'};color:${d.b.ac3||'#e8eaf0'};border-color:${d.b.ac||'#1e2d4a'}">${d.b.tipo||'RF'}</span></td>
     <td style="font-size:10px">${d.b.label||'—'}</td>
-    <td style="font-size:10px">${fmtDate(d.fechaV)}</td>
+    <td style="font-size:10px">${fmtDate(d.fechaV)}${d.tirShow}</td>
     <td>${fmtP(Math.abs(d.b.vGiro))}</td>
     <td>${d.valorVenta>0?fmtP(d.valorVenta):'<span style="color:var(--txt3)">a venc.</span>'}</td>
-    <td>${fmtP(d.cuponesCobrados)}<span style="font-size:9px;color:var(--txt3)"> (${d.nCup})</span></td>
+    <td>${fmtP(d.cuponesCobrados)}<span style="font-size:9px;color:var(--txt3)"> (${d.nCup} cup.)</span></td>
     <td style="font-weight:700;color:${d.pg>=0?'var(--green3)':'var(--red3)'}">${d.pg>=0?'+':''}${fmtP(d.pg)}</td>
   </tr>`).join('');
 
@@ -514,7 +538,7 @@ function calcTIRRealizada(pfId){
     <div style="overflow-x:auto">
       <table class="ft">
         <thead><tr><th>Tipo</th><th style="text-align:left">Bono</th>
-          <th>F.Venta/Venc</th><th>V.Compra</th><th>V.Venta mercado</th>
+          <th>F.Venta / TIR EA</th><th>V.Compra</th><th>V.Venta mercado</th>
           <th>Cupones cobrados</th><th>P&G</th></tr></thead>
         <tbody>${detRows}</tbody>
         <tfoot><tr>
