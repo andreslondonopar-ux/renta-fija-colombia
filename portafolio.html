@@ -408,15 +408,52 @@ function resetAggNom(){
 }
 
 // ── TIR REALIZADA ─────────────────────────────────────────────────────────
+// ── Lookup IBR/IPC desde JSONs del proyecto ───────────────────
+async function _loadRateData(){
+  if(!window._pf_ibr){
+    try{const r=await fetch('datos_ibr.json?_='+Date.now());
+      if(r.ok){const d=await r.json();window._pf_ibr=d.data||{};}}catch(e){}
+  }
+  if(!window._pf_ipc){
+    try{const r=await fetch('datos_ipc.json?_='+Date.now());
+      if(r.ok){const d=await r.json();window._pf_ipc=d.data||[];}}catch(e){}
+  }
+}
+function _lookupIBR(dateStr){
+  const data=window._pf_ibr; if(!data) return null;
+  const keys=Object.keys(data).sort();
+  let best=null;
+  for(const k of keys){if(k<=dateStr)best=k;else break;}
+  return best?+(data[best]*100).toFixed(4):null;
+}
+function _lookupIPC(dateStr){
+  const data=window._pf_ipc; if(!data||!data.length) return null;
+  const d=new Date(dateStr+'T12:00:00');
+  const y=d.getFullYear(),m=d.getMonth()+1;
+  let best=null;
+  for(const e of data){if(e.y<y||(e.y===y&&e.m<=m))best=e;}
+  return best?+(best.v*100).toFixed(4):null;
+}
+function pfAutoRate(i,tipo){
+  const dateStr=document.getElementById('tv-f-'+i)?.value; if(!dateStr) return;
+  const el=document.getElementById('tv-a-'+i); if(!el) return;
+  const rate=tipo==='IBR'?_lookupIBR(dateStr):tipo==='IPC'?_lookupIPC(dateStr):null;
+  if(rate!==null){el.value=rate;el.style.borderColor='#10b981';}
+  else{el.value='';el.style.borderColor='';}
+}
+
 function _rateInput(b,i){
-  const inp=(id,ph,color='var(--amber3)')=>`<input type="number" id="${id}" placeholder="${ph}" step="0.01" min="0" max="100"
-    style="width:88px;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:${color};font-size:11px;text-align:right">`;
+  const spread=(id,ph)=>`<input type="number" id="${id}" placeholder="${ph}" step="0.01" min="0" max="100"
+    style="width:88px;padding:3px 5px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--amber3);font-size:11px;text-align:right">`;
+  const auto=(id)=>`<input type="number" id="${id}" placeholder="auto" step="0.0001"
+    style="width:80px;padding:3px 5px;background:#071a10;border:1px solid #166534;border-radius:4px;color:#6ee7b7;font-size:11px;text-align:right"
+    title="Se llena automático según la fecha — editable si necesitas sobreescribir">`;
   const lbl=t=>`<span style="font-size:9px;color:var(--txt3);font-weight:700">${t}</span>`;
   if(b.tipo==='IBR')
-    return`<div style="display:flex;align-items:center;gap:4px">${lbl('IBR %')}${inp('tv-a-'+i,'ej: 9.50','#6ee7b7')}${lbl('+ Spread %')}${inp('tv-b-'+i,'ej: 2.30')}</div>`;
+    return`<div style="display:flex;align-items:center;gap:4px">${lbl('IBR')}${auto('tv-a-'+i)}${lbl('+ Spread %')}${spread('tv-b-'+i,'ej: 2.30')}</div>`;
   if(b.tipo==='IPC')
-    return`<div style="display:flex;align-items:center;gap:4px">${lbl('IPC %')}${inp('tv-a-'+i,'ej: 5.68','#6ee7b7')}${lbl('+ Spread %')}${inp('tv-b-'+i,'ej: 7.10')}</div>`;
-  return inp('tv-a-'+i,'TIR EA, ej: 14.00');
+    return`<div style="display:flex;align-items:center;gap:4px">${lbl('IPC')}${auto('tv-a-'+i)}${lbl('+ Spread %')}${spread('tv-b-'+i,'ej: 7.10')}</div>`;
+  return spread('tv-a-'+i,'TIR EA, ej: 14.00');
 }
 
 function _resolveEA(b,i){
@@ -443,9 +480,11 @@ function buildTIRRealizadaCard(pfId,bonds){
     <td><span class="tag" style="background:${b.ac2||'#1a2540'};color:${b.ac3||'#e8eaf0'};border-color:${b.ac||'#1e2d4a'}">${b.tipo||'RF'}</span></td>
     <td style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.label||'—'}</td>
     <td style="font-size:10px">${fmtDate(b.venc)}</td>
-    <td><input type="date" id="tv-f-${i}" style="padding:3px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--txt);font-size:11px;width:130px"></td>
+    <td><input type="date" id="tv-f-${i}" onchange="pfAutoRate(${i},'${b.tipo}')"
+        style="padding:3px 6px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--txt);font-size:11px;width:130px"></td>
     <td>${_rateInput(b,i)}</td>
   </tr>`).join('');
+  _loadRateData();
   return`<div class="card">
     <div class="c-hdr">💰 TIR Realizada — Rentabilidad obtenida</div>
     <div class="c-body">
