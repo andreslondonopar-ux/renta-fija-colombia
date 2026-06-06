@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-05T15:56:32Z",
+  "updated": "2026-06-06T14:43:13Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -13,27 +13,6 @@
       "type": "ipc",
       "title": "IPC mayo · DANE",
       "desc": "Índice de Precios al Consumidor"
-    },
-    {
-      "date": "2026-06-05",
-      "type": "empleo_us",
-      "title": "Average Hourly Earnings (MoM) — May",
-      "desc": "Act: 0.3 · Prev: 0.3 · Ant: 0.2",
-      "pais": "us"
-    },
-    {
-      "date": "2026-06-05",
-      "type": "empleo_us",
-      "title": "Nonfarm Payrolls — May",
-      "desc": "Act: 172 · Prev: 85 · Ant: 179",
-      "pais": "us"
-    },
-    {
-      "date": "2026-06-05",
-      "type": "empleo_us",
-      "title": "Unemployment Rate — May",
-      "desc": "Act: 4.3 · Prev: 4.3 · Ant: 4.3",
-      "pais": "us"
     },
     {
       "date": "2026-06-10",
