@@ -1,45 +1,45 @@
 {
-  "date": "2026-06-05",
+  "date": "2026-06-08",
   "rates": [
     {
       "plazo": "1M",
       "years": 0.083,
-      "tir": 3.71
+      "tir": 3.7
     },
     {
       "plazo": "2M",
       "years": 0.167,
-      "tir": 3.71
+      "tir": 3.7
     },
     {
       "plazo": "3M",
       "years": 0.25,
-      "tir": 3.78
+      "tir": 3.8
     },
     {
       "plazo": "4M",
       "years": 0.333,
-      "tir": 3.78
+      "tir": 3.79
     },
     {
       "plazo": "6M",
       "years": 0.5,
-      "tir": 3.81
+      "tir": 3.83
     },
     {
       "plazo": "1Y",
       "years": 1,
-      "tir": 3.88
+      "tir": 3.85
     },
     {
       "plazo": "2Y",
       "years": 2,
-      "tir": 4.17
+      "tir": 4.15
     },
     {
       "plazo": "3Y",
       "years": 3,
-      "tir": 4.22
+      "tir": 4.21
     },
     {
       "plazo": "5Y",
@@ -49,27 +49,97 @@
     {
       "plazo": "7Y",
       "years": 7,
-      "tir": 4.41
+      "tir": 4.42
     },
     {
       "plazo": "10Y",
       "years": 10,
-      "tir": 4.55
+      "tir": 4.56
     },
     {
       "plazo": "20Y",
       "years": 20,
-      "tir": 5.03
+      "tir": 5.05
     },
     {
       "plazo": "30Y",
       "years": 30,
-      "tir": 5.01
+      "tir": 5.03
     }
   ],
   "source": "US Treasury XML",
-  "updated": "2026-06-05T23:09:13Z",
+  "updated": "2026-06-08T23:12:01Z",
   "history": [
+    {
+      "date": "2026-06-05",
+      "rates": [
+        {
+          "plazo": "1M",
+          "years": 0.083,
+          "tir": 3.71
+        },
+        {
+          "plazo": "2M",
+          "years": 0.167,
+          "tir": 3.71
+        },
+        {
+          "plazo": "3M",
+          "years": 0.25,
+          "tir": 3.78
+        },
+        {
+          "plazo": "4M",
+          "years": 0.333,
+          "tir": 3.78
+        },
+        {
+          "plazo": "6M",
+          "years": 0.5,
+          "tir": 3.81
+        },
+        {
+          "plazo": "1Y",
+          "years": 1,
+          "tir": 3.88
+        },
+        {
+          "plazo": "2Y",
+          "years": 2,
+          "tir": 4.17
+        },
+        {
+          "plazo": "3Y",
+          "years": 3,
+          "tir": 4.22
+        },
+        {
+          "plazo": "5Y",
+          "years": 5,
+          "tir": 4.29
+        },
+        {
+          "plazo": "7Y",
+          "years": 7,
+          "tir": 4.41
+        },
+        {
+          "plazo": "10Y",
+          "years": 10,
+          "tir": 4.55
+        },
+        {
+          "plazo": "20Y",
+          "years": 20,
+          "tir": 5.03
+        },
+        {
+          "plazo": "30Y",
+          "years": 30,
+          "tir": 5.01
+        }
+      ]
+    },
     {
       "date": "2026-06-04",
       "rates": [
@@ -422,7 +492,7 @@
     }
   ],
   "reference": {
-    "date": "2026-05-29",
+    "date": "2026-06-02",
     "rates": [
       {
         "plazo": "1M",
@@ -437,12 +507,12 @@
       {
         "plazo": "3M",
         "years": 0.25,
-        "tir": 3.69
+        "tir": 3.77
       },
       {
         "plazo": "4M",
         "years": 0.333,
-        "tir": 3.78
+        "tir": 3.79
       },
       {
         "plazo": "6M",
@@ -452,42 +522,42 @@
       {
         "plazo": "1Y",
         "years": 1,
-        "tir": 3.79
+        "tir": 3.82
       },
       {
         "plazo": "2Y",
         "years": 2,
-        "tir": 3.98
+        "tir": 4.05
       },
       {
         "plazo": "3Y",
         "years": 3,
-        "tir": 4.06
+        "tir": 4.09
       },
       {
         "plazo": "5Y",
         "years": 5,
-        "tir": 4.13
+        "tir": 4.17
       },
       {
         "plazo": "7Y",
         "years": 7,
-        "tir": 4.27
+        "tir": 4.31
       },
       {
         "plazo": "10Y",
         "years": 10,
-        "tir": 4.45
+        "tir": 4.46
       },
       {
         "plazo": "20Y",
         "years": 20,
-        "tir": 4.98
+        "tir": 4.97
       },
       {
         "plazo": "30Y",
         "years": 30,
-        "tir": 4.99
+        "tir": 4.97
       }
     ]
   }
