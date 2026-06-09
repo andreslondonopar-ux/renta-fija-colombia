@@ -1,7 +1,21 @@
 {
-  "updated": "2026-06-08T21:52:49Z",
-  "date": "2026-06-08",
+  "updated": "2026-06-09T01:52:01Z",
+  "date": "2026-06-09",
   "articles": [
+    {
+      "title": "Más de 8.000 empresas prefirieron pagarle una multa al Sena que contratar a aprendices tras la reforma laboral",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sectores/mas-de-8-000-empresas-prefirieron-pagarle-una-multa-al-sena-que-contratar-a-aprendices-tras-la-reforma-laboral-3561957",
+      "published": "2026-06-09T01:31:13Z",
+      "summary": "A las compañías les está saliendo más rentable pagar esa penalización que contratar a los jóvenes."
+    },
+    {
+      "title": "Estudio concluye que la minería moderna puede crecer sin desplazar al agro",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sectores/estudio-concluye-que-la-mineria-moderna-puede-crecer-sin-desplazar-al-agro-3562921",
+      "published": "2026-06-08T23:03:21Z",
+      "summary": "Un análisis de E-Concept encontró que la minería moderna de cobre no desplaza la producción agrícola y que ambas actividades pueden coexistir."
+    },
     {
       "title": "Deuda en dólares se convierte en un freno para la inversión de las empresas",
       "source": "Portafolio",
@@ -50,20 +64,6 @@
       "url": "https://www.valoraanalitik.com/exportacion-petrolera-de-venezuela-llego-a-su-nivel-mas-alto-desde-2018-se-ubico-en-125-millones-de-barriles-diarios-en-mayo/",
       "published": "2026-06-08T19:00:00Z",
       "summary": "El petróleo venezolano alivia parcialmente las presiones sobre la oferta mundial derivadas de la guerra entre EE. UU. e Irán."
-    },
-    {
-      "title": "La empresa colombiana que ayuda a Coca-Cola, TikTok y General Motors a traducir la complejidad regulatoria de América Latina",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/empresas/la-empresa-colombiana-que-ayuda-a-coca-cola-tiktok-y-general-motors-a-traducir-la-complejidad-regulatoria-de-america-latina-3562873",
-      "published": "2026-06-08T17:49:21Z",
-      "summary": "La plataforma creada por Luis Alberto Rodríguez, ayuda a detectar riesgos, identificar oportunidades y navegar por la normativa regional."
-    },
-    {
-      "title": "‘Sobreproducción siderúrgica mundial alcanzaría las 745 millones de toneladas en 2028’: Ocde",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/infraestructura/sobreproduccion-siderurgica-mundial-alcanzaria-las-745-millones-de-toneladas-en-2028-ocde-495748",
-      "published": "2026-06-08T17:44:09Z",
-      "summary": "Los fabricantes de acero chinos exportaron una cifra récord de 131 millones de toneladas en 2025."
     }
   ]
 }
