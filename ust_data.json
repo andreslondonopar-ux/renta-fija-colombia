@@ -1,20 +1,20 @@
 {
-  "date": "2026-06-08",
+  "date": "2026-06-09",
   "rates": [
     {
       "plazo": "1M",
       "years": 0.083,
-      "tir": 3.7
+      "tir": 3.69
     },
     {
       "plazo": "2M",
       "years": 0.167,
-      "tir": 3.7
+      "tir": 3.69
     },
     {
       "plazo": "3M",
       "years": 0.25,
-      "tir": 3.8
+      "tir": 3.79
     },
     {
       "plazo": "4M",
@@ -24,52 +24,122 @@
     {
       "plazo": "6M",
       "years": 0.5,
-      "tir": 3.83
+      "tir": 3.82
     },
     {
       "plazo": "1Y",
       "years": 1,
-      "tir": 3.85
+      "tir": 3.9
     },
     {
       "plazo": "2Y",
       "years": 2,
-      "tir": 4.15
+      "tir": 4.13
     },
     {
       "plazo": "3Y",
       "years": 3,
-      "tir": 4.21
+      "tir": 4.16
     },
     {
       "plazo": "5Y",
       "years": 5,
-      "tir": 4.29
+      "tir": 4.26
     },
     {
       "plazo": "7Y",
       "years": 7,
-      "tir": 4.42
+      "tir": 4.39
     },
     {
       "plazo": "10Y",
       "years": 10,
-      "tir": 4.56
+      "tir": 4.53
     },
     {
       "plazo": "20Y",
       "years": 20,
-      "tir": 5.05
+      "tir": 5.02
     },
     {
       "plazo": "30Y",
       "years": 30,
-      "tir": 5.03
+      "tir": 5.01
     }
   ],
   "source": "US Treasury XML",
-  "updated": "2026-06-08T23:12:01Z",
+  "updated": "2026-06-09T23:17:06Z",
   "history": [
+    {
+      "date": "2026-06-08",
+      "rates": [
+        {
+          "plazo": "1M",
+          "years": 0.083,
+          "tir": 3.7
+        },
+        {
+          "plazo": "2M",
+          "years": 0.167,
+          "tir": 3.7
+        },
+        {
+          "plazo": "3M",
+          "years": 0.25,
+          "tir": 3.8
+        },
+        {
+          "plazo": "4M",
+          "years": 0.333,
+          "tir": 3.79
+        },
+        {
+          "plazo": "6M",
+          "years": 0.5,
+          "tir": 3.83
+        },
+        {
+          "plazo": "1Y",
+          "years": 1,
+          "tir": 3.85
+        },
+        {
+          "plazo": "2Y",
+          "years": 2,
+          "tir": 4.15
+        },
+        {
+          "plazo": "3Y",
+          "years": 3,
+          "tir": 4.21
+        },
+        {
+          "plazo": "5Y",
+          "years": 5,
+          "tir": 4.29
+        },
+        {
+          "plazo": "7Y",
+          "years": 7,
+          "tir": 4.42
+        },
+        {
+          "plazo": "10Y",
+          "years": 10,
+          "tir": 4.56
+        },
+        {
+          "plazo": "20Y",
+          "years": 20,
+          "tir": 5.05
+        },
+        {
+          "plazo": "30Y",
+          "years": 30,
+          "tir": 5.03
+        }
+      ]
+    },
     {
       "date": "2026-06-05",
       "rates": [
@@ -492,12 +562,12 @@
     }
   ],
   "reference": {
-    "date": "2026-06-02",
+    "date": "2026-06-03",
     "rates": [
       {
         "plazo": "1M",
         "years": 0.083,
-        "tir": 3.72
+        "tir": 3.71
       },
       {
         "plazo": "2M",
@@ -507,12 +577,12 @@
       {
         "plazo": "3M",
         "years": 0.25,
-        "tir": 3.77
+        "tir": 3.78
       },
       {
         "plazo": "4M",
         "years": 0.333,
-        "tir": 3.79
+        "tir": 3.77
       },
       {
         "plazo": "6M",
@@ -522,42 +592,42 @@
       {
         "plazo": "1Y",
         "years": 1,
-        "tir": 3.82
+        "tir": 3.84
       },
       {
         "plazo": "2Y",
         "years": 2,
-        "tir": 4.05
+        "tir": 4.08
       },
       {
         "plazo": "3Y",
         "years": 3,
-        "tir": 4.09
+        "tir": 4.14
       },
       {
         "plazo": "5Y",
         "years": 5,
-        "tir": 4.17
+        "tir": 4.21
       },
       {
         "plazo": "7Y",
         "years": 7,
-        "tir": 4.31
+        "tir": 4.34
       },
       {
         "plazo": "10Y",
         "years": 10,
-        "tir": 4.46
+        "tir": 4.49
       },
       {
         "plazo": "20Y",
         "years": 20,
-        "tir": 4.97
+        "tir": 5.0
       },
       {
         "plazo": "30Y",
         "years": 30,
-        "tir": 4.97
+        "tir": 4.99
       }
     ]
   }
