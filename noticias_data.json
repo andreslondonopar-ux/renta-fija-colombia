@@ -1,69 +1,69 @@
 {
-  "updated": "2026-06-11T18:48:40Z",
+  "updated": "2026-06-11T22:04:23Z",
   "date": "2026-06-11",
   "articles": [
     {
-      "title": "Desplome del dólar en Colombia: Perfora el piso de los $3.500 y cae a niveles no vistos desde 2021",
+      "title": "Bancolombia habilita compra y venta de dólares digitales desde su app",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/bancolombia-habilita-compra-y-venta-de-dolares-digitales-desde-su-app-496013",
+      "published": "2026-06-11T21:48:11Z",
+      "summary": "El servicio permitirá comprar, vender, consultar movimientos y convertir estos activos a pesos colombianos."
+    },
+    {
+      "title": "¿Dónde están hoy las oportunidades de inversión fuera de la bolsa?; esto dicen expertos de Sura Asset Management",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sector-financiero/donde-estan-hoy-las-oportunidades-de-inversion-fuera-de-la-bolsa-esto-dicen-expertos-de-sura-asset-management-3563728",
+      "published": "2026-06-11T21:46:36Z",
+      "summary": "La transición energética, la digitalización y la brecha de financiamiento empresarial aparecen como algunos de los principales motores de crecimiento."
+    },
+    {
+      "title": "La compañía de GLP Colgas convertirá 3.000 vehículos a gas licuado en 2026",
       "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/desplome-del-dolar-en-colombia-perfora-el-piso-de-los-3-500-y-cae-a-niveles-no-vistos-desde-2021/",
-      "published": "2026-06-11T18:36:00Z",
-      "summary": "Tras abrir en $3.543,10 y registrar un máximo de $3.555 en las primeras operaciones, la cotización llegó hasta un mínimo intradía de $3.4865."
+      "url": "https://www.valoraanalitik.com/la-compania-de-glp-colgas-convertira-tres-mil-vehiculos-a-gas-licuado-en-2026/",
+      "published": "2026-06-11T21:00:00Z",
+      "summary": "La empresa manifestó que el gas es más económico que la gasolina y señaló que entre 30 % y 45 % de los ingresos de los conductores van al pago de combustibles."
     },
     {
-      "title": "'No va a haber tarifa diferencial': Gobierno reconoce que no hay presupuesto para los peajes del Eje Cafetero",
+      "title": "¿No va más?: este es el Ministerio que inició cierre administrativo antes de que finalice el Gobierno Petro",
       "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/infraestructura/no-va-a-haber-tarifa-diferencial-gobierno-reconoce-que-no-hay-presupuesto-para-los-peajes-del-eje-cafetero-495992",
-      "published": "2026-06-11T18:00:00Z",
-      "summary": "Declaración contradice anuncio oficial del 20 de mayo cuando ANI confirmó reducción inmediata de tarifas a $700."
+      "url": "https://www.portafolio.co/economia/gobierno/no-va-mas-este-es-el-ministerio-que-se-acabara-antes-de-que-finalice-el-gobierno-petro-496008",
+      "published": "2026-06-11T20:55:58Z",
+      "summary": "La entidad activó un cronograma interno ante el vencimiento del plazo fijado por la Corte Constitucional."
     },
     {
-      "title": "Dólar en Colombia se negocia por debajo de $3.500 y alcanza su precio más bajo en casi siete años",
+      "title": "Depuración del efecto TRS revela fuerte aumento de compras extranjeras de deuda pública colombiana",
       "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/dolar-en-colombia-cae-a-su-precio-mas-bajo-de-2026-estos-son-los-factores-detras-de-la-caida-495981",
-      "published": "2026-06-11T17:47:08Z",
-      "summary": "La moneda estadounidense bajó en medio de la cautela electoral y los datos económicos de Estados Unidos."
+      "url": "https://www.portafolio.co/economia/depuracion-del-efecto-trs-revela-fuerte-aumento-de-compras-extranjeras-de-deuda-publica-colombiana-496005",
+      "published": "2026-06-11T20:33:05Z",
+      "summary": "Los extranjeros se ubicaron como el segundo mayor comprador de títulos del Gobierno nacional."
     },
     {
-      "title": "Programa de la ONU para el Desarrollo destaca el inicio de las Finanzas Abiertas obligatorias en Colombia",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/finanzas/programa-de-la-onu-para-el-desarrollo-destaca-el-inicio-de-las-finanzas-abiertas-obligatorias-en-colombia-495989",
-      "published": "2026-06-11T17:13:34Z",
-      "summary": "Expedición del Decreto 368 posiciona a Colombia como líder regional en innovación financiera, dijo el organismo."
-    },
-    {
-      "title": "La Superfinanciera lanzó una herramienta fortalecer el conocimiento frente al fraude",
-      "source": "La República",
-      "url": "https://www.larepublica.co/finanzas/la-superfinanciera-lanzo-una-herramienta-fortalecer-el-conocimiento-frente-al-fraude-4412414",
-      "published": "2026-06-11T16:38:03Z",
-      "summary": "La entidad busca reforzar la identificación de delitos financieros y cibernéticos, así como apostar por una mayor conocimiento en materia de denuncias"
-    },
-    {
-      "title": "Bogotá: vence el plazo para inscribirse al pago por cuotas del impuesto vehicular",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/regiones/bogota-vence-el-plazo-para-inscribirse-al-pago-por-cuotas-del-impuesto-vehicular-495982",
-      "published": "2026-06-11T16:21:30Z",
-      "summary": "Más de 1,2 millones de propietarios de vehículos en Bogotá aún pueden acceder al pago por cuotas."
-    },
-    {
-      "title": "Ya se pueden comprar dólares digitales desde la app de Bancolombia: así funcionará el servicio",
+      "title": "Bajo recaudo tributario: por qué la DIAN recibió menos dinero del esperado por el impuesto al patrimonio",
       "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/comprar-dolares-digitales-bancolombia/",
-      "published": "2026-06-11T16:20:00Z",
-      "summary": "Como lo reveló Valora Analitik esta función, disponible también en Nequi, es posible a través de Wenia, la plataforma de criptos de Grupo Cibest."
+      "url": "https://www.valoraanalitik.com/por-que-la-dian-recaudo-pocos-impuestos/",
+      "published": "2026-06-11T20:30:00Z",
+      "summary": "La DIAN reconoce que el recaudo del impuesto al patrimonio quedó por debajo de las metas. Un exdirectivo de la entidad explica qué habría detrás del desfase."
     },
     {
-      "title": "Sura Investments le apuesta a los activos alternativos para sus portafolios",
-      "source": "La República",
-      "url": "https://www.larepublica.co/finanzas/sura-investments-le-apuesta-a-los-activos-alternativos-para-sus-portafolios-4412343",
-      "published": "2026-06-11T16:14:29Z",
-      "summary": "La regionalización de las cadenas de suministro también permite que el tema de costos y logística sea mucho más amable"
+      "title": "Fenómeno de El Niño se adelantó 3 meses y llegará antes de lo previsto a Colombia: cuándo será la fecha crítica",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/regiones/el-nino-llega-antes-de-lo-previsto-a-colombia-estos-serian-los-meses-mas-criticos-495998",
+      "published": "2026-06-11T20:11:50Z",
+      "summary": "El Gobierno confirmó el inicio del evento climático, que podría afectar el abastecimiento de agua."
     },
     {
-      "title": "Tras cambio de marca, supermercado en Antioquia reporta crecimiento del 11 % en ventas: plan de expansión y otras inversiones",
+      "title": "Relevante | Fenómeno de El Niño comienza en Colombia antes de lo previsto: podría ser uno de los más fuertes en 75 años",
       "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/tras-cambio-de-marca-supermercado-en-antioquia-reporta-crecimiento-del-11-en-ventas-plan-de-expansion-y-otras-inversiones/",
-      "published": "2026-06-11T16:00:00Z",
-      "summary": "La cadena antioqueña consolida su identidad con 14 tiendas en Medellín y sus municipios cercanos."
+      "url": "https://www.valoraanalitik.com/fenomeno-de-el-nino-comienza-en-colombia-antes-de-lo-previsto-podria-ser-uno-de-los-mas-fuertes-en-75-anos/",
+      "published": "2026-06-11T20:00:00Z",
+      "summary": "La ministra encargada de Ambiente y directora de la ANLA, Irene Vélez, lanzó alertas sobre medidas de prevención y cuidado del agua."
+    },
+    {
+      "title": "GFT Technologies abre vacantes en Colombia: busca devops, fullstack y más perfiles tech para contratación inmediata",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/finanzas-personales/gft-technologies-busca-su-talento-conozca-las-ofertas-y-postulese-ya-3563641",
+      "published": "2026-06-11T19:23:51Z",
+      "summary": "Encuentre su próximo reto profesional en una de las mejores empresas tecnológicas del país."
     }
   ]
 }
