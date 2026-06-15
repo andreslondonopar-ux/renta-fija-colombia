@@ -1,7 +1,35 @@
 {
-  "updated": "2026-06-15T17:02:47Z",
+  "updated": "2026-06-15T19:50:11Z",
   "date": "2026-06-15",
   "articles": [
+    {
+      "title": "El triple impacto que tendrán las empresas en sus costos laborales en el segundo semestre",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/cuanto-se-incrementaran-los-costos-laborales-para-las-empresas-en-colombia/",
+      "published": "2026-06-15T19:41:49Z",
+      "summary": "A partir de julio de 2026, se pondrán en marcha una serie de cambios que tendrán efecto en el funcionamiento del mercado laboral."
+    },
+    {
+      "title": "“Con las nuevas reglas seremos fuertes con los que mienten y hacen fraude”: Director de la Dian",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/impuestos/con-las-nuevas-reglas-seremos-fuertes-con-los-que-mienten-y-hacen-fraude-director-de-la-dian-496095",
+      "published": "2026-06-15T18:11:40Z",
+      "summary": "Carlos Betancourt habló con Portafolio sobre el nuevo régimen aduanero y dijo que va con zanahoria y garrote."
+    },
+    {
+      "title": "Bloqueada la Troncal del Caribe por combates entre el Ejército y Autodefensas Conquistadoras de la Sierra Nevada",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/regiones/bloqueada-la-troncal-del-caribe-por-combates-entre-el-ejercito-y-autodefensas-conquistadoras-de-la-sierra-nevada-496224",
+      "published": "2026-06-15T17:43:55Z",
+      "summary": "Habitantes reportaron enfrentamientos desde la madrugada en el sector de Quebrada del Sol."
+    },
+    {
+      "title": "Trump amenaza con un arancel del 100 % a vinos franceses si no retira impuesto a gigantes tecnológicas",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/trump-amenaza-con-un-arancel-del-100-a-vinos-franceses/",
+      "published": "2026-06-15T17:43:48Z",
+      "summary": "Estados Unidos representa al mayor mercado de exportación de los vinos y la champaña franceses."
+    },
     {
       "title": "Tras acuerdo con Irán, Trump confirma reapertura del estrecho de Ormuz; precios del petróleo alcanzan mínimos en tres meses",
       "source": "Valora Analitik",
@@ -17,25 +45,11 @@
       "summary": "Esta novedad es posible por la integración de Wenia, compañía de activos digitales del Grupo Cibest, con la App Mi Bancolombia."
     },
     {
-      "title": "Colombia se la juega el domingo 21 de junio, este día se eligirá el nuevo rumbo económico del país",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/colombia-elige-su-rumbo-economico-en-el-balotaje-de-este-domingo-21-de-junio-496201",
-      "published": "2026-06-15T15:26:50Z",
-      "summary": "En siete días se enfrentarán Abelardo De La Espriella e Iván Cepeda en las urnas del país."
-    },
-    {
       "title": "La producción industrial de Estados Unidos experimentó un ligero aumento del 0,1 % durante el mes de mayo",
       "source": "Portafolio",
       "url": "https://www.portafolio.co/economia/gobierno/la-produccion-industrial-de-estados-unidos-experimento-un-ligero-aumento-del-0-1-durante-el-mes-de-mayo-496203",
       "published": "2026-06-15T15:07:40Z",
       "summary": "El dato revela una desaceleración frente al avance de 0,9 % observado en abril."
-    },
-    {
-      "title": "La diversidad de la caña colombiana abre oportunidades para fortalecer una nueva industria de destilados",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/agro/la-diversidad-de-la-cana-colombiana-abre-oportunidades-para-fortalecer-una-nueva-industria-de-destilados-496204",
-      "published": "2026-06-15T14:59:17Z",
-      "summary": "Consumidores más exigentes impulsan cambios en las categorías históricas de destilados del país."
     },
     {
       "title": "Lo que aumentarán los costos salariales de las empresas colombianas con la reducción de la jornada, los mayores recargos y el nuevo festivo",
@@ -50,20 +64,6 @@
       "url": "https://www.eltiempo.com/economia/sectores/cuentas-claras-la-distancia-de-la-deuda-de-colombia-y-argentina-3564118",
       "published": "2026-06-15T02:51:33Z",
       "summary": "Hace 4 años, la calificación de la deuda de Colombia por la agencia S&P estaba 4 niveles arriba de la de Argentina."
-    },
-    {
-      "title": "De los 3.678 a los 3.475 pesos, el dólar cae a mínimos de 2021 tras desplomarse 202 pesos por señales fiscales e internacionales ¿se mantendrá?",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sector-financiero/de-los-3-678-a-los-3-475-pesos-el-dolar-cae-a-minimos-de-2021-tras-desplomarse-202-pesos-por-senales-fiscales-e-internacionales-se-mantendra-3563877",
-      "published": "2026-06-15T02:50:34Z",
-      "summary": "De acuerdo con los expertos, las señales geopolíticas globales y la expectativa por el Marco Fiscal arrastraron la TRM por debajo de los $3.500"
-    },
-    {
-      "title": "Todo lo que debe saber sobre la prima de servicios que recibirá antes del 30 de junio",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/finanzas-personales/todo-lo-que-debe-saber-sobre-la-prima-de-servicios-que-recibira-antes-del-30-de-junio-3564310",
-      "published": "2026-06-15T00:23:30Z",
-      "summary": "Conozca en qué se diferencia de las primas extralegales que también pagan algunas empresas."
     }
   ]
 }
