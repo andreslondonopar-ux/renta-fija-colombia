@@ -2,53 +2,53 @@
   "colombia": {
     "interest_rate": {
       "value": 11.25,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "inflation": {
       "value": 5.84,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "inflation_mom": {
       "value": 0.47,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "gdp_annual": {
       "value": 2.2,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "unemployment": {
       "value": 8.8,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "trade_balance": {
       "value": -0.84,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     }
   },
   "usa": {
     "interest_rate": {
       "value": 3.75,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "inflation": {
       "value": 4.2,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "inflation_mom": {
       "value": 0.5,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "gdp_annual": {
       "value": 2.7,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "unemployment": {
       "value": 4.3,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     },
     "trade_balance": {
       "value": -55.88,
-      "source": "Trading Economics · 2026-06-12"
+      "source": "Trading Economics · 2026-06-15"
     }
   },
   "ust": {
@@ -123,8 +123,8 @@
     "source": "US Treasury XML",
     "updated": "2026-06-12T23:16:57Z"
   },
-  "fecha": "2026-06-12",
-  "updated": "2026-06-12T23:07:51Z",
+  "fecha": "2026-06-15",
+  "updated": "2026-06-15T18:23:20Z",
   "sources": [
     "TradingEconomics COL (6 ind.)",
     "TradingEconomics USA (6 ind.)"
