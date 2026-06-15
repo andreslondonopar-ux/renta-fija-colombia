@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-08T16:50:13Z",
+  "updated": "2026-06-15T17:58:15Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -15,45 +15,10 @@
       "desc": "Índice de Precios al Consumidor"
     },
     {
-      "date": "2026-06-10",
-      "type": "cpi_us",
-      "title": "CPI (MoM) — May",
-      "desc": "Prev: 0.3 · Ant: 0.6",
-      "pais": "us"
-    },
-    {
-      "date": "2026-06-10",
-      "type": "cpi_us",
-      "title": "Core CPI (MoM) — May",
-      "desc": "Prev: 0.5 · Ant: 0.4",
-      "pais": "us"
-    },
-    {
-      "date": "2026-06-10",
-      "type": "cpi_us",
-      "title": "CPI (YoY) — May",
-      "desc": "Prev: 4.2 · Ant: 3.8",
-      "pais": "us"
-    },
-    {
       "date": "2026-06-11",
       "type": "eme",
       "title": "EME junio · BanRep",
       "desc": "Encuesta mensual de expectativas"
-    },
-    {
-      "date": "2026-06-11",
-      "type": "cpi_us",
-      "title": "PPI (MoM) — May",
-      "desc": "Prev: 0.7 · Ant: 1.4",
-      "pais": "us"
-    },
-    {
-      "date": "2026-06-11",
-      "type": "empleo_us",
-      "title": "Initial Jobless Claims",
-      "desc": "Ant: 225",
-      "pais": "us"
     },
     {
       "date": "2026-06-12",
