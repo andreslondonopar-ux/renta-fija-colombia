@@ -1,12 +1,61 @@
 {
-  "updated": "2026-06-16T19:39:39Z",
+  "updated": "2026-06-16T22:16:38Z",
   "date": "2026-06-16",
   "articles": [
+    {
+      "title": "Fitch Ratings alerta por presión crediticia en el agro latinoamericano con El Niño",
+      "source": "La República",
+      "url": "https://www.larepublica.co/economia/fitch-ratings-alerta-por-presion-crediticia-en-el-agro-latinoamericano-con-llegada-de-el-nino-4415687",
+      "published": "2026-06-16T22:14:50Z",
+      "summary": "De acuerdo con la calificadora, la escasez de fertilizantes podría reducir los márgenes en el segundo semestre del año"
+    },
+    {
+      "title": "Tiendas ARA devolverá dinero a clientes: Será hasta $1 millón y así se hará el pago",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/tiendas-ara-devolvera-dinero-a-clientes-sera-hasta-1-millon-y-asi-se-hara-el-pago/",
+      "published": "2026-06-16T21:40:00Z",
+      "summary": "Tiendas ARA llegó hace 13 años a Colombia y ahora busca recompensar la fidelidad de sus clientes."
+    },
+    {
+      "title": "Fenalco pide al Dane explicar brecha entre empleo formal reportado y cotizantes de la Pila en Colombia",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/empleo/fenalco-pide-al-dane-explicar-brecha-entre-empleo-formal-reportado-y-cotizantes-de-la-pila-en-colombia-496296",
+      "published": "2026-06-16T21:30:53Z",
+      "summary": "La discusión se centra en la diferencia entre una encuesta de hogares y registros de aportes a seguridad social."
+    },
+    {
+      "title": "Investigaciones Económicas de Bancolombia advierte que déficit fiscal podría llegar a 6,5% del PIB en 2026",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/investigaciones-economicas-de-bancolombia-advierte-que-deficit-fiscal-podria-llegar-a-6-5-del-pib-en-496295",
+      "published": "2026-06-16T21:28:54Z",
+      "summary": "La entidad financiera estima que la sobrejecución presupuestal y el mayor costo de la deuda dificultan el ajuste."
+    },
+    {
+      "title": "Diferencia de casi un millón de empleos abre debate nacional sobre las cifras laborales del Dane",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/diferencia-de-casi-un-millon-de-empleos-abre-debate-nacional-sobre-las-cifras-laborales-del-dane-496292",
+      "published": "2026-06-16T21:08:06Z",
+      "summary": "La Universidad de Antioquia encontró amplias diferencias entre la GEIH y los registros de aportes sociales."
+    },
+    {
+      "title": "Pese a estrategia del gobierno Petro, Colombia mantiene sus finanzas públicas deterioradas: Bancolombia",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/pese-a-estrategia-del-gobierno-petro-colombia-mantiene-sus-finanzas-publicas-deterioradas-bancolombia/",
+      "published": "2026-06-16T21:00:00Z",
+      "summary": "La entidad aseguró que la estrategia ejecutada por la Dirección de Crédito Público ha sido limitada para contener el avance del pago por intereses."
+    },
+    {
+      "title": "Superola de calor tendría un impacto económico mayor al de la fallida tributaria de $16,3 billones",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/superola-de-calor-tendria-un-impacto-economico-mayor-al-de-la-fallida-tributaria-de-163-billones/",
+      "published": "2026-06-16T20:00:00Z",
+      "summary": "Algunos expertos indicaron que el impacto sobre el PIB podría estar entre 0,6 y 0,9 puntos porcentuales."
+    },
     {
       "title": "Estudio de la U. de Antioquia controvierte cifras del DANE sobre empleo: habría caído en vez de crecer; entidad responde",
       "source": "El Tiempo",
       "url": "https://www.eltiempo.com/economia/sectores/estudio-de-la-u-de-antioquia-controvierte-cifras-del-dane-sobre-empleo-habria-caido-en-vez-de-crecer-entidad-responde-3564621",
-      "published": "2026-06-16T18:54:05Z",
+      "published": "2026-06-16T19:41:26Z",
       "summary": "De acuerdo con el informe académico, se compararon las cifras del Departamento con los registros de la Unidad de Gestión Pensional y Parafiscales."
     },
     {
@@ -15,55 +64,6 @@
       "url": "https://www.larepublica.co/finanzas/bancolombia-habilito-pagos-de-creditos-de-vivienda-desde-su-aplicacion-mi-bancolombia-4415217",
       "published": "2026-06-16T18:46:26Z",
       "summary": "Los usuarios podrán realizar el pago de la cuota mensual, hacer abonos a capital o hacer el pago completo del crédito desde la app"
-    },
-    {
-      "title": "Fenalco solicitó al Dane explicación sobre metodología de cifras del mercado laboral",
-      "source": "La República",
-      "url": "https://www.larepublica.co/economia/fenalco-solicito-al-dane-explicacion-sobre-metodologia-de-cifras-del-mercado-laboral-4415524",
-      "published": "2026-06-16T18:43:01Z",
-      "summary": "Para el presidente del gremio, no es congruente el crecimiento de 2,6% de la economía con la caída del desempleo"
-    },
-    {
-      "title": "“Colombia no logrará la holgura fiscal en un solo gobierno y eso retrasará recuperar el grado de inversión”",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sector-financiero/colombia-no-lograra-la-holgura-fiscal-en-un-solo-gobierno-y-eso-retrasara-recuperar-el-grado-de-inversion-3563884",
-      "published": "2026-06-16T18:33:17Z",
-      "summary": "César Cuervo, de Sura Investments, dice que el próximo gobierno recibe un país con grandes retos en energía, pensiones, salud y mercado de capitales."
-    },
-    {
-      "title": "La multinacional que convirtió a Colombia en su centro de producción para más de 30 países",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/presencia-multinacional-essity-en-colombia/",
-      "published": "2026-06-16T18:00:00Z",
-      "summary": "Desde Colombia esta multinacional abastece más de 30 países y consolida al país como una plataforma clave para la manufactura y las exportaciones regionales."
-    },
-    {
-      "title": "Aseguradores presentan hoja de ruta para los próximos cuatro años, buscan blindar las finanzas de Colombia ante desastres y choques económicos",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/aseguradores-presentan-hoja-de-ruta-para-los-proximos-cuatro-anos-buscan-blindar-las-finanzas-de-colombia-ante-desastres-y-choques-economicos-3564614",
-      "published": "2026-06-16T17:59:56Z",
-      "summary": "El plan estratégico 2026-2030 propone vincular seguros a subsidios y crear alianzas públicas para mitigar riesgos"
-    },
-    {
-      "title": "Primicia | Los detalles de la suspendida OPA de Ecopetrol por Brava en Brasil: hay controversia con regulador de ese país",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/detalles-opa-ecopetrol-brava-brasil/",
-      "published": "2026-06-16T17:36:00Z",
-      "summary": "La petrolera colombiana apeló una decisión reciente en la que se pidió ajustes a la oferta con la que busca consolidar cerca de 51 % de la empresa en Brasil."
-    },
-    {
-      "title": "Llegan 103.000 barriles de combustible a Tumaco en una operación logística sin precedentes",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/llegan-103-000-barriles-de-combustible-a-tumaco-en-una-operacion-logistica-sin-precedentes-3564608",
-      "published": "2026-06-16T17:34:17Z",
-      "summary": "Este cargamento está compuesto en un 55 % por gasolina y un 45 % por diésel. Es la mayor carga transportada por el buque Willard."
-    },
-    {
-      "title": "Colombia empeora en Índice de Libertad Económica 2026: hay limitaciones de apertura a mercados",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/colombia-empeora-en-indice-de-libertad-economica-2026-hay-limitaciones-de-apertura-a-mercados/",
-      "published": "2026-06-16T17:20:00Z",
-      "summary": "Heritage Foundation calificó la economía colombiana y delineó las oportunidades de mejora."
     }
   ]
 }
