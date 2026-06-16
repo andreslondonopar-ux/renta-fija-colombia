@@ -1,13 +1,27 @@
 {
-  "updated": "2026-06-15T22:22:22Z",
-  "date": "2026-06-15",
+  "updated": "2026-06-16T02:32:23Z",
+  "date": "2026-06-16",
   "articles": [
     {
-      "title": "Estudio de UdeA reabre debate sobre medición de cifras del mercado laboral",
+      "title": "Ahora | Ecopetrol suspende oferta de adquisición por petrolera Brava en Brasil",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/ahora-ecopetrol-suspende-oferta-de-adquisicion-por-petrolera-brava-en-brasil/",
+      "published": "2026-06-16T01:28:00Z",
+      "summary": "Ecopetrol recibió requerimientos por la Comisión de Valores Mobiliarios de Brasil, aunque sin dar más detalles al respecto."
+    },
+    {
+      "title": "Bloqueada la Troncal del Caribe por combates entre el Ejército y Autodefensas Conquistadoras de la Sierra Nevada",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/regiones/bloqueada-la-troncal-del-caribe-por-combates-entre-el-ejercito-y-autodefensas-conquistadoras-de-la-sierra-nevada-496224",
+      "published": "2026-06-15T22:54:11Z",
+      "summary": "Habitantes reportaron enfrentamientos desde la madrugada en el sector de Quebrada del Sol."
+    },
+    {
+      "title": "Controversia por los datos del Dane sobre la medición de las cifras del mercado laboral",
       "source": "La República",
       "url": "https://www.larepublica.co/economia/estudio-de-udea-reabre-debate-sobre-medicion-de-cifras-del-mercado-laboral-4414823",
       "published": "2026-06-15T22:08:52Z",
-      "summary": "Un estudio encontró diferencias entre los reportes del Dane y la Unidad de Gestión Pensional y Parafiscal, Ugpp"
+      "summary": "Un estudio encontró algunas diferencias entre los reportes realizados por el Dane y la Unidad de Gestión Pensional y Parafiscal, Ugpp"
     },
     {
       "title": "Inversionistas extranjeros superan a fondos de pensiones y se consolidan como los mayores acumuladores de TES",
@@ -50,20 +64,6 @@
       "url": "https://www.valoraanalitik.com/cuanto-se-incrementaran-los-costos-laborales-para-las-empresas-en-colombia/",
       "published": "2026-06-15T19:41:49Z",
       "summary": "A partir de julio de 2026, se pondrán en marcha una serie de cambios que tendrán efecto en el funcionamiento del mercado laboral."
-    },
-    {
-      "title": "“Con las nuevas reglas seremos fuertes con los que mienten y hacen fraude”: Director de la Dian",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/impuestos/con-las-nuevas-reglas-seremos-fuertes-con-los-que-mienten-y-hacen-fraude-director-de-la-dian-496095",
-      "published": "2026-06-15T18:11:40Z",
-      "summary": "Carlos Betancourt habló con Portafolio sobre el nuevo régimen aduanero y dijo que va con zanahoria y garrote."
-    },
-    {
-      "title": "Bloqueada la Troncal del Caribe por combates entre el Ejército y Autodefensas Conquistadoras de la Sierra Nevada",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/regiones/bloqueada-la-troncal-del-caribe-por-combates-entre-el-ejercito-y-autodefensas-conquistadoras-de-la-sierra-nevada-496224",
-      "published": "2026-06-15T17:43:55Z",
-      "summary": "Habitantes reportaron enfrentamientos desde la madrugada en el sector de Quebrada del Sol."
     }
   ]
 }
