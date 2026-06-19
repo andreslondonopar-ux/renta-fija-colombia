@@ -1,13 +1,62 @@
 {
-  "updated": "2026-06-19T14:46:37Z",
+  "updated": "2026-06-19T18:01:03Z",
   "date": "2026-06-19",
   "articles": [
     {
-      "title": "SIC inaugura centro para resolver más rápido las disputas de consumidores y empresas",
+      "title": "Ofertas de alta gerencia: qué buscan los comités de selección en el mercado actual",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/finanzas-personales/ofertas-de-alta-gerencia-que-buscan-los-comites-de-seleccion-en-el-mercado-actual-3565516",
+      "published": "2026-06-19T17:50:03Z",
+      "summary": "Estás son competencias están marcando la diferencia en los comités de selección y cómo posicionar tu trayectoria en el radar de las grandes compañías."
+    },
+    {
+      "title": "¿Cuánto gana un aprendiz del Sena si el sueldo corresponde al 75% del salario mínimo?",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/finanzas-personales/cuanto-gana-un-aprendiz-del-sena-si-el-sueldo-corresponde-al-75-del-salario-minimo-3565506",
+      "published": "2026-06-19T17:46:32Z",
+      "summary": "Con la entrada en vigencia de la reforma laboral, son muchos los beneficios que reciben los estudiantes de esta institución."
+    },
+    {
+      "title": "Uber, DiDi y Cabify ofrecerán descuentos para los votantes en la segunda vuelta presidencial de este 21 de junio: así puede obtenerlos",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/finanzas-personales/uber-didi-y-cabify-ofreceran-descuentos-para-los-votantes-en-la-segunda-vuelta-presidencial-de-este-21-de-junio-asi-puede-obtenerlos-3565508",
+      "published": "2026-06-19T17:11:37Z",
+      "summary": "Las plataformas de transporte anunciaron descuentos en viajes y herramientas de apoyo para quienes participen en la jornada electoral en Colombia."
+    },
+    {
+      "title": "Un centenar de integrantes de una disidencia de las FARC dejó las armas en Putumayo por acuerdo con el Gobierno",
       "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/gobierno/sic-inaugura-centro-para-resolver-mas-rapido-las-disputas-de-consumidores-y-empresas-496505",
-      "published": "2026-06-19T14:30:50Z",
-      "summary": "El espacio atenderá asuntos de protección al consumidor, competencia y propiedad intelectual."
+      "url": "https://www.portafolio.co/economia/regiones/un-centenar-de-integrantes-de-una-disidencia-de-las-farc-dejo-las-armas-en-putumayo-por-acuerdo-con-el-gobierno-496520",
+      "published": "2026-06-19T16:49:23Z",
+      "summary": "En un evento en Valle del Guamuez, Putumayo, los excombatientes cambiaron sus uniformes por camisetas blancas."
+    },
+    {
+      "title": "Qué tan preparados están el café, el cacao y el aceite de palma colombiano para demostrar ante la UE que son libres de deforestación",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sectores/que-tan-preparados-estan-el-cafe-el-cacao-y-el-aceite-de-palma-colombiano-para-demostrar-ante-la-ue-que-son-libres-de-deforestacion-3565489",
+      "published": "2026-06-19T16:33:18Z",
+      "summary": "Empresarios deberán ejecutar monitoreos satelitales para cumplir nuevo reglamento."
+    },
+    {
+      "title": "Ugpp aclara que datos de cotizantes no pueden contrastarse con Geih del Dane",
+      "source": "La República",
+      "url": "https://www.larepublica.co/economia/ugpp-aclara-que-datos-de-cotizantes-no-pueden-contrastarse-con-geih-del-dane-4418113",
+      "published": "2026-06-19T16:23:23Z",
+      "summary": "Ugpp dijo que la Pila es un instrumento de gestión del sistema de protección social, no un indicador de formalidad"
+    },
+    {
+      "title": "AV Villas fortalece su capital con una emisión privada de bonos por $100.000 millones",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/finanzas/av-villas-fortalece-su-capital-con-una-emision-privada-de-bonos-por-100-000-millones-496515",
+      "published": "2026-06-19T15:52:53Z",
+      "summary": "La operación busca fortalecer la solvencia y ampliar el respaldo a sus metas de negocio."
+    },
+    {
+      "title": "Paloma Valencia alertó que el Gobierno se estaría apoderando de una reconocida empresa de transporte",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/gobierno/paloma-valencia-alerto-que-el-gobierno-se-estaria-apoderando-de-una-reconocida-empresa-de-transporte-496508",
+      "published": "2026-06-19T15:37:07Z",
+      "summary": "Por medio de X, la excandidata afirmó que se habría designado un gerente desde la Supertransporte."
     },
     {
       "title": "Grupo Nutresa firmó un acuerdo para adquirir el 100% de la empresa de confitería ecuatoriana La Universal",
@@ -15,55 +64,6 @@
       "url": "https://www.eltiempo.com/economia/empresas/grupo-nutresa-firmo-un-acuerdo-para-adquirir-el-100-de-la-empresa-de-confiteria-ecuatoriana-la-universal-3565459",
       "published": "2026-06-19T14:28:29Z",
       "summary": "La transacción pactada con Bia Culinary está sujeta a la aprobación de las autoridades regulatorias locales."
-    },
-    {
-      "title": "Analistas esperan que el déficit fiscal del 2026 cierre cerca del 6,5 % del PIB",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/analistas-esperan-que-el-deficit-fiscal-del-2026-cierre-cerca-del-6-5-del-pib-3565438",
-      "published": "2026-06-19T13:57:28Z",
-      "summary": "Dicen que el Gobierno de Gustavo Petro no reconoce plenamente las fragilidades fiscales de este año."
-    },
-    {
-      "title": "Precio del dólar hoy en Colombia: dólar cae a $3.443,15 y opera en modalidad Next Day por festivo en EE. UU.",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/finanzas/precio-del-dolar-hoy-en-colombia-mercado-previo-a-las-elecciones-en-colombia-inicia-con-la-cotizacion-en-3-459-496487",
-      "published": "2026-06-19T13:49:11Z",
-      "summary": "La jornada del jueves 18 de junio terminó con un alza de 20 pesos frente a la TRM del día."
-    },
-    {
-      "title": "Dólar en Colombia abre con ligera alza y opera este viernes en modalidad Next Day",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/dolar-en-colombia-abre-con-ligera-alza-y-opera-este-viernes-en-modalidad-next-day/",
-      "published": "2026-06-19T13:36:00Z",
-      "summary": "JP Tactical Trading reporta que, al ser una sesión de bajo volumen (15 % a 20 % de lo habitual), el mercado carece de una dirección definida."
-    },
-    {
-      "title": "¿Tiene menos de 50 años? Estos son los cánceres gastrointestinales que más están creciendo entre los jóvenes",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/regiones/tiene-menos-de-50-anos-estos-son-los-canceres-gastrointestinales-que-mas-estan-creciendo-entre-los-jovenes-496495",
-      "published": "2026-06-19T13:08:43Z",
-      "summary": "Factores genéticos, hábitos de vida y diagnósticos tardíos aparecen entre las principales preocupaciones."
-    },
-    {
-      "title": "Relevante | Grupo Nutresa comprará tradicional empresa de alimentos en Ecuador; fortalecerá su negocio de chocolates",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/grupo-nutresa-comprara-empresa-ecuador/",
-      "published": "2026-06-19T13:04:00Z",
-      "summary": "El cierre de esta transacción está condicionado, entre otros aspectos, a la obtención de las autorizaciones regulatorias pertinentes."
-    },
-    {
-      "title": "Dólar cotiza $26,05 a la baja durante la modalidad Next Day por festivo en Estados Unidos",
-      "source": "La República",
-      "url": "https://www.larepublica.co/finanzas/precio-del-dolar-y-petroleo-hoy-19-de-junio-de-2026-4417977",
-      "published": "2026-06-19T13:03:11Z",
-      "summary": "El crudo brent se encaminó el viernes a una caída semanal de 9%, mientras los operadores valoraban la suspensión de las negociaciones entre EE.UU. e Irán"
-    },
-    {
-      "title": "Emigrantes desde Colombia: se triplicó el número de personas que salen del país y que no regresan",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/emigrantes-desde-colombia-se-triplico-el-numero-de-personas-que-salen-del-pais-y-que-no-regresan-3564832",
-      "published": "2026-06-19T12:44:39Z",
-      "summary": "En 2025, el éxodo alcanzó niveles que no se habían visto antes. Cuál es la intensidad de acuerdo con los datos del último año."
     }
   ]
 }
