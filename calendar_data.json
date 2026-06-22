@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-15T17:58:15Z",
+  "updated": "2026-06-22T17:41:03Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -32,13 +32,6 @@
       "type": "ventas_us",
       "title": "Ventas al por menor — mayo 2026",
       "desc": "Retail Sales (Census Bureau)",
-      "pais": "us"
-    },
-    {
-      "date": "2026-06-17",
-      "type": "fomc",
-      "title": "Fed Interest Rate Decision",
-      "desc": "Ant: 3.75",
       "pais": "us"
     },
     {
