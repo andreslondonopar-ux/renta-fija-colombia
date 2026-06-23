@@ -1,13 +1,62 @@
 {
-  "updated": "2026-06-23T14:31:54Z",
+  "updated": "2026-06-23T18:00:23Z",
   "date": "2026-06-23",
   "articles": [
     {
-      "title": "Anif plantea recortes de gasto y una tributaria para sanear las finanzas públicas",
+      "title": "El desplome de acciones tecnológicas sacude los mercados mundiales y enciende las alarmas por la IA",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/finanzas/el-desplome-de-acciones-tecnologicas-sacude-los-mercados-mundiales-y-enciende-las-alarmas-por-la-ia-496775",
+      "published": "2026-06-23T17:46:49Z",
+      "summary": "Los indicadores Nasdaq y Dow Jones presentaron caídas que preocupan al mercado."
+    },
+    {
+      "title": "En dos días la acción de Ecopetrol ya ha caído más de 10% en la Bolsa de Valores de Colombia",
+      "source": "La República",
+      "url": "https://www.larepublica.co/finanzas/en-dos-dias-la-accion-de-ecopetrol-ya-ha-caido-mas-de-10-en-la-bolsa-de-valores-de-colombia-4421272",
+      "published": "2026-06-23T17:11:51Z",
+      "summary": "Los analistas explican que la caída es una toma de utilidades por parte de los inversionistas, luego de la victoria de Abelardo De la Espriella"
+    },
+    {
+      "title": "Dueños de carros eléctricos deberán revisar esto antes de asegurar su vehículo",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/que-revisar-al-comprar-seguros-para-carros-electricos/",
+      "published": "2026-06-23T17:00:00Z",
+      "summary": "Los carros eléctricos crecieron más de 200 % en Colombia y las aseguradoras ya están modificando coberturas, asistencias y servicios para sus propietarios."
+    },
+    {
+      "title": "Ofertas de empleo en el sector farmacéutico: empresas líderes buscan auxiliares de farmacia",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/finanzas-personales/ofertas-en-el-sector-farmaceutico-las-empresas-lideres-buscan-su-perfil-3566397",
+      "published": "2026-06-23T16:42:07Z",
+      "summary": "El perfil que buscan las farmacéuticas: habilidades clave para conseguir empleo como auxiliar de farmacia."
+    },
+    {
+      "title": "Faltando mes y medio para finalizar el Gobierno, Minhacienda presenta nuevo plan de austeridad",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/nuevo-plan-de-austeridad-pone-la-lupa-sobre-consultorias-estudios-y-contratos-de-apoyo-a-la-gestion-496760",
+      "published": "2026-06-23T16:20:11Z",
+      "summary": "El Gobierno busca eliminar duplicidades y promover el uso de capacidades internas antes de contratar."
+    },
+    {
+      "title": "Por debajo de cuerda, gobierno Petro explora la opción de darle la administración del Fondo del Café a cooperativas",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/agro/por-debajo-de-cuerda-gobierno-explora-la-opcion-de-darle-la-administracion-del-fondo-del-cafe-a-cooperativas-496758",
+      "published": "2026-06-23T14:55:56Z",
+      "summary": "Portafolio conoció que el Ejecutivo mantiene la intención de romper la institucionalidad del sector. Primicia."
+    },
+    {
+      "title": "Anif plantea recortes de gasto y más ingresos fiscales para sanear las finanzas públicas",
       "source": "El Tiempo",
       "url": "https://www.eltiempo.com/economia/sectores/anif-plantea-recortes-de-gasto-y-una-tributaria-para-sanear-las-finanzas-publicas-3566358",
-      "published": "2026-06-23T14:17:46Z",
+      "published": "2026-06-23T14:52:58Z",
       "summary": "Estima que el ajuste fiscal que se debe llevar a cabo en los próximos años es de 3 puntos del PIB, lo que representa unos 53 billones de pesos."
+    },
+    {
+      "title": "¿Se salvaría la emergencia económica?: Con nueva ponencia la Corte Constitucional buscan retomar su debate",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/se-salvaria-la-emergencia-economica-con-nueva-ponencia-la-corte-constitucional-buscan-retomar-su-debate-496754",
+      "published": "2026-06-23T14:24:00Z",
+      "summary": "La cita está prevista para el próximo miércoles 24 de junio del 2026 en la sala plena de la Corte Constitucional."
     },
     {
       "title": "Los consumidores prefieren financiar sus compras antes que gastar la prima",
@@ -15,55 +64,6 @@
       "url": "https://www.larepublica.co/finanzas/los-consumidores-prefieren-financiar-sus-compras-antes-que-gastar-la-prima-4421145",
       "published": "2026-06-23T14:10:52Z",
       "summary": "La financiación directa con los comercios toma relevancia en esta época de pago de la prima, ya que reduce la fricción y mantiene la liquidez"
-    },
-    {
-      "title": "¿Se salvaría la emergencia económica?: Con nueva ponencia la Corte Constitucional buscan retomar su debate",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/se-salvaria-la-emergencia-economica-con-nueva-ponencia-la-corte-constitucional-buscan-retomar-su-debate-496754",
-      "published": "2026-06-23T14:04:34Z",
-      "summary": "La cita está prevista para el próximo miércoles 24 de junio del 2026 en la sala plena de la Corte Constitucional."
-    },
-    {
-      "title": "Dólar en Colombia abre al alza, pero se mueve con cautela tras el anuncio de cambio de Gobierno",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/dolar-en-colombia-abre-al-alza-pero-se-mueve-con-cautela-tras-el-anuncio-de-cambio-de-gobierno/",
-      "published": "2026-06-23T13:45:00Z",
-      "summary": "Este movimiento se produce en medio de un clima de \"resaca controlada\" tras la segunda vuelta presidencial del pasado domingo."
-    },
-    {
-      "title": "Los tres escenarios del precio del dólar luego de la segunda vuelta presidencial",
-      "source": "La República",
-      "url": "https://www.larepublica.co/finanzas/los-tres-escenarios-del-precio-del-dolar-luego-de-la-segunda-vuelta-presidencial-4421076",
-      "published": "2026-06-23T13:12:48Z",
-      "summary": "En lo que va del año, la moneda local ha tenido una apreciación de casi $300 frente a la TRM del 1 de enero de 2026"
-    },
-    {
-      "title": "¿Qué aprendimos tras 24 meses de agentes de IA? No es un desafío tecnológico. Es un desafío humano",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/que-aprendimos-con-agentes-ia/",
-      "published": "2026-06-23T13:00:00Z",
-      "summary": "El cambio de enfoque es visible cuando se observa cómo las organizaciones líderes redefinen dos elementos fundamentales de su transformación."
-    },
-    {
-      "title": "Fedecafe se reúne con el Gobierno para definir el futuro del Fondo Nacional del Café",
-      "source": "La República",
-      "url": "https://www.larepublica.co/economia/fedecafe-se-reune-con-el-gobierno-para-definir-el-futuro-del-fondo-nacional-del-cafe-4421032",
-      "published": "2026-06-23T12:58:51Z",
-      "summary": "Los cafeteros dijeron que existe voluntad de diálogo y de construcción de consensos alrededor de un modelo que durante 99 años ha acompañado a las familias cafeteras"
-    },
-    {
-      "title": "El dólar en Colombia podría terminar año por debajo de los $3.700",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/el-dolar-en-colombia-podria-terminar-ano-por-debajo-de-los-3-700/",
-      "published": "2026-06-23T12:40:00Z",
-      "summary": "Este año el dólar en Colombia ha tocado mínimos no vistos desde el hace más de cinco años."
-    },
-    {
-      "title": "¿Le aprobaron un crédito de vivienda y aún no compra casa? El Fondo Nacional del Ahorro abrió una jornada de asesoría para facilitar la adquisición",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/finanzas-personales/le-aprobaron-un-credito-de-vivienda-y-aun-no-compra-casa-el-fondo-nacional-del-ahorro-abrio-una-jornada-de-asesoria-para-facilitar-la-adquisicion-3566327",
-      "published": "2026-06-23T12:38:05Z",
-      "summary": "La estrategia ‘Asesor Exprés Inmobiliario’ busca acompañar a quienes aún no han finalizado el proceso de compra de vivienda."
     }
   ]
 }
