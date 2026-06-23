@@ -1,69 +1,69 @@
 {
-  "updated": "2026-06-23T01:57:36Z",
+  "updated": "2026-06-23T14:31:54Z",
   "date": "2026-06-23",
   "articles": [
     {
-      "title": "Nivel de los embalses cerró mayo en 69,12% antes de la declaratoria del Niño",
+      "title": "Anif plantea recortes de gasto y una tributaria para sanear las finanzas públicas",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sectores/anif-plantea-recortes-de-gasto-y-una-tributaria-para-sanear-las-finanzas-publicas-3566358",
+      "published": "2026-06-23T14:17:46Z",
+      "summary": "Estima que el ajuste fiscal que se debe llevar a cabo en los próximos años es de 3 puntos del PIB, lo que representa unos 53 billones de pesos."
+    },
+    {
+      "title": "Los consumidores prefieren financiar sus compras antes que gastar la prima",
       "source": "La República",
-      "url": "https://www.larepublica.co/economia/nivel-de-los-embalses-cerro-mayo-en-69-12-antes-de-la-declaratoria-del-nino-4420755",
-      "published": "2026-06-23T00:49:53Z",
-      "summary": "La fuente hidráulica sigue liderando la generación de las renovables con 179,6 gigavatio-hora producidos en mayo"
+      "url": "https://www.larepublica.co/finanzas/los-consumidores-prefieren-financiar-sus-compras-antes-que-gastar-la-prima-4421145",
+      "published": "2026-06-23T14:10:52Z",
+      "summary": "La financiación directa con los comercios toma relevancia en esta época de pago de la prima, ya que reduce la fricción y mantiene la liquidez"
     },
     {
-      "title": "Katherine Duque Quiroga es la nueva vicepresidenta de ingeniería del Banco BBVA Colombia",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/katherine-duque-bbva-colombia/",
-      "published": "2026-06-23T00:30:00Z",
-      "summary": "Duque tiene más de 18 años de experiencia liderando procesos de transformación tecnológica en el sector financiero."
-    },
-    {
-      "title": "Mantener deuda neta en torno a 60% del PIB exigiría ajuste de entre 4 y 5 puntos del PIB",
-      "source": "La República",
-      "url": "https://www.larepublica.co/economia/mantener-la-deuda-neta-en-torno-a-60-del-pib-exigiria-un-ajuste-de-entre-4-y-5-puntos-del-pib-4420806",
-      "published": "2026-06-23T00:29:40Z",
-      "summary": "Así lo señaló un informe liderado por el Observatorio Fiscal de la Pontificia Universidad Javeriana y el Carf"
-    },
-    {
-      "title": "¡Atención! Colombia entraría en zona de impago y límite legal de deuda en 2028 si no aplica un severo ajuste fiscal",
+      "title": "¿Se salvaría la emergencia económica?: Con nueva ponencia la Corte Constitucional buscan retomar su debate",
       "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/colombia-entraria-en-zona-de-impago-y-limite-legal-de-deuda-para-2028-si-no-aplica-un-severo-ajuste-fiscal-496719",
-      "published": "2026-06-23T00:19:45Z",
-      "summary": "Expertos alertan que el déficit primario llegó a 3,5% del PIB por gastos que desbordaron la tendencia histórica."
+      "url": "https://www.portafolio.co/economia/se-salvaria-la-emergencia-economica-con-nueva-ponencia-la-corte-constitucional-buscan-retomar-su-debate-496754",
+      "published": "2026-06-23T14:04:34Z",
+      "summary": "La cita está prevista para el próximo miércoles 24 de junio del 2026 en la sala plena de la Corte Constitucional."
     },
     {
-      "title": "Exportaciones petroleras de Venezuela crecieron 21,5 % en el primer trimestre, según balanza de pagos",
+      "title": "Dólar en Colombia abre al alza, pero se mueve con cautela tras el anuncio de cambio de Gobierno",
       "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/aumento-exportaciones-petroleo-venezuela/",
-      "published": "2026-06-22T23:00:00Z",
-      "summary": "Las exportaciones de petróleo en Venezuela alcanzaron US$5.491 millones en el primer trimestre, su mejor registro para ese período en años."
+      "url": "https://www.valoraanalitik.com/dolar-en-colombia-abre-al-alza-pero-se-mueve-con-cautela-tras-el-anuncio-de-cambio-de-gobierno/",
+      "published": "2026-06-23T13:45:00Z",
+      "summary": "Este movimiento se produce en medio de un clima de \"resaca controlada\" tras la segunda vuelta presidencial del pasado domingo."
     },
     {
-      "title": "¿Qué tan preparados están el café, el cacao y el aceite de palma colombiano para demostrar ante la UE que son libres de deforestación?",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/que-tan-preparados-estan-el-cafe-el-cacao-y-el-aceite-de-palma-colombiano-para-demostrar-ante-la-ue-que-son-libres-de-deforestacion-3565489",
-      "published": "2026-06-22T22:36:48Z",
-      "summary": "Empresarios deberán ejecutar monitoreos satelitales para cumplir nuevo reglamento."
-    },
-    {
-      "title": "Cuentas Claras / Se exporta al paso de la minería, y China se pierde",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/cuentas-claras-se-exporta-al-paso-de-la-mineria-y-china-se-pierde-3565809",
-      "published": "2026-06-22T22:35:36Z",
-      "summary": "Los subsidios alcanzaron su mayor nivel en 2024, y son 108.000 millones de dólares."
-    },
-    {
-      "title": "Minhacienda expidió decreto de Plan de Austeridad para la vigencia fiscal 2026",
+      "title": "Los tres escenarios del precio del dólar luego de la segunda vuelta presidencial",
       "source": "La República",
-      "url": "https://www.larepublica.co/economia/minhacienda-expidio-decreto-de-plan-de-austeridad-para-la-vigencia-fiscal-2026-4420535",
-      "published": "2026-06-22T22:14:24Z",
-      "summary": "En el plan se definió una reducción de gasto en relación a los contratos por prestación de servicos"
+      "url": "https://www.larepublica.co/finanzas/los-tres-escenarios-del-precio-del-dolar-luego-de-la-segunda-vuelta-presidencial-4421076",
+      "published": "2026-06-23T13:12:48Z",
+      "summary": "En lo que va del año, la moneda local ha tenido una apreciación de casi $300 frente a la TRM del 1 de enero de 2026"
     },
     {
-      "title": "Binance Research: La capitalización del mercado de RWA tokenizados supera los US$10.000 millones a nivel global",
+      "title": "¿Qué aprendimos tras 24 meses de agentes de IA? No es un desafío tecnológico. Es un desafío humano",
       "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/rwa-tokenizados-superan-us10-000-millones-reporte-de-binance/",
-      "published": "2026-06-22T21:54:02Z",
-      "summary": "Un nuevo análisis revela que el 80 % de los operadores de acciones tokenizadas en Binance a nivel global provienen de mercados emergentes."
+      "url": "https://www.valoraanalitik.com/que-aprendimos-con-agentes-ia/",
+      "published": "2026-06-23T13:00:00Z",
+      "summary": "El cambio de enfoque es visible cuando se observa cómo las organizaciones líderes redefinen dos elementos fundamentales de su transformación."
+    },
+    {
+      "title": "Fedecafe se reúne con el Gobierno para definir el futuro del Fondo Nacional del Café",
+      "source": "La República",
+      "url": "https://www.larepublica.co/economia/fedecafe-se-reune-con-el-gobierno-para-definir-el-futuro-del-fondo-nacional-del-cafe-4421032",
+      "published": "2026-06-23T12:58:51Z",
+      "summary": "Los cafeteros dijeron que existe voluntad de diálogo y de construcción de consensos alrededor de un modelo que durante 99 años ha acompañado a las familias cafeteras"
+    },
+    {
+      "title": "El dólar en Colombia podría terminar año por debajo de los $3.700",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/el-dolar-en-colombia-podria-terminar-ano-por-debajo-de-los-3-700/",
+      "published": "2026-06-23T12:40:00Z",
+      "summary": "Este año el dólar en Colombia ha tocado mínimos no vistos desde el hace más de cinco años."
+    },
+    {
+      "title": "¿Le aprobaron un crédito de vivienda y aún no compra casa? El Fondo Nacional del Ahorro abrió una jornada de asesoría para facilitar la adquisición",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/finanzas-personales/le-aprobaron-un-credito-de-vivienda-y-aun-no-compra-casa-el-fondo-nacional-del-ahorro-abrio-una-jornada-de-asesoria-para-facilitar-la-adquisicion-3566327",
+      "published": "2026-06-23T12:38:05Z",
+      "summary": "La estrategia ‘Asesor Exprés Inmobiliario’ busca acompañar a quienes aún no han finalizado el proceso de compra de vivienda."
     }
   ]
 }
