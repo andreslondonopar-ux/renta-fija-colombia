@@ -52,12 +52,12 @@
     }
   },
   "ust": {
-    "date": "2026-06-24",
+    "date": "2026-06-25",
     "rates": [
       {
         "plazo": "1M",
         "years": 0.083,
-        "tir": 3.66
+        "tir": 3.7
       },
       {
         "plazo": "2M",
@@ -67,7 +67,7 @@
       {
         "plazo": "3M",
         "years": 0.25,
-        "tir": 3.85
+        "tir": 3.84
       },
       {
         "plazo": "4M",
@@ -82,32 +82,32 @@
       {
         "plazo": "1Y",
         "years": 1,
-        "tir": 3.99
+        "tir": 3.96
       },
       {
         "plazo": "2Y",
         "years": 2,
-        "tir": 4.11
+        "tir": 4.09
       },
       {
         "plazo": "3Y",
         "years": 3,
-        "tir": 4.15
+        "tir": 4.13
       },
       {
         "plazo": "5Y",
         "years": 5,
-        "tir": 4.17
+        "tir": 4.15
       },
       {
         "plazo": "7Y",
         "years": 7,
-        "tir": 4.28
+        "tir": 4.26
       },
       {
         "plazo": "10Y",
         "years": 10,
-        "tir": 4.41
+        "tir": 4.4
       },
       {
         "plazo": "20Y",
@@ -121,7 +121,7 @@
       }
     ],
     "source": "US Treasury XML",
-    "updated": "2026-06-24T23:03:12Z"
+    "updated": "2026-06-25T23:17:43Z"
   },
   "fecha": "2026-06-25",
   "updated": "2026-06-25T23:07:50Z",
