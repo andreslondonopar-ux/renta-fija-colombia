@@ -1,27 +1,34 @@
 {
-  "updated": "2026-06-29T15:33:56Z",
+  "updated": "2026-06-29T18:10:25Z",
   "date": "2026-06-29",
   "articles": [
+    {
+      "title": "El BID manifestó su compromiso de apoyar a Colombia con US$ 60 millones para acompañar la transición al gobierno de De la Espriella",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sectores/el-bid-manifesto-su-compromiso-de-apoyar-a-colombia-con-us-60-millones-para-acompanar-la-transicion-al-gobierno-de-de-la-espriella-3567787",
+      "published": "2026-06-29T16:53:19Z",
+      "summary": "De manera paralela, el vicepresidente electo Restrepo se ha reunido con otros organismos como el CAF."
+    },
+    {
+      "title": "BID anuncia cooperación no reembolsable por US$60 millones para apoyar la transición del gobierno entrante",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/bid-anuncia-cooperacion-no-reembolsable-por-us-60-millones-para-apoyar-la-transicion-del-gobierno-entrante-497130",
+      "published": "2026-06-29T16:33:53Z",
+      "summary": "Los recursos estarán destinados al acompañamiento técnico y a la etapa inicial de la nueva administración."
+    },
+    {
+      "title": "Créditos al 2 % y subsidios: Sector vivienda reacciona a propuesta de Abelardo de la Espriella para reactivación",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/creditos-al-2-y-subsidios-sector-vivienda-reacciona-a-propuesta-de-abelardo-de-la-espriella-para-reactivacion/",
+      "published": "2026-06-29T16:00:00Z",
+      "summary": "El interés por estas propuestas de vivienda surgen en un momento en el que los indicadores del sector continúan reflejando debilidad."
+    },
     {
       "title": "Acciones de Samsung y SK Hynix bajan tras anunciar billonario plan de IA; Yen cae a peor nivel desde 1986",
       "source": "Valora Analitik",
       "url": "https://www.valoraanalitik.com/acciones-de-samsung-y-sk-hynix-bajan-tras-anunciar-billonario-plan-de-ia-yen-cae-a-peor-nivel-desde-1986/",
       "published": "2026-06-29T15:10:09Z",
       "summary": "El plan de inversión de Samsung para la próxima década se estima en cerca de US$646.000 millones."
-    },
-    {
-      "title": "Reforma tributaria de Petro estaría mal calculada: ¿qué debe hacer el Gobierno entrante para sanear las finanzas?",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/reforma-tributaria/reforma-tributaria-de-petro-estaria-mal-calculada-que-debe-hacer-el-gobierno-entrante-para-sanear-las-finanzas-497112",
-      "published": "2026-06-29T14:40:15Z",
-      "summary": "Experto considera que se debe presentar una iniciativa que aumente los ingresos y reduzca el gasto público."
-    },
-    {
-      "title": "Productividad antes que contratación: siete estrategias para que las pymes ganen eficiencia sin ampliar su nómina",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/empleo/productividad-antes-que-contratacion-siete-estrategias-para-que-las-pymes-ganen-eficiencia-sin-ampliar-su-nomina-497113",
-      "published": "2026-06-29T14:14:22Z",
-      "summary": "Especialista explica cómo optimizar procesos, reducir desperdicios y fortalecer la gestión sin contratar personal."
     },
     {
       "title": "La paradoja de la coca en Colombia: el cultivo pesa cada vez más en la economía, pero sus rentas se quedan en la ilegalidad",
@@ -57,13 +64,6 @@
       "url": "https://www.eltiempo.com/economia/sectores/hay-que-recuperar-la-confianza-consejo-gremial-traza-la-hoja-de-ruta-economica-ante-el-nuevo-gobierno-de-abelardo-de-la-espriella-3567039",
       "published": "2026-06-29T02:40:00Z",
       "summary": "Natalia Gutiérrez, la presidente del Consejo Gremial Nacional, analiza los retos de inversión, la crisis energética y el ajuste fiscal."
-    },
-    {
-      "title": "¿Es necesaria otra reforma tributaria? Tres mecanismos para recaudar más sin tocar a los mismos de siempre",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/es-necesaria-otra-reforma-tributaria-tres-mecanismos-para-recaudar-mas-sin-tocar-a-los-mismos-de-siempre/",
-      "published": "2026-06-29T00:00:00Z",
-      "summary": "Mientras el recaudo en impuestos ha retrocedido del 16,7 % al 14,4 % del PIB, los intereses de la deuda consumen uno de cada tres pesos."
     }
   ]
 }
