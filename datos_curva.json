@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-06-26",
+  "fecha": "2026-06-29",
   "fuente": "BanRep SEN",
   "tes": [
     {
@@ -20,14 +20,14 @@
       "codigo": "TFIT16280428",
       "name": "TES TF 28/04/2028",
       "tir": 12.529,
-      "plazo": 1.84,
+      "plazo": 1.83,
       "vencimiento": "2028-04-28"
     },
     {
       "codigo": "TFIT05220829",
       "name": "TES TF 22/08/2029",
       "tir": 12.18,
-      "plazo": 3.16,
+      "plazo": 3.15,
       "vencimiento": "2029-08-22"
     },
     {
@@ -41,14 +41,14 @@
       "codigo": "TFIT16180930",
       "name": "TES TF 18/09/2030",
       "tir": 12.215,
-      "plazo": 4.23,
+      "plazo": 4.22,
       "vencimiento": "2030-09-18"
     },
     {
       "codigo": "TFIT10260331",
       "name": "TES TF 26/03/2031",
       "tir": 12.135,
-      "plazo": 4.75,
+      "plazo": 4.74,
       "vencimiento": "2031-03-26"
     },
     {
@@ -62,14 +62,14 @@
       "codigo": "TFIT11090233",
       "name": "TES TF 09/02/2033",
       "tir": 12.029,
-      "plazo": 6.63,
+      "plazo": 6.62,
       "vencimiento": "2033-02-09"
     },
     {
       "codigo": "TFIT16181034",
       "name": "TES TF 18/10/2034",
       "tir": 12.01,
-      "plazo": 8.32,
+      "plazo": 8.31,
       "vencimiento": "2034-10-18"
     },
     {
@@ -83,46 +83,136 @@
       "codigo": "TFIT16090736",
       "name": "TES TF 09/07/2036",
       "tir": 11.85,
-      "plazo": 10.04,
+      "plazo": 10.03,
       "vencimiento": "2036-07-09"
     },
     {
       "codigo": "TFIT16281140",
       "name": "TES TF 28/11/2040",
       "tir": 12.072,
-      "plazo": 14.43,
+      "plazo": 14.42,
       "vencimiento": "2040-11-28"
     },
     {
       "codigo": "TFIT21280542",
       "name": "TES TF 28/05/2042",
       "tir": 11.89,
-      "plazo": 15.93,
+      "plazo": 15.92,
       "vencimiento": "2042-05-28"
     },
     {
       "codigo": "TFIT23250746",
       "name": "TES TF 25/07/2046",
       "tir": 11.87,
-      "plazo": 20.09,
+      "plazo": 20.08,
       "vencimiento": "2046-07-25"
     },
     {
       "codigo": "TFIT31261050",
       "name": "TES TF 26/10/2050",
       "tir": 11.79,
-      "plazo": 24.35,
+      "plazo": 24.34,
       "vencimiento": "2050-10-26"
     },
     {
       "codigo": "TFIT34130358",
       "name": "TES TF 13/03/2058",
       "tir": 12.081,
-      "plazo": 31.73,
+      "plazo": 31.72,
       "vencimiento": "2058-03-13"
     }
   ],
   "history": [
+    {
+      "fecha": "2026-06-26",
+      "tirs": [
+        {
+          "codigo": "TFIT15260826",
+          "tir": 6.397,
+          "plazo": 0.16
+        },
+        {
+          "codigo": "TFIT08031127",
+          "tir": 12.47,
+          "plazo": 1.35
+        },
+        {
+          "codigo": "TFIT16280428",
+          "tir": 12.529,
+          "plazo": 1.84
+        },
+        {
+          "codigo": "TFIT05220829",
+          "tir": 12.18,
+          "plazo": 3.16
+        },
+        {
+          "codigo": "TFIT05270230",
+          "tir": 12.22,
+          "plazo": 3.67
+        },
+        {
+          "codigo": "TFIT16180930",
+          "tir": 12.215,
+          "plazo": 4.23
+        },
+        {
+          "codigo": "TFIT10260331",
+          "tir": 12.135,
+          "plazo": 4.75
+        },
+        {
+          "codigo": "TFIT16300632",
+          "tir": 12.144,
+          "plazo": 6.01
+        },
+        {
+          "codigo": "TFIT11090233",
+          "tir": 12.029,
+          "plazo": 6.63
+        },
+        {
+          "codigo": "TFIT16181034",
+          "tir": 12.01,
+          "plazo": 8.32
+        },
+        {
+          "codigo": "TFIT11240135",
+          "tir": 12.08,
+          "plazo": 8.58
+        },
+        {
+          "codigo": "TFIT16090736",
+          "tir": 11.85,
+          "plazo": 10.04
+        },
+        {
+          "codigo": "TFIT16281140",
+          "tir": 12.072,
+          "plazo": 14.43
+        },
+        {
+          "codigo": "TFIT21280542",
+          "tir": 11.89,
+          "plazo": 15.93
+        },
+        {
+          "codigo": "TFIT23250746",
+          "tir": 11.87,
+          "plazo": 20.09
+        },
+        {
+          "codigo": "TFIT31261050",
+          "tir": 11.79,
+          "plazo": 24.35
+        },
+        {
+          "codigo": "TFIT34130358",
+          "tir": 12.081,
+          "plazo": 31.73
+        }
+      ]
+    },
     {
       "fecha": "2026-06-25",
       "tirs": [
@@ -470,96 +560,6 @@
           "codigo": "TFIT34130358",
           "tir": 11.995,
           "plazo": 31.74
-        }
-      ]
-    },
-    {
-      "fecha": "2026-06-19",
-      "tirs": [
-        {
-          "codigo": "TFIT15260826",
-          "tir": 6.615,
-          "plazo": 0.18
-        },
-        {
-          "codigo": "TFIT08031127",
-          "tir": 12.73,
-          "plazo": 1.37
-        },
-        {
-          "codigo": "TFIT16280428",
-          "tir": 12.794,
-          "plazo": 1.86
-        },
-        {
-          "codigo": "TFIT05220829",
-          "tir": 12.586,
-          "plazo": 3.18
-        },
-        {
-          "codigo": "TFIT05270230",
-          "tir": 12.5,
-          "plazo": 3.69
-        },
-        {
-          "codigo": "TFIT16180930",
-          "tir": 12.479,
-          "plazo": 4.25
-        },
-        {
-          "codigo": "TFIT10260331",
-          "tir": 12.16,
-          "plazo": 4.77
-        },
-        {
-          "codigo": "TFIT16300632",
-          "tir": 12.009,
-          "plazo": 6.03
-        },
-        {
-          "codigo": "TFIT11090233",
-          "tir": 12.068,
-          "plazo": 6.65
-        },
-        {
-          "codigo": "TFIT16181034",
-          "tir": 12.106,
-          "plazo": 8.33
-        },
-        {
-          "codigo": "TFIT11240135",
-          "tir": 12.149,
-          "plazo": 8.6
-        },
-        {
-          "codigo": "TFIT16090736",
-          "tir": 11.67,
-          "plazo": 10.06
-        },
-        {
-          "codigo": "TFIT16281140",
-          "tir": 12.039,
-          "plazo": 14.45
-        },
-        {
-          "codigo": "TFIT21280542",
-          "tir": 11.8,
-          "plazo": 15.95
-        },
-        {
-          "codigo": "TFIT23250746",
-          "tir": 11.819,
-          "plazo": 20.11
-        },
-        {
-          "codigo": "TFIT31261050",
-          "tir": 11.656,
-          "plazo": 24.37
-        },
-        {
-          "codigo": "TFIT34130358",
-          "tir": 11.82,
-          "plazo": 31.75
         }
       ]
     }
