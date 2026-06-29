@@ -1,7 +1,35 @@
 {
-  "updated": "2026-06-29T18:10:25Z",
+  "updated": "2026-06-29T21:38:06Z",
   "date": "2026-06-29",
   "articles": [
+    {
+      "title": "Desorden fiscal obliga a revisar con cautela el decreto que baja la inversión de fondos de pensiones en el exterior",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/desorden-fiscal-obliga-a-revisar-con-cautela-el-decreto-que-baja-la-inversion-de-fondos-de-pensiones-en-el-exterior-497028",
+      "published": "2026-06-29T21:34:10Z",
+      "summary": "BTG Pactual prevé ajustes a normativa que impacta a los fondos de pensiones sin desmontar la medida vigente."
+    },
+    {
+      "title": "Entrevista | Proyectos industriales en Bogotá han tenido que ser frenados por falta de energía: Gerente de Enlaza",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/proyectos-industriales-en-bogota-han-tenido-que-ser-frenados-por-falta-de-energia-gerente-de-enlaza/",
+      "published": "2026-06-29T20:00:00Z",
+      "summary": "Freddy Zuleta reveló que todo el proyecto de la colectora transmitirá una energía equivalente a la que consume Medellín."
+    },
+    {
+      "title": "¿Es mejor un crédito en pesos o en UVR para comprar vivienda?",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sector-financiero/es-mejor-un-credito-en-pesos-o-en-uvr-para-comprar-vivienda-3567802",
+      "published": "2026-06-29T19:56:16Z",
+      "summary": "Expertos de Bancolombia le recomiendan una u otra opción en función del perfil de cada persona."
+    },
+    {
+      "title": "Kissimmee renueva su oferta turística para el verano de 2026 y refuerza su conexión con el mercado colombiano",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/verano-kissimmee-2026-atracciones-hoteles/",
+      "published": "2026-06-29T19:00:00Z",
+      "summary": "A 25 minutos del aeropuerto de Orlando, el destino estrena atracciones y nuevos hoteles, con cerca de 37 vuelos semanales directos desde Colombia."
+    },
     {
       "title": "El BID manifestó su compromiso de apoyar a Colombia con US$ 60 millones para acompañar la transición al gobierno de De la Espriella",
       "source": "El Tiempo",
@@ -36,34 +64,6 @@
       "url": "https://www.valoraanalitik.com/la-paradoja-de-la-coca-en-colombia-el-cultivo-pesa-cada-vez-mas-en-la-economia-pero-sus-rentas-se-quedan-en-la-ilegalidad/",
       "published": "2026-06-29T13:00:00Z",
       "summary": "En 2024, en Colombia se sembraron 261.000 hectáreas de coca y su producción y tráfico representaron el 4,4 % del Producto Interno Bruto (PIB)."
-    },
-    {
-      "title": "Lo que se anuncia para el gobierno de Abelardo de la Espriella en los frentes de la economía",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/lo-que-se-anuncia-para-el-gobierno-de-abelardo-de-la-espriella-en-los-frentes-de-la-economia-3566969",
-      "published": "2026-06-29T12:53:37Z",
-      "summary": "Lo que vendrá para la crisis fiscal; la crisis en hidrocarburos y electricidad; reanimar la vivienda y reactivar la infraestructura."
-    },
-    {
-      "title": "Los datos que el Gobierno Petro evitó mostrar y evidencian la gravedad de la crisis de reservas de petróleo y gas en Colombia",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/los-datos-que-el-gobierno-petro-evito-mostrar-y-evidencian-la-gravedad-de-la-crisis-de-reservas-de-petroleo-y-gas-en-colombia-3567187",
-      "published": "2026-06-29T12:51:59Z",
-      "summary": "Aunque el discurso oficial defiende la estabilidad, el informe detallado de la ANH revela que Colombia tiene menos gas y petróleo en sus cuentas."
-    },
-    {
-      "title": "¿Qué impuestos debería tener la próxima reforma tributaria? Expertos dan recomendaciones",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/que-impuestos-deberia-tener-la-proximo-reforma-tributaria-expertos-dan-recomendaciones-3567256",
-      "published": "2026-06-29T02:45:00Z",
-      "summary": "Expertos hacen recomendaciones para solucionar el problema fiscal del país. Para el próximo año, se debería hacer un ajuste de más de $ 30 billones."
-    },
-    {
-      "title": "'Hay que recuperar la confianza': Consejo Gremial traza la hoja de ruta económica ante el nuevo Gobierno de Abelardo de la Espriella",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/hay-que-recuperar-la-confianza-consejo-gremial-traza-la-hoja-de-ruta-economica-ante-el-nuevo-gobierno-de-abelardo-de-la-espriella-3567039",
-      "published": "2026-06-29T02:40:00Z",
-      "summary": "Natalia Gutiérrez, la presidente del Consejo Gremial Nacional, analiza los retos de inversión, la crisis energética y el ajuste fiscal."
     }
   ]
 }
