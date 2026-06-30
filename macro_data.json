@@ -1,7 +1,7 @@
 {
   "colombia": {
     "interest_rate": {
-      "value": 11.25,
+      "value": 12.0,
       "source": "Trading Economics · 2026-06-30"
     },
     "inflation": {
@@ -124,7 +124,7 @@
     "updated": "2026-06-29T22:57:24Z"
   },
   "fecha": "2026-06-30",
-  "updated": "2026-06-30T16:22:13Z",
+  "updated": "2026-06-30T23:03:25Z",
   "sources": [
     "TradingEconomics COL (6 ind.)",
     "TradingEconomics USA (6 ind.)"
