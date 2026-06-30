@@ -1,7 +1,21 @@
 {
-  "updated": "2026-06-29T21:38:06Z",
-  "date": "2026-06-29",
+  "updated": "2026-06-30T02:01:07Z",
+  "date": "2026-06-30",
   "articles": [
+    {
+      "title": "De La Espriella aseguró que saldos de los TES del Gobierno alcanzan $763,6 billones",
+      "source": "La República",
+      "url": "https://www.larepublica.co/economia/de-la-espriella-aseguro-que-saldos-de-los-tes-del-gobierno-alcanzan-763-6-billones-4425315",
+      "published": "2026-06-30T01:56:48Z",
+      "summary": "En una alocución por sus redes sociales, el Presidente electo, aseguró que para evitar una crisis energética garantizará el cumplimiento de las obligaciones con las generadoras"
+    },
+    {
+      "title": "¿Busca empleo? Ojo con la información que podrían revisar sobre usted y por la que podrían descartarlo",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/que-revisan-las-empresas-de-usted-cuando-busca-empleo/",
+      "published": "2026-06-29T22:00:00Z",
+      "summary": "Muchas personas desconocen que durante un proceso de selección las empresas pueden revisar información que va mucho más allá de la hoja de vida."
+    },
     {
       "title": "Desorden fiscal obliga a revisar con cautela el decreto que baja la inversión de fondos de pensiones en el exterior",
       "source": "Portafolio",
@@ -50,20 +64,6 @@
       "url": "https://www.valoraanalitik.com/creditos-al-2-y-subsidios-sector-vivienda-reacciona-a-propuesta-de-abelardo-de-la-espriella-para-reactivacion/",
       "published": "2026-06-29T16:00:00Z",
       "summary": "El interés por estas propuestas de vivienda surgen en un momento en el que los indicadores del sector continúan reflejando debilidad."
-    },
-    {
-      "title": "Acciones de Samsung y SK Hynix bajan tras anunciar billonario plan de IA; Yen cae a peor nivel desde 1986",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/acciones-de-samsung-y-sk-hynix-bajan-tras-anunciar-billonario-plan-de-ia-yen-cae-a-peor-nivel-desde-1986/",
-      "published": "2026-06-29T15:10:09Z",
-      "summary": "El plan de inversión de Samsung para la próxima década se estima en cerca de US$646.000 millones."
-    },
-    {
-      "title": "La paradoja de la coca en Colombia: el cultivo pesa cada vez más en la economía, pero sus rentas se quedan en la ilegalidad",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/la-paradoja-de-la-coca-en-colombia-el-cultivo-pesa-cada-vez-mas-en-la-economia-pero-sus-rentas-se-quedan-en-la-ilegalidad/",
-      "published": "2026-06-29T13:00:00Z",
-      "summary": "En 2024, en Colombia se sembraron 261.000 hectáreas de coca y su producción y tráfico representaron el 4,4 % del Producto Interno Bruto (PIB)."
     }
   ]
 }
