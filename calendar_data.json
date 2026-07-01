@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-29T16:38:50Z",
+  "updated": "2026-07-01T15:44:06Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -59,24 +59,17 @@
       "desc": "Decision tasa de intervencion (efectiva 2026-07-01)"
     },
     {
-      "date": "2026-06-30",
-      "type": "empleo_us",
-      "title": "JOLTS Job Openings — May",
-      "desc": "Prev: 7.28 · Ant: 7.618",
-      "pais": "us"
-    },
-    {
       "date": "2026-07-01",
       "type": "empleo_us",
       "title": "ADP Nonfarm Employment Change — Jun",
-      "desc": "Prev: 118 · Ant: 122",
+      "desc": "Act: 98 · Prev: 118 · Ant: 122",
       "pais": "us"
     },
     {
       "date": "2026-07-01",
       "type": "cpi_us",
       "title": "ISM Manufacturing Prices — Jun",
-      "desc": "Prev: 79 · Ant: 82.1",
+      "desc": "Act: 73 · Prev: 77.7 · Ant: 82.1",
       "pais": "us"
     },
     {
@@ -104,7 +97,7 @@
       "date": "2026-07-02",
       "type": "empleo_us",
       "title": "Initial Jobless Claims",
-      "desc": "Prev: 220 · Ant: 215",
+      "desc": "Prev: 219 · Ant: 215",
       "pais": "us"
     },
     {
@@ -127,10 +120,24 @@
       "desc": "Estadísticas de comercio exterior"
     },
     {
+      "date": "2026-07-08",
+      "type": "fomc",
+      "title": "FOMC Meeting Minutes",
+      "desc": "",
+      "pais": "us"
+    },
+    {
       "date": "2026-07-09",
       "type": "eme",
       "title": "EME julio · BanRep",
       "desc": "Encuesta mensual de expectativas"
+    },
+    {
+      "date": "2026-07-09",
+      "type": "empleo_us",
+      "title": "Initial Jobless Claims",
+      "desc": "",
+      "pais": "us"
     },
     {
       "date": "2026-07-14",
