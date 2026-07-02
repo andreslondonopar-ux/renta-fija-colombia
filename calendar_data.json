@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-01T15:47:02Z",
+  "updated": "2026-07-02T15:17:53Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -53,51 +53,31 @@
       "desc": "GEIH — empleo y desempleo"
     },
     {
-      "date": "2026-06-30",
-      "type": "banrep",
-      "title": "JDBR - BanRep",
-      "desc": "Decision tasa de intervencion (efectiva 2026-07-01)"
-    },
-    {
-      "date": "2026-07-01",
-      "type": "empleo_us",
-      "title": "ADP Nonfarm Employment Change — Jun",
-      "desc": "Act: 98 · Prev: 118 · Ant: 122",
-      "pais": "us"
-    },
-    {
-      "date": "2026-07-01",
-      "type": "cpi_us",
-      "title": "ISM Manufacturing Prices — Jun",
-      "desc": "Act: 73 · Prev: 77.7 · Ant: 82.1",
-      "pais": "us"
-    },
-    {
       "date": "2026-07-02",
       "type": "empleo_us",
       "title": "Nonfarm Payrolls — Jun",
-      "desc": "Prev: 114 · Ant: 172",
+      "desc": "Act: 57 · Prev: 114 · Ant: 129",
       "pais": "us"
     },
     {
       "date": "2026-07-02",
       "type": "empleo_us",
       "title": "Unemployment Rate — Jun",
-      "desc": "Prev: 4.3 · Ant: 4.3",
+      "desc": "Act: 4.2 · Prev: 4.3 · Ant: 4.3",
       "pais": "us"
     },
     {
       "date": "2026-07-02",
       "type": "empleo_us",
       "title": "Average Hourly Earnings (MoM) — Jun",
-      "desc": "Prev: 0.3 · Ant: 0.3",
+      "desc": "Act: 0.3 · Prev: 0.3 · Ant: 0.3",
       "pais": "us"
     },
     {
       "date": "2026-07-02",
       "type": "empleo_us",
       "title": "Initial Jobless Claims",
-      "desc": "Prev: 219 · Ant: 215",
+      "desc": "Act: 215 · Prev: 219 · Ant: 216",
       "pais": "us"
     },
     {
