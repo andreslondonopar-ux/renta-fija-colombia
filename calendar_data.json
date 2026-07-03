@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-02T15:17:53Z",
+  "updated": "2026-07-03T15:12:55Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -53,34 +53,6 @@
       "desc": "GEIH — empleo y desempleo"
     },
     {
-      "date": "2026-07-02",
-      "type": "empleo_us",
-      "title": "Nonfarm Payrolls — Jun",
-      "desc": "Act: 57 · Prev: 114 · Ant: 129",
-      "pais": "us"
-    },
-    {
-      "date": "2026-07-02",
-      "type": "empleo_us",
-      "title": "Unemployment Rate — Jun",
-      "desc": "Act: 4.2 · Prev: 4.3 · Ant: 4.3",
-      "pais": "us"
-    },
-    {
-      "date": "2026-07-02",
-      "type": "empleo_us",
-      "title": "Average Hourly Earnings (MoM) — Jun",
-      "desc": "Act: 0.3 · Prev: 0.3 · Ant: 0.3",
-      "pais": "us"
-    },
-    {
-      "date": "2026-07-02",
-      "type": "empleo_us",
-      "title": "Initial Jobless Claims",
-      "desc": "Act: 215 · Prev: 219 · Ant: 216",
-      "pais": "us"
-    },
-    {
       "date": "2026-07-06",
       "type": "cpi_us",
       "title": "ISM Non-Manufacturing Prices — Jun",
@@ -116,7 +88,7 @@
       "date": "2026-07-09",
       "type": "empleo_us",
       "title": "Initial Jobless Claims",
-      "desc": "",
+      "desc": "Ant: 215",
       "pais": "us"
     },
     {
