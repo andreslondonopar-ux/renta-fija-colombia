@@ -1,7 +1,56 @@
 {
-  "updated": "2026-07-03T21:11:53Z",
-  "date": "2026-07-03",
+  "updated": "2026-07-04T01:30:23Z",
+  "date": "2026-07-04",
   "articles": [
+    {
+      "title": "Conjuntos podrían enfrentar serio riesgo en sus finanzas: Propietarios tendrían responsabilidad",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/conjuntos-tendria-enfrentar-serio-riesgo-en-sus-finanzas-propietarios-tendrian-responsabilidad/",
+      "published": "2026-07-04T01:00:00Z",
+      "summary": "Pese a este problema, las administraciones de conjuntos podrían recurrir a soluciones clave que eviten riesgos financieros."
+    },
+    {
+      "title": "La economía de Bogotá aceleró en 2025 con un crecimiento de 3,5%, por encima del desempeño registrado en el país",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/la-economia-de-bogota-acelero-en-2025-con-un-crecimiento-de-3-5-por-encima-del-desempeno-registrado-en-el-pais-497487",
+      "published": "2026-07-03T23:35:32Z",
+      "summary": "El mejor desempeño de sectores estratégicos consolidó la recuperación económica y fortaleció la actividad."
+    },
+    {
+      "title": "Iris asegura que ha llegado a 3.500 empresas y 6.700 personas con soluciones de inversión",
+      "source": "La República",
+      "url": "https://www.larepublica.co/finanzas/iris-asegura-que-ha-llegado-a-3-500-empresas-y-6-700-personas-con-soluciones-de-inversion-4428866",
+      "published": "2026-07-03T23:16:30Z",
+      "summary": "Los CDT se han consolidado como uno de los instrumentos más demandados, al superar las 14.000 inversiones y administrar más de $500.000 millones"
+    },
+    {
+      "title": "Fenavi advirtió sobre posible aumento del IVA en reforma tributaria de Abelardo De La Espriella",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/impuestos/fenavi-advirtio-sobre-posible-aumento-del-iva-en-reforma-tributaria-de-abelardo-de-la-espriella-497479",
+      "published": "2026-07-03T22:39:40Z",
+      "summary": "El gremio expresó su preocupación frente al impacto en los precios del pollo y el huevo."
+    },
+    {
+      "title": "¿Qué es el Banco interamericano de desarrollo (BID) y como funciona?",
+      "source": "El Tiempo",
+      "url": "https://www.eltiempo.com/economia/sector-financiero/que-es-el-banco-interamericano-de-desarrollo-bid-y-como-funciona-3568885",
+      "published": "2026-07-03T22:35:34Z",
+      "summary": "La entidad financia proyectos en América Latina y también ofrece cooperación técnica para apoyar políticas públicas y reformas."
+    },
+    {
+      "title": "Santander Colombia, primer banco corporativo en integrarse al ecosistema Bre-B gracias a su alianza con CCO Credibanco",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/santander-colombia-primer-banco-corporativo-en-integrarse-al-ecosistema-bre-b-gracias-a-su-alianza-con-cco-credibanco/",
+      "published": "2026-07-03T21:04:00Z",
+      "summary": "A partir de esta implementación, el segmento corporativo podrá recibir pagos, transferencias y recaudos en tiempo real."
+    },
+    {
+      "title": "Distrito lanza 'Mejora tu Cuota', el primer subsidio para el pago de créditos de mejoramiento de vivienda en Bogotá",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/regiones/distrito-lanza-mejora-tu-cuota-el-primer-subsidio-para-el-pago-de-creditos-de-mejoramiento-de-vivienda-en-bogota-497471",
+      "published": "2026-07-03T20:59:14Z",
+      "summary": "El apoyo financiero consistirá en una transferencia de \"hasta $ 231.000 mensuales durante un periodo de 36 meses\"."
+    },
     {
       "title": "Expopartes Medellín: así avanza la feria que proyecta negocios por más de US$125 millones",
       "source": "Valora Analitik",
@@ -15,55 +64,6 @@
       "url": "https://www.valoraanalitik.com/produccion-de-cafe-en-colombia-repunto-43-en-junio/",
       "published": "2026-07-03T20:00:00Z",
       "summary": "Aunque la cosecha mostró señales de recuperación, la producción acumulada entre enero y junio cayó en 630.000 sacos frente al mismo periodo del año anterior."
-    },
-    {
-      "title": "Altos niveles de producción y reservas, la clave de Ecopetrol para mantener estables sus calificaciones crediticias: Fitch",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/altos-niveles-de-produccion-y-reservas-la-clave-de-ecopetrol-para-mantener-estables-sus-calificaciones-crediticias-fitch/",
-      "published": "2026-07-03T19:15:00Z",
-      "summary": "La compañía podría tener cambios ante las advertencias del gobierno de Abelardo de la Espriella."
-    },
-    {
-      "title": "Ecopetrol conmemora una década de operación directa en Campo Rubiales con más de 440 millones de barriles producidos",
-      "source": "El Tiempo",
-      "url": "https://www.eltiempo.com/economia/sectores/ecopetrol-conmemora-una-decada-de-operacion-directa-en-campo-rubiales-con-mas-de-440-millones-de-barriles-producidos-3568844",
-      "published": "2026-07-03T19:11:57Z",
-      "summary": "La empresa está invirtiendo 2.600 millones de dólares en el desarrollo de 244 millones de barriles de reservas de crudo."
-    },
-    {
-      "title": "Ministro de Hacienda de Abelardo De La Espriella confirmó reunión con el gerente del Banco de la República",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/gobierno/ministro-de-hacienda-de-abelardo-de-la-espriella-confirmo-reunion-con-el-gerente-del-banco-de-la-republica-497462",
-      "published": "2026-07-03T19:10:47Z",
-      "summary": "Esto significaría un nuevo camino entre el Banrepública y el Ejecutivo, luego de cuatro años de tensión con Petro."
-    },
-    {
-      "title": "Dólar en Colombia cae otros $25 y se acerca a niveles de $3.300: mercado se mueve por nuevos anuncios de MinHacienda",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/dolar-en-colombia-cae-otros-25-y-se-acerca-a-niveles-de-3-300-mercado-se-mueve-por-nuevos-anuncios-de-minhacienda/",
-      "published": "2026-07-03T18:40:00Z",
-      "summary": "Tras una apertura en $3.348, que rápidamente marcó el techo de la sesión al registrar un máximo de $3.353,60, la divisa comenzó un descenso."
-    },
-    {
-      "title": "Gobierno De la Espriella reveló los tres únicos impuestos que buscaría dejar en manos de la Dian",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/impuestos/gobierno-de-la-espriella-revelo-los-tres-unicos-impuestos-que-buscaria-dejar-en-manos-de-la-dian-497460",
-      "published": "2026-07-03T18:13:05Z",
-      "summary": "El nuevo Minhacienda, Miguel Gómez, buscará aliviar la carga sobre empresas y simplificar el sistema tributario."
-    },
-    {
-      "title": "Reclamos y señalamientos durante el primer careo de comités de empalme de los gobiernos entrantes y salientes",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/gobierno/reclamos-y-senalamientos-durante-el-primer-cara-a-cara-en-comite-de-empalme-de-los-gobiernos-entrantes-y-salientes-497455",
-      "published": "2026-07-03T18:12:39Z",
-      "summary": "En la reunión definieron la agenda para la realización del proceso de empalme."
-    },
-    {
-      "title": "PIB de Bogotá en 2025 creció 3,5%, jalonó el sector de comercio y servicios",
-      "source": "La República",
-      "url": "https://www.larepublica.co/economia/pib-de-bogota-en-2025-crecio-3-5-jalono-el-sector-de-comercio-y-servicios-4428511",
-      "published": "2026-07-03T18:03:28Z",
-      "summary": "En el cuarto trimestre del año pasado, la capital registró una expansión de 3% frente al mismo periodo de 2024"
     }
   ]
 }
