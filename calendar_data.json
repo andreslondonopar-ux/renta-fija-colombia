@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-07T15:43:48Z",
+  "updated": "2026-07-13T15:42:37Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -65,24 +65,10 @@
       "desc": "Estadísticas de comercio exterior"
     },
     {
-      "date": "2026-07-08",
-      "type": "fomc",
-      "title": "FOMC Meeting Minutes",
-      "desc": "",
-      "pais": "us"
-    },
-    {
       "date": "2026-07-09",
       "type": "eme",
       "title": "EME julio · BanRep",
       "desc": "Encuesta mensual de expectativas"
-    },
-    {
-      "date": "2026-07-09",
-      "type": "empleo_us",
-      "title": "Initial Jobless Claims",
-      "desc": "Ant: 215",
-      "pais": "us"
     },
     {
       "date": "2026-07-14",
