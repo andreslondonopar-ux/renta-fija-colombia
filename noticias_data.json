@@ -1,7 +1,35 @@
 {
-  "updated": "2026-07-13T20:59:58Z",
-  "date": "2026-07-13",
+  "updated": "2026-07-14T01:12:58Z",
+  "date": "2026-07-14",
   "articles": [
+    {
+      "title": "Vicepresidenta del Banco Mundial visitará a De La Espriella en Barranquilla",
+      "source": "La República",
+      "url": "https://www.larepublica.co/economia/vicepresidenta-del-banco-mundial-visitara-a-de-la-espriella-en-barranquilla-4435246",
+      "published": "2026-07-14T00:17:24Z",
+      "summary": "El vicepresidente electo, junto al equipo económico del Gobierno entrante, sostuvieron una reunión con el organismo multilateral"
+    },
+    {
+      "title": "Este es el nuevo mercado que recomienda UBS por potencial alza de las acciones",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/india-vuelve-al-radar-de-ubs-espera-un-repunte-de-las-acciones-en-los-proximos-12-meses/",
+      "published": "2026-07-13T21:40:55Z",
+      "summary": "La recomendación forma parte del más reciente informe del Chief Investment Office de UBS, en el que revisó sus perspectivas sobre mercados globales."
+    },
+    {
+      "title": "Vapear en espacios cerrados podría costarle hasta $933.000: estas son las multas vigentes en Colombia",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/gobierno/vapear-en-espacios-cerrados-podria-costarle-hasta-933-000-estas-son-las-multas-vigentes-en-colombia-498140",
+      "published": "2026-07-13T21:37:05Z",
+      "summary": "El Código de Policía también castiga esta conducta y las sanciones varían según el lugar y la infracción."
+    },
+    {
+      "title": "Interés Oculto: los movimientos empresariales y políticos que marcan la agenda",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/gobierno/interes-oculto-los-movimientos-empresariales-y-politicos-que-marcan-la-agenda-498138",
+      "published": "2026-07-13T21:21:01Z",
+      "summary": "Los confidenciales que ayudan a entender cómo se mueve el poder económico, las empresas y el Gobierno."
+    },
     {
       "title": "Lluvias impactan miles de hectáreas de arroz listas para cosechar: gremio pide 'salvavidas financiero' al Gobierno Petro",
       "source": "El Tiempo",
@@ -36,34 +64,6 @@
       "url": "https://www.valoraanalitik.com/petroleo-supera-los-75-dolares-por-barril-tras-ofensiva-de-trump-en-orduz/",
       "published": "2026-07-13T19:20:00Z",
       "summary": "El petróleo volvió a dispararse luego de que Donald Trump anunciara nuevas medidas sobre el estrecho de Ormuz, ruta clave para el suministro mundial de crudo."
-    },
-    {
-      "title": "De 'trocha del sol' a Autopista del Magdalena Medio: con más de 70 frentes, esta vía 5G llega a 33% de avance",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/infraestructura/de-trocha-del-sol-a-autopista-del-magdalena-medio-con-mas-de-70-frentes-esta-via-5g-llega-a-33-de-avance-497976",
-      "published": "2026-07-13T19:10:12Z",
-      "summary": "La banca colombiana e internacional respalda hoy el ritmo financiero de la Troncal Magdalena 1."
-    },
-    {
-      "title": "Fitch Ratings advirtió que el precio del brent sería inferior a US$87 al cierre de 2026",
-      "source": "La República",
-      "url": "https://www.larepublica.co/economia/fitch-ratings-advirtio-que-el-precio-del-brent-podria-ser-inferior-a-us-87-al-cierre-de-2026-4435153",
-      "published": "2026-07-13T19:01:03Z",
-      "summary": "Este escenario bajista obedece a la recuperación de la producción del petróleo tras el acuerdo de la Opep"
-    },
-    {
-      "title": "Rezago en nuevos proyectos, fenómeno de El Niño y deudas: los retos de De la Espriella en el sector eléctrico colombiano",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/borrador-automatico-2rezago-en-nuevos-proyectos-fenomeno-de-el-nino-y-deudas-los-retos-de-de-la-espriella-en-el-sector-electrico-colombiano/",
-      "published": "2026-07-13T19:00:00Z",
-      "summary": "Cifras del operador del mercado muestran que el sistema recibe menos energía de la prevista desde hace más de seis años."
-    },
-    {
-      "title": "Paso a paso de cómo el alza de 23% en el mínimo desucadró las proyecciones de inflación en el mercado",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/asi-descuadro-el-alza-de-23-en-el-minimo-las-proyecciones-de-inflacion-de-los-analistas-la-brecha-se-ampliara-mas-497971",
-      "published": "2026-07-13T18:55:52Z",
-      "summary": "Expertos señalan que el costo de vida está subiendo más rápido de lo que se esperaba y la brecha será más alta."
     }
   ]
 }
