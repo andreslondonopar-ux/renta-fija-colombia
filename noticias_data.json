@@ -1,7 +1,21 @@
 {
-  "updated": "2026-07-20T18:06:44Z",
+  "updated": "2026-07-20T21:14:26Z",
   "date": "2026-07-20",
   "articles": [
+    {
+      "title": "El empresario Jorge Jaller será embajador de Colombia en Venezuela, confirma Abelardo de la Espriella",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/el-empresario-jorge-jaller-sera-embajador-de-colombia-en-venezuela-confirma-abelardo-de-la-espriella/",
+      "published": "2026-07-20T20:37:00Z",
+      "summary": "​Jaller asumirá así la representación diplomática en Caracas respaldado por una consolidada trayectoria ejecutiva en el sector corporativo nacional."
+    },
+    {
+      "title": "Consumo privado impulsa el comercio, pero la industria muestra señales de alerta en Colombia",
+      "source": "Valora Analitik",
+      "url": "https://www.valoraanalitik.com/consumo-privado-impulsa-el-comercio-pero-la-industria-muestra-senales-de-alerta-en-colombia/",
+      "published": "2026-07-20T19:00:00Z",
+      "summary": "La principal preocupación de los analistas radica en que la producción nacional está excesivamente volcada al consumo final de los hogares."
+    },
     {
       "title": "Entrevista | Colombia, el mercado más grande de la división dermatológica de L’Oréal en la región: crece a doble dígito por tercer año",
       "source": "Valora Analitik",
@@ -15,20 +29,6 @@
       "url": "https://www.valoraanalitik.com/lo-nuevo-en-caso-canacol-fin-de-contratos-podria-elevar-costos-del-gas-para-la-industria-en-colombia/",
       "published": "2026-07-20T16:40:00Z",
       "summary": "Una vez terminados los contratos actuales, las empresas que hoy compran gas bajo esas condiciones tendrían que renegociar nuevos acuerdos."
-    },
-    {
-      "title": "'Ya se materializó el riesgo': la Contraloría responde a Invías y anuncia fiscalización al Túnel del Toyo",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/infraestructura/ya-se-materializo-el-riesgo-la-contraloria-responde-a-invias-y-anuncia-fiscalizacion-al-tunel-del-toyo-498549",
-      "published": "2026-07-20T14:50:00Z",
-      "summary": "El futuro túnel carretero más largo de Suramérica enfrenta un año de atraso antes de entrar en operación."
-    },
-    {
-      "title": "Colombia firma alianza con Países Bajos para impulsar producción local de medicamentos contra el cáncer",
-      "source": "Portafolio",
-      "url": "https://www.portafolio.co/economia/gobierno/colombia-firma-alianza-con-paises-bajos-para-impulsar-produccion-local-de-medicamentos-contra-el-cancer-498548",
-      "published": "2026-07-20T14:48:31Z",
-      "summary": "El acuerdo con Erasmus MC prioriza innovación, fabricación local de biológicos y fortalecimiento regulatorio."
     },
     {
       "title": "Oro se estabiliza tras evaluar el futuro de la guerra en Irán y las tasas de la Reserva Federal",
@@ -45,6 +45,13 @@
       "summary": "La tasa de cambio se cotiza por debajo de los 3.300 pesos. La moneda colombiana es una de las de mejor desempeño del mundo."
     },
     {
+      "title": "De la Espriella lideró el desfile del 20 de julio en Medellín, junto con Federico Gutiérrez",
+      "source": "La República",
+      "url": "https://www.larepublica.co/economia/abelardo-de-la-espriella-lidero-el-desfile-militar-del-20-de-julio-en-medellin-junto-con-fico-gutierrez-4439479",
+      "published": "2026-07-20T14:02:17Z",
+      "summary": "En su discurso, el presidente electo inisistió en que trabajará por la seguridad, y dijo que volverá a trar la tranquilidad a Antioquia"
+    },
+    {
       "title": "Terpel inicia retiro de estaciones de servicio en Ecuador y concentrará su estrategia en el negocio de lubricantes",
       "source": "El Tiempo",
       "url": "https://www.eltiempo.com/economia/empresas/terpel-inicia-retiro-de-estaciones-de-servicio-en-ecuador-y-concentrara-su-estrategia-en-el-negocio-de-lubricantes-3572388",
@@ -57,13 +64,6 @@
       "url": "https://www.valoraanalitik.com/test-drive-gwm-ora-5-precio-competitivo/",
       "published": "2026-07-19T20:00:00Z",
       "summary": "La versión Top trae 15 asistencias a la conducción y una batería que promete hasta 520 km de autonomía."
-    },
-    {
-      "title": "Villar señala que la tasa de interés seguirá alta hasta que inflación retome el rango meta",
-      "source": "La República",
-      "url": "https://www.larepublica.co/economia/villar-senala-que-tasas-seguiran-altas-hasta-que-inflacion-retome-senda-meta-4439325",
-      "published": "2026-07-19T18:17:24Z",
-      "summary": "Política monetaria está en su nivel más alto en dos años luego que en la última reunión del Emisor se ajustara a 12%"
     }
   ]
 }
