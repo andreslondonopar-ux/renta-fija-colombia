@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-13T15:42:37Z",
+  "updated": "2026-07-20T15:12:40Z",
   "sources": "JDBR: API SUAMECA BanRep | DANE: calendario oficial | EE.UU.: Investing.com",
   "events": [
     {
@@ -71,38 +71,10 @@
       "desc": "Encuesta mensual de expectativas"
     },
     {
-      "date": "2026-07-14",
-      "type": "cpi_us",
-      "title": "CPI (MoM) — Jun",
-      "desc": "Ant: 0.5",
-      "pais": "us"
-    },
-    {
-      "date": "2026-07-14",
-      "type": "cpi_us",
-      "title": "Core CPI (MoM) — Jun",
-      "desc": "Ant: 0.2",
-      "pais": "us"
-    },
-    {
-      "date": "2026-07-14",
-      "type": "cpi_us",
-      "title": "CPI (YoY) — Jun",
-      "desc": "Ant: 4.2",
-      "pais": "us"
-    },
-    {
       "date": "2026-07-15",
       "type": "ppi_us",
       "title": "PPI EE.UU. — junio 2026",
       "desc": "Índice de Precios al Productor",
-      "pais": "us"
-    },
-    {
-      "date": "2026-07-15",
-      "type": "cpi_us",
-      "title": "PPI (MoM) — Jun",
-      "desc": "Ant: 1.1",
       "pais": "us"
     },
     {
