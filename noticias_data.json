@@ -1,7 +1,14 @@
 {
-  "updated": "2026-07-20T21:14:26Z",
-  "date": "2026-07-20",
+  "updated": "2026-07-21T01:20:13Z",
+  "date": "2026-07-21",
   "articles": [
+    {
+      "title": "Una vaca rompe el récord de producción de leche con 108,7 litros en un día gracias al mejoramiento genético",
+      "source": "Portafolio",
+      "url": "https://www.portafolio.co/economia/agro/una-vaca-rompe-el-record-de-produccion-de-leche-con-108-7-litros-en-un-dia-gracias-al-mejoramiento-genetico-498582",
+      "published": "2026-07-20T21:33:50Z",
+      "summary": "El ejemplar superó por 15,8 litros la marca nacional de 2023 y proviene de generaciones de alta productividad."
+    },
     {
       "title": "El empresario Jorge Jaller será embajador de Colombia en Venezuela, confirma Abelardo de la Espriella",
       "source": "Valora Analitik",
@@ -57,13 +64,6 @@
       "url": "https://www.eltiempo.com/economia/empresas/terpel-inicia-retiro-de-estaciones-de-servicio-en-ecuador-y-concentrara-su-estrategia-en-el-negocio-de-lubricantes-3572388",
       "published": "2026-07-20T01:09:45Z",
       "summary": "La compañía venderá su red en Ecuador de forma gradual y mantendrá la operación mientras avanzan las transacciones."
-    },
-    {
-      "title": "Test drive | GWM Ora 5: la SUV eléctrica que llega a competir por precio en Colombia",
-      "source": "Valora Analitik",
-      "url": "https://www.valoraanalitik.com/test-drive-gwm-ora-5-precio-competitivo/",
-      "published": "2026-07-19T20:00:00Z",
-      "summary": "La versión Top trae 15 asistencias a la conducción y una batería que promete hasta 520 km de autonomía."
     }
   ]
 }
